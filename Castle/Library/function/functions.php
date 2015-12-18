@@ -185,7 +185,7 @@ function L($name=null, $value=null) {
  * @return void|array
  */
 function trace($value='[think]',$label='',$level='DEBUG',$record=false) {
-    return Think\Think::trace($value,$label,$level,$record);
+    return Core\Think::trace($value,$label,$level,$record);
 }
 
 /**
@@ -577,10 +577,10 @@ function vendor($class, $baseUrl = '', $ext='.php') {
  * 实例化模型类 格式 [资源://][模块/]模型
  * @param string $name 资源地址
  * @param string $layer 模型层名称
- * @return Think\Model
+ * @return Core\Model
  */
 function D($name='',$layer='') {
-    if(empty($name)) return new Tsy\Model;
+    if(empty($name)) return new Core\Model;
     static $_model  =   array();
     $layer          =   $layer? : C('DEFAULT_M_LAYER');
     if(isset($_model[$name.$layer]))
@@ -595,10 +595,10 @@ function D($name='',$layer='') {
         }else{
             $class      =   '\\Common\\'.$layer.'\\'.$name.$layer;
         }
-        $model      =   class_exists($class)? new $class($name) : new Tsy\Model($name);
+        $model      =   class_exists($class)? new $class($name) : new Core\Model($name);
     }else {
-        Think\Log::record('D方法实例化没找到模型类'.$class,Think\Log::NOTICE);
-        $model      =   new Think\Model(basename($name));
+        Core\Log::record('D方法实例化没找到模型类'.$class,Core\Log::NOTICE);
+        $model      =   new Core\Model(basename($name));
     }
     $_model[$name.$layer]  =  $model;
     return $model;
@@ -609,7 +609,7 @@ function D($name='',$layer='') {
  * @param string $name Model名称 支持指定基础模型 例如 MongoModel:User
  * @param string $tablePrefix 表前缀
  * @param mixed $connection 数据库连接信息
- * @return Think\Model
+ * @return Core\Model
  */
 function M($name='', $tablePrefix='',$connection='') {
     static $_model  = array();
@@ -664,7 +664,7 @@ function parse_res_name($name,$layer,$level=1){
  * 用于实例化访问控制器
  * @param string $name 控制器名
  * @param string $path 控制器命名空间（路径）
- * @return Think\Controller|false
+ * @return Core\Controller|false
  */
 function controller($name,$path=''){
     $layer  =   C('DEFAULT_C_LAYER');
@@ -691,7 +691,7 @@ function controller($name,$path=''){
  * @param string $name 资源地址
  * @param string $layer 控制层名称
  * @param integer $level 控制器层次
- * @return Think\Controller|false
+ * @return Core\Controller|false
  */
 function A($name,$layer='',$level=0) {
     static $_action = array();
@@ -740,7 +740,7 @@ function R($url,$vars=array(),$layer='') {
  * @return void
  */
 function tag($tag, &$params=NULL) {
-    \Think\Hook::listen($tag,$params);
+    \Core\Hook::listen($tag,$params);
 }
 
 /**
@@ -754,7 +754,7 @@ function B($name, $tag='',&$params=NULL) {
     if(''==$tag){
         $name   .=  'Behavior';
     }
-    return \Think\Hook::exec($name,$tag,$params);
+    return \Core\Hook::exec($name,$tag,$params);
 }
 
 /**
@@ -785,7 +785,7 @@ function strip_whitespace($content) {
                     }
                     break;
                 case T_START_HEREDOC:
-                    $stripStr .= "<<<THINK\n";
+                    $stripStr .= "<<<Core\n";
                     break;
                 case T_END_HEREDOC:
                     $stripStr .= "THINK;\n";
@@ -810,16 +810,16 @@ function strip_whitespace($content) {
 /**
  * 自定义异常处理
  * @param string $msg 异常消息
- * @param string $type 异常类型 默认为Think\Exception
+ * @param string $type 异常类型 默认为Core\Exception
  * @param integer $code 异常代码 默认为0
  * @return void
  */
-function throw_exception($msg, $type='Think\\Exception', $code=0) {
-    Think\Log::record('建议使用E方法替代throw_exception',Think\Log::NOTICE);
+function throw_exception($msg, $type='Core\\Exception', $code=0) {
+    Core\Log::record('建议使用E方法替代throw_exception',Core\Log::NOTICE);
     if (class_exists($type, false))
         throw new $type($msg, $code);
     else
-        Think\Think::halt($msg);        // 异常类型不存在则输出错误信息字串
+        Core\Think::halt($msg);        // 异常类型不存在则输出错误信息字串
 }
 
 /**
@@ -1095,13 +1095,13 @@ function S($name,$value='',$options=null) {
     if(is_array($options)){
         // 缓存操作的同时初始化
         $type       =   isset($options['type'])?$options['type']:'';
-        $cache      =   Think\Cache::getInstance($type,$options);
+        $cache      =   Core\Cache::getInstance($type,$options);
     }elseif(is_array($name)) { // 缓存初始化
         $type       =   isset($name['type'])?$name['type']:'';
-        $cache      =   Think\Cache::getInstance($type,$name);
+        $cache      =   Core\Cache::getInstance($type,$name);
         return $cache;
     }elseif(empty($cache)) { // 自动初始化
-        $cache      =   Think\Cache::getInstance();
+        $cache      =   Core\Cache::getInstance();
     }
     if(''=== $value){ // 获取缓存
         return $cache->get($name);
@@ -1137,10 +1137,10 @@ function F($name, $value='', $path=false) {
                 return false; // TODO 
             }else{
                 unset($_cache[$name]);
-                return Think\Storage::unlink($filename,'F');
+                return Core\Storage::unlink($filename,'F');
             }
         } else {
-            Think\Storage::put($filename,serialize($value),'F');
+            Core\Storage::put($filename,serialize($value),'F');
             // 缓存数据
             $_cache[$name]  =   $value;
             return null;
@@ -1149,8 +1149,8 @@ function F($name, $value='', $path=false) {
     // 获取缓存数据
     if (isset($_cache[$name]))
         return $_cache[$name];
-    if (Think\Storage::has($filename,'F')){
-        $value      =   unserialize(Think\Storage::read($filename,'F'));
+    if (Core\Storage::has($filename,'F')){
+        $value      =   unserialize(Core\Storage::read($filename,'F'));
         $_cache[$name]  =   $value;
     } else {
         $value          =   false;
@@ -1254,7 +1254,7 @@ function session($name='',$value='') {
         if(isset($name['type']))            C('SESSION_TYPE',$name['type']);
         if(C('SESSION_TYPE')) { // 读取session驱动
             $type   =   C('SESSION_TYPE');
-            $class  =   strpos($type,'\\')? $type : 'Think\\Session\\Driver\\'. ucwords(strtolower($type));
+            $class  =   strpos($type,'\\')? $type : 'Core\\Session\\Driver\\'. ucwords(strtolower($type));
             $hander =   new $class();
             session_set_save_handler(
                 array(&$hander,"open"), 
