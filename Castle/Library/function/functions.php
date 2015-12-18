@@ -95,11 +95,11 @@ if (!function_exists('yaml_parse_file')) {
  * 抛出异常处理
  * @param string $msg 异常消息
  * @param integer $code 异常代码 默认为0
- * @throws Think\Exception
+ * @throws Exception
  * @return void
  */
 function E($msg, $code=0) {
-//    throw new Think\Exception($msg, $code);
+    //TODO 错误记录
     ajaxReturn([],$code,$msg);
     exit();
 }
@@ -2164,4 +2164,6 @@ function build_tsy_modules($modules=[]){
     }
     return !$Rs?true:$Rs;
 }
-//function
+function log(){
+
+}

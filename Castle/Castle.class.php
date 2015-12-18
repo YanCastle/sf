@@ -12,6 +12,8 @@ class Castle
     // 实例化对象
     private static $_instance = array();
     function __construct(){
+        C('CASTLE_PATH',__DIR__);
+        $this->configLoad(__DIR__.'/Config/config.php');
         // 注册AUTOLOAD方法
         spl_autoload_register('Castle::autoload');
         // 设定错误和异常处理
@@ -28,18 +30,18 @@ class Castle
             include self::$_map[$class];
         }elseif(false !== strpos($class,'\\')){
             $name           =   strstr($class, '\\', true);
-            if(in_array($name,array('Think','Org','Behavior','Com','Vendor')) || is_dir(LIB_PATH.$name)){
+            if(in_array($name,array('Think','Org','Behavior','Com','Vendor')) || is_dir(C('LIB_PATH').$name)){
                 // Library目录下面的命名空间自动定位
-                $path       =   LIB_PATH;
+                $path       =   C('LIB_PATH');
             }else{
                 // 检测自定义命名空间 否则就以模块为命名空间
                 $namespace  =   C('AUTOLOAD_NAMESPACE');
-                $path       =   isset($namespace[$name])? dirname($namespace[$name]).'/' : APP_PATH;
+                $path       =   isset($namespace[$name])? dirname($namespace[$name]).'/' : C('APP_PATH');
             }
-            $filename       =   $path . str_replace('\\', '/', $class) . EXT;
+            $filename       =   $path . str_replace('\\', '/', $class) . C('EXT');
             if(is_file($filename)) {
                 // Win环境下面严格区分大小写
-                if (IS_WIN && false === strpos(str_replace('/', '\\', realpath($filename)), $class . EXT)){
+                if (C('IS_WIN') && false === strpos(str_replace('/', '\\', realpath($filename)), $class . C('EXT'))){
                     return ;
                 }
                 include $filename;
@@ -48,7 +50,7 @@ class Castle
             // 自动加载的类库层
             foreach(explode(',',C('APP_AUTOLOAD_LAYER')) as $layer){
                 if(substr($class,-strlen($layer))==$layer){
-                    if(require_cache(MODULE_PATH.$layer.'/'.$class.EXT)) {
+                    if(require_cache(C('MODULE_PATH').$layer.'/'.$class.C('EXT'))) {
                         return ;
                     }
                 }
