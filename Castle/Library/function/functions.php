@@ -518,9 +518,9 @@ function import($class, $baseUrl = '', $ext=EXT) {
             //加载公共模块的类库
             $baseUrl = COMMON_PATH;
             $class   = substr($class, 7);
-        }elseif (in_array($class_strut[0],array('Think','Org','Behavior','Com','Vendor')) || is_dir(LIB_PATH.$class_strut[0])) {
+        }elseif (in_array($class_strut[0],array('Think','Org','Behavior','Com','Vendor')) || is_dir(C('LIB_PATH').$class_strut[0])) {
             // 系统类库包和第三方类库包
-            $baseUrl = LIB_PATH;
+            $baseUrl = C('LIB_PATH');
         }else { // 加载其他模块的类库
             $baseUrl = APP_PATH;
         }
@@ -1124,7 +1124,10 @@ function S($name,$value='',$options=null) {
  * @param string $path 缓存路径
  * @return mixed
  */
-function F($name, $value='', $path=DATA_PATH) {
+function F($name, $value='', $path=false) {
+    if(false===$path){
+        $path=C('DATA_PATH');
+    }
     static $_cache  =   array();
     $filename       =   $path . $name . '.php';
     if ('' !== $value) {
@@ -2113,7 +2116,7 @@ function tsy_module_check($modules=[]){
     $false=[];
     $NotExist = [];
     foreach($modules as $module){
-        $dir = LIB_PATH.'Tsy/'.ucfirst(strtolower($module));
+        $dir = C('LIB_PATH').'Tsy/'.ucfirst(strtolower($module));
         if(is_dir($dir)&&file_exists($dir.'/require.php')){
             $rs = include $dir.'/require.php';
             if(is_array($rs)){
@@ -2138,7 +2141,7 @@ function build_tsy_modules($modules=[]){
     }
     $false=[];$NotExist=[];
     foreach($modules as $module){
-        $dir = LIB_PATH.'Tsy/'.ucfirst(strtolower($module));
+        $dir = C('LIB_PATH').'Tsy/'.ucfirst(strtolower($module));
         if(is_dir($dir)){
             if(file_exists($dir.'/build.php')){
                 $rs = include $dir.'/build.php';
@@ -2147,7 +2150,7 @@ function build_tsy_modules($modules=[]){
                 }
             }
             if(file_exists($dir.'/build.sql')){
-                if(!\Tsy\Db\Db::build(M(),$dir.'/build.sql')){
+                if(!\Plugs\Db\Db::build(M(),$dir.'/build.sql')){
                     $false[]=[$module=>'创建失败'];
                 }
             }
