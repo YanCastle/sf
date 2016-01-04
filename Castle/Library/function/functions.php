@@ -485,7 +485,7 @@ function require_cache($filename) {
  */
 function file_exists_case($filename) {
     if (is_file($filename)) {
-        if (IS_WIN && APP_DEBUG) {
+        if (C('IS_WIN') && C('APP_DEBUG')) {
             if (basename(realpath($filename)) != basename($filename))
                 return false;
         }
@@ -501,7 +501,8 @@ function file_exists_case($filename) {
  * @param string $ext 导入的文件扩展名
  * @return boolean
  */
-function import($class, $baseUrl = '', $ext=EXT) {
+function import($class, $baseUrl = '', $ext=false) {
+    if(false===$ext)$ext=C('EXT');
     static $_file = array();
     $class = str_replace(array('.', '#'), array('/', '.'), $class);
     if (isset($_file[$class . $baseUrl]))
@@ -510,19 +511,19 @@ function import($class, $baseUrl = '', $ext=EXT) {
         $_file[$class . $baseUrl] = true;
     $class_strut     = explode('/', $class);
     if (empty($baseUrl)) {
-        if ('@' == $class_strut[0] || MODULE_NAME == $class_strut[0]) {
+        if ('@' == $class_strut[0] || C('MODULE_NAME') == $class_strut[0]) {
             //加载当前模块的类库
-            $baseUrl = MODULE_PATH;
+            $baseUrl = C('MODULE_PATH');
             $class   = substr_replace($class, '', 0, strlen($class_strut[0]) + 1);
         }elseif ('Common' == $class_strut[0]) {
             //加载公共模块的类库
-            $baseUrl = COMMON_PATH;
+            $baseUrl = C('COMMON_PATH');
             $class   = substr($class, 7);
         }elseif (in_array($class_strut[0],array('Think','Org','Behavior','Com','Vendor')) || is_dir(C('LIB_PATH').$class_strut[0])) {
             // 系统类库包和第三方类库包
             $baseUrl = C('LIB_PATH');
         }else { // 加载其他模块的类库
-            $baseUrl = APP_PATH;
+            $baseUrl = C('APP_PATH');
         }
     }
     if (substr($baseUrl, -1) != '/')
