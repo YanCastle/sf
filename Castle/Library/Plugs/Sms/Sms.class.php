@@ -6,7 +6,7 @@
  * Time: 12:25
  */
 namespace Plugs\Sms;
-use Think\Controller;
+use Core\Controller;
 use Plugs\Arrays\Arrays;
 use Plugs\Db\Db;
 use Plugs\Model;

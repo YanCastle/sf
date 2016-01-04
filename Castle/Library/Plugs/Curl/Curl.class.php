@@ -6,7 +6,7 @@
  * Time: 23:19
  */
 namespace Plugs\Curl;
-use Think\Controller;
+use Core\Controller;
 
 class Curl extends Controller{
     public $UserID=false;

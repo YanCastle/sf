@@ -9,7 +9,7 @@
 namespace Plugs\File;
 
 
-use Think\Upload;
+use Core\Upload;
 
 class File
 {

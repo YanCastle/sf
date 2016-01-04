@@ -19,7 +19,7 @@ class PayVo {
     /**
      * 设置订单号
      * @param type $order_no
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setOrderNo($order_no) {
         $this->_orderNo = $order_no;
@@ -29,7 +29,7 @@ class PayVo {
     /**
      * 设置商品价格
      * @param type $fee
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setFee($fee) {
         $this->_fee = $fee;
@@ -39,7 +39,7 @@ class PayVo {
     /**
      * 设置商品名称
      * @param type $title
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setTitle($title) {
         $this->_title = $title;
@@ -49,7 +49,7 @@ class PayVo {
     /**
      * 设置商品描述
      * @param type $body
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setBody($body) {
         $this->_body = $body;
@@ -59,7 +59,7 @@ class PayVo {
     /**
      * 设置支付完成后的后续操作接口
      * @param type $callback
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setCallback($callback) {
         $this->_callback = $callback;
@@ -69,7 +69,7 @@ class PayVo {
     /**
      * 设置支付完成后的跳转地址
      * @param type $url
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setUrl($url) {
         $this->_url = $url;
@@ -79,7 +79,7 @@ class PayVo {
     /**
      * 设置订单的额外参数
      * @param type $param
-     * @return \Think\Pay\PayVo
+     * @return \Core\Pay\PayVo
      */
     public function setParam($param) {
         $this->_param = $param;

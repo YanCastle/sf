@@ -9,3 +9,4 @@
 include 'Library/function/functions.php';
 include 'Castle.class.php';
 $Castle=new Castle();
+$Castle->start();

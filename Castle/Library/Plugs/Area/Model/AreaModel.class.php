@@ -6,7 +6,7 @@
  * Time: 18:56
  */
 namespace Plugs\Area\Model;
-use Think\Model;
+use Core\Model;
 
 class AreaModel extends Model{
     /**

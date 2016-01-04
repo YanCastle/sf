@@ -6,7 +6,7 @@
  * Time: 12:28
  */
 namespace Plugs\Mail;
-use Think\Controller;
+use Core\Controller;
 
 class Mail extends Controller{
     function send($addresses,$content,$data){

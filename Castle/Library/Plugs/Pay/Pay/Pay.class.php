@@ -41,7 +41,7 @@ abstract class Pay {
     /**
      * 建立提交表单
      */
-    abstract public function buildRequestForm(\Think\Pay\PayVo $vo);
+    abstract public function buildRequestForm(\Core\Pay\PayVo $vo);
 
     /**
      * 构造表单

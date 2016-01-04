@@ -6,10 +6,10 @@
  * Time: 11:20
  */
 namespace Plugs\Wechat;
-use Think\Controller;
-use Think\Exception;
-use Think\Model;
-use Think\View;
+use Core\Controller;
+use Core\Exception;
+use Core\Model;
+use Core\View;
 use Plugs\Db\Db;
 
 class TsyWechat extends Controller{

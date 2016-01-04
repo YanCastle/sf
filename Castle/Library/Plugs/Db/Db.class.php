@@ -3,8 +3,8 @@
  * 创建数据库、获取字段结构等数据库操作方法
  */
 namespace Plugs\Db;
-use Think\Controller;
-use Think\Model;
+use Core\Controller;
+use Core\Model;
 
 class Db extends Controller{
     static $BACKUP_TYPE_FILE='file';//备份到文件

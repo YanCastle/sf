@@ -9,8 +9,9 @@
 namespace Plugs\Area;
 
 
-use Think\Controller;
+use Core\Controller;
 use Plugs\Area\Model\AreaModel;
+
 
 class Area extends Controller
 {

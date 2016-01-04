@@ -6,7 +6,7 @@
  * Time: 14:56
  */
 namespace Plugs\Member\Model;
-use Think\Model;
+use Core\Model;
 
 class AuthGroupAccessModel extends Model{
 

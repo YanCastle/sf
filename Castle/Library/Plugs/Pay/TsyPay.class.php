@@ -6,7 +6,7 @@
  */
 
 namespace Plugs\Pay;
-use Think\Controller;
+use Core\Controller;
 use Plugs\Pay\Pay\PayVo;
 
 /**
@@ -54,7 +54,7 @@ class Pay extends Controller{
         $config = array_merge($this->config, $config);
 
         /* 设置支付驱动 */
-        $class = strpos($driver, '\\') ? $driver : 'Think\\Pay\\Driver\\' . ucfirst(strtolower($driver));
+        $class = strpos($driver, '\\') ? $driver : 'Core\\Pay\\Driver\\' . ucfirst(strtolower($driver));
         $this->setDriver($class, $config);
     }
 

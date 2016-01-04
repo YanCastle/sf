@@ -6,7 +6,7 @@
  * Time: 19:56
  */
 namespace Plugs\Excel;
-use Think\Controller;
+use Core\Controller;
 
 class Excel extends Controller{
     function __construct(){

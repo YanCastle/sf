@@ -1,6 +1,6 @@
 <?php
 
-namespace Think\Pay\Driver;
+namespace Core\Pay\Driver;
 
 use Plugs\Pay\Pay\Pay;
 use Plugs\Pay\Pay\PayVo;

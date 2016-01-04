@@ -18,8 +18,10 @@ class Castle
         set_error_handler('Castle::appError');
         set_exception_handler('Castle::appException');
     }
-    static function start(){
-
+    function start(){
+        C('APP',true);//标记已有应用
+//        加载模块配置文件
+//        实例化控制器，
     }
     static function configLoad($file){
         C(load_config($file));
