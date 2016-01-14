@@ -12,7 +12,7 @@
 namespace Core;
 
 /**
- * ThinkPHP 数据库中间层实现类
+ * 数据库中间层实现类
  */
 class Db {
 
