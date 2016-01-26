@@ -1,13 +1,4 @@
 <?php
-// +----------------------------------------------------------------------
-// | ThinkPHP [ WE CAN DO IT JUST THINK IT ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2006-2014 http://thinkphp.cn All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: liu21st <liu21st@gmail.com>
-// +----------------------------------------------------------------------
 
 namespace Core;
 
@@ -34,13 +25,13 @@ class Db {
             // 兼容mysqli
             if('mysqli' == $options['type']) $options['type']   =   'mysql';
             // 如果采用lite方式 仅支持原生SQL 包括query和execute方法
-            $class  =   !empty($options['lite'])?  'Think\Db\Lite' :   'Think\\Db\\Driver\\'.ucwords(strtolower($options['type']));
-            if(class_exists($class)){
+            $class  =   !empty($options['lite'])?  'Core\Db\Lite' :   'Core\\Db\\Driver\\'.ucwords(strtolower($options['type']));
+//            if(class_exists($class)){
                 self::$instance[$md5]   =   new $class($options);
-            }else{
+//            }else{
                 // 类没有定义
-                E(L('_NO_DB_DRIVER_').': ' . $class);
-            }
+//                E(L('_NO_DB_DRIVER_').': ' . $class);
+//            }
         }
         self::$_instance    =   self::$instance[$md5];
         return self::$_instance;

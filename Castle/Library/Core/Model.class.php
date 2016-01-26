@@ -90,7 +90,7 @@ class Model {
     }
 
     protected function _auto_map(){
-        $db   =  $this->dbName?:C('db.name');
+        $db   =  $this->dbName?:C('DB_NAME');
         $map = S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name));
         if($map&&!$this->_map){
             $this->_map = $map;
@@ -100,7 +100,7 @@ class Model {
                 foreach($Fields as $Field){
                     $this->_map[$Field]=strtolower($Field);
                 }
-                S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name),$this->_map,C('db._map.expire'));
+                S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name),$this->_map,C('db_map_expire'));
             }
         }
     }
@@ -283,6 +283,8 @@ class Model {
                         E(L('_DATA_TYPE_INVALID_').':['.$key.'=>'.$val.']');
                     }
                     unset($data[$key]);
+                }elseif(is_bool($val)){
+                    $data[$key]=$val?1:0;
                 }elseif(is_scalar($val)) {
                     // 字段类型检查 和 强制转换
                     $this->_parseType($data,$key);
@@ -714,7 +716,7 @@ class Model {
             }elseif(false !== strpos($fieldType,'float') || false !== strpos($fieldType,'double')){
                 $data[$key]   =  floatval($data[$key]);
             }elseif(false !== strpos($fieldType,'bool')){
-                $data[$key]   =  (bool)$data[$key];
+                $data[$key]   =  $data[$key]?1:0;
             }
         }
     }

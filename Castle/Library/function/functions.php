@@ -21,7 +21,7 @@
  * @return mixed
  */
 function C($name=null, $value=null,$default=null,$APPID=0) {
-    static $_config = array();
+    global $_config;
     // 无参数时获取所有
     if(!isset($_config[$APPID])){$_config[$APPID]=[];}
     if (empty($name)) {
@@ -99,10 +99,10 @@ if (!function_exists('yaml_parse_file')) {
  * @throws Exception
  * @return void
  */
-function E($msg, $code=0) {
+function E($msg=false, $code=0) {
     //TODO 错误记录
-    ajaxReturn([],$code,$msg);
-    exit();
+    static $e=[];
+    if($msg==false){return $e;}else{$e[]=$msg;}
 }
 
 /**
@@ -186,7 +186,7 @@ function L($name=null, $value=null) {
  * @return void|array
  */
 function trace($value='[think]',$label='',$level='DEBUG',$record=false) {
-    return Core\Think::trace($value,$label,$level,$record);
+//    return Core\Think::trace($value,$label,$level,$record);
 }
 
 /**
@@ -618,7 +618,7 @@ function M($name='', $tablePrefix='',$connection='') {
     if(strpos($name,':')) {
         list($class,$name)    =  explode(':',$name);
     }else{
-        $class      =   'Tsy\\Model';
+        $class      =   'Core\\Model';
     }
     $guid           =   (is_array($connection)?implode('',$connection):$connection).$tablePrefix . $name . '_' . $class;
     if (!isset($_model[$guid]))
@@ -681,13 +681,62 @@ function controller($name,$path=''){
         }
         $class .=   $layer;
     }
+    return new $class();
     if(class_exists($class)) {
-        return new $class();
+
     }else {
         return false;
     }
 }
+function controller_exec($controller,$action,$vars){
+    if(method_exists($controller,$action)){
+        $method = new \ReflectionMethod($controller,$action);
+        $params =  $method->getParameters();
+        $paramsBindType     =   C('URL_PARAMS_BIND_TYPE');
+        foreach ($params as $param){
+            $name = $param->getName();
+            if( 1 == $paramsBindType && !empty($vars) ){
+                $args[] =   array_shift($vars);
+            }elseif( 0 == $paramsBindType && isset($vars[$name])){
+                $args[] =   $vars[$name];
+            }elseif($param->isDefaultValueAvailable()){
+                $args[] =   $param->getDefaultValue();
+            }else{
+                E(L('_PARAM_ERROR_').':'.$name);
+            }
+        }
+        // 开启绑定参数过滤机制
+        if(C('URL_PARAMS_SAFE')){
+            $filters     =   C('URL_PARAMS_FILTER')?:C('DEFAULT_FILTER');
+            if($filters) {
+                $filters    =   explode(',',$filters);
+                foreach($filters as $filter){
+                    $args   =   array_map_recursive($filter,$args); // 参数过滤
+                }
+            }
+        }
+        if(isset($args)){
+            array_walk_recursive($args,'think_filter');
+        }
+        return isset($args)?$method->invokeArgs($controller,$args):$method->invoke($controller);
+    }else{
+        return false;
+    }
+}
 
+/**
+ * swoole_send 发送
+ */
+function swoole_send($fd,$content,$eof=EOF){
+    $server = $_REQUEST['server'];
+    $content = (is_string($content)?$content:get_send_str($_GET['i'],$content,$_GET['t'],''));
+    if(is_object($server)&&$server->connection_info($fd)){
+        $server->send($fd,substr($content,-4,4)==$eof?$content:($content.$eof));
+        return true;
+    }else{
+        return false;
+    }
+}
 /**
  * 实例化多层控制器 格式：[资源://][模块/]控制器
  * @param string $name 资源地址
@@ -1821,27 +1870,74 @@ function ajaxReturn($d,$code=200,$msg = '')
     switch (strtoupper($type)) {
         case 'JSON' :
             // 返回JSON数据格式到客户端 包含状态信息
-            header('Content-Type:application/json; charset=utf-8');
-            echo(json_encode($data, JSON_UNESCAPED_UNICODE));
+//            header('Content-Type:application/json; charset=utf-8');
+            return (json_encode($data, JSON_UNESCAPED_UNICODE));
             break;
         case 'XML'  :
             // 返回xml格式数据
-            header('Content-Type:text/xml; charset=utf-8');
-            echo(xml_encode($data));
+//            header('Content-Type:text/xml; charset=utf-8');
+            return(xml_encode($data));
             break;
         case 'JSONP':
             // 返回JSON数据格式到客户端 包含状态信息
-            header('Content-Type:application/json; charset=utf-8');
+//            header('Content-Type:application/json; charset=utf-8');
             $handler = $_GET['callback'] ? $_GET['callback'] : 'tsyapi';
-            echo($handler . '(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ');');
+            return($handler . '(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ');');
             break;
         case 'EVAL' :
             // 返回可执行的js脚本
-            header('Content-Type:text/html; charset=utf-8');
-            echo($data);
+//            header('Content-Type:text/html; charset=utf-8');
+            return($data);
             break;
     }
 }
+    function recv_buffer($fd,$str){
+        static $buffer=[];
+//        if(strpos(EOF,$str)==(strlen($str)-strlen(EOF))){
+        if(substr(trim($str,"\r\n"),-1)=='}'){
+            $str = (isset($buffer[$fd])?$buffer[$fd]:'').$str;
+            $buffer[$fd]='';
+            return $str;
+        }else{
+            $buffer[$fd]=(isset($buffer[$fd])?$buffer[$fd]:'').$str;
+            return false;
+        }
+    }
+    function get_send_str($i,$d,$t,$err){
+        $data=[
+            'i'=>$i,
+            't'=>$t,
+            'd'=>is_string($d)?$d:json_encode($d),
+            'err'=>is_string($err)?$err:json_encode($err),
+            'tsy'=>session_id(),
+            'UID'=>session('UID'),
+            'UN'=>session('UN')
+        ];
+        $type = 'JSON';
+        switch (strtoupper($type)) {
+            case 'JSON' :
+                // 返回JSON数据格式到客户端 包含状态信息
+    //            header('Content-Type:application/json; charset=utf-8');
+            return (json_encode($data));
+            break;
+        case 'XML'  :
+            // 返回xml格式数据
+    //            header('Content-Type:text/xml; charset=utf-8');
+            return(xml_encode($data));
+            break;
+        case 'JSONP':
+            // 返回JSON数据格式到客户端 包含状态信息
+    //            header('Content-Type:application/json; charset=utf-8');
+            $handler = $_GET['callback'] ? $_GET['callback'] : 'tsyapi';
+            return($handler . '(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ');');
+            break;
+        case 'EVAL' :
+            // 返回可执行的js脚本
+    //            header('Content-Type:text/html; charset=utf-8');
+            return($data);
+            break;
+    }
+    }
 /**
  * @param $str
  * @param int $start
