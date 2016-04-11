@@ -15,7 +15,7 @@ use Tsy\Mode;
  * swoole模式
  * @package Tsy\Mode
  */
-class Swoole extends Mode
+class Swoole implements Mode
 {
-
+    function exec(){}
 }

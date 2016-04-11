@@ -9,7 +9,9 @@
 namespace Application;
 
 
-class IndexController
+use Tsy\Library\Controller;
+
+class IndexController extends Controller
 {
 
 }

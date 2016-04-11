@@ -13,7 +13,18 @@ namespace Tsy;
  * Class Mode
  * @package Tsy
  */
-class Mode
+interface Mode
 {
-    
+    /**
+     * 执行体
+     * @return mixed
+     */
+    function exec();
+
+    /**
+     * 调度
+     * @return mixed
+     */
+    function dispatch();
+    function start();
 }
