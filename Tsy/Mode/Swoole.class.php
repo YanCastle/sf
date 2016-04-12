@@ -60,6 +60,18 @@ class Swoole implements Mode
                 $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);
+                $Server->on('start',[$Swoole,'onStart']);
+                $Server->on('shutdown',[$Swoole,'onShutdown']);
+                $Server->on('WorkerStop',[$Swoole,'onWorkerStop']);
+                $Server->on('WorkerStart',[$Swoole,'onWorkerStart']);
+                $Server->on('timer',[$Swoole,'onTimer']);
+                $Server->on('packet',[$Swoole,'onPacket']);
+                $Server->on('task',[$Swoole,'onTask']);
+                $Server->on('finish',[$Swoole,'onFinish']);
+                $Server->on('PipeMessage',[$Swoole,'onPipeMessage']);
+                $Server->on('WorkerError',[$Swoole,'onWorkerError']);
+                $Server->on('ManagerStart',[$Swoole,'onManagerStart']);
+                $Server->on('ManagerStop',[$Swoole,'onManagerStop']);
                 $GLOBALS['_SWOOLE']=$Server;
             }else{
                 die('SWOOLE创建失败');
