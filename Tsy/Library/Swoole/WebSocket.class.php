@@ -6,10 +6,12 @@
  * Time: 11:14
  */
 
-namespace Tsy\Library;
+namespace Tsy\Library\Swoole;
 
 
-class WebSocket
+use Tsy\Library\Swoole;
+
+class WebSocket extends Swoole
 {
     /**
      * WebSocket握手
@@ -17,7 +19,7 @@ class WebSocket
      * @param $buffer
      * @return bool
      */
-    function handshake($k,$buffer){
+    function handshake($buffer){
         $buf  = substr($buffer,strpos($buffer,'Sec-WebSocket-Key:')+18);
         $key  = trim(substr($buf,0,strpos($buf,"\r\n")));
         $new_key = base64_encode(sha1($key."258EAFA5-E914-47DA-95CA-C5AB0DC85B11",true));
@@ -26,9 +28,7 @@ class WebSocket
         $new_message .= "Sec-WebSocket-Version: 13\r\n";
         $new_message .= "Connection: Upgrade\r\n";
         $new_message .= "Sec-WebSocket-Accept: " . $new_key . "\r\n\r\n";
-        socket_write($this->users[$k]['socket'],$new_message,strlen($new_message));
-        $this->users[$k]['hand']=true;
-        return true;
+        return $new_message;
     }
 
     /**

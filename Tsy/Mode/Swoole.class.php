@@ -35,5 +35,14 @@ class Swoole implements Mode
      */
     function start(){
 //        读取配置文件、启动服务器
+        $Listen = C('SWOOLE.LISTEN');
+        $Conf = C('SWOOLE.CONF');
+        if($Listen){
+            foreach ($Listen as $Type=>$Config){
+                
+            }
+        }else{
+            die('SWOOLE配置不存在或不正确，请正确配置SWOOLE下面的信息');
+        }
     }
 }
