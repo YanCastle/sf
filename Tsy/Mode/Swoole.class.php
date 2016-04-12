@@ -39,7 +39,7 @@ class Swoole implements Mode
         $Conf = C('SWOOLE.CONF');
         if($Listen){
             foreach ($Listen as $Type=>$Config){
-                if(isset($Config['HOST'])&&isset($Config['PORT'])){
+                if(isset($Config['HOST'])&&isset($Config['PORT'])&&is_numeric($Config['PORT'])&&$Config['PORT']>0&&$Config['PORT']<65536&&long2ip(ip2long($Config['HOST']))==$Config['HOST']){
                     if(isset($Server)){
                         //添加监听
                         $Server->addListener($Config['HOST'],$Config['PORT']);
@@ -56,7 +56,7 @@ class Swoole implements Mode
                 if($Conf){
                     $Server->set($Conf);
                 }
-                $Swoole = new \Tsy\Library\Swoole();
+                $Swoole = new \Tsy\Library\Server();
                 $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);
@@ -72,7 +72,8 @@ class Swoole implements Mode
                 $Server->on('WorkerError',[$Swoole,'onWorkerError']);
                 $Server->on('ManagerStart',[$Swoole,'onManagerStart']);
                 $Server->on('ManagerStop',[$Swoole,'onManagerStop']);
-                $GLOBALS['_SWOOLE']=$Server;
+                $GLOBALS['_SWOOLE']=&$Server;
+                $Server->start();
             }else{
                 die('SWOOLE创建失败');
             }

@@ -28,9 +28,9 @@ function cache($key,$value=false,$expire=false){
  * @return mixed
  */
 function C($name=null, $value=null,$default=null) {
-    static $_config;
+    static $_config=[];
     // 无参数时获取所有
-//    if(!isset($_config[$APPID])){$_config[$APPID]=[];}
+//    if(!isset($_config)){$_config=[];}
     if (empty($name)) {
         return $_config;
     }
@@ -39,21 +39,21 @@ function C($name=null, $value=null,$default=null) {
         if (!strpos($name, '.')) {
             $name = strtoupper($name);
             if (is_null($value))
-                return isset($_config[$APPID][$name]) ? $_config[$APPID][$name] : $default;
-            $_config[$APPID][$name] = $value;
+                return isset($_config[$name]) ? $_config[$name] : $default;
+            $_config[$name] = $value;
             return null;
         }
         // 二维数组设置和获取支持
         $name = explode('.', $name);
         $name[0]   =  strtoupper($name[0]);
         if (is_null($value))
-            return isset($_config[$APPID][$name[0]][$name[1]]) ? $_config[$APPID][$name[0]][$name[1]] : $default;
-        $_config[$APPID][$name[0]][$name[1]] = $value;
+            return isset($_config[$name[0]][$name[1]]) ? $_config[$name[0]][$name[1]] : $default;
+        $_config[$name[0]][$name[1]] = $value;
         return null;
     }
     // 批量设置
     if (is_array($name)){
-        $_config[$APPID] = array_merge($_config[$APPID], array_change_key_case($name,CASE_UPPER));
+        $_config = array_merge($_config, array_change_key_case($name,CASE_UPPER));
         return null;
     }
     return null; // 避免非法参数

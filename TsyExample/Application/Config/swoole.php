@@ -9,9 +9,9 @@ return [
     'SWOOLE'=>[
         //监听配置
         'LISTEN'=>[
-            '类型'=>[
-                'HOST'=>'',
-                'PORT'=>'',
+            'Socket'=>[
+                'HOST'=>'0.0.0.0',
+                'PORT'=>'65502',
 //                'TYPE'=>SWOOLE_SOCK_TCP 暂时只支持TCP连接
             ],
         ],
