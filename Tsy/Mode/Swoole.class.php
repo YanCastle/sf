@@ -56,36 +56,16 @@ class Swoole implements Mode
                 if($Conf){
                     $Server->set($Conf);
                 }
-                $Server->on('receive',[$this,'onReceive']);
-                $Server->on('connect',[$this,'onConnect']);
-                $Server->on('close',[$this,'onClose']);
+                $Swoole = new \Tsy\Library\Swoole();
+                $Server->on('receive',[$Swoole,'onReceive']);
+                $Server->on('connect',[$Swoole,'onConnect']);
+                $Server->on('close',[$Swoole,'onClose']);
+                $GLOBALS['_SWOOLE']=$Server;
             }else{
                 die('SWOOLE创建失败');
             }
         }else{
             die('SWOOLE配置不存在或不正确，请正确配置SWOOLE下面的信息');
         }
-    }
-
-    /**
-     * 接收处理
-     * @return int
-     */
-    function onReceive(){
-
-    }
-
-    /**
-     * 断开连接的触发
-     */
-    function onClose(){
-
-    }
-
-    /**
-     * 连接处理
-     */
-    function onConnect(){
-
     }
 }

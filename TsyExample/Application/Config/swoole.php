@@ -23,6 +23,9 @@ return [
             'dispatch_mode '=>3,//轮询模式
             'worker_num'=>2,
             'open_eof_check'=>true,
-        ]
+        ],
+        //定时器配置
+        'TIMER'=>[],
+        
     ]
 ];
