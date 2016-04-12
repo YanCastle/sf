@@ -13,30 +13,54 @@ class Server
 {
 
     /**
-     * 接收处理
-     * @return int
+     * 收到消息
+     * @param \swoole_server $server
+     * @param $fd
+     * @param $from_id
+     * @param $data
      */
-    function onReceive(){
+    function onReceive(\swoole_server $server,$fd,$from_id,$data){
+//        检测是否第一次收到消息，如果是第一次收到消息则调用类型的握手，
+//         如果握手返回字符串则回发内容并停止解析后面的动作
+        
+    }
+
+    /**
+     * 连接断开
+     * @param \swoole_server $server
+     * @param $fd
+     * @param $from_id
+     */
+    function onClose(\swoole_server $server,$fd,$from_id){
 
     }
 
     /**
-     * 断开连接的触发
+     * 连接建立
+     * @param \swoole_server $server
+     * @param $fd
+     * @param $from_id
      */
-    function onClose(){
+    function onConnect(\swoole_server $server,$fd,$from_id){
 
     }
 
     /**
-     * 连接处理
+     * 异步任务触发回调
+     * @param \swoole_server $server
+     * @param $task_id
+     * @param $from_id
+     * @param $data
      */
-    function onConnect(){
+    function onTask(\swoole_server $server,$task_id,$from_id,$data){}
 
-    }
-
-
-    function onTask(){}
-    function onFinish(){}
+    /**
+     * 异步任务完成回调
+     * @param \swoole_server $server
+     * @param $task_id
+     * @param $data
+     */
+    function onFinish(\swoole_server $server,$task_id,$data){}
 
     /**
      * UDP回调
