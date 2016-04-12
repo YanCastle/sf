@@ -12,9 +12,15 @@ function is_first_receive($port,$fd=1){
         $_type=array_merge($_type,$port);
     }else{
         if(isset($_type[$port])){
-
+//            TODO 识别是否是第一次并返回该请求的类型
+            return 'Socket';
         }
     }
+    return 'Socket';
+}
+
+function controller($i,$data){
+
 }
 
 function session($name,$value=false){}

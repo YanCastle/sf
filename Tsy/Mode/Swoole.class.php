@@ -57,7 +57,7 @@ class Swoole implements Mode
                 if($Conf){
                     $Server->set($Conf);
                 }
-                $Swoole = new \Tsy\Library\Server();
+                $Swoole = new \Tsy\Library\Server(array_keys($Listen));
                 $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);

@@ -13,5 +13,5 @@ use Tsy\Library\Swoole;
 
 class Socket extends Swoole
 {
-
+    
 }

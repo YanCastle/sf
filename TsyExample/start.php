@@ -8,4 +8,4 @@
 error_reporting(E_ALL);
 $APP_PATH = 'Application';
 $RUNTIME_PATH = '../Runtime';
-include '../Tsy/Tsy.php';
+include __DIR__.'/../Tsy/Tsy.php';
