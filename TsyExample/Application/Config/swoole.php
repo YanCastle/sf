@@ -12,7 +12,7 @@ return [
             '类型'=>[
                 'HOST'=>'',
                 'PORT'=>'',
-
+//                'TYPE'=>SWOOLE_SOCK_TCP 暂时只支持TCP连接
             ],
         ],
         //SWOOLE 配置
