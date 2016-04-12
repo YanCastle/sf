@@ -36,6 +36,8 @@ class Tsy
         }else{
             die(APP_MODE.':模式不存在');
         }
+//        加载模式处理类，开始模式处理
+        $ModeClass->start();
     }
     function loadConfig(){
         //因为涉及到多线程竞争同步的问题，所以C函数的内容必须是共享式的，

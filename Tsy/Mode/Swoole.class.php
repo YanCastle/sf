@@ -17,5 +17,23 @@ use Tsy\Mode;
  */
 class Swoole implements Mode
 {
+    /**
+     * 执行体
+     * @return mixed
+     */
     function exec(){}
+
+    /**
+     * 调度
+     * @return mixed
+     */
+    function dispatch(){}
+
+    /**
+     * 启动函数
+     * @return mixed
+     */
+    function start(){
+//        读取配置文件、启动服务器
+    }
 }

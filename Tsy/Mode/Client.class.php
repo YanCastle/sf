@@ -3,33 +3,37 @@
  * Created by PhpStorm.
  * User: Castle
  * Date: 2016/4/11
- * Time: 22:56
+ * Time: 22:58
  */
 
-namespace Tsy;
+namespace Tsy\Mode;
+
+
+use Tsy\Mode;
 
 /**
- * 模式类 基类
- * Class Mode
- * @package Tsy
+ * Client模式
+ * @package Tsy\Mode
  */
-interface Mode
+class Client implements Mode
 {
     /**
      * 执行体
      * @return mixed
      */
-    function exec();
+    function exec(){}
 
     /**
      * 调度
      * @return mixed
      */
-    function dispatch();
+    function dispatch(){}
 
     /**
      * 启动函数
      * @return mixed
      */
-    function start();
+    function start(){
+//        读取配置文件、启动服务器
+    }
 }
