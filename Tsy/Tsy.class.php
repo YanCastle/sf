@@ -9,6 +9,8 @@
 namespace Tsy;
 
 
+use Tsy\Library\Session;
+
 class Tsy
 {
     protected static $class_map = [];
@@ -29,6 +31,8 @@ class Tsy
         if(file_exists_case(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php')){
             include_once TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php';
         }
+        $Session = new Session();
+        session_set_save_handler($Session,true);
 //        开始实例化Mode类，进行初始化操作
         $ModeClassName = 'Tsy\\Mode\\'.APP_MODE;
         if(class_exists($ModeClassName)){

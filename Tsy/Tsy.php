@@ -9,8 +9,8 @@
 //开始各种define检测
 defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
 defined('APP_DEBUG') or define('APP_DEBUG',false);
-
 define('APP_PATH',realpath($APP_PATH));
+define('RUNTIME_PATH',$RUNTIME_PATH?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
 
 define('TSY_PATH',__DIR__);
 define('CONF_PATH',APP_PATH.DIRECTORY_SEPARATOR.'Conf');

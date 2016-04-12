@@ -5,5 +5,6 @@
  * Date: 2016/4/11
  * Time: 22:24
  */
-$APP_PATH = '../TsyExample/Application';
+$APP_PATH = 'Application';
+$RUNTIME_PATH = '../Runtime';
 include '../Tsy/Tsy.php';

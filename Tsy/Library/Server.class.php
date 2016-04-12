@@ -11,6 +11,10 @@ namespace Tsy\Library;
 
 class Server
 {
+    protected static $_swoole=[];
+    function __construct()
+    {
+    }
 
     /**
      * 收到消息
@@ -20,9 +24,16 @@ class Server
      * @param $data
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
+
 //        检测是否第一次收到消息，如果是第一次收到消息则调用类型的握手，
 //         如果握手返回字符串则回发内容并停止解析后面的动作
-        
+        if(is_first_receive($fd)){
+            //第一次接受数据，检查是否需要握手
+            $server->connection_info($fd);
+        }else{
+            //后面的，进行uncode操作然后继续
+
+        }
     }
 
     /**
