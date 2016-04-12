@@ -6,7 +6,13 @@
  * Time: 22:20
  */
 function is_first_receive($fd){
-    return true;
+    static $_type=[];
+    if(is_array($fd)){
+        //Store the Map of Port To Type
+        $_type=array_merge($_type,$fd);
+    }else{
+
+    }
 }
 
 function session($name,$value=false){}

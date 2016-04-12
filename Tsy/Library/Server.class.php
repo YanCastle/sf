@@ -29,7 +29,7 @@ class Server
 //         如果握手返回字符串则回发内容并停止解析后面的动作
         if(is_first_receive($fd)){
             //第一次接受数据，检查是否需要握手
-            $server->connection_info($fd);
+            $info = $server->connection_info($fd);
         }else{
             //后面的，进行uncode操作然后继续
 
