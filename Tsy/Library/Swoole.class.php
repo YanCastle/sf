@@ -9,7 +9,7 @@
 namespace Tsy\Library;
 
 
-class Swoole
+abstract class Swoole
 {
     function code($str){
         return $str;

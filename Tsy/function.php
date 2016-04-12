@@ -5,13 +5,15 @@
  * Date: 2016/4/11
  * Time: 22:20
  */
-function is_first_receive($fd){
+function is_first_receive($port,$fd=1){
     static $_type=[];
-    if(is_array($fd)){
+    if(is_array($port)){
         //Store the Map of Port To Type
-        $_type=array_merge($_type,$fd);
+        $_type=array_merge($_type,$port);
     }else{
+        if(isset($_type[$port])){
 
+        }
     }
 }
 
@@ -23,9 +25,32 @@ function session($name,$value=false){}
  * @param bool $value
  * @param bool $expire
  */
-function cache($key,$value=false,$expire=false){
+function cache($key,$value=false,$expire=false,$type='Default'){
 
 }
+
+/**
+ * 队列读写
+ * @param $key
+ * @param bool $value
+ * @param int $order 1表示先进先出 0 先进后出
+ */
+function queue($key,$value=false,$order=1){
+
+}
+
+/**
+ * 任务投递
+ */
+function task(){}
+
+/**
+ * 异步任务
+ * @param callable $callback
+ * @param array $params
+ */
+function async($config,array $params=[]){}
+
 /**
  * 获取和设置配置参数 支持批量定义
  * @param string|array $name 配置变量

@@ -47,6 +47,7 @@ class Swoole implements Mode
                         //初次启动服务
                         $Server=new \swoole_server($Config['HOST'],$Config['PORT']);
                     }
+                    is_first_receive([$Config['PORT']=>$Type]);
                 }else{
                     die('SWOOLE的Listen配置不正确，请确认配置是否正确.');
                 }
