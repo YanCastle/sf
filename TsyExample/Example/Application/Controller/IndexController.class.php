@@ -13,8 +13,8 @@ use Tsy\Library\Controller;
 
 class IndexController extends Controller
 {
-    function index($f){
-        return 'sdfs';
+    function index(){
+        return C('MODULE');
     }
 
     /**
