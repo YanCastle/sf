@@ -5,18 +5,8 @@
  * Date: 2016/4/11
  * Time: 22:20
  */
-function is_first_receive($port,$fd=1){
-    static $_type=[];
-    if(is_array($port)){
-        //Store the Map of Port To Type
-        $_type=array_merge($_type,$port);
-    }else{
-        if(isset($_type[$port])){
-//            TODO 识别是否是第一次并返回该请求的类型
-            return 'Socket';
-        }
-    }
-    return 'Socket';
+function is_first_receive($fd){
+    return true;
 }
 
 function controller($i,$data){

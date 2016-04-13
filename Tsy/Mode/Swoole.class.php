@@ -37,6 +37,7 @@ class Swoole implements Mode
 //        读取配置文件、启动服务器
         $Listen = C('SWOOLE.LISTEN');
         $Conf = C('SWOOLE.CONF');
+        $PortModeMap = [];
         if($Listen){
             foreach ($Listen as $Type=>$Config){
                 if(isset($Config['HOST'])&&isset($Config['PORT'])&&is_numeric($Config['PORT'])&&$Config['PORT']>0&&$Config['PORT']<65536&&long2ip(ip2long($Config['HOST']))==$Config['HOST']){
@@ -47,7 +48,7 @@ class Swoole implements Mode
                         //初次启动服务
                         $Server=new \swoole_server($Config['HOST'],$Config['PORT']);
                     }
-                    is_first_receive([$Config['PORT']=>$Type]);
+                    $PortModeMap[]=[$Config['PORT']=>$Type];
                 }else{
                     die('SWOOLE的Listen配置不正确，请确认配置是否正确.');
                 }
@@ -57,7 +58,7 @@ class Swoole implements Mode
                 if($Conf){
                     $Server->set($Conf);
                 }
-                $Swoole = new \Tsy\Library\Server(array_keys($Listen));
+                $Swoole = new \Tsy\Library\Server($PortModeMap);
                 $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);

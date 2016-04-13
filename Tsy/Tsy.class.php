@@ -58,9 +58,13 @@ class Tsy
     static function autoload($class){
         if(isset(self::$class_map[$class])){
             include_once self::$class_map[$class];
-        }elseif(false !== strpos($class,'\\')){
+        }elseif(false !== strpos($class,'\\')) {
             //带命名空间的类
-            $file_path = dirname(TSY_PATH).DIRECTORY_SEPARATOR.str_replace('\\',DIRECTORY_SEPARATOR,$class).'.class.php';
+            if ('Tsy' == substr($class, 0, 3)){
+                $file_path = dirname(TSY_PATH) . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.class.php';
+            }else{
+                $file_path = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.class.php';
+            }
             if(file_exists($file_path)){
                 include($file_path);
             }

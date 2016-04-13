@@ -8,18 +8,27 @@
 
 namespace Tsy\Library;
 
-
+/**
+ * Server类，用来处理SwooleServer的各种回调
+ * @package Tsy\Library
+ */
 class Server
 {
-    protected static $_swoole=[];
+    protected $_swoole=[];
+    protected $first=[];
+    protected $port_mode_map=[];
     function __construct($modes=[])
     {
-        foreach ($modes as $mode){
-            $class = 'Tsy\\Library\\Swoole\\'.$mode;
-            self::$_swoole[$mode]=new $class();
-        }
+        $this->port_mode_map=$modes;
+        $this->init();
     }
 
+    /**
+     * Server启动时的初始化方法
+     */
+    function init(){
+
+    }
     /**
      * 收到消息
      * @param \swoole_server $server
@@ -28,25 +37,27 @@ class Server
      * @param $data
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
-        $Handed=false;
-//        检测是否第一次收到消息，如果是第一次收到消息则调用类型的握手，
-//         如果握手返回字符串则回发内容并停止解析后面的动作
-        $Mode = $server->connection_info($fd);
-        $mode = is_first_receive($Mode['server_port'],$fd);
-        $class = 'Tsy\\Library\\Swoole\\'.$mode;
-        $Class=new $class();
-        if(is_first_receive($fd)){
-            //第一次接受数据，检查是否需要握手
-               if($Data = $Class->handshake($data)){
-                   $server->send($fd,$Data);
-                   $Handed=true;
-               }
-//            }
+//        标记变量，是否是第一次接受请求
+        $IsFirst=false;
+        if(!isset($this->first[$fd])){
+            $IsFirst=is_first_receive($fd);
         }
-        if(!$Handed){
-            $data = $Class->uncode($data);
-            echo $data;
+        $mode = $this->port_mode_map[$server->connection_info($fd)['server_port']];
+        $Class = $this->getModeClass($mode);
+        if($IsFirst){
+            $this->first[$fd]=1;
+            if($HandData = $Class->handshake($data)){
+                //响应握手协议
+                $server->send($fd,$HandData);
+                return ;
+            }
         }
+        //            解码协议，
+        $data = $Class->uncode($data);
+//            实例化Controller
+        
+//            响应检测
+
     }
 
     /**
@@ -56,7 +67,7 @@ class Server
      * @param $from_id
      */
     function onClose(\swoole_server $server,$fd,$from_id){
-
+        unset($this->first[$fd]);
     }
 
     /**
@@ -157,4 +168,11 @@ class Server
      * @param \swoole_server $server
      */
     function onManagerStop(\swoole_server $server){}
+    protected function getModeClass($mode){
+        if(!isset($this->_swoole[$mode])){
+            $class='Tsy\\Library\\Swoole\\'.$mode;
+            $this->_swoole[$mode]=new $class();
+        }
+        return $this->_swoole[$mode];
+    }
 }
