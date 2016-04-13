@@ -10,8 +10,26 @@ function is_first_receive($fd){
 }
 
 function controller($i,$data,$mid){
-    list($C,$A)=explode('/',$i);
-    $ClassName = implode('\\',[DEFAULT_MODULE,'Controller',$C.'Controller']);
+    $ModuleClassAction=explode('/',$i);
+    $MCACount = count($ModuleClassAction);
+    if($MCACount==2){
+        list($C,$A)=$ModuleClassAction;
+        $M=DEFAULT_MODULE;
+    }elseif($MCACount==3){
+        list($M,$C,$A)=$ModuleClassAction;
+    }else{
+        log($i.'错误',LOG_ERR);
+        return null;
+    }
+//    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
+    if(isset($GLOBALS['CurrentModule'])&&$GLOBALS['CurrentModule']==$M){
+
+    }else{
+        $GLOBALS['CurrentModule']=$M;
+        load_module_config($M);
+    }
+//    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
+    $ClassName = implode('\\',[$M,'Controller',$C.'Controller']);
     if(!class_exists($ClassName)){
         $ClassName=str_replace($C,'Empty',$ClassName);
         if(!class_exists($ClassName)){
@@ -66,7 +84,9 @@ function controller($i,$data,$mid){
 function L($msg,$Type=0){
     echo $msg;
 }
-function session($name,$value=false){}
+function session($name,$value=false){
+
+}
 
 /**
  * 缓存
@@ -100,6 +120,19 @@ function task(){}
  */
 function async($config,array $params=[]){}
 
+function load_module_config($module){
+    //清空配置缓存
+    C(false,false);
+    //加载公共配置
+    C($GLOBALS['Config']);
+    $ModuleConfigPath = APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR;
+//        加载项目配置文件,http模式则加载http.php,swoole模式则加载swoole.php
+    C(load_config($ModuleConfigPath.'config.php'));
+    !APP_DEBUG or C(load_config($ModuleConfigPath.'debug.php'));
+    C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
+    !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
+}
+
 /**
  * 获取和设置配置参数 支持批量定义
  * @param string|array $name 配置变量
@@ -113,6 +146,9 @@ function C($name=null, $value=null,$default=null) {
 //    if(!isset($_config)){$_config=[];}
     if (empty($name)) {
         return $_config;
+    }
+    if(false===$name&&$value===false){
+        $_config=[];
     }
     // 优先执行设置获取或赋值
     if (is_string($name)) {
