@@ -159,3 +159,7 @@ function controller($i,$data,$mid){
     }
     return $result;
 }
+
+function E($msg){
+    echo $msg;//ss
+}
