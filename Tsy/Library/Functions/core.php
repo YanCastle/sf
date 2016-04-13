@@ -166,5 +166,5 @@ function E($msg){
 
 function L($msg,$Type=0){
     //TODO 完善log函数
-    echo $msg;
+    echo $msg,"\r\n";
 }
