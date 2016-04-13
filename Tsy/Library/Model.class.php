@@ -742,20 +742,6 @@ class Model {
                 unset($data[$key]);
             }
         }
-//        TODO 检查是否是字典表，如果不是字典表又含有字典表主键字段，则自动读取字典值
-//        通过读取Conf下面的dic.php来获取字典表定义
-//        较差对比字典配置中的键和读取数据中的字段值，如果存在则自动补上，不存在则略过
-//        第一个参数是 字典名 => 字典主键，第二个参数是读取内容的字段，即该表的字段
-        $Intersect = array_intersect(dic(),array_keys($data));
-        if($Intersect){
-            foreach($Intersect as $ModelName=>$PK){
-                if(strtolower($ModelName)==strtolower($this->trueTableName)){
-                    continue;
-                }
-                $Model = D($ModelName);
-                $data[$ModelName]=method_exists($Model,'obj')?call_user_func([$Model,'obj'],$data[$PK]):$Model->where([$PK=>$data[$ModelName]])->cache(7200)->find();
-            }
-        }
         return $data;
     }
 
