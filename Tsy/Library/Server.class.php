@@ -83,7 +83,8 @@ class Server
         $_POST['_i']=$Data['i'];
         $return = controller($Data['i'],$Data['d'],$Data['m']);
         //返回内容检测
-        
+        $sendStr = call_user_func($this->port_mode_map[$Port][2],$return);
+        !$sendStr or $server->send($fd,$sendStr);
     }
 
     /**
