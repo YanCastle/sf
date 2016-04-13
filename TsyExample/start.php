@@ -6,6 +6,6 @@
  * Time: 22:24
  */
 error_reporting(E_ALL);
-$APP_PATH = 'Application';
+$APP_PATH = './Example/Application';
 $RUNTIME_PATH = '../Runtime';
 include __DIR__.'/../Tsy/Tsy.php';
