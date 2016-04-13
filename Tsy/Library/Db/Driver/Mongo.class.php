@@ -32,7 +32,7 @@ class Mongo extends Driver {
     public function __construct($config=''){
         parent::__construct($config);
         if ( !class_exists('mongoClient') ) {
-            E(L('_NOT_SUPPORT_').':Mongo');
+            L('不支持该驱动'.':Mongo',LOG_ERR);
         }
         if(!empty($config)) {
             $this->config           =   array_merge($this->config,$config);
@@ -696,7 +696,7 @@ class Mongo extends Driver {
             }else{
                 // 查询字段的安全过滤
                 if(!preg_match('/^[A-Z_\|\&\-.a-z0-9]+$/',trim($key))){
-                    E(L('_ERROR_QUERY_').':'.$key);
+                    L('不安全的查询参数'.':'.$key,LOG_WARNING);
                 }
                 $key = trim($key);
                 if(strpos($key,'|')) {

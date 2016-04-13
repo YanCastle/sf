@@ -9,9 +9,6 @@ function is_first_receive($fd){
     return true;
 }
 
-function L($msg,$Type=0){
-    echo $msg;
-}
 function session($name,$value=false){
 
 }

@@ -161,5 +161,10 @@ function controller($i,$data,$mid){
 }
 
 function E($msg){
-    echo $msg;//ss
+    L($msg);
+}
+
+function L($msg,$Type=0){
+    //TODO 完善log函数
+    echo $msg;
 }
