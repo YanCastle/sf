@@ -18,7 +18,7 @@ class IndexController extends Controller
         //如果这儿是return的字符串，则会作为错误信息返回
         //如果return的数组则是有效消息
         $M = new Model('a');
-        $M->add(['a'=>1]);
+        $a=$M->where(['a'=>['in',[5,4]]])->delete();
     }
     /**
      * 空操作
