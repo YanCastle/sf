@@ -30,6 +30,7 @@ class Mongo extends Driver {
      * @param array $config 数据库配置数组
      */
     public function __construct($config=''){
+        parent::__construct($config);
         if ( !class_exists('mongoClient') ) {
             E(L('_NOT_SUPPORT_').':Mongo');
         }
