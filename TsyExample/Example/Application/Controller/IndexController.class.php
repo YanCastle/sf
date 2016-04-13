@@ -10,11 +10,15 @@ namespace Application\Controller;
 
 
 use Tsy\Library\Controller;
+use Tsy\Library\Model;
 
 class IndexController extends Controller
 {
     function index(){
-        return 'ss';
+        //如果这儿是return的字符串，则会作为错误信息返回
+        //如果return的数组则是有效消息
+        $M = new Model();
+        $M->add(['a'=>1]);
     }
     /**
      * 空操作

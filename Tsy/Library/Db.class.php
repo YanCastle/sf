@@ -34,12 +34,12 @@ class Db {
             // 兼容mysqli
             if('mysqli' == $options['type']) $options['type']   =   'mysql';
             // 如果采用lite方式 仅支持原生SQL 包括query和execute方法
-            $class  =   !empty($options['lite'])?  'Think\Db\Lite' :   'Think\\Db\\Driver\\'.ucwords(strtolower($options['type']));
+            $class  =   !empty($options['lite'])?  'Tsy\Library\Db\Lite' :   'Tsy\\Library\\Db\\Driver\\'.ucwords(strtolower($options['type']));
             if(class_exists($class)){
                 self::$instance[$md5]   =   new $class($options);
             }else{
                 // 类没有定义
-                E(L('_NO_DB_DRIVER_').': ' . $class);
+                L("缺少数据库驱动类");
             }
         }
         self::$_instance    =   self::$instance[$md5];
