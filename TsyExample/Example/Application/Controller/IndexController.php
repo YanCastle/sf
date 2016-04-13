@@ -6,7 +6,7 @@
  * Time: 23:09
  */
 
-namespace Application;
+namespace Application\Controller;
 
 
 use Tsy\Library\Controller;
