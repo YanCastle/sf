@@ -17,7 +17,7 @@ class IndexController extends Controller
     function index(){
         //如果这儿是return的字符串，则会作为错误信息返回
         //如果return的数组则是有效消息
-        $M = new Model();
+        $M = new Model('a');
         $M->add(['a'=>1]);
     }
     /**

@@ -25,9 +25,11 @@ class Tsy
     }
     function start(){
 //        加载配置文件
+        $this->loadFunctions();//加载框架function和项目function
+        
         $this->loadConfig();
         $GLOBALS['Config']=C();
-        $this->loadFunctions();//加载框架function和项目function
+
 //        分析配置，决定是http模式还是swoole模式
 ////        如果是http模式则实例化http类，如果是swoole模式则实例化swoole类
         if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php')){
