@@ -39,10 +39,11 @@ class Server
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
 //        标记变量，是否是第一次接受请求
         $IsFirst=false;
+        $Port = $server->connection_info($fd)['server_port'];
         if(!isset($this->first[$fd])){
             $IsFirst=is_first_receive($fd);
         }
-        $mode = $this->port_mode_map[$server->connection_info($fd)['server_port']];
+        $mode = $this->port_mode_map[$Port][0];
         $Class = $this->getModeClass($mode);
         if($IsFirst){
             $this->first[$fd]=1;
@@ -54,8 +55,30 @@ class Server
         }
         //            解码协议，
         $data = $Class->uncode($data);
+        $Data=[
+            'i'=>'Empty/empty',
+            'd'=>$data,
+            't'=>''
+        ];
 //            实例化Controller
-        
+        if(is_callable($this->port_mode_map[$Port][1])){
+            $tmpData = call_user_func($this->port_mode_map[$Port][1],$data);
+            $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
+        }
+        //-----------------------------------------
+        //开始进行t值检测，做桥链接处理
+        //        生成mid
+        $_POST['_mid']=uniqid();
+        $Data['m']=$_POST['_mid'];
+        if($Data['t']){
+//            链接桥响应,此处要应用通道编码,通道编码之前要有协议编码
+            $SendData = [
+                't'=>$Data['t'],
+                'm'=>$Data['m']
+            ];
+//            响应桥请求
+            $server->send($fd,$Class->code(is_callable($this->port_mode_map[$Port][2])?call_user_func($this->port_mode_map[$Port][2],$SendData):\json_encode($SendData,true)));
+        }
 //            响应检测
 
     }
