@@ -13,7 +13,9 @@ use Tsy\Library\Controller;
 
 class IndexController extends Controller
 {
-    function index(){}
+    function index($f){
+        return 'sdfs';
+    }
 
     /**
      * 空操作

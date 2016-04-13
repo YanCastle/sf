@@ -9,10 +9,63 @@ function is_first_receive($fd){
     return true;
 }
 
-function controller($i,$data){
-
+function controller($i,$data,$mid){
+    list($C,$A)=explode('/',$i);
+    $ClassName = implode('\\',[DEFAULT_MODULE,'Controller',$C.'Controller']);
+    if(!class_exists($ClassName)){
+        $ClassName=str_replace($C,'Empty',$ClassName);
+        if(!class_exists($ClassName)){
+            log($C.'类不存在',LOG_ERR);
+            return null;
+        }
+    }
+    $result = '';//返回结果
+    $Class = new $ClassName();
+    if(!method_exists($Class,$A)){
+        //方法不存在
+        if(method_exists($Class,'_empty')){
+            $result = call_user_func_array([$Class,'_empty'],[$i,$data]);
+        }elseif(method_exists($Class,'__call')){
+            $result = call_user_func_array([$Class,$A],$data);
+        }else{
+            L($A.'方法不存在',LOG_ERR);
+            return null;
+        }
+        return $result;
+    }
+    //方法存在时
+    $ReflectMethod = new ReflectionMethod($Class,$A);
+    //获取方法参数
+    if($ReflectMethod->isPublic()){
+//        是否需要参数绑定
+        if($ReflectMethod->getNumberOfParameters()>0){
+            $args = [];
+            foreach ($ReflectMethod->getParameters() as $Param){
+                $ParamName=$Param->getName();
+                if(isset($data[$ParamName])){
+                    $args[]=$data[$ParamName];
+                }elseif($Param->isDefaultValueAvailable()){
+                    $args[]=$Param->getDefaultValue();
+                }else{
+                    //必填参数未传入完整
+                    L($ParamName.':必填参数未传入完整',LOG_ERR);
+                    return null;
+                }
+            }
+            $result = $ReflectMethod->invokeArgs($Class,$args);
+        }else{
+            $result = $ReflectMethod->invoke($Class);
+        }
+//        TODO 判断result内容
+    }else{
+        L($i.'方法不是公共方法',LOG_ERR);
+    }
+    return $result;
 }
 
+function L($msg,$Type=0){
+    echo $msg;
+}
 function session($name,$value=false){}
 
 /**
