@@ -88,6 +88,7 @@ function session($name,$value=false){
 
 }
 
+
 /**
  * 缓存
  * @param $key

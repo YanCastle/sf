@@ -27,6 +27,7 @@ class Tsy
 //        加载配置文件
         $this->loadConfig();
         $GLOBALS['Config']=C();
+        $this->loadFunctions();//加载框架function和项目function
 //        分析配置，决定是http模式还是swoole模式
 ////        如果是http模式则实例化http类，如果是swoole模式则实例化swoole类
         if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php')){
@@ -55,6 +56,20 @@ class Tsy
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug.php'));
         C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
+    }
+    function loadFunctions(){
+        $FunctionPath = TSY_PATH.'/Library/Functions';
+        foreach (scandir($FunctionPath) as $path){
+            if(!in_array($path,['.','..'])&&'php'==substr($path,-3)){
+                include ($FunctionPath.'/'.$path);
+            }
+        }
+        $FunctionPath = APP_PATH.'/Common/Functions';
+        foreach (scandir($FunctionPath) as $path){
+            if(!in_array($path,['.','..'])&&'php'==substr($path,-3)){
+                include ($FunctionPath.'/'.$path);
+            }
+        }
     }
     static function autoload($class){
         if(isset(self::$class_map[$class])){

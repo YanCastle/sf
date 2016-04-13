@@ -80,7 +80,10 @@ class Server
             $server->send($fd,$Class->code(is_callable($this->port_mode_map[$Port][2])?call_user_func($this->port_mode_map[$Port][2],$SendData):\json_encode($SendData,true)));
         }
 //            响应检测
+        $_POST['_i']=$Data['i'];
         $return = controller($Data['i'],$Data['d'],$Data['m']);
+        //返回内容检测
+        
     }
 
     /**

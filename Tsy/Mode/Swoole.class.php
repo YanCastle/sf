@@ -48,7 +48,8 @@ class Swoole implements Mode
                         //初次启动服务
                         $Server=new \swoole_server($Config['HOST'],$Config['PORT']);
                     }
-                    $PortModeMap[$Config['PORT']]=[$Type,$Config['DISPATCH']];
+                    //同时允许默认解析方法和输出方法
+                    $PortModeMap[$Config['PORT']]=[$Type,isset($Config['DISPATCH'])?$Config['DISPATCH']:'dispatch',isset($Config['OUT'])?$Config['OUT']:'out'];
                 }else{
                     die('SWOOLE的Listen配置不正确，请确认配置是否正确.');
                 }
