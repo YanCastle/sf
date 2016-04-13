@@ -14,9 +14,8 @@ use Tsy\Library\Controller;
 class IndexController extends Controller
 {
     function index(){
-        return C('MODULE');
+        return 'ss';
     }
-
     /**
      * 空操作
      * @param string $Action 方法名称

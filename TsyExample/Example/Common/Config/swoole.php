@@ -14,10 +14,17 @@ return [
                 'PORT'=>'65502',
 //                'TYPE'=>SWOOLE_SOCK_TCP 暂时只支持TCP连接
                 'DISPATCH'=>function($data){
+                    list($i,$d)=explode(',',$data);
+                    $d = explode('&',$d);
+                    $Data = [];
+                    foreach ($d as $val){
+                        list($k,$v) = explode('=',$val);
+                        $Data[$k]=$v;
+                    }
                     return [
-                        'i'=>'Index/index',//要被调用的类和方法
-                        'd'=>[],//前端发送的消息参数体
-                        't'=>'',//这个是前端生成的消息唯一值
+                        'i'=>$i,//要被调用的类和方法
+                        'd'=>$Data,//前端发送的消息参数体
+                        't'=>'fwafaw',//这个是前端生成的消息唯一值
                     ];
                 }
             ],
