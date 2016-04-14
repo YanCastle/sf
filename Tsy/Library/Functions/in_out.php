@@ -21,7 +21,7 @@ function dispatch($data){
     session('[id]',isset($d['s'])?$d['s']:str_replace('.','',uniqid()));
     return [
         'i'=>isset($d['i'])?$d['i']:'Empty/_empty',
-        'd'=>isset($d['d'])?json_decode($d['d'],true):[],
+        'd'=>isset($d['d'])?$d['d']:[],
         't'=>isset($d['t'])?$d['t']:uniqid()
     ];
 }
