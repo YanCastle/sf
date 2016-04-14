@@ -25,7 +25,7 @@ class Redis extends Cache
             'port'          => C('REDIS_PORT') ? : 6379,
             'timeout'       => C('DATA_CACHE_TIMEOUT') ? : false,
             'persistent'    => false,
-        ),$options);
+        ),is_array($options)?$options:[]);
 
         $this->options =  $options;
         $this->options['expire'] =  isset($options['expire'])?  $options['expire']  :   C('DATA_CACHE_TIME');
@@ -47,7 +47,7 @@ class Redis extends Cache
     public function get($name) {
         N('cache_read',1);
         $value = $this->handler->get($this->options['prefix'].$name);
-        $jsonData  = json_decode( $value, true );
+        $jsonData  = unserialize( $value);
         return ($jsonData === NULL) ? $value : $jsonData;	//检测是否为JSON数据 true 返回JSON解析数组, false返回源数据
     }
 
@@ -66,7 +66,7 @@ class Redis extends Cache
         }
         $name   =   $this->options['prefix'].$name;
         //对数组/对象数据进行缓存处理，保证数据完整性
-        $value  =  (is_object($value) || is_array($value)) ? json_encode($value) : $value;
+        $value  =  (is_object($value) || is_array($value)) ? serialize($value) : $value;
         if(is_int($expire) && $expire) {
             $result = $this->handler->setex($name, $expire, $value);
         }else{

@@ -5,8 +5,9 @@
  * Date: 2016/4/13
  * Time: 21:37
  */
-function S($key,$value=false,$expire=false,$type='Default'){
-    return cache($key,$value,$expire,$type);
+function S($key,$value=false,$expire=false,$Default=''){
+    $value = cache($key,$value,$expire);
+    return null!==$value?$value:$Default;
 }
 
 /**
@@ -15,15 +16,33 @@ function S($key,$value=false,$expire=false,$type='Default'){
  * @param bool $value
  * @param bool $expire
  */
-function cache($key,$value=false,$expire=false,$type='Default'){
+function cache($key,$value=false,$expire=null,$type=''){
+    static $_map =[];
     if(empty($type))  $type = C('DATA_CACHE_TYPE');
-    $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
-    if(class_exists($class))
-        $cache = new $class($class);
-    else
-//        E(L('_CACHE_TYPE_INVALID_').':'.$type);
+    if(!isset($_map[$type])){
+        $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
+        if(class_exists($class)){
+            $cache = new $class([]);
+            $_map[$type]=$cache;
+        }
+        else{
+            L('缓存驱动类不存在',LOG_ERR);
+            return false;
+        }
+    }else{
+        $cache = $_map[$type];
+    }
+    //开始数据处理
+    if($cache){
+        if(false===$value){
+            return $cache->get($key);
+        }else{
+            return $cache->set($key,$value,$expire);
+        }
+    }else{
+        L('缓存驱动类不存在',LOG_ERR);
         return false;
-    return $cache;
+    }
 }
 
 /**

@@ -11,6 +11,24 @@ namespace Tsy\Library;
 
 abstract class Cache
 {
+    /**
+     * 操作句柄
+     * @var string
+     * @access protected
+     */
+    protected $handler    ;
+
+    /**
+     * 缓存连接参数
+     * @var integer
+     * @access protected
+     */
+    protected $options = array();
+    function __construct($Config=[])
+    {
+        
+    }
+
     function read($key){}
     function write($key,$value){}
     function config(array $config=[]){}
