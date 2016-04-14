@@ -106,7 +106,7 @@ class Server
      * @param $from_id
      */
     function onConnect(\swoole_server $server,$fd,$from_id){
-
+        L($fd);
     }
 
     /**

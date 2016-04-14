@@ -96,3 +96,94 @@ function G($start,$end='',$dec=4) {
 function trace($value='[think]',$label='',$level='DEBUG',$record=false) {
 //    return Core\Think::trace($value,$label,$level,$record);
 }
+/**
+ * 实例化模型类 格式 [资源://][模块/]模型
+ * @param string $name 资源地址
+ * @param string $layer 模型层名称
+ * @return Think\Model
+ */
+function D($name='',$layer='') {
+    if(empty($name)) return new Tsy\Library\Model;
+    static $_model  =   array();
+    $layer          =   $layer? : 'Model';
+    if(isset($_model[$name.$layer]))
+        return $_model[$name.$layer];
+    $class          =   parse_res_name($name,$layer);
+    if(class_exists($class)) {
+        $model      =   new $class(basename($name));
+    }elseif(false === strpos($name,'/')){
+        // 自动加载公共模块下面的模型
+        if(!C('APP_USE_NAMESPACE')){
+            import('Common/'.$layer.'/'.$class);
+        }else{
+            $class      =   '\\Common\\'.$layer.'\\'.$name.$layer;
+        }
+        $model      =   class_exists($class)? new $class($name) : new Tsy\Library\Model($name);
+    }else {
+        L('D方法实例化没找到模型类'.$class,LOG_ERR);
+        $model      =   new Tsy\Library\Model(basename($name));
+    }
+    $_model[$name.$layer]  =  $model;
+    return $model;
+}
+
+/**
+ * 实例化一个没有模型文件的Model
+ * @param string $name Model名称 支持指定基础模型 例如 MongoModel:User
+ * @param string $tablePrefix 表前缀
+ * @param mixed $connection 数据库连接信息
+ * @return Think\Model
+ */
+function M($name='', $tablePrefix='',$connection='') {
+    static $_model  = array();
+    if(strpos($name,':')) {
+        list($class,$name)    =  explode(':',$name);
+    }else{
+        $class      =   'Tsy\\Library\\Model';
+    }
+    $guid           =   (is_array($connection)?implode('',$connection):$connection).$tablePrefix . $name . '_' . $class;
+    if (!isset($_model[$guid]))
+        $_model[$guid] = new $class($name,$tablePrefix,$connection);
+    return $_model[$guid];
+}
+
+/**
+ * 导入所需的类库 同java的Import 本函数有缓存功能
+ * @param string $class 类库命名空间字符串
+ * @param string $baseUrl 起始路径
+ * @param string $ext 导入的文件扩展名
+ * @return boolean
+ */
+function import($class, $baseUrl = '', $ext=EXT) {
+    static $_file = array();
+    $class = str_replace(array('.', '#'), array('/', '.'), $class);
+    if (isset($_file[$class . $baseUrl]))
+        return true;
+    else
+        $_file[$class . $baseUrl] = true;
+    $class_strut     = explode('/', $class);
+    if (empty($baseUrl)) {
+        if ('@' == $class_strut[0] || MODULE_NAME == $class_strut[0]) {
+            //加载当前模块的类库
+            $baseUrl = MODULE_PATH;
+            $class   = substr_replace($class, '', 0, strlen($class_strut[0]) + 1);
+        }elseif ('Common' == $class_strut[0]) {
+            //加载公共模块的类库
+            $baseUrl = COMMON_PATH;
+            $class   = substr($class, 7);
+        }elseif (in_array($class_strut[0],array('Think','Org','Behavior','Com','Vendor')) || is_dir(LIB_PATH.$class_strut[0])) {
+            // 系统类库包和第三方类库包
+            $baseUrl = LIB_PATH;
+        }else { // 加载其他模块的类库
+            $baseUrl = APP_PATH;
+        }
+    }
+    if (substr($baseUrl, -1) != '/')
+        $baseUrl    .= '/';
+    $classfile       = $baseUrl . $class . $ext;
+    if (!class_exists(basename($class),false)) {
+        // 如果类不存在 则导入类库文件
+        return require($classfile);
+    }
+    return null;
+}
