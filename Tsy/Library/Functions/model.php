@@ -132,7 +132,7 @@ function D($name='',$layer='') {
  * @param string $name Model名称 支持指定基础模型 例如 MongoModel:User
  * @param string $tablePrefix 表前缀
  * @param mixed $connection 数据库连接信息
- * @return Think\Model
+ * @return Tsy\Library\Model
  */
 function M($name='', $tablePrefix='',$connection='') {
     static $_model  = array();

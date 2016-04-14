@@ -15,8 +15,8 @@ function S($name,$value){
  * @param bool $value
  * @param bool $expire
  */
-function cache($key,$value=false,$expire=false,$type='Default'){
-
+function cache($key,$value=false,$expire=false,$type=''){
+    return '';
 }
 
 /**
