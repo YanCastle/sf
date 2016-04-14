@@ -90,7 +90,7 @@ class Model {
     }
 
     protected function _auto_map(){
-        if(defined('APP_DEBUG')&&APP_DEBUG){
+//        if(defined('APP_DEBUG')&&APP_DEBUG){
             $db   =  $this->dbName?:C('DB_NAME');
             $map = APP_DEBUG?[]:S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name));
             if($map){
@@ -104,7 +104,7 @@ class Model {
                     S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name),$this->_map,C('DB_MAP_EXPIRE'));
                 }
             }
-        }
+//        }
     }
 
     /**

@@ -11,17 +11,24 @@ function out($data){
         'm'=>$_POST['_mid'],
         'd'=>$data,
         'i'=>$_POST['_i'],
-        'c'=>200,
+        'c'=>'m',
         's'=>session('[id]'),
         'UID'=>session('UID')
-    ],JSON_UNESCAPED_UNICODE);
+    ]);
 }
 function dispatch($data){
     $d = json_decode($data,true);
     session('[id]',isset($d['s'])?$d['s']:str_replace('.','',uniqid()));
     return [
         'i'=>isset($d['i'])?$d['i']:'Empty/_empty',
-        'd'=>isset($d['d'])?$d['d']:[],
+        'd'=>isset($d['d'])?json_decode($d['d'],true):[],
         't'=>isset($d['t'])?$d['t']:uniqid()
     ];
+}
+function bridge($data){
+    return json_encode([
+        't'=>$data['t'],
+        'm'=>$_POST['_mid'],
+        'c'=>'t'
+    ]);
 }

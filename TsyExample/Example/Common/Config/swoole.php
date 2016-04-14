@@ -9,9 +9,20 @@ return [
     'SWOOLE'=>[
         //监听配置
         'LISTEN'=>[
-            'WebSocket'=>[
+            [
                 'HOST'=>'0.0.0.0',
                 'PORT'=>'65502',
+                'TYPE'=>'Socket',
+                'ALLOW_IP'=>'',
+                'DENY_IP'=>'',
+                'ALLOW_MODULE'=>[
+                    'Application'=>[
+
+                    ]
+                ],
+                'DENY_MODULE'=>[
+
+                ],
 //                'TYPE'=>SWOOLE_SOCK_TCP 暂时只支持TCP连接
             ],
         ],

@@ -13,6 +13,14 @@ use Tsy\Library\Swoole;
 
 class WebSocket extends Swoole
 {
+    protected static $opcodes = array(
+        'continuation' => 0,
+        'text'         => 1,
+        'binary'       => 2,
+        'close'        => 8,
+        'ping'         => 9,
+        'pong'         => 10,
+    );
     /**
      * WebSocket握手
      * @param $k
@@ -31,11 +39,6 @@ class WebSocket extends Swoole
         return $new_message;
     }
 
-    /**
-     * WebSocket解码
-     * @param $str
-     * @return bool|string
-     */
     function uncode($str){
         $mask = array();
         $data = '';
@@ -48,6 +51,7 @@ class WebSocket extends Swoole
             $mask[] = hexdec(substr($msg[1],6,2));
             $mask[] = hexdec(substr($msg[1],8,2));
             $mask[] = hexdec(substr($msg[1],10,2));
+
             $s = 12;
             $e = strlen($msg[1])-2;
             $n = 0;
@@ -59,27 +63,63 @@ class WebSocket extends Swoole
         return $data;
     }
 
-    /**
-     * WebSocket编码
-     * @param $msg
-     * @return mixed
-     */
-    function code($msg){
-        $msg = preg_replace(array('/\r$/','/\n$/','/\r\n$/',), '', $msg);
-        $frame = array();
-        $frame[0] = '81';
-        $len = strlen($msg);
-        $frame[1] = $len<16?'0'.dechex($len):dechex($len);
-        $frame[2] = $this->ord_hex($msg);
-        $data = implode('',$frame);
-        return pack("H*", $data);
-    }
-    function ord_hex($data)  {
-        $msg = '';
-        $l = strlen($data);
-        for ($i= 0; $i<$l; $i++) {
-            $msg .= dechex(ord($data{$i}));
+    function code($message) {
+        $messageType='text';
+        switch ($messageType) {
+            case 'continuous':
+                $b1 = 0;
+                break;
+            case 'text':
+                $b1 = 1;
+                break;
+            case 'binary':
+                $b1 = 2;
+                break;
+            case 'close':
+                $b1 = 8;
+                break;
+            case 'ping':
+                $b1 = 9;
+                break;
+            case 'pong':
+                $b1 = 10;
+                break;
         }
-        return $msg;
+        $b1+=128;
+        $length = strlen($message);
+        $lengthField = "";
+        if ($length < 126) {
+            $b2 = $length;
+        }
+        elseif ($length < 65536) {
+            $b2 = 126;
+            $hexLength = dechex($length);
+            //$this->stdout("Hex Length: $hexLength");
+            if (strlen($hexLength)%2 == 1) {
+                $hexLength = '0' . $hexLength;
+            }
+            $n = strlen($hexLength) - 2;
+            for ($i = $n; $i >= 0; $i=$i-2) {
+                $lengthField = chr(hexdec(substr($hexLength, $i, 2))) . $lengthField;
+            }
+            while (strlen($lengthField) < 2) {
+                $lengthField = chr(0) . $lengthField;
+            }
+        }
+        else {
+            $b2 = 127;
+            $hexLength = dechex($length);
+            if (strlen($hexLength)%2 == 1) {
+                $hexLength = '0' . $hexLength;
+            }
+            $n = strlen($hexLength) - 2;
+            for ($i = $n; $i >= 0; $i=$i-2) {
+                $lengthField = chr(hexdec(substr($hexLength, $i, 2))) . $lengthField;
+            }
+            while (strlen($lengthField) < 8) {
+                $lengthField = chr(0) . $lengthField;
+            }
+        }
+        return chr($b1) . chr($b2) . $lengthField . $message;
     }
 }

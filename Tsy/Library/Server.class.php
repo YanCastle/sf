@@ -46,15 +46,18 @@ class Server
         $mode = $this->port_mode_map[$Port][0];
         $Class = $this->getModeClass($mode);
         if($IsFirst){
+            L('检测握手协议'.$mode);
             $this->first[$fd]=1;
             if($HandData = $Class->handshake($data)){
                 //响应握手协议
+                L('握手响应:'.$HandData);
                 $server->send($fd,$HandData);
                 return ;
             }
         }
         //            解码协议，
         $data = $Class->uncode($data);
+        if(false===$data){return;}
         $Data=[
             'i'=>'Empty/_empty',
             'd'=>$data,
@@ -77,15 +80,18 @@ class Server
                 'm'=>$Data['m']
             ];
 //            响应桥请求
-            $server->send($fd,$Class->code(is_callable($this->port_mode_map[$Port][2])?call_user_func($this->port_mode_map[$Port][2],$SendData):\json_encode($SendData,true)));
+            $Bridge=call_user_func($this->port_mode_map[$Port][3],$SendData);
+            if(is_string($Bridge)&&strlen($Bridge)>0){
+                $server->send($fd,$Class->code($Bridge));
+            }
         }
 //            响应检测
         $_POST['_i']=$Data['i'];
         $return = controller($Data['i'],$Data['d'],$Data['m']);
         //返回内容检测
-        $sendStr = call_user_func($this->port_mode_map[$Port][2],$return);
-        if(is_string($sendStr)&&strlen($sendStr)>0){
-            $server->send($fd,$Class->code($sendStr));
+        $Bridge=call_user_func($this->port_mode_map[$Port][2],$return);
+        if(is_string($Bridge)&&strlen($Bridge)>0){
+            $server->send($fd,$Class->code($Bridge));
         }
         session('[id]',null);//删除session_id标识
     }
@@ -98,6 +104,7 @@ class Server
      */
     function onClose(\swoole_server $server,$fd,$from_id){
         unset($this->first[$fd]);
+        L("连接断开：{$fd}");
     }
 
     /**
@@ -107,7 +114,8 @@ class Server
      * @param $from_id
      */
     function onConnect(\swoole_server $server,$fd,$from_id){
-        L($fd);
+//        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
+        L("新连接：{$fd}");
     }
 
     /**
