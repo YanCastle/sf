@@ -178,7 +178,12 @@ class Server
      * @param \swoole_server $server
      * @param $interval
      */
-    function onTimer(\swoole_server $server,$interval){}
+    function onTimer(\swoole_server $server,$interval){
+        $Timer = C('SWOOLE.TIMER');
+        if(isset($Timer[$interval])&&is_callable($Timer[$interval])){
+            call_user_func_array($Timer[$interval],[$server,$interval]);
+        }
+    }
 
     /**
      * 当工作进程收到由sendMessage发送的管道消息时会触发onPipeMessage事件。
