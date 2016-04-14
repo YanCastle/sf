@@ -9,7 +9,7 @@
 namespace Tsy\Plugs\Apis;
 
 
-class Apis extends Controller
+class Apis
 {
     /**
      * 查询四川车辆违章情况
