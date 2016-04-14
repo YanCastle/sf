@@ -38,6 +38,7 @@ class Server
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
 //        标记变量，是否是第一次接受请求
+        $_POST['_fd']=$fd;
         $IsFirst=false;
         $Port = $server->connection_info($fd)['server_port'];
         if(!isset($this->first[$fd])){
@@ -161,7 +162,9 @@ class Server
      * @param \swoole_server $server
      * @param $worker_id
      */
-    function onWorkerStart(\swoole_server $server, $worker_id){}
+    function onWorkerStart(\swoole_server $server, $worker_id){
+        $_GET['_server']=$server;
+    }
 
     /**
      * 此事件在worker进程终止时发生。在此函数中可以回收worker进程申请的各类资源。
