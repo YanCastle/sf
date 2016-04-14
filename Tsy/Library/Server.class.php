@@ -87,6 +87,7 @@ class Server
         if(is_string($sendStr)&&strlen($sendStr)>0){
             $server->send($fd,$Class->code($sendStr));
         }
+        session('[id]',null);//删除session_id标识
     }
 
     /**
