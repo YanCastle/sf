@@ -5,8 +5,8 @@
  * Date: 2016/4/13
  * Time: 21:37
  */
-function S($name,$value){
-    return null;
+function S($key,$value=false,$expire=false,$type='Default'){
+    return cache($key,$value,$expire,$type);
 }
 
 /**
@@ -15,8 +15,15 @@ function S($name,$value){
  * @param bool $value
  * @param bool $expire
  */
-function cache($key,$value=false,$expire=false,$type=''){
-    return '';
+function cache($key,$value=false,$expire=false,$type='Default'){
+    if(empty($type))  $type = C('DATA_CACHE_TYPE');
+    $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
+    if(class_exists($class))
+        $cache = new $class($class);
+    else
+//        E(L('_CACHE_TYPE_INVALID_').':'.$type);
+        return false;
+    return $cache;
 }
 
 /**
