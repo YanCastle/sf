@@ -39,7 +39,8 @@ class Swoole implements Mode
         $Conf = C('SWOOLE.CONF');
         $PortModeMap = [];
         if($Listen){
-            foreach ($Listen as $Type=>$Config){
+            foreach ($Listen as $Config){
+                $Type = isset($Config['TYPE'])?$Config['TYPE']:'Socket';
                 if(isset($Config['HOST'])&&isset($Config['PORT'])&&is_numeric($Config['PORT'])&&$Config['PORT']>0&&$Config['PORT']<65536&&long2ip(ip2long($Config['HOST']))==$Config['HOST']){
                     if(isset($Server)){
                         //添加监听
