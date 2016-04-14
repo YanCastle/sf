@@ -169,5 +169,5 @@ function E($msg){
 
 function L($msg,$Type=0){
     //TODO 完善log函数
-    echo $msg,"\r\n";
+    echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
 }
