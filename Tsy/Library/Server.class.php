@@ -56,7 +56,7 @@ class Server
         //            解码协议，
         $data = $Class->uncode($data);
         $Data=[
-            'i'=>'Empty/empty',
+            'i'=>'Empty/_empty',
             'd'=>$data,
             't'=>''
         ];
