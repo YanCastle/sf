@@ -6,9 +6,8 @@
  * Time: 21:24
  */
 $str = json_encode([
-    'i'=>'Test/test',
-    'd'=>['s'=>5],
-    't'=>'fwe'
+    'i'=>'Device/bind',
+    'd'=>['DID'=>5],
 ],JSON_UNESCAPED_UNICODE);
 //$client = fsockopen('10.10.13.22',65502);
 //fputs($client,$str);
