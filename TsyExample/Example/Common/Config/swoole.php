@@ -36,7 +36,11 @@ return [
             'open_eof_check'=>true,
         ],
         //定时器配置
-        'TIMER'=>[],
+        'TIMER'=>[
+            100=>function(\swoole_server $server,$interval){
+                L($interval);
+            }
+        ],
         
     ]
 ];

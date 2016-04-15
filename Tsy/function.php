@@ -23,7 +23,7 @@ function session($name,$value=false){
                 }
                 break;
         }
-        return ;
+        return '';
     }
     if(null===$name){
         //清空session
