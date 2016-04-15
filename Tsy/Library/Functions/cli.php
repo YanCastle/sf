@@ -87,6 +87,43 @@ function push($name,$value,$online=true){
     }
 }
 
+/**
+ * 往某个端口上所有连接广播信息
+ * @param $Port
+ * @param $value
+ */
+function broadcast($Port,$value){
+    $Group = port_group($Port);
+    foreach ($Group as $fd){
+        swoole_send($fd,$value);
+    }
+}
+
+/**
+ * 按照连接端口对连接进行分组
+ * @param $port
+ * @param bool $fd
+ * @return array|bool
+ */
+function port_group($port,$fd=false){
+    if(false===$fd){
+        $g = cache('tmp_port_group'.$port);
+        return is_array($g)?$g:[];
+    }elseif(null===$fd){
+        $g = cache('tmp_port_group'.$port);
+        $g = is_array($g)?$g:[];
+        if($k = array_search($_GET['_fd'],$g)){
+            unset($g[$k]);
+        }
+        cache('tmp_port_group'.$port,$fd);
+    }else{
+        $g = cache('tmp_port_group'.$port);
+        $g = is_array($g)?$g:[];
+        $g[]=$fd;
+        cache('tmp_port_group'.$port,$fd);
+    }
+}
+
 function swoole_in_check($fd,$data){
     $info = swoole_connect_info($fd);
     if(false===$info){return false;}

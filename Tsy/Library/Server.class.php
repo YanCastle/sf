@@ -59,9 +59,11 @@ class Server
      */
     function onClose(\swoole_server $server,$fd,$from_id){
         unset($this->first[$fd]);
+        $_GET['_fd']=$fd;
         L("连接断开：{$fd}");
         fd_name(null);
         swoole_receive(null);
+        port_group(swoole_connect_info($fd)['server_port'],null);
     }
 
     /**
@@ -71,9 +73,11 @@ class Server
      * @param $from_id
      */
     function onConnect(\swoole_server $server,$fd,$from_id){
+        $_GET['_fd']=$fd;
 //        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
         L("新连接：{$fd}");
         fd_name($fd);
+        port_group(swoole_connect_info($fd)['server_port'],$fd);
     }
 
     /**
