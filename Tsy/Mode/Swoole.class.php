@@ -44,11 +44,11 @@ class Swoole implements Mode
                 if(isset($Config['HOST'])&&isset($Config['PORT'])&&is_numeric($Config['PORT'])&&$Config['PORT']>0&&$Config['PORT']<65536&&long2ip(ip2long($Config['HOST']))==$Config['HOST']){
                     if(isset($Server)){
                         //添加监听
-                        L("添加监听{$Config['HOST']}:{$Config['PORT']}");
+                        L("添加监听{$Type} {$Config['HOST']}:{$Config['PORT']}");
                         $Server->addListener($Config['HOST'],$Config['PORT'],SWOOLE_SOCK_TCP);
                     }else{
                         //初次启动服务
-                        L("监听{$Config['HOST']}:{$Config['PORT']}");
+                        L("监听{$Type} {$Config['HOST']}:{$Config['PORT']}");
                         $Server=new \swoole_server($Config['HOST'],$Config['PORT']);
                     }
                     //同时允许默认解析方法和输出方法
