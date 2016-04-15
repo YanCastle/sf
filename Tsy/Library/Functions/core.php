@@ -133,6 +133,26 @@ function controller($i,$data,$mid){
         }
         return $result;
     }
+    //前置检测，其返回结果将跟Data部分合并。如果返回false则不会再调用，此部分的返回内容为数组时会合并
+    if(method_exists($Class,'_before_'.$A)){
+        $before = invokeClass($Class,'_before_'.$A,$data);
+    }
+    if(isset($before)&&is_array($before)){
+        $data = array_merge($data,$before);
+    }
+    $result = invokeClass($Class,$A,$data);
+    //后置检测
+    if(method_exists($Class,'_after_'.$A)){
+        $after = invokeClass($Class,'_after_'.$A,$data);
+    }
+    if(isset($after)&&is_array($after)&&is_array($result)){
+        $result = array_merge($result,$after);
+    }
+    return $result;
+}
+
+function invokeClass($Class,$A,$data){
+    $result = '';
     //方法存在时
     $ReflectMethod = new ReflectionMethod($Class,$A);
     //获取方法参数
@@ -158,7 +178,7 @@ function controller($i,$data,$mid){
         }
 //        TODO 判断result内容
     }else{
-        L($i.'方法不是公共方法',LOG_ERR);
+        L('方法不是公共方法',LOG_ERR);
     }
     return $result;
 }
