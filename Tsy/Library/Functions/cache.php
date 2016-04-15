@@ -59,7 +59,7 @@ function cache($key,$value=false,$expire=null,$type=''){
                 $tmp = $cache->get('_tmp_keys');
                 $tmp = is_array($tmp)?$tmp:[];
                 $tmp[]=$key;
-                $cache->set($key,$tmp);
+                $cache->set('_tmp_keys',$tmp);
             }
             return $cache->set($key,$value,$expire);
         }
