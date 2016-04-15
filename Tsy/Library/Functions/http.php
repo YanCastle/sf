@@ -56,6 +56,7 @@ function http_header_parse($data){
  */
 function http_parse($data){
     $data=array_filter(explode("\r\n",$data));
+    $B=[];$Datas=[];$Header=[];
     foreach($data as $d){
         $B[]=explode(':',$d);
     }
@@ -67,7 +68,7 @@ function http_parse($data){
             $Header[$b[0]] = implode(':', $Header[$b[0]]);
         }
         else{
-            $Datas=array_merge($Datas?$Datas:[],$b);
+            $Datas=array_merge($Datas,$b);
         }
     }
     foreach ($Datas as $k=>$v){
@@ -89,7 +90,6 @@ function http_parse($data){
             $POST[$res[0]]=$res[1];
         }
     }
-    $a=1;
     return array_merge(['Header'=>$Header,'Method'=>$Method,'Version'=>$Version],isset($GET)?['GET'=>$GET]:[],isset($POST)?['POST'=>$POST]:[]);
 }
 
