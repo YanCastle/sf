@@ -63,6 +63,7 @@ class Swoole implements Mode
                     $Server->set($Conf);
                 }
                 $Swoole = new \Tsy\Library\Server($PortModeMap);
+                $GLOBALS['_PortModeMap']=$PortModeMap;
                 $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);

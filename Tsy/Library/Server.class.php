@@ -40,61 +40,13 @@ class Server
 //        标记变量，是否是第一次接受请求
         $_POST['_fd']=$fd;
         $_GET['_fd']=$fd;
-        $IsFirst=false;
-        $Port = $server->connection_info($fd)['server_port'];
-        if(!isset($this->first[$fd])){
-            $IsFirst=is_first_receive($fd);
-        }
-        $mode = $this->port_mode_map[$Port][0];
-        $Class = $this->getModeClass($mode);
-        if($IsFirst){
-            L('检测握手协议'.$mode);
-            $this->first[$fd]=1;
-            if($HandData = $Class->handshake($data)){
-                //响应握手协议
-                L('握手响应:'.$HandData);
-                $server->send($fd,$HandData);
-                return ;
-            }
-        }
-        //            解码协议，
-        $data = $Class->uncode($data);
-        $_GET['_str']=$data;
-        if(false===$data){return;}
-        $Data=[
-            'i'=>'Empty/_empty',
-            'd'=>$data,
-            't'=>''
-        ];
-//            实例化Controller
-        if(is_callable($this->port_mode_map[$Port][1])){
-            $tmpData = call_user_func($this->port_mode_map[$Port][1],$data);
-            $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
-        }
-        //-----------------------------------------
-        //开始进行t值检测，做桥链接处理
-        //        生成mid
-        $_POST['_mid']=uniqid();
-        $Data['m']=$_POST['_mid'];
-        if($Data['t']){
-//            链接桥响应,此处要应用通道编码,通道编码之前要有协议编码
-            $SendData = [
-                't'=>$Data['t'],
-                'm'=>$Data['m']
-            ];
-//            响应桥请求
-            $Bridge=call_user_func($this->port_mode_map[$Port][3],$SendData);
-            if(is_string($Bridge)&&strlen($Bridge)>0){
-                $server->send($fd,$Class->code($Bridge));
-            }
-        }
-//            响应检测
-        $_POST['_i']=$Data['i'];
-        $return = controller($Data['i'],$Data['d'],$Data['m']);
-        //返回内容检测
-        $Bridge=call_user_func($this->port_mode_map[$Port][2],$return);
-        if(is_string($Bridge)&&strlen($Bridge)>0){
-            $server->send($fd,$Class->code($Bridge));
+//        接受数据次数统计
+        swoole_receive();
+        $Data = swoole_in_check($fd,$data);
+        if($Data){
+            swoole_bridge_check($fd,$Data);
+            if($return = controller($Data['i'],$Data['d'],$Data['m']))
+                swoole_out_check($fd,$return);
         }
         session('[id]',null);//删除session_id标识
     }
@@ -108,6 +60,8 @@ class Server
     function onClose(\swoole_server $server,$fd,$from_id){
         unset($this->first[$fd]);
         L("连接断开：{$fd}");
+        fd_name(null);
+        swoole_receive(null);
     }
 
     /**
@@ -119,6 +73,7 @@ class Server
     function onConnect(\swoole_server $server,$fd,$from_id){
 //        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
         L("新连接：{$fd}");
+        fd_name($fd);
     }
 
     /**
