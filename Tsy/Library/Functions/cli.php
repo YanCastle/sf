@@ -49,3 +49,17 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
     cache(C('CLI_FD_GROUP'),$Groups);
     return true;
 }
+
+/**
+ * 给链接赋值
+ * @param bool $name
+ * @return mixed
+ */
+function fd_name($name=false){
+    $fdName = cache('fd_name');
+    if(false===$name){
+        return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
+    }
+    $fdName[$_GET['_fd']]=$name;
+    cache('fd_name',$fdName);
+}
