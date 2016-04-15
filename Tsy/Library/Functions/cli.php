@@ -78,8 +78,7 @@ function push($name,$value,$online=true){
     $fdName = cache('fd_name');
     //获取所有映射关系
     if($fd = array_search($name,$fdName)){
-        $info = $GLOBALS['SWOOLE']->connection_info($fd);
-
+        $info = swoole_connect_info($fd);
     }else{
         if(!$online){
             //处理不在线的情况
@@ -175,6 +174,10 @@ function swoole_out_check($fd,$data){
     }
 }
 
+/**
+ * @param int $fd 链接标识符
+ * @return array
+ */
 function swoole_connect_info($fd){
     return $GLOBALS['_SWOOLE']->connection_info($fd);
 }
