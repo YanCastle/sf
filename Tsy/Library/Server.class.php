@@ -40,6 +40,8 @@ class Server
 //        标记变量，是否是第一次接受请求
         $_POST['_fd']=$fd;
         $_GET['_fd']=$fd;
+        $info = swoole_connect_info($fd);
+        $_GET['_Port']=$info['server_port'];
 //        接受数据次数统计
         swoole_receive();
         $Data = swoole_in_check($fd,$data);
@@ -62,8 +64,10 @@ class Server
         $_GET['_fd']=$fd;
         L("连接断开：{$fd}");
         fd_name(null);
+        $info = swoole_connect_info($fd);
+        $_GET['_Port']=$info['server_port'];
         swoole_receive(null);
-        port_group(swoole_connect_info($fd)['server_port'],null);
+        port_group($info['server_port'],null);
     }
 
     /**
@@ -74,10 +78,12 @@ class Server
      */
     function onConnect(\swoole_server $server,$fd,$from_id){
         $_GET['_fd']=$fd;
+        $info = swoole_connect_info($fd);
+        $_GET['_Port']=$info['server_port'];
 //        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
         L("新连接：{$fd}");
         fd_name($fd);
-        port_group(swoole_connect_info($fd)['server_port'],$fd);
+        port_group($info['server_port'],$fd);
     }
 
     /**
