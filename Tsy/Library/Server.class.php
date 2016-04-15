@@ -39,6 +39,7 @@ class Server
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
 //        标记变量，是否是第一次接受请求
         $_POST['_fd']=$fd;
+        $_GET['_fd']=$fd;
         $IsFirst=false;
         $Port = $server->connection_info($fd)['server_port'];
         if(!isset($this->first[$fd])){
@@ -58,6 +59,7 @@ class Server
         }
         //            解码协议，
         $data = $Class->uncode($data);
+        $_GET['_str']=$data;
         if(false===$data){return;}
         $Data=[
             'i'=>'Empty/_empty',
