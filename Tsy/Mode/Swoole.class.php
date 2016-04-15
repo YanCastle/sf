@@ -36,7 +36,7 @@ class Swoole implements Mode
     function start(){
 //        读取配置文件、启动服务器
 //        清楚缓存
-        cache('[clear]');
+        cache('[cleartmp]');
         $Listen = C('SWOOLE.LISTEN');
         $Conf = C('SWOOLE.CONF');
         $PortModeMap = [];
