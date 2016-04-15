@@ -155,6 +155,7 @@ function invokeClass($Class,$A,$data){
     $result = '';
     //方法存在时
     $ReflectMethod = new ReflectionMethod($Class,$A);
+//    TODO 获取函数的注释，查找是否有标注需要调用前置函数、后置函数，如果有且函数存在则调用
     //获取方法参数
     if($ReflectMethod->isPublic()){
 //        是否需要参数绑定
