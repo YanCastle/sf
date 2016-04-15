@@ -94,8 +94,10 @@ function push($name,$value,$online=true){
  */
 function broadcast($Port,$value){
     $Group = port_group($Port);
+    $Type = $GLOBALS['_PortModeMap'][$Port][0];
+    $Class = swoole_get_mode_class($Type);
     foreach ($Group as $fd){
-        swoole_send($fd,$value);
+        swoole_send($fd,$Class->code($value));
     }
 }
 
@@ -120,7 +122,7 @@ function port_group($port,$fd=false){
         $g = cache('tmp_port_group'.$port);
         $g = is_array($g)?$g:[];
         $g[]=$fd;
-        cache('tmp_port_group'.$port,$fd);
+        cache('tmp_port_group'.$port,$g);
     }
 }
 
