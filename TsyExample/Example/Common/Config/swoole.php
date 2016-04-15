@@ -12,7 +12,7 @@ return [
             [
                 'HOST'=>'0.0.0.0',
                 'PORT'=>'65502',
-                'TYPE'=>'Socket',
+                'TYPE'=>'Http',
                 'ALLOW_IP'=>'',
                 'DENY_IP'=>'',
                 'ALLOW_MODULE'=>[
