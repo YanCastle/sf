@@ -10,10 +10,10 @@
  */
 function cli_fd_group($GroupName=false,$fd=false,$del=false){
 //    Group => fd
-    $Groups = cache(C('CLI_FD_GROUP'),false,false,[]);
+    $Groups = cache(C('tmp_CLI_FD_GROUP'),false,false,[]);
     if(null===$GroupName&&null===$fd){
 //        使用两个null来初始化
-        cache(C('CLI_FD_GROUP'),[]);
+        cache(C('tmp_CLI_FD_GROUP'),[]);
     }
     if(false===$GroupName){
 //        返回全部已定义的组
@@ -46,7 +46,7 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
             unset($Groups[$GroupName]);
         }
     }
-    cache(C('CLI_FD_GROUP'),$Groups);
+    cache(C('tmp_CLI_FD_GROUP'),$Groups);
     return true;
 }
 
@@ -56,7 +56,7 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
  * @return mixed
  */
 function fd_name($name=false){
-    $fdName = cache('fd_name');
+    $fdName = cache('tmp_fd_name');
     if(false===$name){
         return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
     }
@@ -65,7 +65,7 @@ function fd_name($name=false){
     }else{
         $fdName[$_GET['_fd']]=$name;
     }
-    cache('fd_name',$fdName);
+    cache('tmp_fd_name',$fdName);
 }
 
 /**
@@ -75,7 +75,7 @@ function fd_name($name=false){
  * @param bool $online 是否必须要当前连接在线才推送，默认为是
  */
 function push($name,$value,$online=true){
-    $fdName = cache('fd_name');
+    $fdName = cache('tmp_fd_name');
     //获取所有映射关系
     if($fd = array_search($name,$fdName)){
         $info = swoole_connect_info($fd);
@@ -84,6 +84,43 @@ function push($name,$value,$online=true){
             //处理不在线的情况
         }
         return false;
+    }
+}
+
+/**
+ * 往某个端口上所有连接广播信息
+ * @param $Port
+ * @param $value
+ */
+function broadcast($Port,$value){
+    $Group = port_group($Port);
+    foreach ($Group as $fd){
+        swoole_send($fd,$value);
+    }
+}
+
+/**
+ * 按照连接端口对连接进行分组
+ * @param $port
+ * @param bool $fd
+ * @return array|bool
+ */
+function port_group($port,$fd=false){
+    if(false===$fd){
+        $g = cache('tmp_port_group'.$port);
+        return is_array($g)?$g:[];
+    }elseif(null===$fd){
+        $g = cache('tmp_port_group'.$port);
+        $g = is_array($g)?$g:[];
+        if($k = array_search($_GET['_fd'],$g)){
+            unset($g[$k]);
+        }
+        cache('tmp_port_group'.$port,$fd);
+    }else{
+        $g = cache('tmp_port_group'.$port);
+        $g = is_array($g)?$g:[];
+        $g[]=$fd;
+        cache('tmp_port_group'.$port,$fd);
     }
 }
 
@@ -191,15 +228,15 @@ function swoole_send($fd,$str){
 function swoole_receive($fd=false){
     if(null===$fd){
         //删除该链接的计数缓存
-        cache('swoole_receive_count_'.$_GET['_fd'],null);
+        cache('tmp_swoole_receive_count_'.$_GET['_fd'],null);
     }elseif($fd){
         //返回接受次数
-        $count =  cache('swoole_receive_count_'.$_GET['_fd']);
+        $count =  cache('tmp_swoole_receive_count_'.$_GET['_fd']);
         return is_numeric($count)?$count:0;
     }else{
 //        计数+1
-        $count =  cache('swoole_receive_count_'.$_GET['_fd']);
-        cache('swoole_receive_count_'.$_GET['_fd'],is_numeric($count)?$count+1:1);
+        $count =  cache('tmp_swoole_receive_count_'.$_GET['_fd']);
+        cache('tmp_swoole_receive_count_'.$_GET['_fd'],is_numeric($count)?$count+1:1);
     }
 }
 

@@ -40,14 +40,27 @@ function cache($key,$value=false,$expire=null,$type=''){
                     if(method_exists($class,'clear'))
                         $cache->clear();
                     break;
+                case 'cleartmp':
+                    $tmp = $cache->get('_tmp_keys');
+                    $tmp = is_array($tmp)?$tmp:[];
+                    foreach ($tmp as $k){
+                        $cache->rm($k);
+                    }
+                    break;
             }
             return null;
         }
         if(false===$value){
             return $cache->get($key);
-        }elseif (null==$value){
+        }elseif (null===$value){
             return $cache->rm($key);
         }else{
+            if('tmp_'==substr($key,0,4)){
+                $tmp = $cache->get('_tmp_keys');
+                $tmp = is_array($tmp)?$tmp:[];
+                $tmp[]=$key;
+                $cache->set($key,$tmp);
+            }
             return $cache->set($key,$value,$expire);
         }
     }else{
