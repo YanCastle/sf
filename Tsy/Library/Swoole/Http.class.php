@@ -23,6 +23,12 @@ class Http extends Swoole
 //DNT: 1
 //Accept-Encoding: gzip, deflate, sdch
 //Accept-Language: zh-CN,zh;q=0.8
+
+//        A=1212&f=232
+        $_SERVER = array_merge($_SERVER,[
+            'REQUEST_TIME'=>time(),
+
+        ]);
     }
     function uncode($str)
     {

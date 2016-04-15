@@ -41,3 +41,13 @@ function http_cookie($cookie=false){
     }
     return true;
 }
+
+function http_header_parse($data){
+
+}
+function http_parse($data){
+
+}
+function http_body_parse($data){
+
+}
