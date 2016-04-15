@@ -34,8 +34,18 @@ function cache($key,$value=false,$expire=null,$type=''){
     }
     //开始数据处理
     if($cache){
+        if(preg_match('/\[[a-z]+\]/',$key)){
+            switch (substr($key,1,strlen($key)-2)){
+                case 'clean':
+                    $cache->clean();
+                    break;
+            }
+            return null;
+        }
         if(false===$value){
             return $cache->get($key);
+        }elseif (null==$value){
+            return $cache->rm($key);
         }else{
             return $cache->set($key,$value,$expire);
         }

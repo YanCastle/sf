@@ -99,7 +99,7 @@ function swoole_in_check($fd,$data){
         if($HandData = $Class->handshake($data)){
             //响应握手协议
             L('握手响应:'.$HandData);
-            $GLOBALS['_SWOOLE']->send($fd,$HandData);
+            swoole_send($fd,$HandData);
             return false;
         }
     }
@@ -199,7 +199,7 @@ function swoole_receive($fd=false){
     }else{
 //        计数+1
         $count =  cache('swoole_receive_count_'.$_GET['_fd']);
-        cache('swoole_receive_count_'.$_GET['_fd'],is_numeric($count)?$count++:1);
+        cache('swoole_receive_count_'.$_GET['_fd'],is_numeric($count)?$count+1:1);
     }
 }
 

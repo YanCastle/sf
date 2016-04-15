@@ -16,7 +16,7 @@ abstract class Cache
      * @var string
      * @access protected
      */
-    protected $handler    ;
+    protected $handler;
 
     /**
      * 缓存连接参数
@@ -26,7 +26,6 @@ abstract class Cache
     protected $options = array();
     function __construct($Config=[])
     {
-        
     }
 
     function read($key){}
