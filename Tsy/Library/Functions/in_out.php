@@ -9,7 +9,7 @@
 function out($data){
     return json_encode([
         'm'=>$_POST['_mid'],
-        'd'=>$data,
+        'd'=>is_array($data)?$data:['err'=>$data],
         'i'=>$_POST['_i'],
         'c'=>'m',
         's'=>session('[id]'),
