@@ -36,8 +36,9 @@ function cache($key,$value=false,$expire=null,$type=''){
     if($cache){
         if(preg_match('/\[[a-z]+\]/',$key)){
             switch (substr($key,1,strlen($key)-2)){
-                case 'clean':
-                    $cache->clean();
+                case 'clear':
+                    if(method_exists($class,'clear'))
+                        $cache->clear();
                     break;
             }
             return null;
