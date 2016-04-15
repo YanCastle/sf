@@ -14,6 +14,28 @@ use Tsy\Library\Swoole;
 class Http extends Swoole
 {
     function code($str){
+        $HTTP = http_parse($str);
+        if(is_array($HTTP)){
+            if(isset($HTTP['Header'])){
+
+            }
+            if(isset($HTTP['Method'])){
+
+            }
+            if(isset($HTTP['POST'])){
+                $_POST = array_merge($_POST,$HTTP['POST']);
+            }
+            if(isset($HTTP['GET'])){
+                $_GET = array_merge($_GET,$HTTP['GET']);
+            }
+            if(isset($HTTP['FILES'])){
+                $_FILES = array_merge($_FILES,$HTTP['FILES']);
+            }
+            if(isset($HTTP['SERVER'])){
+                $_SERVER=array_merge($_SERVER,$HTTP['SERVER']);
+            }
+            $_REQUEST = array_merge($_GET,$_POST);
+        }
 //GET / HTTP/1.1
 //Host: 127.0.0.1:60000
 //Connection: keep-alive
