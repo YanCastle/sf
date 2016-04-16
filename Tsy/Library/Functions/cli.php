@@ -76,12 +76,13 @@ function fd_name($name=false){
  */
 function push($name,$value,$online=true){
     $fdName = cache('tmp_fd_name');
+    if(!is_array($fdName)){$fdName=[];}
     //获取所有映射关系
     if($fd = array_search($name,$fdName)){
         $info = swoole_connect_info($fd);
     }else{
         if(!$online){
-            //处理不在线的情况
+            //TODO 处理不在线的情况
         }
         return false;
     }
