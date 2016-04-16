@@ -9,16 +9,30 @@
  * 在swoole模式下发送header信息
  */
 function http_header($header=false){
-    static $headers=[];
+    static $headers=[
+        'HTTP/1.1'=>'200 OK',
+        'Connection:'=>'keep-alive',
+        'Content-Type:'=>'text/html',
+    ];
     if(false===$header){
         return $headers;
     }
     if(is_string($header)){
-        $headers[]=$header;
+        $list = explode(' ',$header);
+        if(count($list)<2){
+            return false;
+        }
+        $key = $list[0];unset($list[0]);
+        $headers[$key]=implode(' ',$list);
     }elseif(is_array($header)){
         $headers=array_merge($headers,$header);
-    }else{
-
+    }elseif(null===$header){
+        $str='';
+        foreach ($headers as $k=>$v){
+            $str.=($k.' '.$v."\r\n");
+        }
+        $headers=[];
+        return $str."\r\n";
     }
     return true;
 }
@@ -76,14 +90,15 @@ function http_parse($data){
     }
     $Version=$Datas[0][2];
     $Method=$Datas[0][0];
-    if('GET'==$Method){
+//    if('GET'==$Method){
         $GETData=explode('?',$Datas[0][1])[1];
         $GETData=explode('&',$GETData);
         foreach ($GETData as $get){
             $res=explode('=',$get);
             $GET[$res[0]]=$res[1];
         }
-    }elseif ('POST'==$Method){
+//    }else
+    if ('POST'==$Method){
         $POSTData=explode('&',$Datas[1][0]);
         foreach ($POSTData as $get){
             $res=explode('=',$get);

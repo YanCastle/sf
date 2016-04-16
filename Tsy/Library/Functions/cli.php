@@ -131,7 +131,7 @@ function swoole_in_check($fd,$data){
     if(false===$info){return false;}
     $Port = $info['server_port'];
     $Type = swoole_get_port_property($Port,'TYPE');
-    $Dispatch = swoole_get_port_property($Port,'DISPATCH');
+
     $Class = swoole_get_mode_class($Type);
     if(swoole_receive($_GET['_fd'])==1){
 //        第一次，做通道协议检测
@@ -152,6 +152,7 @@ function swoole_in_check($fd,$data){
         't'=>''
     ];
 //            实例化Controller
+    $Dispatch = swoole_get_port_property($Port,'DISPATCH');
     if(is_callable($Dispatch)){
         $tmpData = call_user_func($Dispatch,$data);
         $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
@@ -238,6 +239,9 @@ function swoole_connect_info($fd){
 }
 function swoole_send($fd,$str){
     $GLOBALS['_SWOOLE']->send($fd,$str);
+    if(isset($_REQUEST['_close'])&&$_REQUEST['_close']===true){
+        $GLOBALS['_SWOOLE']->close($fd);
+    }
 }
 /**
  * @param bool $fd
