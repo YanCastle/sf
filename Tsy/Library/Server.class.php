@@ -47,8 +47,8 @@ class Server
         $Data = swoole_in_check($fd,$data);
         if($Data){
             swoole_bridge_check($fd,$Data);
-            if($return = controller($Data['i'],$Data['d'],$Data['m']))
-                swoole_out_check($fd,$return);
+            $return = controller($Data['i'],$Data['d'],$Data['m']);
+            swoole_out_check($fd,$return);
         }
         session('[id]',null);//删除session_id标识
     }
@@ -68,6 +68,7 @@ class Server
         $_GET['_Port']=$info['server_port'];
         swoole_receive(null);
         port_group($info['server_port'],null);
+        http_header(null);
     }
 
     /**

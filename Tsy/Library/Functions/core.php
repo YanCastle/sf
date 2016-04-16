@@ -100,7 +100,7 @@ function controller($i,$data,$mid){
     }elseif($MCACount==3){
         list($M,$C,$A)=$ModuleClassAction;
     }else{
-        log($i.'错误',LOG_ERR);
+        L($i.'错误',LOG_ERR);
         return null;
     }
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
@@ -115,7 +115,7 @@ function controller($i,$data,$mid){
     if(!class_exists($ClassName)){
         $ClassName=str_replace($C,'Empty',$ClassName);
         if(!class_exists($ClassName)){
-            log($C.'类不存在',LOG_ERR);
+            L($C.'类不存在',LOG_ERR);
             return null;
         }
     }
@@ -188,7 +188,20 @@ function E($msg){
     L($msg);
 }
 
-function L($msg,$Type=0){
-    //TODO 完善log函数
-    echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
+function L($msg = false,$Type=0){
+    static $_log=[];
+    if($msg){
+        if(isset($_log[$Type])){
+            $_log[$Type]=$msg;
+        }else{
+            $_log[$Type]=$msg;
+        }
+        //TODO 完善log函数
+        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
+    }elseif(false===$msg){
+        return $_log;
+    }elseif(null===$msg){
+        $_log=[];
+    }
+
 }
