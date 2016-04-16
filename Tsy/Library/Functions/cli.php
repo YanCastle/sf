@@ -94,7 +94,7 @@ function push($name,$value,$online=true){
  */
 function broadcast($Port,$value){
     $Group = port_group($Port);
-    $Type = $GLOBALS['_PortModeMap'][$Port][0];
+    $Type = swoole_get_port_property($Port,'TYPE');
     $Class = swoole_get_mode_class($Type);
     foreach ($Group as $fd){
         swoole_send($fd,$Class->code($value));
@@ -130,8 +130,8 @@ function swoole_in_check($fd,$data){
     $info = swoole_connect_info($fd);
     if(false===$info){return false;}
     $Port = $info['server_port'];
-    $Type = $GLOBALS['_PortModeMap'][$Port][0];
-    $Dispatch = $GLOBALS['_PortModeMap'][$Port][1];
+    $Type = swoole_get_port_property($Port,'TYPE');
+    $Dispatch = swoole_get_port_property($Port,'DISPATCH');
     $Class = swoole_get_mode_class($Type);
     if(swoole_receive($_GET['_fd'])==1){
 //        第一次，做通道协议检测
@@ -182,8 +182,8 @@ function swoole_bridge_check($fd,$Data){
         $info = swoole_connect_info($fd);
         if(false===$info){return false;}
         $Port = $info['server_port'];
-        $Type = $GLOBALS['_PortModeMap'][$Port][0];
-        $Bridge = $GLOBALS['_PortModeMap'][$Port][3];
+        $Type = swoole_get_port_property($Port,'TYPE');
+        $Bridge = swoole_get_port_property($Port,'BRIDGE');
 //            响应桥请求
         $BridgeData=is_callable($Bridge)?call_user_func($Bridge,$SendData):'';
         $Class = swoole_get_mode_class($Type);
@@ -203,8 +203,8 @@ function swoole_out_check($fd,$data){
     $info = swoole_connect_info($fd);
     if(false===$info){return false;}
     $Port = $info['server_port'];
-    $Type = $GLOBALS['_PortModeMap'][$Port][0];
-    $Out = $GLOBALS['_PortModeMap'][$Port][2];
+    $Type = swoole_get_port_property($Port,'TYPE');
+    $Out = swoole_get_port_property($Port,'OUT');
     //返回内容检测
     $Class = swoole_get_mode_class($Type);
     $OutData=is_callable($Out)?call_user_func($Out,$data):'';
@@ -213,6 +213,22 @@ function swoole_out_check($fd,$data){
     }
 }
 
+function swoole_connect_check(\swoole_server $server,$info,$fd){
+    $Connect = swoole_get_port_property($info['server_port'],'CONNECT');
+    if(is_callable($Connect)){
+        call_user_func_array($Connect,[$server,$info,$fd]);
+    }
+}
+function swoole_close_check(\swoole_server $server,$info,$fd){
+    $Close = swoole_get_port_property($info['server_port'],'CLOSE');
+    if(is_callable($Close)){
+        call_user_func_array($Close,[$server,$info,$fd]);
+    }
+}
+
+function swoole_get_port_property($Port,$Property){
+    return isset($GLOBALS['_PortModeMap'][$Port])&&isset($GLOBALS['_PortModeMap'][$Port][$Property])?$GLOBALS['_PortModeMap'][$Port][$Property]:null;
+}
 /**
  * @param int $fd 链接标识符
  * @return array

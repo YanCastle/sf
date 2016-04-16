@@ -81,9 +81,10 @@ class Server
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
 //        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
-        L("新连接：{$fd}");
+        L("新连接 服务器:{$info['server_port']} 客户端:{$info['remote_ip']}:{$info['remote_port']} 链接标识符:{$fd}",LOG_DEBUG);
         fd_name($fd);
         port_group($info['server_port'],$fd);
+        swoole_connect_check($server,$info,$fd);
     }
 
     /**
