@@ -37,6 +37,7 @@ class Server
      * @param $data
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
+        echo $data;
 //        标记变量，是否是第一次接受请求
         $_POST['_fd']=$fd;
         $_GET['_fd']=$fd;
