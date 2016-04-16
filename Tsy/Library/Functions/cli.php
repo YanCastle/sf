@@ -266,7 +266,7 @@ function swoole_receive($fd=false){
 
 function swoole_get_mode_class($mode){
     static $mode_class=[];
-    if(!isset($mode_class[$mode])){
+    if(!isset($mode_class[$mode])&&$mode){
         $class='Tsy\\Library\\Swoole\\'.$mode;
         $mode_class[$mode]=new $class();
     }
