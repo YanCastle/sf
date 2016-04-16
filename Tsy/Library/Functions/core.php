@@ -88,7 +88,7 @@ function load_config($file,$parse='php'){
     }
 }
 
-function controller($i,$data,$mid){
+function controller($i,$data,$mid=''){
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
     }

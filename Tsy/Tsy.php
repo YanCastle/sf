@@ -13,8 +13,11 @@ defined('APP_DEBUG') or define('APP_DEBUG',false);
 define('APP_PATH',realpath($APP_PATH));
 define('RUNTIME_PATH',$RUNTIME_PATH?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
-if(!is_dir(RUNTIME_PATH)&&is_writable(RUNTIME_PATH)){
-    mkdir(RUNTIME_PATH,0777,true);
+if(!is_dir(RUNTIME_PATH)){
+    if(is_writable(dirname(RUNTIME_PATH)))
+        mkdir(RUNTIME_PATH,0777,true);
+    else
+        die("临时目录不可写");
 }
 
 define('TSY_PATH',__DIR__);

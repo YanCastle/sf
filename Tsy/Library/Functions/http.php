@@ -166,3 +166,26 @@ function http_body_parse($data){
 //
 //leaderboard_id
 
+
+function http_in_check($data){
+//    调用HTTP模式的DISPATCH，然后调用Controller
+    $Data=[
+        'i'=>'Empty/_empty',
+        'd'=>$data,
+        't'=>''
+    ];
+    $Dispatch = C('HTTP.DISPATCH');
+    if(is_callable($Dispatch)){
+        $tmpData = call_user_func($Dispatch,$data);
+        $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
+    }
+    return $Data;
+}
+
+function http_out_check($data){
+    $Out = C('HTTP.OUT');
+    $OutData=is_callable($Out)?call_user_func($Out,$data):'';
+    if(is_string($OutData)&&strlen($OutData)>0){
+        echo $OutData;
+    }
+}
