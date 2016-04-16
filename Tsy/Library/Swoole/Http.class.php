@@ -16,6 +16,8 @@ class Http extends Swoole
     function code($str){
         http_header(['Content-Length:'=>strlen($str)]);
         $_REQUEST['_close']=true;
+        $_REQUEST=[];
+        $_GET=[];$_POST=[];$_FILES=[];
         return http_header(null).$str;
     }
     function uncode($str)
