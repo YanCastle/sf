@@ -241,6 +241,7 @@ function swoole_send($fd,$str){
     $GLOBALS['_SWOOLE']->send($fd,$str);
     if(isset($_REQUEST['_close'])&&$_REQUEST['_close']===true){
         $GLOBALS['_SWOOLE']->close($fd);
+        $_REQUEST['_close']=false;
     }
 }
 /**

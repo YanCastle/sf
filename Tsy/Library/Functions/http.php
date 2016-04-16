@@ -13,6 +13,10 @@ function http_header($header=false){
         'HTTP/1.1'=>'200 OK',
         'Connection:'=>'keep-alive',
         'Content-Type:'=>'text/html',
+        'Access-Control-Allow-Origin:'=>'*',
+        'Access-Control-Allow-Credentials:'=>'true',
+        'Access-Control-Request-Method:'=>'GET,POST',
+        'Access-Control-Allow-Headers:'=>'X-Requested-With,Cookie,ContentType',
     ];
     if(false===$header){
         return $headers;
