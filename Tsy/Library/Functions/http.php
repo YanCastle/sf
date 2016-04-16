@@ -35,7 +35,15 @@ function http_header($header=false){
         foreach ($headers as $k=>$v){
             $str.=($k.' '.$v."\r\n");
         }
-        $headers=[];
+        $headers=[
+            'HTTP/1.1'=>'200 OK',
+            'Connection:'=>'keep-alive',
+            'Content-Type:'=>'text/html',
+            'Access-Control-Allow-Origin:'=>'*',
+            'Access-Control-Allow-Credentials:'=>'true',
+            'Access-Control-Request-Method:'=>'GET,POST',
+            'Access-Control-Allow-Headers:'=>'X-Requested-With,Cookie,ContentType',
+        ];
         return $str."\r\n";
     }
     return true;
