@@ -48,7 +48,8 @@ class Server
         if($Data){
             swoole_bridge_check($fd,$Data);
             $return = controller($Data['i'],$Data['d'],$Data['m']);
-            swoole_out_check($fd,$return);
+            if(HTTP_COMMENT!==$return)
+                swoole_out_check($fd,$return);
         }
         session('[id]',null);//删除session_id标识
     }
