@@ -148,6 +148,7 @@ function controller($i,$data,$mid=''){
     if(isset($after)&&is_array($after)&&is_array($result)){
         $result = array_merge($result,$after);
     }
+    $Class=null;
     return $result;
 }
 
