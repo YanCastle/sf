@@ -79,7 +79,7 @@ function push($name,$value,$online=true){
     if(!is_array($fdName)){$fdName=[];}
     //获取所有映射关系
     if($fd = array_search($name,$fdName)){
-        swoole_out_check($fd,$data);
+        swoole_out_check($fd,$value);
     }else{
         if(!$online){
             //TODO 处理不在线的情况
