@@ -28,7 +28,7 @@ class GoodsObject extends Object
             self::RELATION_TABLE_COLUMN=>'GoodsID',
             self::RELATION_TABLE_LINK_HAS_PROPERTY=>true,
             self::RELATION_TABLE_LINK_TABLES=>[
-                'UnitDic'=>[
+                'UNIT_DIC'=>[
                     self::RELATION_TABLE_COLUMN=>'UnitID'
                 ]
             ]

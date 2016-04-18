@@ -81,7 +81,50 @@ abstract class Object
         }
         $Objects = $Model->where([$this->pk=>['IN',$IDs]])->select();
         //TODO 处理一对多的情况
-        return array_key_set($Objects,$this->pk);
+        $ArrayPropertyValues=[];
+        foreach ($ArrayProperties as $PropertyName=>$Config){
+            $ArrayPropertyValues[$PropertyName]=array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects,$Config[self::RELATION_TABLE_COLUMN])]])->select(),$Config[self::RELATION_TABLE_COLUMN]);
+        }
+        //处理多对多属性
+        $LinkPropertyValues=[];
+        foreach ($this->link as $PropertyName=>$Config){
+            if(
+                isset($Config[self::RELATION_TABLE_NAME])&&
+                isset($Config[self::RELATION_TABLE_COLUMN])&&
+                isset($Config[self::RELATION_TABLE_LINK_HAS_PROPERTY])&&
+                isset($Config[self::RELATION_TABLE_LINK_TABLES])&&
+                is_array($Config[self::RELATION_TABLE_LINK_TABLES])&&
+                count($Config[self::RELATION_TABLE_LINK_TABLES])>0
+            ){
+                $LinkModel = M($Config[self::RELATION_TABLE_NAME])->where(
+                    [
+                        $Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects,$Config[self::RELATION_TABLE_COLUMN])]
+                    ]
+                );
+                $UpperJoinTable = strtoupper($Config[self::RELATION_TABLE_NAME]);
+//                TODO Link表中的多对多关系先忽略不计
+                foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $TableName=>$Conf){
+                    $TableName = strtoupper($TableName);
+                    $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
+                    $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}",'LEFT');
+                }
+                $ArrayPropertyValues[$PropertyName] = array_key_set($LinkModel->select(),$Config[self::RELATION_TABLE_COLUMN]);
+            }else{
+                L('Obj配置有问题');
+            }
+//            $LinkPropertyValues[$PropertyName]=
+        }
+//        TODO 组合生成最终的Object对象
+        $Objects = array_key_set($Objects,$this->pk);
+        foreach ($Objects as $ID=>$Object){
+            foreach ($ArrayProperties as $PropertyName => $PropertyConfig){
+                $Objects[$ID][$PropertyName]=isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
+            }
+            foreach ($this->link as $PropertyName=>$PropertyConfig){
+                $Objects[$ID][$PropertyName]=isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
+            }
+        }
+        return $Objects;
     }
     function save(){}
 }
