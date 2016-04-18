@@ -8,12 +8,12 @@
 return [
     /* 数据库设置 */
     'DB_TYPE'               =>  'mysqli',     // 数据库类型
-    'DB_HOST'               =>  '127.0.0.1', // 服务器地址
-    'DB_NAME'               =>  'object',          // 数据库名
-    'DB_USER'               =>  'root',      // 用户名
-    'DB_PWD'                =>  '123456',          // 密码
+    'DB_HOST'               =>  'js.s.tansuyun.cn', // 服务器地址
+    'DB_NAME'               =>  'chest',          // 数据库名
+    'DB_USER'               =>  'chest',      // 用户名
+    'DB_PWD'                =>  'chest',          // 密码
     'DB_PORT'               =>  '3306',        // 端口
-    'DB_PREFIX'             =>  'diet_',    // 数据库表前缀
+    'DB_PREFIX'             =>  'goods_',    // 数据库表前缀
     'DB_PARAMS'          	=>  array(), // 数据库连接参数
     'DB_DEBUG'  			=>  TRUE, // 数据库调试模式 开启后可以记录SQL日志
     'DB_FIELDS_CACHE'       =>  true,        // 启用字段缓存

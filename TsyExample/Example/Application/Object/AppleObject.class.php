@@ -14,6 +14,7 @@ use Tsy\Library\Object;
 class AppleObject extends Object
 {
     protected $main='Apple';
+    protected $pk='';
     protected $property=[
         '属性'=>[
             self::RELATION_TABLE_NAME=>'表名',

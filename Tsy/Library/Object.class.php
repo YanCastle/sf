@@ -21,6 +21,7 @@ abstract class Object
     const RELATION_TABLE_LINK_TABLES='TBLT';
 
     protected $main='';
+    protected $pk='';
     protected $link=[];
     protected $property=[];
     public $map=[
@@ -47,7 +48,9 @@ abstract class Object
     function add(){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
     }
-    function get(){}
+    function get($ID){
+
+    }
     function search(){}
     function del(){}
     function gets(){}
