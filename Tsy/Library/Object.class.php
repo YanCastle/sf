@@ -11,9 +11,18 @@ namespace Tsy\Library;
 
 abstract class Object
 {
-    public $main='';
-    public $link=[];
-    public $property=[];
+    const PROPERTY_ONE='ONE';
+    const PROPERTY_ARRAY='ARRAY';
+
+    const RELATION_TABLE_NAME='TBN';
+    const RELATION_TABLE_COLUMN='TBC';
+    const RELATION_TABLE_PROPERTY='TBP';
+    const RELATION_TABLE_LINK_HAS_PROPERTY='TBLHP';
+    const RELATION_TABLE_LINK_TABLES='TBLT';
+
+    protected $main='';
+    protected $link=[];
+    protected $property=[];
     public $map=[
 //        自动生成
     ];//字段=》表名 映射
@@ -23,6 +32,16 @@ abstract class Object
             $this->table = substr(__CLASS__,0,strlen(__CLASS__)-6);
         }
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
+    }
+    function __set($name, $value)
+    {
+        // TODO: Implement __set() method.
+        $this->$name=$value;
+    }
+    function __get($name)
+    {
+        // TODO: Implement __get() method.
+        return $this->$name;
     }
 
     function add(){
