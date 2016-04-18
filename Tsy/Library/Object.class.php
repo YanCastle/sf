@@ -53,6 +53,35 @@ abstract class Object
     }
     function search(){}
     function del(){}
-    function gets(){}
+    function gets($IDs){
+        if(is_numeric($IDs)&&$IDs>0){
+            $IDs=[$IDs];
+        }
+        if(!$this->main||!$this->pk||!$IDs||!is_array($IDs)||count($IDs)<1){
+            return false;
+        }
+        $Objects = [];
+        $Model = M($this->main);
+        $UpperMainTable = strtoupper($this->main);
+        $ArrayProperties=[];
+        foreach ($this->property as $PropertyName=>$Config){
+            if(isset($Config[self::RELATION_TABLE_PROPERTY])&&isset($Config[self::RELATION_TABLE_NAME])&&isset($Config[self::RELATION_TABLE_COLUMN]))
+            {
+                if($Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
+                    //一对一属性
+//                    TODO 字段映射
+                    $TableName = strtoupper($Config[self::RELATION_TABLE_NAME]);
+                    $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
+                    $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}",'LEFT');
+                }else{
+                    //一对多
+                    $ArrayProperties[$PropertyName]=$Config;
+                }
+            }
+        }
+        $Objects = $Model->where([$this->pk=>['IN',$IDs]])->select();
+        //TODO 处理一对多的情况
+        return $Objects;
+    }
     function save(){}
 }

@@ -13,17 +13,12 @@ return [
                 'HOST'=>'0.0.0.0',
                 'PORT'=>'65502',
                 'TYPE'=>'Http',
-                'ALLOW_IP'=>'',
-                'DENY_IP'=>'',
-                'ALLOW_MODULE'=>[
-                    'Application'=>[
-
-                    ]
-                ],
-                'DENY_MODULE'=>[
-
-                ],
-//                'TYPE'=>SWOOLE_SOCK_TCP 暂时只支持TCP连接
+                'DISPATCH'=>function($data){
+                    return[
+                        'i'=>'Application/Index/index',
+                        'd'=>''
+                    ];
+                }
             ],
         ],
         //SWOOLE 配置
@@ -37,9 +32,7 @@ return [
         ],
         //定时器配置
         'TIMER'=>[
-            5=>function(\swoole_server $server,$interval){
-                L($interval);
-            }
+
         ],
         
     ]

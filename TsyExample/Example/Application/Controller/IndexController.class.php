@@ -9,6 +9,7 @@
 namespace Application\Controller;
 
 
+use Application\Object\GoodsObject;
 use Tsy\Library\Controller;
 use Tsy\Library\Model;
 
@@ -17,8 +18,8 @@ class IndexController extends Controller
     function index(){
         //如果这儿是return的字符串，则会作为错误信息返回
         //如果return的数组则是有效消息
-        $M = new Model('a');
-        $a=$M->where(['a'=>['in',[5,4]]])->delete();
+        $GoodsObject = new GoodsObject();
+        $GoodsObject->gets([1]);
     }
     /**
      * 空操作
