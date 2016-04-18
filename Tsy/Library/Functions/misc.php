@@ -5,6 +5,12 @@
  * Date: 2016/4/14
  * Time: 21:35
  */
+/**
+ * 目录级别的PHP压缩算法
+ * @param $from_path
+ * @param $to_path
+ * @return bool
+ */
 function compress($from_path,$to_path){
     $from_path=realpath($from_path);
     $to_path=realpath($to_path);
