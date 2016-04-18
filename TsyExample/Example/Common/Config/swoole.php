@@ -37,7 +37,7 @@ return [
         ],
         //定时器配置
         'TIMER'=>[
-            100=>function(\swoole_server $server,$interval){
+            5=>function(\swoole_server $server,$interval){
                 L($interval);
             }
         ],

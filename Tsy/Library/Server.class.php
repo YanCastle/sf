@@ -177,13 +177,17 @@ class Server
      * 当管理进程启动时调用它
      * @param \swoole_server $server
      */
-    function onManagerStart(\swoole_server $server){}
+    function onManagerStart(\swoole_server $server){
+        cache('[cleartmp]');
+    }
 
     /**
      * 当管理进程结束时调用它
      * @param \swoole_server $server
      */
-    function onManagerStop(\swoole_server $server){}
+    function onManagerStop(\swoole_server $server){
+        cache('[cleartmp]');
+    }
     protected function getModeClass($mode){
         if(!isset($this->_swoole[$mode])){
             $class='Tsy\\Library\\Swoole\\'.$mode;
