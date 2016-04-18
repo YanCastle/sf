@@ -88,7 +88,7 @@ function load_config($file,$parse='php'){
     }
 }
 
-function controller($i,$data,$mid=''){
+function controller($i,$data,$mid='',$layer="Controller"){
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
     }
@@ -111,7 +111,7 @@ function controller($i,$data,$mid=''){
         load_module_config($M);
     }
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
-    $ClassName = implode('\\',[$M,'Controller',$C.'Controller']);
+    $ClassName = implode('\\',[$M,$layer,$C.$layer]);
     if(!class_exists($ClassName)){
         $ClassName=str_replace($C,'Empty',$ClassName);
         if(!class_exists($ClassName)){
