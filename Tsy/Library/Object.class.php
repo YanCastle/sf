@@ -81,7 +81,7 @@ abstract class Object
         }
         $Objects = $Model->where([$this->pk=>['IN',$IDs]])->select();
         //TODO 处理一对多的情况
-        return $Objects;
+        return array_key_set($Objects,$this->pk);
     }
     function save(){}
 }

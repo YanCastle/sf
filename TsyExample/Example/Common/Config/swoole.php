@@ -18,7 +18,8 @@ return [
                         'i'=>'Application/Index/index',
                         'd'=>''
                     ];
-                }
+                },
+                'OUT'=>'json_encode'
             ],
         ],
         //SWOOLE 配置
