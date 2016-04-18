@@ -36,7 +36,8 @@ class Controller
     protected function send($UID,$data){
         //TODO 需要建立UID跟fd的连接信息，如果不是在swoole模式下还需要放到队列中去
     }
-    function _empty(){
-
+    function _empty($Action,$Data){
+        $Object = $this->className;
+        return class_exists($this->className)?controller($this->className.'/'.$Action,$Data,'','Object'):"{$this->className}/{$Action}方法不存在";
     }
 }
