@@ -9,7 +9,9 @@
 namespace Application\Object;
 
 
-class AppleObject
+use Tsy\Library\Object;
+
+class AppleObject extends Object
 {
-    
+    public $table='';
 }
