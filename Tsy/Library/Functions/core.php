@@ -148,6 +148,7 @@ function controller($i,$data,$mid=''){
     if(isset($after)&&is_array($after)&&is_array($result)){
         $result = array_merge($result,$after);
     }
+    $Class=null;
     return $result;
 }
 
@@ -188,7 +189,7 @@ function E($msg){
     L($msg);
 }
 
-function L($msg = false,$Type=LOG_INFO){
+function L($msg = false,$Type=6){
     static $_log=[];
     if($msg){
         if(isset($_log[$Type])){
@@ -199,7 +200,7 @@ function L($msg = false,$Type=LOG_INFO){
         //TODO 完善log函数
         echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg){
-        return $_log[$Type];
+        return $Type==0?$_log:$_log[$Type];
     }elseif(null===$msg){
         $_log=[];
     }
