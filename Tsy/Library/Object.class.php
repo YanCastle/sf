@@ -11,9 +11,9 @@ namespace Tsy\Library;
 
 abstract class Object
 {
-    public $object=[
-
-    ];
+    public $mail='';
+    public $link=[];
+    public $property=[];
     public $map=[
 //        自动生成
     ];//字段=》表名 映射
