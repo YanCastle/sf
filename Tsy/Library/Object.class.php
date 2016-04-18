@@ -11,9 +11,7 @@ namespace Tsy\Library;
 
 abstract class Object
 {
-    public $table='';//定义主表名称
-    public $link=[];//多对多关联表
-    public $property=[
+    public $object=[
 
     ];
     public $map=[
