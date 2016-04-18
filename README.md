@@ -13,3 +13,7 @@
 IP限定功能，只允许哪个IP范围的客户端连接
 
 cache方法如果要缓存临时缓存则用tmp_开头，清楚临时缓存的方法是cache('[cleartmp]')
+
+LOG服务，使用TCP或者UDP协议，在引入框架时通过Config或者define定义日志服务地址。所有使用L方法输出的日志全部发送到这个服务器上。
+
+TODO MySql连接池技术

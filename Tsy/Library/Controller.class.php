@@ -11,9 +11,24 @@ namespace Tsy\Library;
 
 class Controller
 {
+    protected $className='';
     protected $swoole;
     function __construct()
     {
+        $this->className = $this->getControllerName();
+    }
+    function __call($name, $arguments)
+    {
+        $Object = $this->className.'Object';
+        if(class_exists($Object)){
+            $ObjectClass = new $Object();
+            if(method_exists($ObjectClass,$name)){
+                return call_user_func_array($ObjectClass,$arguments);
+            }
+        }
+    }
+    protected function getControllerName(){
+        return substr(__CLASS__,0,strlen(__CLASS__)-10);
     }
     function set_swoole($swoole){
         $this->swoole=$swoole;
