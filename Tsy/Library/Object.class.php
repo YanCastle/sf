@@ -11,7 +11,7 @@ namespace Tsy\Library;
 
 abstract class Object
 {
-    public $mail='';
+    public $main='';
     public $link=[];
     public $property=[];
     public $map=[
