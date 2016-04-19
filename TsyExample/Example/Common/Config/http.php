@@ -9,7 +9,7 @@ return [
     'HTTP'=>[
         'DISPATCH'=>function(){
             return [
-                'i'=>'User/login',
+                'i'=>'Index/index',
                 'd'=>[
                     'UN'=>1,
                     'PWD'=>1
