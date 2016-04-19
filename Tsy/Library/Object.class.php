@@ -108,7 +108,7 @@ abstract class Object
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}",'LEFT');
                 }
-                $ArrayPropertyValues[$PropertyName] = array_key_set($LinkModel->select(),$Config[self::RELATION_TABLE_COLUMN]);
+                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(),$Config[self::RELATION_TABLE_COLUMN]);
             }else{
                 L('Obj配置有问题');
             }
@@ -121,7 +121,7 @@ abstract class Object
                 $Objects[$ID][$PropertyName]=isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
             }
             foreach ($this->link as $PropertyName=>$PropertyConfig){
-                $Objects[$ID][$PropertyName]=isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
+                $Objects[$ID][$PropertyName]=isset($LinkPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$LinkPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
             }
         }
         return $Objects;
