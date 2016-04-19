@@ -30,6 +30,7 @@ class Http implements Mode
      * @return mixed
      */
     function start(){
-        
+        $HttpDispatch = http_in_check();
+        http_out_check(controller($HttpDispatch['i'],$HttpDispatch['d']));
     }
 }

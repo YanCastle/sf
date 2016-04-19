@@ -7,7 +7,7 @@
  */
 return [
     'HTTP'=>[
-        'DISPATCH'=>function($data){
+        'DISPATCH'=>function(){
             return [
                 'i'=>'User/login',
                 'd'=>[

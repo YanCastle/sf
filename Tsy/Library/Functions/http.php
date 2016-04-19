@@ -167,16 +167,15 @@ function http_body_parse($data){
 //leaderboard_id
 
 
-function http_in_check($data){
+function http_in_check(){
 //    调用HTTP模式的DISPATCH，然后调用Controller
     $Data=[
         'i'=>'Empty/_empty',
-        'd'=>$data,
-        't'=>''
+        'd'=>[],
     ];
     $Dispatch = C('HTTP.DISPATCH');
     if(is_callable($Dispatch)){
-        $tmpData = call_user_func($Dispatch,$data);
+        $tmpData = call_user_func($Dispatch);
         $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
     }
     return $Data;
