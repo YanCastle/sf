@@ -37,36 +37,19 @@ class Swoole implements Mode
 //        读取配置文件、启动服务器
 //        清楚缓存
         cache('[cleartmp]');
-        $Listen = C('SWOOLE.LISTEN');
-        $Conf = C('SWOOLE.CONF');
-        $PortModeMap = [];
-        if($Listen){
-            foreach ($Listen as $Config){
-                $Config['TYPE'] = isset($Config['TYPE'])?$Config['TYPE']:'Socket';
-                $Type=$Config['TYPE'];
-                if(isset($Config['HOST'])&&isset($Config['PORT'])&&is_numeric($Config['PORT'])&&$Config['PORT']>0&&$Config['PORT']<65536&&long2ip(ip2long($Config['HOST']))==$Config['HOST']){
-                    if(isset($Server)){
-                        //添加监听
-                        L("添加监听{$Type} {$Config['HOST']}:{$Config['PORT']}");
-                        $Server->addListener($Config['HOST'],$Config['PORT'],SWOOLE_SOCK_TCP);
-                    }else{
-                        //初次启动服务
-                        L("监听{$Type} {$Config['HOST']}:{$Config['PORT']}");
-                        $Server=new \swoole_server($Config['HOST'],$Config['PORT']);
-                    }
-                    $PortModeMap[$Config['PORT']]=$Config;
-                    //同时允许默认解析方法和输出方法
+        if($SwooleConfig = swoole_load_config()){
+            $Server=null;
+            foreach ($SwooleConfig['LISTEN'] as $Listen){
+                if($Server){
+                    call_user_func_array([$Server,'addListener'],$Listen);
                 }else{
-                    die('SWOOLE的Listen配置不正确，请确认配置是否正确.');
+                    $Server=new \swoole_server($Listen[0],$Listen[1]);
                 }
             }
-//            检测_WS是否创建成功，如果创建成功则继续
-            if(isset($Server)){
-                if($Conf){
-                    $Server->set($Conf);
-                }
-                $Swoole = new \Tsy\Library\Server($PortModeMap);
-                $GLOBALS['_PortModeMap']=$PortModeMap;
+            if(isset($Server)&&$Server){
+                $Server->set($SwooleConfig['CONF']);
+                $Swoole = new \Tsy\Library\Server($SwooleConfig['PortModeMap']);
+                $GLOBALS['_PortModeMap']=$SwooleConfig['PortModeMap'];
                 $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);

@@ -216,10 +216,33 @@ function swoole_out_check($fd,$data){
 }
 
 function swoole_connect_check(\swoole_server $server,$info,$fd){
-    $Connect = swoole_get_port_property($info['server_port'],'CONNECT');
-    if(is_callable($Connect)){
-        call_user_func_array($Connect,[$server,$info,$fd]);
+    $Config = swoole_get_port_property($info['server_port']);
+    $RemoteIP = ip2long($info['remote_ip']);
+    if(isset($Config['ACCEPT_IP'])&&is_array($Config['ACCEPT_IP'])){
+        $Close = false;
+        foreach ($Config['ACCEPT_IP'] as $Rule){
+            //TODO 目前只支持IPV4
+            if(is_array($Rule)&&count($Rule)==2){
+                $Rule = array_map('ip2long',$Rule);
+                if($RemoteIP<=max($Rule)&&$RemoteIP>=min($Rule)){
+                    $Close=true;break;
+                }
+            }elseif (is_string($Rule)&&ip2long($Rule)==$RemoteIP){
+                $Close=true;break;
+            }
+        }
+        if(!$Close){
+            //TODO 提示信息
+            return false;
+        }
     }
+
+
+    $Connect = isset($Config['CONNECT'])?$Config['CONNECT']:null;
+    if(is_callable($Connect)){
+        return call_user_func_array($Connect,[$server,$info,$fd]);
+    }
+    return true;
 }
 function swoole_close_check(\swoole_server $server,$info,$fd){
     $Close = swoole_get_port_property($info['server_port'],'CLOSE');
@@ -228,8 +251,11 @@ function swoole_close_check(\swoole_server $server,$info,$fd){
     }
 }
 
-function swoole_get_port_property($Port,$Property){
-    return isset($GLOBALS['_PortModeMap'][$Port])&&isset($GLOBALS['_PortModeMap'][$Port][$Property])?$GLOBALS['_PortModeMap'][$Port][$Property]:null;
+function swoole_get_port_property($Port,$Property=''){
+    if($Property)
+        return isset($GLOBALS['_PortModeMap'][$Port])&&isset($GLOBALS['_PortModeMap'][$Port][$Property])?$GLOBALS['_PortModeMap'][$Port][$Property]:null;
+    else
+        return isset($GLOBALS['_PortModeMap'][$Port])?$GLOBALS['_PortModeMap'][$Port]:null;
 }
 /**
  * @param int $fd 链接标识符
@@ -271,4 +297,71 @@ function swoole_get_mode_class($mode){
         $mode_class[$mode]=new $class();
     }
     return $mode_class[$mode];
+}
+
+function swoole_load_config(){
+    $Listen = C('SWOOLE.LISTEN');
+    if($Listen) {
+        $Returns = [
+            'LISTEN'=>[],
+            'CONF'=>array_merge([
+                'daemonize' => 0, //自动进入守护进程
+                'task_worker_num' => 1,//开启task功能，
+                'dispatch_mode '=>3,//轮询模式
+                'worker_num'=>2,
+            ],C('SWOOLE.CONF')),
+            'PortModeMap'=>[]
+        ];
+        foreach ($Listen as $Config) {
+            $Config['TYPE'] = isset($Config['TYPE']) ? $Config['TYPE'] : 'Socket';
+            if (isset($Config['HOST']) && isset($Config['PORT']) && is_numeric($Config['PORT']) && $Config['PORT'] > 0 && $Config['PORT'] < 65536 && long2ip(ip2long($Config['HOST'])) == $Config['HOST']) {
+                $Returns['LISTEN'][]=[$Config['HOST'],$Config['PORT'],SWOOLE_SOCK_TCP];
+                //分析ALLOW_IP
+                if(isset($Config['ALLOW_IP'])&&is_array($Config['ALLOW_IP'])&&$Config['ALLOW_IP']){
+                    foreach ($Config['ALLOW_IP'] as $k=>$Rule){
+                        if(is_string($Rule)&&ip2long($Rule)){
+                            $Config['ALLOW_IP'][$k]=ip2long($Rule);
+                        }elseif(is_array($Rule)&&count($Rule)==2){
+                            foreach ($Rule as $key=>$IP){
+                                if($LongIP = ip2long($IP)){
+                                    $Config['ALLOW_IP'][$k][$key]=$LongIP;
+                                }else{
+                                    L($IP.':允许IP范围配置错误');
+                                    return false;
+                                }
+                            }
+                        }else{
+                            return false;
+                        }
+                    }
+                }
+                //分析ALLOW_IP
+                if(isset($Config['DENY_IP'])&&is_array($Config['DENY_IP'])&&$Config['DENY_IP']){
+                    foreach ($Config['DENY_IP'] as $k=>$Rule){
+                        if(is_string($Rule)&&ip2long($Rule)){
+                            $Config['DENY_IP'][$k]=ip2long($Rule);
+                        }elseif(is_array($Rule)&&count($Rule)==2){
+                            foreach ($Rule as $key=>$IP){
+                                if($LongIP = ip2long($IP)){
+                                    $Config['DENY_IP'][$k][$key]=$LongIP;
+                                }else{
+                                    L($IP.':禁止IP范围配置错误');
+                                    return false;
+                                }
+                            }
+                        }else{
+                            return false;
+                        }
+                    }
+                }
+                $Returns['PortModeMap'][$Config['PORT']] = $Config;
+                //同时允许默认解析方法和输出方法
+            } else {
+                return false;
+            }
+        }
+        return $Returns['LISTEN']?$Returns:false;
+    }else{
+        return false;
+    }
 }
