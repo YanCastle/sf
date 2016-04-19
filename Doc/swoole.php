@@ -846,6 +846,16 @@ class swoole_server
      * @return bool
      */
     public function bind($fd, $uid) {}
+
+    /**
+     * 设定建个时间定时器
+     * @param int $ms
+     * @param callback $callback
+     * @param null $param
+     */
+    public function tick($ms,$callback,$param=null){}
+    
+    public function defer(){}
 }
 /**
  * Class swoole_lock

@@ -114,7 +114,9 @@ class Server
      * 在主线程回调
      * @param \swoole_server $server
      */
-    function onStart(\swoole_server $server){}
+    function onStart(\swoole_server $server){
+        $server->tick();
+    }
     /**
      * Server结束时
      * 已关闭所有线程
