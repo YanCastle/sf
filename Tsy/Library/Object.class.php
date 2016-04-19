@@ -70,7 +70,7 @@ abstract class Object
                 if($Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
                     //一对一属性
 //                    TODO 字段映射
-                    $TableName = strtoupper($Config[self::RELATION_TABLE_NAME]);
+                    $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                     $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
                     $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}",'LEFT');
                 }else{
@@ -101,10 +101,10 @@ abstract class Object
                         $Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects,$Config[self::RELATION_TABLE_COLUMN])]
                     ]
                 );
-                $UpperJoinTable = strtoupper($Config[self::RELATION_TABLE_NAME]);
+                $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
 //                TODO Link表中的多对多关系先忽略不计
                 foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $TableName=>$Conf){
-                    $TableName = strtoupper($TableName);
+                    $TableName = strtoupper(parse_name($TableName));
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}",'LEFT');
                 }

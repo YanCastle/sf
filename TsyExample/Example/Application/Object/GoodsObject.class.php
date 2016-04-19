@@ -17,18 +17,18 @@ class GoodsObject extends Object
     protected $pk='GoodsID';
     protected $property=[
         'Producer'=>[
-            self::RELATION_TABLE_NAME=>'PRODUCER_DIC',
+            self::RELATION_TABLE_NAME=>'ProducerDic',
             self::RELATION_TABLE_COLUMN=>'ProducerDicID',
             self::RELATION_TABLE_PROPERTY=>self::PROPERTY_ONE
         ]
     ];
     protected $link=[
         'Units'=>[
-            self::RELATION_TABLE_NAME=>'unit_link',
+            self::RELATION_TABLE_NAME=>'UnitLink',
             self::RELATION_TABLE_COLUMN=>'GoodsID',
             self::RELATION_TABLE_LINK_HAS_PROPERTY=>true,
             self::RELATION_TABLE_LINK_TABLES=>[
-                'UNIT_DIC'=>[
+                'UnitDic'=>[
                     self::RELATION_TABLE_COLUMN=>'UnitID'
                 ]
             ]
