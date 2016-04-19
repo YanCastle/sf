@@ -99,7 +99,7 @@ abstract class Object
         }
         $Objects = [];
         $Model = M($this->main);
-        $UpperMainTable = strtoupper($this->main);
+        $UpperMainTable = strtoupper(parse_name($this->main));
         $ArrayProperties=[];
         foreach ($this->property as $PropertyName=>$Config){
             if(isset($Config[self::RELATION_TABLE_PROPERTY])&&isset($Config[self::RELATION_TABLE_NAME])&&isset($Config[self::RELATION_TABLE_COLUMN]))
@@ -146,7 +146,7 @@ abstract class Object
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}",'LEFT');
                 }
-                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(),$Config[self::RELATION_TABLE_COLUMN]);
+                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(),$Config[self::RELATION_TABLE_COLUMN],true);
             }else{
                 L('Obj配置有问题');
             }

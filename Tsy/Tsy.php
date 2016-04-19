@@ -30,8 +30,8 @@ if(extension_loaded('swoole')&&!defined('APP_MODE')){
     define('APP_MODE','SWOOLE');
 }
 //结束Define检测
-if(version_compare(PHP_VERSION,'5.5.16','<')) {
-    die('需要5.5.16以上的PHP版本');
+if(version_compare(PHP_VERSION,'5.5.0','<')) {
+    die('需要5.5.0以上的PHP版本');
 }
 include_once TSY_PATH.DIRECTORY_SEPARATOR.'Tsy.class.php';
 $Tsy = new Tsy\Tsy();
