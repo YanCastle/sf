@@ -29,9 +29,6 @@ abstract class Object
     ];//字段=》表名 映射
     function __construct()
     {
-        if(!$this->table){
-            $this->table = substr(__CLASS__,0,strlen(__CLASS__)-6);
-        }
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
     }
     function __set($name, $value)
@@ -48,13 +45,40 @@ abstract class Object
     function add(){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
     }
+
+    /**
+     * 获取一个对象属性
+     * @param int $ID 对象唯一标示
+     * @return array|bool|mixed
+     */
     function get($ID){
         if(!is_numeric($ID)){return false;}
         $Object = $this->gets([$ID]);
         return is_array($Object)?$Object[$ID]:[];
     }
     function search(){}
-    function del(){}
+
+    /**
+     * 删除方法
+     * @param $IDs
+     * @return bool
+     */
+    function del($IDs){
+        if(is_numeric($IDs)&&$IDs>0){
+            $IDs=[$IDs];
+        }
+        if(!is_array($IDs)){
+            L($this->main.'删除失败',LOG_ERR);
+            return false;
+        }
+        return M($this->main)->where([$this->pk=>['IN',$IDs]])->delete();
+    }
+
+    /**
+     * 获取多个对象属性
+     * @param array|int $IDs 主键字段编号值
+     * @return array|bool
+     */
     function gets($IDs){
         if(is_numeric($IDs)&&$IDs>0){
             $IDs=[$IDs];
