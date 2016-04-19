@@ -83,7 +83,7 @@ abstract class Object
         //TODO 处理一对多的情况
         $ArrayPropertyValues=[];
         foreach ($ArrayProperties as $PropertyName=>$Config){
-            $ArrayPropertyValues[$PropertyName]=array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects,$Config[self::RELATION_TABLE_COLUMN])]])->select(),$Config[self::RELATION_TABLE_COLUMN]);
+            $ArrayPropertyValues[$PropertyName]=array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects,$Config[self::RELATION_TABLE_COLUMN])]])->select(),$Config[self::RELATION_TABLE_COLUMN],true);
         }
         //处理多对多属性
         $LinkPropertyValues=[];
