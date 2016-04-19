@@ -80,7 +80,7 @@ abstract class Object
             }
         }
         $Objects = $Model->where([$this->pk=>['IN',$IDs]])->select();
-        //TODO 处理一对多的情况
+        //处理一对多的情况
         $ArrayPropertyValues=[];
         foreach ($ArrayProperties as $PropertyName=>$Config){
             $ArrayPropertyValues[$PropertyName]=array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects,$Config[self::RELATION_TABLE_COLUMN])]])->select(),$Config[self::RELATION_TABLE_COLUMN],true);
@@ -112,9 +112,8 @@ abstract class Object
             }else{
                 L('Obj配置有问题');
             }
-//            $LinkPropertyValues[$PropertyName]=
         }
-//        TODO 组合生成最终的Object对象
+//         组合生成最终的Object对象
         $Objects = array_key_set($Objects,$this->pk);
         foreach ($Objects as $ID=>$Object){
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig){
