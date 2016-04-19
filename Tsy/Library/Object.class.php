@@ -49,7 +49,9 @@ abstract class Object
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
     }
     function get($ID){
-
+        if(!is_numeric($ID)){return false;}
+        $Object = $this->gets([$ID]);
+        return is_array($Object)?$Object[$ID]:[];
     }
     function search(){}
     function del(){}
@@ -80,6 +82,7 @@ abstract class Object
             }
         }
         $Objects = $Model->where([$this->pk=>['IN',$IDs]])->select();
+        if(!$Objects){return [];}
         //处理一对多的情况
         $ArrayPropertyValues=[];
         foreach ($ArrayProperties as $PropertyName=>$Config){
