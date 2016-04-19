@@ -30,6 +30,9 @@ abstract class Object
     function __construct()
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
+        if(!$this->map){
+            
+        }
     }
     function __set($name, $value)
     {
@@ -56,7 +59,15 @@ abstract class Object
         $Object = $this->gets([$ID]);
         return is_array($Object)?$Object[$ID]:[];
     }
-    function search(){}
+
+    /**
+     * @param string $Keyword
+     * @param array $W
+     * @param string $Sort
+     */
+    function search($Keyword='',$W=[],$Sort=''){
+
+    }
 
     /**
      * 删除方法

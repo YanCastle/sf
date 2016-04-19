@@ -34,4 +34,7 @@ class GoodsObject extends Object
             ]
         ]
     ];
+    public $map=[
+        'a'=>'b'
+    ];
 }

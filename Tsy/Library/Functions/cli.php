@@ -218,17 +218,27 @@ function swoole_out_check($fd,$data){
 function swoole_connect_check(\swoole_server $server,$info,$fd){
     $Config = swoole_get_port_property($info['server_port']);
     $RemoteIP = ip2long($info['remote_ip']);
-    if(isset($Config['ACCEPT_IP'])&&is_array($Config['ACCEPT_IP'])){
+    if(isset($Config['DENY_IP'])&&is_array($Config['DENY_IP'])){
         $Close = false;
-        foreach ($Config['ACCEPT_IP'] as $Rule){
-            //TODO 目前只支持IPV4
-            if(is_array($Rule)&&count($Rule)==2){
-                $Rule = array_map('ip2long',$Rule);
-                if($RemoteIP<=max($Rule)&&$RemoteIP>=min($Rule)){
-                    $Close=true;break;
-                }
-            }elseif (is_string($Rule)&&ip2long($Rule)==$RemoteIP){
-                $Close=true;break;
+        foreach ($Config['DENY_IP'] as $Rule){
+            if(is_array($Rule)){
+                $Close=$Close||($RemoteIP>=$Rule[0]&&$RemoteIP<=$Rule[1]);
+            }else{
+                $Close=$Close||$Rule==$RemoteIP;
+            }
+        }
+        if($Close){
+            //TODO 提示信息
+            return false;
+        }
+    }
+    if(isset($Config['ALLOW_IP'])&&is_array($Config['ALLOW_IP'])){
+        $Close = false;
+        foreach ($Config['ALLOW_IP'] as $Rule){
+            if(is_array($Rule)){
+                $Close=$Close||($RemoteIP>=$Rule[0]&&$RemoteIP<=$Rule[1]);
+            }else{
+                $Close=$Close||$Rule==$RemoteIP;
             }
         }
         if(!$Close){
@@ -342,12 +352,17 @@ function swoole_load_config(){
                             $Config['DENY_IP'][$k]=ip2long($Rule);
                         }elseif(is_array($Rule)&&count($Rule)==2){
                             foreach ($Rule as $key=>$IP){
+                                $IPs=[];
                                 if($LongIP = ip2long($IP)){
-                                    $Config['DENY_IP'][$k][$key]=$LongIP;
+                                    $IPs[]=$LongIP;
                                 }else{
                                     L($IP.':禁止IP范围配置错误');
                                     return false;
                                 }
+                                $Config['DENY_IP'][$k][$key]=[
+                                    min($IPs),
+                                    max($IPs)
+                                ];
                             }
                         }else{
                             return false;

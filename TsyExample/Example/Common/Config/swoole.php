@@ -13,6 +13,13 @@ return [
                 'HOST'=>'0.0.0.0',
                 'PORT'=>'65502',
                 'TYPE'=>'Http',
+                'ALLOW_IP'=>[
+                    '127.0.0.1',
+                    ['10.10.13.1','10.10.13.2']
+                ],
+//                'DENY_IP'=>[
+//                    '127.0.0.1'
+//                ],
                 'DISPATCH'=>function($data){
                     return[
                         'i'=>'Application/Index/index',
@@ -25,7 +32,6 @@ return [
         //SWOOLE 配置
         'CONF'=>[
             'daemonize' => 0, //自动进入守护进程
-            'log_file' => 'swoole.log',
             'task_worker_num' => 1,//开启task功能，
             'dispatch_mode '=>3,//轮询模式
             'worker_num'=>2,
