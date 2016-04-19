@@ -54,11 +54,7 @@ class Swoole implements Mode
                         L("监听{$Type} {$Config['HOST']}:{$Config['PORT']}");
                         $Server=new \swoole_server($Config['HOST'],$Config['PORT']);
                     }
-                    foreach (['TYPE','DISPATCH','OUT','BRIDGE','CONNECT','CLOSE'] as $t){
-                        if(isset($Config[$t])){
-                            $PortModeMap[$Config['PORT']][$t]=$Config[$t];
-                        }
-                    }
+                    $PortModeMap[$Config['PORT']]=$Config;
                     //同时允许默认解析方法和输出方法
                 }else{
                     die('SWOOLE的Listen配置不正确，请确认配置是否正确.');
