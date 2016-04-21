@@ -60,9 +60,7 @@ class WebQQ
         $this->q=time();
         $this->q=($this->q - $this->q % 1000) / 1000;
         $this->q=$this->q % 10000 * 10000;
-        if(file_exists('psessionid')){
-            $this->psessionid=file_get_contents('psessionid');
-        }
+        $this->psessionid=cache('psessionid');
         if(!$this->psessionid){
             $this->autoLogin();
         }
