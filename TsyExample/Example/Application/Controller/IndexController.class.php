@@ -8,18 +8,28 @@
 
 namespace Application\Controller;
 
-
-use Application\Object\GoodsObject;
 use Tsy\Library\Controller;
-use Tsy\Library\Model;
+use Tsy\Plugs\WebQQ\WebQQ;
 
 class IndexController extends Controller
 {
     function index(){
         //如果这儿是return的字符串，则会作为错误信息返回
         //如果return的数组则是有效消息
-        $GoodsObject = new GoodsObject();
-        return $GoodsObject->gets([1]);
+        $WebQQ = new WebQQ(RUNTIME_PATH.DIRECTORY_SEPARATOR.'qr.png',490523604);
+        if(!$WebQQ->autoLogin()){
+            $WebQQ->downQrcode();
+            $NickName = $WebQQ->login();
+            while (!$NickName){
+                $NickName = $WebQQ->login();
+            }
+        }
+        $WebQQ->init();
+        while (true){
+            $value=$WebQQ->poll();
+//            sleep(2);
+            echo json_encode($value,JSON_UNESCAPED_UNICODE);
+        }
     }
     /**
      * 空操作

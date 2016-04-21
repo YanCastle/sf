@@ -1,5 +1,5 @@
 <?php
-namespace Tsy\Library\Plugs;
+namespace Tsy\Plugs\WebQQ;
 /**
  * Created by PhpStorm.
  * User: castle
@@ -8,6 +8,7 @@ namespace Tsy\Library\Plugs;
  */
 class WebQQ
 {
+    protected static $OFFLINE='100001';
     protected $Curl;
     protected $StartTime;
     protected $NickName="";
@@ -45,11 +46,11 @@ class WebQQ
     protected $q;
     protected $z=0;
 
-    function __construct($QRCodePath){
+    function __construct($QRCodePath,$QQNumber){
         if('png'==pathinfo($QRCodePath,PATHINFO_EXTENSION)&&is_writable(dirname($QRCodePath))){
             $this->QRCodePath=$QRCodePath;
         }
-        $this->Curl = new Curl();
+        $this->Curl = new Curl($QQNumber);
         $this->Curl->referer='http://w.qq.com/';
         $initUrl = 'https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=16&mibao_css=m_webqq&appid=501004106&enable_qlogin=0&no_verifyimg=1&s_url=http%3A%2F%2Fw.qq.com%2Fproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20131024001';
         $this->Curl->get($initUrl);
@@ -66,6 +67,7 @@ class WebQQ
         }
     }
     function downQrcode($path=''){
+        L('请扫码');
         if(!$path&&$this->QRCodePath){
             $path=$this->QRCodePath;
         }
@@ -94,8 +96,9 @@ class WebQQ
             }elseif($html[0]==65){
                 //重新下载图片
                 $this->downQrcode();
+                return false;
             }
-            sleep(2);
+            sleep(1);
         }
     }
     function autoLogin(){
@@ -106,7 +109,7 @@ class WebQQ
         $POST = ['r'=>'{"ptwebqq":"'.$this->ptwebqq.'","clientid":53999199,"psessionid":"","status":"online"}'];
         $this->Curl->referer='http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
         $Rs = $this->Curl->post('http://d1.web2.qq.com/channel/login2',$POST);
-        if($Rs&&$JSON = json_decode($Rs,true)){
+        if($Rs&&($JSON = json_decode($Rs,true))&&isset($JSON['result'])){
             $this->psessionid=$JSON['result']['psessionid'];
             cache('psessionid',$this->psessionid);
             $this->SelfUin=$JSON['result']['uin'];
@@ -131,12 +134,13 @@ class WebQQ
     }
     function poll(){
         $this->Curl->referer='http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
-        $this->api('poll',function($result,$retcode){
+        return $this->api('poll',function($result,$retcode){
            foreach($result as $r){
                switch($r['poll_type']){
                    case 'message':
 //                       消息，普通文本
                        $value = json_decode(iconv('GBK','UTF-8',json_encode($r['value'])),true);
+                       return $value;
                        break;
                    case 'group_message':
 
@@ -423,7 +427,10 @@ class WebQQ
         ]);
     }
     protected function api($name,$callback=null,$vars=[],$method='get',$post=[]){
-        $name=trim($name,'QQ::');
+        preg_match('/::[A-Za-z]+/',$name,$match);
+        if($match){
+            $name=substr($match[0],2);
+        }
         if(!isset($this->UrlMaps[$name])){return false;}
         $Data=array_merge([
             't'=>time().rand(100,999),
@@ -442,24 +449,11 @@ class WebQQ
             $Rs = $this->Curl->post($Url,$post);
         }
         $Json = $Rs?json_decode($Rs,true):false;
+        if($Json['retcode']==self::$OFFLINE){
+            return $Json['retcode'];
+        }
         if(is_callable($callback)&&$Json){
-//            $Parameters=[];
-//            if(is_array($callback)){
-//                //类
-//                $Class = is_object($callback[0])?$callback[0]:new $callback[0]();
-//                $Method = new ReflectionMethod($Class,$callback[1]);
-//                $Parameters = $Method->getParameters();
-//            }else{
-//                //方法
-//                $Function = new ReflectionFunction($callback);
-//                $Parameters = $Function->getParameters();
-//            }
-//            $Vars=[];
-//            foreach ($Parameters as $Param) {
-//                $VarName = $Param->getName();
-//                if(isset($))
-//            }
-            call_user_func_array($callback,['result'=>isset($Json['result'])?$Json['result']:[],'retcode'=>$Json['retcode']]);
+            return call_user_func_array($callback,['result'=>isset($Json['result'])?$Json['result']:[],'retcode'=>$Json['retcode']]);
         }else{
 //            TODO 返回错误
         }

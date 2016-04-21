@@ -1,5 +1,5 @@
 <?php
-namespace Tsy\Library\Plugs;
+namespace Tsy\Plugs\WebQQ;
 /**
  * Created by PhpStorm.
  * User: castle
@@ -19,7 +19,7 @@ class Curl
     public $cookie_jar='';
     function __construct($cookie_id=1){
         $this->cookie_id=$cookie_id;
-        $this->cookie_jar=md5($this->cookie_id);
+        $this->cookie_jar=TEMP_PATH.DIRECTORY_SEPARATOR.md5($this->cookie_id);
         if(file_exists($this->cookie_jar)){
             $this->cookie=file_get_contents($this->cookie_jar);
         }
