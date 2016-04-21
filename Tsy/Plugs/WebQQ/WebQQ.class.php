@@ -6,7 +6,7 @@ namespace Tsy\Library\Plugs;
  * Date: 2016/02/21
  * Time: 18:44
  */
-class QQ
+class WebQQ
 {
     protected $Curl;
     protected $StartTime;
