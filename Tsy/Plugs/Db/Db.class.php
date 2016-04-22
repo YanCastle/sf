@@ -14,7 +14,6 @@ class Db{
     public $db_name;
     public $tables=[];
     function __construct($name='',$tablePrefix='',$connection='',$db_name=''){
-        parent::__construct();
         $this->Model=new Model($name,$tablePrefix,$connection);
         $this->tablePrefix=$tablePrefix?$tablePrefix:C('DB_PREFIX');
         $this->db_name=$db_name?$db_name:C('DB_NAME');

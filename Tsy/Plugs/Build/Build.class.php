@@ -16,6 +16,7 @@ class Build
     public $Model;
     public $Db;
     public $ModulePath = '';
+    public $ModuleName='';
     function __construct($ModulePath=''){
         $this->Model=M();
         $this->Db=new Db();
@@ -62,7 +63,7 @@ $columnConf
         $db_php_path = $this->ModulePath.'Config/db.php';
         $dbConf = include $db_php_path;
         $ControllerConf = [];
-        $ModuleName = MODULE_NAME;//模块名称
+        $ModuleName = $this->ModuleName;//模块名称
         foreach($dbConf as $table=>$columns){
             $ControllerName = '';
             foreach(explode('_',$table) as $tb){
@@ -107,10 +108,12 @@ $columnConf
             }
             $ControllerFileContent="<?php
 namespace {$ModuleName}\\Controller;
-use Tsy\\Controller;
+use {$ModuleName}\\Object\\{$ControllerName}Object;
+use Tsy\\Library\\Controller;
 class {$ControllerName}Controller extends Controller {}";
-            if(!file_exists($this->ModulePath."Controller/{$ControllerName}Controller.class.php"))
-                file_put_contents($this->ModulePath."Controller/{$ControllerName}Controller.class.php",$ControllerFileContent);
+            $path = implode(DIRECTORY_SEPARATOR,[$this->ModulePath,'Controller',$ControllerName.'Controller.class.php']);
+            if(!file_exists($path))
+                file_put_contents($path,$ControllerFileContent);
         }
         $ConfStr = var_export($ControllerConf,true);
         $ConfStr = str_replace(['array (',')'],['[',']'],$ConfStr);
@@ -126,7 +129,7 @@ class {$ControllerName}Controller extends Controller {}";
         $db_php_path = $this->ModulePath.'Config/db.php';
         $dbConf = include $db_php_path;
         $ModelConfig = [];
-        $ModuleName  = MODULE_NAME;
+        $ModuleName  = $this->ModuleName;
         foreach($dbConf as $table=>$columns){
             if(!isset($ModelConfig[$table])){$ModelConfig[$table]=[];}
             $ModelName = '';
@@ -141,7 +144,7 @@ class {$ControllerName}Controller extends Controller {}";
             }
             $ModelFileContent = "<?php
 namespace {$ModuleName}\\Model;
-use Tsy\\Model;
+use Tsy\\Library\\Model;
 class {$ModelName}Model extends  Model{}";
             $ModelFilePath = $this->ModulePath."Model/{$ModelName}Model.class.php";
             if(!is_dir(dirname($ModelFilePath))){

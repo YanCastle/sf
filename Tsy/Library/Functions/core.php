@@ -211,14 +211,16 @@ function L($msg = false,$Type=6){
 function build_cache(){
     $Builder=new \Tsy\Plugs\Build\Build();
     foreach (scandir(APP_PATH) as $dir){
-        if(in_array($dir,['.','..','Common'])){
+        if(in_array($dir,['.','..','Common'])||!is_dir(APP_PATH.DIRECTORY_SEPARATOR.$dir)||APP_PATH.DIRECTORY_SEPARATOR.$dir==realpath(RUNTIME_PATH)){
             continue;
         }
+
         //Switch the Module Config
         load_module_config($dir);
         $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
-        $Builder->ModulePath=$path;
-        foreach (['db','controller','module'] as $conf){
+        $Builder->ModulePath=$path.DIRECTORY_SEPARATOR;
+        $Builder->ModuleName= $dir;
+        foreach (['db','controller','model'] as $conf){
             if(!file_exists($path.DIRECTORY_SEPARATOR.'Config'.DIRECTORY_SEPARATOR.$conf.'.php')){
                 call_user_func([$Builder,'build'.ucfirst($conf).'Config']);
             }
