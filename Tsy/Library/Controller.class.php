@@ -20,12 +20,12 @@ class Controller
     function __construct()
     {
         $this->className = $this->getControllerName();
-        if(file_exists(MODULE_PATH.'Conf/controller.php'))
-            $this->Controller=include MODULE_PATH.'Conf/controller.php';
-        if(isset($this->Controller[CONTROLLER_NAME])&&
-            isset($this->Controller[CONTROLLER_NAME][ACTION_NAME])) {
-            $this->PRIKey = $this->Controller[CONTROLLER_NAME]['_pki'];
-            $this->Params=$this->Controller[CONTROLLER_NAME][ACTION_NAME];
+        if(file_exists(APP_PATH.DIRECTORY_SEPARATOR.$_GET['_m'].'Config/controller.php'))
+            $this->Controller=include APP_PATH.DIRECTORY_SEPARATOR.$_GET['_m'].'Config/controller.php';
+        if(isset($this->Controller[$_GET['_c']])&&
+            isset($this->Controller[$_GET['_c']][$_GET['_a']])) {
+            $this->PRIKey = $this->Controller[$_GET['_c']]['_pki'];
+            $this->Params=$this->Controller[$_GET['_c']][$_GET['_a']];
         }
     }
     function __call($name, $arguments)
@@ -53,17 +53,17 @@ class Controller
     }
     function get($ID=[]){
         if($ID){
-            return array_values(array_values(D(CONTROLLER_NAME)->obj($ID)))[0];
+            return array_values(array_values(D($_GET['_c'])->obj($ID)))[0];
         }
-        if(isset($this->Controller[CONTROLLER_NAME])&&isset($this->Controller[CONTROLLER_NAME][ACTION_NAME])){
-            return array_values(array_values(D(CONTROLLER_NAME)->obj([$_REQUEST[array_keys($this->Controller[CONTROLLER_NAME][ACTION_NAME])[0]]])))[0];
+        if(isset($this->Controller[$_GET['_c']])&&isset($this->Controller[$_GET['_c']][$_GET['_a']])){
+            return array_values(array_values(D($_GET['_c'])->obj([$_REQUEST[array_keys($this->Controller[$_GET['_c']][$_GET['_a']])[0]]])))[0];
         }else{
             return FALSE;
         }
     }
     function gets($P=1,$N=20,$Sort=[]){
         if($this->PRIKey){
-            $Model = D(CONTROLLER_NAME);
+            $Model = D($_GET['_c']);
             if(isset($_REQUEST[$this->PRIKey.'s'])&&is_array($_REQUEST[$this->PRIKey.'s'])){
                 $IDs = $Model->where([$this->PRIKey=>['in',$_REQUEST[$this->PRIKey.'s']]])->page($P,$N)->order($Sort)->getField($this->PRIKey,true);
             }else{
@@ -81,7 +81,7 @@ class Controller
     }
     function save(array $Params){
         if($this->PRIKey&&isset($_REQUEST[$this->PRIKey])&&is_numeric($_REQUEST[$this->PRIKey])){
-            $Model = D(CONTROLLER_NAME);
+            $Model = D($_GET['_c']);
             return $Model->where([$this->PRIKey=>$_REQUEST[$this->PRIKey]])->save($Params);
         }else{return FALSE;}
     }
@@ -100,7 +100,7 @@ class Controller
                 $IDs=[$_REQUEST[$this->PRIKey]];
             }
             if($IDs){
-                $Model = D(CONTROLLER_NAME);
+                $Model = D($_GET['_c']);
                 $Deletes = $Model->obj($IDs);
                 if($Model->where([$this->PRIKey=>['in',$IDs]])->delete()){
                     return array_values($Deletes);
@@ -112,8 +112,8 @@ class Controller
     }
     function search($keyword='',$W=[],$P=1,$N=20,$Sort=[]){
         $where = [];
-        if($keyword&&isset($this->Controller[CONTROLLER_NAME]['_search'])){
-            foreach($this->Controller[CONTROLLER_NAME]['_search'] as $column){
+        if($keyword&&isset($this->Controller[$_GET['_c']]['_search'])){
+            foreach($this->Controller[$_GET['_c']]['_search'] as $column){
                 $where[$column]=['like',"%{$keyword}%"];
             }
         }
@@ -151,12 +151,12 @@ class Controller
             }
         }
         if($where){
-            $IDs = D(CONTROLLER_NAME)->where($where)->order($Sort)->getField($this->PRIKey,TRUE);
+            $IDs = D($_GET['_c'])->where($where)->order($Sort)->getField($this->PRIKey,TRUE);
         }
         $IDs=array_unique($IDs);
         //开始分页处理
         if(isset($W['_logic'])&&$where){
-            $Rs = D(CONTROLLER_NAME)->order($Sort)->where($where)->getField($this->PRIKey,TRUE);
+            $Rs = D($_GET['_c'])->order($Sort)->where($where)->getField($this->PRIKey,TRUE);
             if(strtoupper($W['_logic'])=='AND'){
                 $IDs = array_intersect($IDs,$Rs);
             }else{
@@ -172,7 +172,7 @@ class Controller
         }
         if(false!==$IDs){
             return [
-                'L'=>array_values(D(CONTROLLER_NAME)->obj($PRIKeyIDs)),
+                'L'=>array_values(D($_GET['_c'])->obj($PRIKeyIDs)),
                 'P'=>$P,
                 'N'=>$N,
                 'T'=>count($IDs)
@@ -182,7 +182,7 @@ class Controller
         }
     }
     function add(){
-        $ID = D(CONTROLLER_NAME)->add($_POST);
-        return $ID?array_values(D(CONTROLLER_NAME)->obj([$ID]))[0]:false;
+        $ID = D($_GET['_c'])->add($_POST);
+        return $ID?array_values(D($_GET['_c'])->obj([$ID]))[0]:false;
     }
 }

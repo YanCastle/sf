@@ -13,6 +13,8 @@ abstract class Object
 {
     const PROPERTY_ONE='ONE';
     const PROPERTY_ARRAY='ARRAY';
+    
+    const PROPERTY_OBJECT='OBJECT';
 
     const RELATION_TABLE_NAME='TBN';
     const RELATION_TABLE_COLUMN='TBC';
