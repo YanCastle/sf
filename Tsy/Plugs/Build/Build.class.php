@@ -49,6 +49,9 @@ $columnConf
         }
         $db_php = "<?php\r\nreturn [{$dbConf}];";
         $db_php_path = $this->ModulePath.'Config/db.php';
+        if(!is_dir(dirname($db_php_path))){
+            @mkdir(dirname($db_php_path),0777,true);
+        }
         file_put_contents($db_php_path,$db_php);
         file_put_contents($db_php_path,php_strip_whitespace($db_php_path));
     }
