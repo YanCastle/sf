@@ -380,3 +380,16 @@ function swoole_load_config(){
         return false;
     }
 }
+function swoole_client_send($ip,$port,$data){
+    static $client=null;
+    if(null===$client){
+        $client=new swoole_client();
+    }
+}
+function client_send($ip,$port,$data){
+    static $clients=[];
+    if(!isset($clients[$ip.$port])||!$clients[$ip.$port]){
+        $clients[$ip.$port]=fsockopen($ip,$port,$err,3);
+    }
+    fwrite($clients[$ip.$port],$data);
+}
