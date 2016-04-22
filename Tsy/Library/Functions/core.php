@@ -103,6 +103,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
         L($i.'错误',LOG_ERR);
         return null;
     }
+    $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
     if(isset($GLOBALS['CurrentModule'])&&$GLOBALS['CurrentModule']==$M){
 
@@ -205,4 +206,20 @@ function L($msg = false,$Type=6){
         $_log=[];
     }
 
+}
+
+function build_cache(){
+    $Builder=new \Tsy\Plugs\Build\Build();
+    foreach (scandir(APP_PATH) as $dir){
+        if(in_array($dir,['.','..','Common'])){
+            continue;
+        }
+        $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
+        $Builder->ModulePath=$path;
+        foreach (['db','controller','module'] as $conf){
+            if(!file_exists($path.DIRECTORY_SEPARATOR.$conf.'.php')){
+                call_user_func([$Builder,'build'.ucfirst($conf).'Config']);
+            }
+        }
+    }
 }

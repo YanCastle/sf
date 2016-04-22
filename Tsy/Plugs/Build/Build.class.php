@@ -17,7 +17,7 @@ class Build
     public $Model;
     public $Db;
     public $ModulePath = '';
-    function __construct($ModulePath){
+    function __construct($ModulePath=''){
         $this->Model=M();
         $this->Db=new Db();
         $this->ModulePath=$ModulePath?$ModulePath:APP_PATH.DIRECTORY_SEPARATOR.$_GET['_m'];
@@ -26,7 +26,7 @@ class Build
     /**
      * 自动构建数据库缓存
      */
-    function buildDbCache(){
+    function buildDbConfig(){
         $DB_PREFIX = C('DB_PREFIX');
         $dbConf = "";
         foreach($this->Db->getColumns() as $table=>$columns){
