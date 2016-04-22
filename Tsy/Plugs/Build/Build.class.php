@@ -8,8 +8,7 @@
 
 namespace Tsy\Plugs\Build;
 
-
-use Tsy\Library\Db;
+use Tsy\Plugs\Db\Db;
 use Tsy\Plugs\Verify\Verify;
 
 class Build
