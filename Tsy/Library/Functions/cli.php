@@ -389,7 +389,7 @@ function swoole_client_send($ip,$port,$data){
 function client_send($ip,$port,$data){
     static $clients=[];
     if(!isset($clients[$ip.$port])||!$clients[$ip.$port]){
-        $clients[$ip.$port]=fsockopen($ip,$port,$err,3);
+        $clients[$ip.$port]=fsockopen($ip,$port);
     }
     fwrite($clients[$ip.$port],$data);
 }
