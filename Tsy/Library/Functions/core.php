@@ -214,6 +214,7 @@ function build_cache(){
         if(in_array($dir,['.','..','Common'])){
             continue;
         }
+        //TODO Switch the Module Config
         $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
         $Builder->ModulePath=$path;
         foreach (['db','controller','module'] as $conf){
