@@ -187,3 +187,8 @@ function import($class, $baseUrl = '', $ext=EXT) {
     }
     return null;
 }
+
+function db_connect($linkNum='',$config=[],$force){
+    static $_dbs=[];
+//    需要监听数据库链接的最后动作时间，如果最后动作时间超时
+}
