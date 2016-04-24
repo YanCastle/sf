@@ -65,6 +65,13 @@ function fd_name($name=false){
         unset($fdName[$_GET['_fd']]);
     }else{
         $fdName[$_GET['_fd']]=$name;
+//        开始检测是否有该fdName的推送消息，如果有的话则推送，如果没有的话则不推送
+        $PushData=cache(C('CACHE_FD_NAME_PUSH').$name);
+        if(is_array($PushData)){
+            foreach ($PushData as $data){
+                push($name,$data,true);
+            }
+        }
     }
     cache($CacheKey,$fdName);
 }
@@ -84,7 +91,8 @@ function push($name,$value,$online=true){
     }else{
         if(!$online){
             //TODO 处理不在线的情况
-            cache('[+A]'.C('CACHE_FD_NAME_PUSH'),[$fdName,$value]);
+            cache('[+A]'.C('CACHE_FD_NAME_PUSH').$fdName,$value);
+//            cache('[+A]'.'')
         }
         return false;
     }
