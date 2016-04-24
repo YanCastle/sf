@@ -15,4 +15,5 @@ return [
         ]
     ],
     'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
+    'CACHE_FD_NAME_PUSH'=>'fd_name_push',//缓存不在线的push推送信息，禁止带上tmp_前缀
 ];

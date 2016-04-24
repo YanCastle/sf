@@ -56,7 +56,8 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
  * @return mixed
  */
 function fd_name($name=false){
-    $fdName = cache('tmp_fd_name');
+    $CacheKey = C('CACHE_FD_NAME');
+    $fdName = cache($CacheKey);
     if(false===$name){
         return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
     }
@@ -65,7 +66,7 @@ function fd_name($name=false){
     }else{
         $fdName[$_GET['_fd']]=$name;
     }
-    cache('tmp_fd_name',$fdName);
+    cache($CacheKey,$fdName);
 }
 
 /**
@@ -83,7 +84,7 @@ function push($name,$value,$online=true){
     }else{
         if(!$online){
             //TODO 处理不在线的情况
-            
+            cache('[+A]'.C('CACHE_FD_NAME_PUSH'),[$fdName,$value]);
         }
         return false;
     }
