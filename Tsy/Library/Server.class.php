@@ -118,7 +118,6 @@ class Server
      * @param \swoole_server $server
      */
     function onStart(\swoole_server $server){
-        $server->tick();
     }
     /**
      * Server结束时

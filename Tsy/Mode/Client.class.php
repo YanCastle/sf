@@ -35,6 +35,6 @@ class Client implements Mode
      */
     function start(){
 //        读取配置文件、启动服务器
-        $ServerConfig = C('SWOOLE.SERVER');
+        $ClientConfig = C('CLIENT');
     }
 }
