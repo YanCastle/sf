@@ -380,12 +380,6 @@ function swoole_load_config(){
         return false;
     }
 }
-function swoole_client_send($ip,$port,$data){
-    static $client=null;
-    if(null===$client){
-        $client=new swoole_client();
-    }
-}
 
 /**
  * socket client 给指定目标发送消息，不管回调
