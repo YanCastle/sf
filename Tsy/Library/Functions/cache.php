@@ -34,7 +34,7 @@ function cache($key,$value=false,$expire=null,$type=''){
     }
     //开始数据处理
     if($cache){
-        if(preg_match('/\[[a-z]+\]/',$key)){
+        if(preg_match('/^\[[a-z]+\]$/',$key)){
             switch (substr($key,1,strlen($key)-2)){
                 case 'clear':
                     if(method_exists($class,'clear'))
@@ -47,21 +47,95 @@ function cache($key,$value=false,$expire=null,$type=''){
                         $cache->rm($k);
                     }
                     break;
+                default:
+                    L('UnknowOperateOfCache',LOG_WARNING);
+                    break;
             }
             return null;
-        }
-        if(false===$value){
-            return $cache->get($key);
-        }elseif (null===$value){
-            return $cache->rm($key);
-        }else{
-            if('tmp_'==substr($key,0,4)){
-                $tmp = $cache->get('_tmp_keys');
-                $tmp = is_array($tmp)?$tmp:[];
-                $tmp[]=$key;
-                $cache->set('_tmp_keys',$tmp);
+        }elseif(preg_match('/^\[[\+\-AS]{1,2}\][A-Za-z_]+$/',$key)){
+            //进行复杂操作
+//            从 [+][+S][+A][-][-A][-S] 中提取操作符，然后再分离key
+            $Operate = substr($key,1,1);
+            $Type = substr($key,2,1)===']'?null:substr($key,2,1);
+            $key = substr($key,$Type?3:2);
+            $v = $cache->get($key);
+            $Changed=false;
+            if(!$v){
+                //初始化
+                switch ($Type){
+                    case 'A':$v=[];break;
+                    case 'S':$v='';break;
+                    case null:
+                        if(is_array($value)){
+                            $v=[];
+                        }elseif(is_string($value)){
+                            $v='';
+                        }
+                        break;
+                }
+                $Changed=true;
             }
-            return $cache->set($key,$value,$expire);
+            switch ($Operate){
+                case '+':
+                    switch ($Type){
+                        case 'A':$v[]=$value;break;
+                        case 'S':$v.=$value;break;
+                        case null:
+                            if(is_array($value)){
+                                $v[]=$value;
+                            }elseif(is_string($value)){
+                                $v.=$value;
+                            }
+                            break;
+                    }
+                    $Changed=true;
+                    break;
+                case '-':
+                    switch ($Type){
+                        case 'A':
+                            if(isset($v[$key])){
+                                unset($v[$key]);
+                                $Changed=true;
+                            }
+                            break;
+                        case 'S':
+                            if($pos = strpos($v,$value)){
+                                $Changed=true;
+                                $v=substr($v,0,$pos).substr($v,$pos+strlen($value));
+                            }
+                            break;
+                        case null:
+                            if(is_array($value)){
+                                if(isset($v[$key])){
+                                    unset($v[$key]);
+                                    $Changed=true;
+                                }
+                            }elseif(is_string($value)){
+                                if($pos = strpos($v,$value)){
+                                    $Changed=true;
+                                    $v=substr($v,0,$pos).substr($v,$pos+strlen($value));
+                                }
+                            }
+                            break;
+                    }
+                    break;
+            }
+            //存储 仅当数据发生变更时保存变更值
+            !$Changed or $cache->set($key,$v);
+        }else{
+            if(false===$value){
+                return $cache->get($key);
+            }elseif (null===$value){
+                return $cache->rm($key);
+            }else{
+                if('tmp_'==substr($key,0,4)){
+                    $tmp = $cache->get('_tmp_keys');
+                    $tmp = is_array($tmp)?$tmp:[];
+                    $tmp[]=$key;
+                    $cache->set('_tmp_keys',$tmp);
+                }
+                return $cache->set($key,$value,$expire);
+            }
         }
     }else{
         L('缓存驱动类不存在',LOG_ERR);
