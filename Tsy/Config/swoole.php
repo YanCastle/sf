@@ -13,5 +13,6 @@ return [
             'dispatch_mode '=>3,//轮询模式
             'worker_num'=>5,
         ]
-    ]
+    ],
+    'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
 ];
