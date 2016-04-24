@@ -386,10 +386,29 @@ function swoole_client_send($ip,$port,$data){
         $client=new swoole_client();
     }
 }
-function client_send($ip,$port,$data){
+
+/**
+ * socket client 给指定目标发送消息，不管回调
+ * @param string $ip 链接地址，hostname
+ * @param int $port 链接端口
+ * @param string|null $data 发送内容，如果为null则删除该链接
+ * @return bool
+ */
+function client_send($ip,$port,$data,$receive=null){
     static $clients=[];
-    if(!isset($clients[$ip.$port])||!$clients[$ip.$port]){
-        $clients[$ip.$port]=fsockopen($ip,$port);
+    $key = $ip.$port;
+//    TODO 检测是否存在Swoole扩展，如果存在swoole扩展且为swoole模式或者client模式则使用swoole_client
+    //当data为null时断开连接
+    if(null===$data&&isset($clients[$key])){
+        fclose($clients[$key]);
+        unset($clients[$key]);
     }
-    fwrite($clients[$ip.$port],$data);
+    //检测连接是否存在，如果不存在则创建连接
+    if(!isset($clients[$key])||!$clients[$key]){
+        $clients[$key]=fsockopen($ip,$port);
+    }
+//    如果连接存在且发送内容为字符串则发送内容
+    if(!is_string($data)&&isset($clients[$key])){
+        return fwrite($clients[$key],$data)>0;
+    }
 }
