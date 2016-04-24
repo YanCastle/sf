@@ -75,7 +75,7 @@ function fd_name($name=false){
  * @param bool $online 是否必须要当前连接在线才推送，默认为是
  */
 function push($name,$value,$online=true){
-    $fdName = cache('tmp_fd_name');
+    $fdName = cache(C('CACHE_FD_NAME'));
     if(!is_array($fdName)){$fdName=[];}
     //获取所有映射关系
     if($fd = array_search($name,$fdName)){
@@ -83,6 +83,7 @@ function push($name,$value,$online=true){
     }else{
         if(!$online){
             //TODO 处理不在线的情况
+            
         }
         return false;
     }
@@ -229,6 +230,7 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
         }
         if($Close){
             //TODO 提示信息
+            L('ConnectClosedByConnectCheck:'.json_encode($info,JSON_UNESCAPED_UNICODE),LOG_NOTICE);
             return false;
         }
     }
@@ -391,7 +393,7 @@ function swoole_load_config(){
 function client_send($host,$port,$data,$timeout=5,$receive=null){
     static $clients=[];
     $key = $host.$port;
-//    TODO 检测是否存在Swoole扩展，如果存在swoole扩展且为swoole模式或者client模式则使用swoole_client
+//    检测是否存在Swoole扩展，如果存在swoole扩展且为swoole模式或者client模式则使用swoole_client
     if(extension_loaded('swoole')){
         if(in_array(strtolower(APP_MODE),['client','swoole'])){
             //当data为null时断开连接
