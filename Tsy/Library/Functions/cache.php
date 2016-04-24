@@ -119,6 +119,11 @@ function cache($key,$value=false,$expire=null,$type=''){
                             break;
                     }
                     break;
+                case '=':
+                    //获取并设置值
+                    $cache->set($key,$value);
+                    return $v;
+                    break;
             }
             //存储 仅当数据发生变更时保存变更值
             !$Changed or $cache->set($key,$v);
