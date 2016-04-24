@@ -394,21 +394,77 @@ function swoole_client_send($ip,$port,$data){
  * @param string|null $data 发送内容，如果为null则删除该链接
  * @return bool
  */
-function client_send($ip,$port,$data,$receive=null){
+function client_send($host,$port,$data,$timeout=5,$receive=null){
     static $clients=[];
-    $key = $ip.$port;
+    $key = $host.$port;
 //    TODO 检测是否存在Swoole扩展，如果存在swoole扩展且为swoole模式或者client模式则使用swoole_client
-    //当data为null时断开连接
-    if(null===$data&&isset($clients[$key])){
-        fclose($clients[$key]);
-        unset($clients[$key]);
-    }
-    //检测连接是否存在，如果不存在则创建连接
-    if(!isset($clients[$key])||!$clients[$key]){
-        $clients[$key]=fsockopen($ip,$port);
-    }
+    if(extension_loaded('swoole')){
+        if(in_array(strtolower(APP_MODE),['client','swoole'])){
+            //当data为null时断开连接
+            if(null===$data){
+                if(isset($clients[$key]))
+                    $clients[$key]->close();
+                return true;
+            }
+            //检测连接是否存在，如果不存在则创建连接
+            if(!isset($clients[$key])||!$clients[$key]){
+                $client=new swoole_client(SWOOLE_TCP);
+                if(!$client->connect($host,$port,$timeout)){
+                    L('SocketClientError:'.$client->errCode,LOG_ERR);
+                    return false;
+                }
+                $clients[$key]=$client;
+            }
+            if(is_callable($receive)){
+                $clients[$key]->on('receive',$receive);
+            }
+            //如果连接存在且发送内容为字符串则发送内容
+            if(!is_string($data)&&isset($clients[$key])){
+                return $clients[$key]->send($data);
+            }
+        }else{
+//            非CLI模式
+            //当data为null时断开连接
+            if(null===$data){
+                if(isset($clients[$key]))
+                    $clients[$key]->close();
+                return true;
+            }
+            //检测连接是否存在，如果不存在则创建连接
+            if(!isset($clients[$key])||!$clients[$key]){
+                $client=new swoole_client(SWOOLE_TCP|SWOOLE_KEEP);
+                if(!$client->connect($host,$port,$timeout)){
+                    L('SocketClientError:'.$client->errCode,LOG_ERR);
+                    return false;
+                }
+                $clients[$key]=$client;
+            }
+            //如果连接存在且发送内容为字符串则发送内容
+            if(!is_string($data)&&isset($clients[$key])){
+                return $clients[$key]->send($data);
+            }
+        }
+    }else{
+        //当data为null时断开连接
+        if(null===$data){
+            if(isset($clients[$key])){
+                fclose($clients[$key]);
+                unset($clients[$key]);
+            }
+            return true;
+        }
+        //检测连接是否存在，如果不存在则创建连接
+        if(!isset($clients[$key])||!$clients[$key]){
+            $clients[$key]=fsockopen($host,$port);
+            if(!$clients[$key]){
+                unset($clients[$key]);
+                L('SocketClientError:ConnectFailed',LOG_ERR);
+                return false;
+            }
+        }
 //    如果连接存在且发送内容为字符串则发送内容
-    if(!is_string($data)&&isset($clients[$key])){
-        return fwrite($clients[$key],$data)>0;
-    }
+        if(!is_string($data)&&isset($clients[$key])){
+            return fwrite($clients[$key],$data)>0;
+        }
+    }    
 }
