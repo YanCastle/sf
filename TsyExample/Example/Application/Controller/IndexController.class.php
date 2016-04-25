@@ -30,11 +30,7 @@ class IndexController extends Controller
 ////            sleep(2);
 //            echo json_encode($value,JSON_UNESCAPED_UNICODE);
 //        }
-        cache('[+A]s',1);
-        cache('[+A]s',2);
-        $s = cache('s');
-        cache('[-A]s',2);
-        $s = cache('s');
+       return 's';
     }
     /**
      * 空操作
