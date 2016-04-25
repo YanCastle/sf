@@ -287,9 +287,9 @@ function swoole_connect_info($fd){
 }
 function swoole_send($fd,$str){
     $GLOBALS['_SWOOLE']->send($fd,$str);
-    if(isset($_REQUEST['_close'])&&$_REQUEST['_close']===true){
+    if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
         $GLOBALS['_SWOOLE']->close($fd);
-        $_REQUEST['_close']=false;
+        $GLOBALS['_close']=false;
     }
 }
 /**

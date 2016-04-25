@@ -34,9 +34,9 @@ return [
         //SWOOLE 配置
         'CONF'=>[
             'daemonize' => 0, //自动进入守护进程
-            'task_worker_num' => 1,//开启task功能，
+            'task_worker_num' => 0,//开启task功能，
             'dispatch_mode '=>3,//轮询模式
-            'worker_num'=>12,
+            'worker_num'=>20,
         ],
         //定时器配置
         'TIMER'=>[
