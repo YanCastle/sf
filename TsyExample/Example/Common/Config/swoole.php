@@ -26,7 +26,9 @@ return [
                         'd'=>''
                     ];
                 },
-                'OUT'=>'json_encode'
+                'OUT'=>function($d){
+                    return $d;
+                }
             ],
         ],
         //SWOOLE 配置
