@@ -16,20 +16,25 @@ class IndexController extends Controller
     function index(){
         //如果这儿是return的字符串，则会作为错误信息返回
         //如果return的数组则是有效消息
-        $WebQQ = new WebQQ(RUNTIME_PATH.DIRECTORY_SEPARATOR.'qr.png',490523604);
-        if(!$WebQQ->autoLogin()){
-            $WebQQ->downQrcode();
-            $NickName = $WebQQ->login();
-            while (!$NickName){
-                $NickName = $WebQQ->login();
-            }
-        }
-        $WebQQ->init();
-        while (true){
-            $value=$WebQQ->poll();
-//            sleep(2);
-            echo json_encode($value,JSON_UNESCAPED_UNICODE);
-        }
+//        $WebQQ = new WebQQ(RUNTIME_PATH.DIRECTORY_SEPARATOR.'qr.png',490523604);
+//        if(!$WebQQ->autoLogin()){
+//            $WebQQ->downQrcode();
+//            $NickName = $WebQQ->login();
+//            while (!$NickName){
+//                $NickName = $WebQQ->login();
+//            }
+//        }
+//        $WebQQ->init();
+//        while (true){
+//            $value=$WebQQ->poll();
+////            sleep(2);
+//            echo json_encode($value,JSON_UNESCAPED_UNICODE);
+//        }
+        cache('[+A]s',1);
+        cache('[+A]s',2);
+        $s = cache('s');
+        cache('[-A]s',2);
+        $s = cache('s');
     }
     /**
      * 空操作

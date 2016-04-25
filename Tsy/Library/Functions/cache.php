@@ -57,7 +57,7 @@ function cache($key,$value=false,$expire=null,$type=''){
 //            从 [+][+S][+A][-][-A][-S] 中提取操作符，然后再分离key
             $Operate = substr($key,1,1);
             $Type = substr($key,2,1)===']'?null:substr($key,2,1);
-            $key = substr($key,$Type?3:2);
+            $key = substr($key,$Type?4:3);
             $v = $cache->get($key);
             $Changed=false;
             if(!$v){
@@ -93,8 +93,8 @@ function cache($key,$value=false,$expire=null,$type=''){
                 case '-':
                     switch ($Type){
                         case 'A':
-                            if(isset($v[$key])){
-                                unset($v[$key]);
+                            if($index=array_search($value,$v)){
+                                $v=array_diff($v,$value);
                                 $Changed=true;
                             }
                             break;
@@ -106,8 +106,8 @@ function cache($key,$value=false,$expire=null,$type=''){
                             break;
                         case null:
                             if(is_array($value)){
-                                if(isset($v[$key])){
-                                    unset($v[$key]);
+                                if($index=array_search($value,$v)){
+                                    unset($v[$index]);
                                     $Changed=true;
                                 }
                             }elseif(is_string($value)){
