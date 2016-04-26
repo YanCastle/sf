@@ -229,6 +229,7 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
         }
         if($Close){
             //TODO 提示信息
+            L('禁止链接');
             return false;
         }
     }
@@ -243,6 +244,7 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
         }
         if(!$Close){
             //TODO 提示信息
+            L('禁止链接');
             return false;
         }
     }
