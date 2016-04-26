@@ -56,7 +56,8 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
  * @return mixed
  */
 function fd_name($name=false){
-    $fdName = cache('tmp_fd_name');
+    $CacheKey = C('CACHE_FD_NAME');
+    $fdName = cache($CacheKey);
     if(false===$name){
         return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
     }
@@ -64,8 +65,15 @@ function fd_name($name=false){
         unset($fdName[$_GET['_fd']]);
     }else{
         $fdName[$_GET['_fd']]=$name;
+//        开始检测是否有该fdName的推送消息，如果有的话则推送，如果没有的话则不推送
+        $PushData=cache(C('CACHE_FD_NAME_PUSH').$name);
+        if(is_array($PushData)){
+            foreach ($PushData as $data){
+                push($name,$data,true);
+            }
+        }
     }
-    cache('tmp_fd_name',$fdName);
+    cache($CacheKey,$fdName);
 }
 
 /**
@@ -75,7 +83,7 @@ function fd_name($name=false){
  * @param bool $online 是否必须要当前连接在线才推送，默认为是
  */
 function push($name,$value,$online=true){
-    $fdName = cache('tmp_fd_name');
+    $fdName = cache(C('CACHE_FD_NAME'));
     if(!is_array($fdName)){$fdName=[];}
     //获取所有映射关系
     if($fd = array_search($name,$fdName)){
@@ -83,6 +91,8 @@ function push($name,$value,$online=true){
     }else{
         if(!$online){
             //TODO 处理不在线的情况
+            cache('[+A]'.C('CACHE_FD_NAME_PUSH').$fdName,$value);
+//            cache('[+A]'.'')
         }
         return false;
     }
@@ -229,7 +239,7 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
         }
         if($Close){
             //TODO 提示信息
-            L('禁止链接');
+            L('ConnectClosedByConnectCheck:'.json_encode($info,JSON_UNESCAPED_UNICODE),LOG_NOTICE);
             return false;
         }
     }
@@ -244,7 +254,6 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
         }
         if(!$Close){
             //TODO 提示信息
-            L('禁止链接');
             return false;
         }
     }
@@ -278,9 +287,9 @@ function swoole_connect_info($fd){
 }
 function swoole_send($fd,$str){
     $GLOBALS['_SWOOLE']->send($fd,$str);
-    if(isset($_REQUEST['_close'])&&$_REQUEST['_close']===true){
+    if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
         $GLOBALS['_SWOOLE']->close($fd);
-        $_REQUEST['_close']=false;
+        $GLOBALS['_close']=false;
     }
 }
 /**
@@ -382,16 +391,85 @@ function swoole_load_config(){
         return false;
     }
 }
-function swoole_client_send($ip,$port,$data){
-    static $client=null;
-    if(null===$client){
-        $client=new swoole_client();
-    }
-}
-function client_send($ip,$port,$data){
+
+/**
+ * socket client 给指定目标发送消息，不管回调
+ * @param string $ip 链接地址，hostname
+ * @param int $port 链接端口
+ * @param string|null $data 发送内容，如果为null则删除该链接
+ * @return bool
+ */
+function client_send($host,$port,$data,$timeout=5,$receive=null){
     static $clients=[];
-    if(!isset($clients[$ip.$port])||!$clients[$ip.$port]){
-        $clients[$ip.$port]=fsockopen($ip,$port);
-    }
-    fwrite($clients[$ip.$port],$data);
+    $key = $host.$port;
+//    检测是否存在Swoole扩展，如果存在swoole扩展且为swoole模式或者client模式则使用swoole_client
+    if(extension_loaded('swoole')){
+        if(in_array(strtolower(APP_MODE),['client','swoole'])){
+            //当data为null时断开连接
+            if(null===$data){
+                if(isset($clients[$key]))
+                    $clients[$key]->close();
+                return true;
+            }
+            //检测连接是否存在，如果不存在则创建连接
+            if(!isset($clients[$key])||!$clients[$key]){
+                $client=new swoole_client(SWOOLE_TCP);
+                if(!$client->connect($host,$port,$timeout)){
+                    L('SocketClientError:'.$client->errCode,LOG_ERR);
+                    return false;
+                }
+                $clients[$key]=$client;
+            }
+            if(is_callable($receive)){
+                $clients[$key]->on('receive',$receive);
+            }
+            //如果连接存在且发送内容为字符串则发送内容
+            if(!is_string($data)&&isset($clients[$key])&&$clients[$key]->isConnected()){
+                return $clients[$key]->send($data);
+            }
+        }else{
+//            非CLI模式
+            //当data为null时断开连接
+            if(null===$data){
+                if(isset($clients[$key]))
+                    $clients[$key]->close();
+                return true;
+            }
+            //检测连接是否存在，如果不存在则创建连接
+            if(!isset($clients[$key])||!$clients[$key]){
+                $client=new swoole_client(SWOOLE_TCP|SWOOLE_KEEP);
+                if(!$client->connect($host,$port,$timeout)){
+                    L('SocketClientError:'.$client->errCode,LOG_ERR);
+                    return false;
+                }
+                $clients[$key]=$client;
+            }
+            //如果连接存在且发送内容为字符串则发送内容
+            if(!is_string($data)&&isset($clients[$key])){
+                return $clients[$key]->send($data);
+            }
+        }
+    }else{
+        //当data为null时断开连接
+        if(null===$data){
+            if(isset($clients[$key])){
+                fclose($clients[$key]);
+                unset($clients[$key]);
+            }
+            return true;
+        }
+        //检测连接是否存在，如果不存在则创建连接
+        if(!isset($clients[$key])||!$clients[$key]){
+            $clients[$key]=fsockopen($host,$port);
+            if(!$clients[$key]){
+                unset($clients[$key]);
+                L('SocketClientError:ConnectFailed',LOG_ERR);
+                return false;
+            }
+        }
+//    如果连接存在且发送内容为字符串则发送内容
+        if(!is_string($data)&&isset($clients[$key])){
+            return fwrite($clients[$key],$data)>0;
+        }
+    }    
 }
