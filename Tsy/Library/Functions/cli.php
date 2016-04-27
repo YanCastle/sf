@@ -105,9 +105,8 @@ function push($name,$value,$online=true){
         swoole_out_check($fd,$value);
     }else{
         if(!$online){
-            //TODO 处理不在线的情况
+            //处理不在线的情况
             cache('[+A]'.C('CACHE_FD_NAME_PUSH').$fdName,$value);
-//            cache('[+A]'.'')
         }
         return false;
     }
@@ -301,14 +300,23 @@ function swoole_get_port_property($Port,$Property=''){
 function swoole_connect_info($fd){
     return $GLOBALS['_SWOOLE']->connection_info($fd);
 }
+
+/**
+ * swoole模式下给链接发送消息
+ * @param int $fd 链接标识符
+ * @param string $str 发送的消息内容
+ * @return bool
+ */
 function swoole_send($fd,$str){
+    $rs=false;
     if($GLOBALS['_SWOOLE']->exist($fd)){
-        $GLOBALS['_SWOOLE']->send($fd,$str);
+        $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
         if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
             $GLOBALS['_SWOOLE']->close($fd);
             $GLOBALS['_close']=false;
         }
     }
+    return $rs;
 }
 /**
  * @param bool $fd
