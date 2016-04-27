@@ -253,7 +253,7 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
             }
         }
         if($Close){
-            //TODO 提示信息
+            // 提示信息
             L('ConnectClosedByConnectCheck:'.json_encode($info,JSON_UNESCAPED_UNICODE),LOG_NOTICE);
             return false;
         }
@@ -268,7 +268,8 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
             }
         }
         if(!$Close){
-            //TODO 提示信息
+            // 提示信息
+            L('ConnectClosedByConnectCheck:'.json_encode($info,JSON_UNESCAPED_UNICODE),LOG_NOTICE);
             return false;
         }
     }
