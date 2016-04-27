@@ -8,8 +8,9 @@
 
 namespace Tsy\Library\Cache\Driver;
 use Tsy\Library\Cache\Cache;
+use Tsy\Library\Cache\CacheInterface;
 
-class Redis extends Cache
+class Redis extends Cache implements CacheInterface
 {
     /**
      * 架构函数
