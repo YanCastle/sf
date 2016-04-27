@@ -73,10 +73,6 @@ class Redis extends Cache implements CacheInterface
         }else{
             $result = $this->handler->set($name, $value);
         }
-        if($result && $this->options['length']>0) {
-            // 记录缓存队列
-            $this->queue($name);
-        }
         return $result;
     }
 
