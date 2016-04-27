@@ -157,6 +157,7 @@ class Server
         if(isset($Timer[$interval])&&is_callable($Timer[$interval])){
             call_user_func_array($Timer[$interval],[$server,$interval]);
         }
+//       TODO 开始检测系统定时器设定。如检测fdName缓存是否失效，fdGroup是否失效等
     }
 
     /**
