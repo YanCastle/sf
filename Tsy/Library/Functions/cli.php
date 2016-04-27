@@ -301,10 +301,12 @@ function swoole_connect_info($fd){
     return $GLOBALS['_SWOOLE']->connection_info($fd);
 }
 function swoole_send($fd,$str){
-    $GLOBALS['_SWOOLE']->send($fd,$str);
-    if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
-        $GLOBALS['_SWOOLE']->close($fd);
-        $GLOBALS['_close']=false;
+    if($GLOBALS['_SWOOLE']->exist($fd)){
+        $GLOBALS['_SWOOLE']->send($fd,$str);
+        if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
+            $GLOBALS['_SWOOLE']->close($fd);
+            $GLOBALS['_close']=false;
+        }
     }
 }
 /**
