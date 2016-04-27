@@ -12,6 +12,8 @@ namespace Tsy\Library\Cache;
 abstract class Cache
 {
     public static $QUEUE_ALL="\x00";
+    public static $setInc="\x01";
+    public static $setDec="\x02";
     public $handler;
     public $options=[];
     //读取缓存
@@ -23,6 +25,24 @@ abstract class Cache
     //清除缓存
     public function clear(){}
 
+    public static function getCacheHandler($type=''){
+        static $_map =[];
+        if(empty($type))  $type = C('DATA_CACHE_TYPE');
+        if(!isset($_map[$type])){
+            $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
+            if(class_exists($class)){
+                $cache = new $class([]);
+                $_map[$type]=$cache;
+            }
+            else{
+                L('缓存驱动类不存在',LOG_ERR);
+                return false;
+            }
+        }else{
+            $cache = $_map[$type];
+        }
+        return $cache;
+    }
     /**
      * 队列方法
      * @param $name
