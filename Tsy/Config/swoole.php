@@ -7,6 +7,8 @@
  */
 return [
     'SWOOLE'=>[
+        'AUTO_RELOAD'=>true,
+        'AUTO_RELOAD_TIME'=>3,
         'CONF'=>[
             'daemonize' => !APP_DEBUG, //自动进入守护进程
             'task_worker_num' => 5,//开启task功能，

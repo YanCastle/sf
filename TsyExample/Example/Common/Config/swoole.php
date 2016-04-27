@@ -7,6 +7,7 @@
  */
 return [
     'SWOOLE'=>[
+        'AUTO_RELOAD'=>true,
         //监听配置
         'LISTEN'=>[
             [

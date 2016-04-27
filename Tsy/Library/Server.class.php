@@ -157,7 +157,17 @@ class Server
         if(isset($Timer[$interval])&&is_callable($Timer[$interval])){
             call_user_func_array($Timer[$interval],[$server,$interval]);
         }
-//       TODO 开始检测系统定时器设定。如检测fdName缓存是否失效，fdGroup是否失效等
+//       开始检测系统定时器设定。如检测fdName缓存是否失效，fdGroup是否失效等
+        //自动重启检测
+        $AutoReload = C('AUTO_RELOAD');
+        if($AutoReload){
+            $Time = is_callable($AutoReload)?call_user_func($AutoReload):(is_numeric($AutoReload)?$AutoReload:C('AUTO_RELOAD_TIME'));
+            if(date('h')==$Time){
+                $GLOBALS['_SWOOLE']->reload();
+            }
+        }
+//        检测Db连接，超过20分钟未动作的链接将被释放掉
+        
     }
 
     /**
