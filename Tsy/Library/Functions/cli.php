@@ -64,7 +64,22 @@ function fd_name($name=false){
     if(null===$name){
         unset($fdName[$_GET['_fd']]);
     }else{
-        $fdName[$_GET['_fd']]=$name;
+        if(!isset($fdName[$_GET['_fd']])){
+            $fdName[$_GET['_fd']]=[];
+        }
+        //检测是否该连接已经被关闭，如果已经被关闭则删除该连接
+        if(isset($_GET['_server'])){
+            $ClosedFD=[];
+            foreach ($fdName[$_GET['_fd']] as $fd){
+                if(!$_GET['_server']->exist($fd)){
+                    $ClosedFD[]=$fd;
+                }
+            }
+            if($ClosedFD){
+                $fdName[$_GET['_fd']]=array_diff($fdName[$_GET['_fd']],$ClosedFD);
+            }
+        }
+        $fdName[$_GET['_fd']][]=$name;
 //        开始检测是否有该fdName的推送消息，如果有的话则推送，如果没有的话则不推送
         $PushData=cache(C('CACHE_FD_NAME_PUSH').$name);
         if(is_array($PushData)){
