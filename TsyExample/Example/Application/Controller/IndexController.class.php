@@ -38,4 +38,11 @@ class IndexController extends Controller
      * @param array|string $Data 数据
      */
     function _empty($Action,$Data){}
+    function sleep(){
+        sleep(10);
+        return 'out';
+    }
+    function check(){
+        return 'sds';
+    }
 }
