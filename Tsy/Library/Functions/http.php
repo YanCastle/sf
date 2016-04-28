@@ -127,45 +127,6 @@ function http_parse($data){
 function http_body_parse($data){
 
 }
-//----------------------------------get--------------------------//
-//GET / HTTP/1.1
-//Host: 127.0.0.1:60000
-//Connection: keep-alive
-//Cache-Control: max-age=0
-//Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-//Upgrade-Insecure-Requests: 1
-//User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36
-//Accept-Encoding: gzip, deflate, sdch
-//Accept-Language: zh-CN,zh;q=0.8
-
-//--------------------------文件-----------------------//
-//PUT /swoole.log HTTP/1.1
-//Host: 127.0.0.1:60000
-//User-Agent: curl/7.48.0
-//Accept: */*
-//Content-Length: 1239
-//Expect: 100-continue
-
-//----------------------文件内容----------------------//
-//ERROR	zm_deactivate_swoole (ERROR 103): Fatal error: Class 'Tsy\Library\Swoole\' not found in /cygdrive/e/CygwinDownload/web/SocketFramework/Tsy/Library/Server.class.php on line 176.
-//[2016-04-13 15:24:14 *6040.1]	ERROR	zm_deactivate_swoole (ERROR 9003): worker process is terminated by exit()/die().
-//[2016-04-13 15:27:36 *116.1]	ERROR	zm_deactivate_swoole (ERROR 9003): worker process is terminated by exit()/die().
-//[2016-04-13 15:41:28 *2760.1]	ERROR	zm_deactivate_swoole (ERROR 103): Fatal error: Call to undefined function Tsy\Library\json_encode() in /cygdrive/e/CygwinDownload/web/SocketFramework/Tsy/Library/Server.class.php on line 80.
-//[2016-04-13 15:41:56 *4176.1]	ERROR	zm_deactivate_swoole (ERROR 103): Fatal error: Call to undefined function json_encode() in /cygdrive/e/CygwinDownload/web/SocketFramework/Tsy/Library/Server.class.php on line 80.
-//[2016-04-13 16:16:21 *5540.1]	ERROR	zm_deactivate_swoole (ERROR 9003): worker process is terminated by exit()/die().
-//[2016-04-13 16:17:13 *5192.1]	ERROR	zm_deactivate_swoole (ERROR 9003): worker process is terminated by exit()/die().
-//[2016-04-13 18:42:44 *6992.0]	ERROR	zm_deactivate_swoole (ERROR 9003): worker process is terminated by exit()/die().
-
-//-------------------------post-------------------------------//
-//POST / HTTP/1.1
-//Host: 127.0.0.1:60000
-//User-Agent: curl/7.48.0
-//Accept: */*
-//Content-Length: 83
-//Content-Type: application/x-www-form-urlencoded
-//
-//leaderboard_id
-
 
 function http_in_check(){
 //    调用HTTP模式的DISPATCH，然后调用Controller

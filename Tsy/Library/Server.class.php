@@ -48,8 +48,11 @@ class Server
         if($Data){
             swoole_bridge_check($fd,$Data);
             $return = controller($Data['i'],$Data['d'],$Data['m']);
-            if(HTTP_COMMENT!==$return)
+            if(HTTP_COMMENT!==$return){
                 swoole_out_check($fd,$return);
+            }
+            //写入HTTP_COMMENT的链接队列中
+            cache('[+]tmp_HTTP_COMMENT',$fd);
         }
         session('[id]',null);//删除session_id标识
     }
@@ -70,6 +73,7 @@ class Server
         swoole_receive(null);
         port_group($info['server_port'],null);
         http_header(null);
+        cache('[-]tmp_HTTP_COMMENT',$fd);
     }
 
     /**
