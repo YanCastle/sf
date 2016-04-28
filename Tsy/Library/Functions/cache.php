@@ -62,7 +62,7 @@ function cache($key,$value=false,$expire=null,$type=''){
         if(preg_match('/^\[[a-z]+\]$/',$key)){
             switch (substr($key,1,strlen($key)-2)){
                 case 'clear':
-                    if(method_exists($class,'clear'))
+                    if(method_exists($cache,'clear'))
                         $cache->clear();
                     break;
                 case 'cleartmp':
