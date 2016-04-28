@@ -179,7 +179,7 @@ function invokeClass($Class,$A,$data){
         }else{
             $result = $ReflectMethod->invoke($Class);
         }
-//        TODO 判断result内容
+//        判断result内容
     }else{
         L('方法不是公共方法',LOG_ERR);
     }
@@ -190,7 +190,7 @@ function E($msg){
     L($msg);
 }
 
-function L($msg = false,$Type=6){
+function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
     if($msg){
         if(isset($_log[$Type])){
@@ -208,16 +208,25 @@ function L($msg = false,$Type=6){
 
 }
 
-function build_cache(){
+/**
+ * 创建初始化环境和缓存
+ * 创建缓存支持指定模块来创建
+ * @param array $Models
+ */
+function build_cache($Models=[]){
     $Builder=new \Tsy\Plugs\Build\Build();
-    foreach (scandir(APP_PATH) as $dir){
-        if(in_array($dir,['.','..','Common'])||!is_dir(APP_PATH.DIRECTORY_SEPARATOR.$dir)||APP_PATH.DIRECTORY_SEPARATOR.$dir==realpath(RUNTIME_PATH)){
-            continue;
+    if(!$Models){
+        foreach (scandir(APP_PATH) as $dir){
+            if(in_array($dir,['.','..','Common'])||!is_dir(APP_PATH.DIRECTORY_SEPARATOR.$dir)||APP_PATH.DIRECTORY_SEPARATOR.$dir==realpath(RUNTIME_PATH)){
+                continue;
+            }
+            $Models[]=$dir;
         }
-
+    }
+    foreach ($Models as $dir){
+        $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
         //Switch the Module Config
         load_module_config($dir);
-        $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
         $Builder->ModulePath=$path.DIRECTORY_SEPARATOR;
         $Builder->ModuleName= $dir;
         foreach (['db','controller','model'] as $conf){
