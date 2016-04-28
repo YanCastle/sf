@@ -142,6 +142,7 @@ class Server
      */
     function onWorkerStart(\swoole_server $server, $worker_id){
         $_GET['_server']=$server;
+        
     }
 
     /**

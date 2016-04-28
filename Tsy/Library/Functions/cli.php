@@ -499,3 +499,12 @@ function client_send($host,$port,$data,$timeout=5,$receive=null){
         }
     }    
 }
+
+function swoole_get_callback($callback){
+    static $conf=[];
+    if(is_array($callback)){
+        $conf=$callback;
+    }else{
+        return isset($conf[$callback])?$conf[$callback]:null;
+    }
+}
