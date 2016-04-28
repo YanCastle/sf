@@ -1982,11 +1982,14 @@ class Model {
         }
         return $data;
 	}
-//    function get(){
-//	    func_get_args();
-//    }
-//    function gets(){}
-//    function put(){}
-//    function post(){}
-//    function del(){}
+
+    /**
+     * 开启异步操作，仅在swoole模块被加载的情况下可用，如果不是在该模块下被使用则需要定时触发
+     * @param null|callable $callback
+     * @return $this
+     */
+    function async($callback=null){
+        $this->options['async']=$callback;
+        return $this;
+    }
 }
