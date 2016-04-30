@@ -11,16 +11,16 @@ namespace Tsy\Library;
 
 abstract class Object
 {
-    const PROPERTY_ONE='ONE';
-    const PROPERTY_ARRAY='ARRAY';
+    const PROPERTY_ONE="\x00";
+    const PROPERTY_ARRAY="\x01";
     
-    const PROPERTY_OBJECT='OBJECT';
+    const PROPERTY_OBJECT="\x02";
 
-    const RELATION_TABLE_NAME='TBN';
-    const RELATION_TABLE_COLUMN='TBC';
-    const RELATION_TABLE_PROPERTY='TBP';
-    const RELATION_TABLE_LINK_HAS_PROPERTY='TBLHP';
-    const RELATION_TABLE_LINK_TABLES='TBLT';
+    const RELATION_TABLE_NAME="\x03";
+    const RELATION_TABLE_COLUMN="\x04";
+    const RELATION_TABLE_PROPERTY="\x05";
+    const RELATION_TABLE_LINK_HAS_PROPERTY="\x06";
+    const RELATION_TABLE_LINK_TABLES="\x07";
 
     protected $main='';
     protected $pk='';
@@ -150,7 +150,7 @@ abstract class Object
                 }
                 $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(),$Config[self::RELATION_TABLE_COLUMN],true);
             }else{
-                L('Obj配置有问题');
+                L('Obj配置有问题',LOG_ERR,$Config);
             }
         }
 //         组合生成最终的Object对象

@@ -46,6 +46,7 @@ class Swoole implements Mode
                     $Server=new \swoole_server($Listen[0],$Listen[1]);
                 }
             }
+            swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
                 $Server->set($SwooleConfig['CONF']);
                 $Swoole = new \Tsy\Library\Server($SwooleConfig['PortModeMap']);

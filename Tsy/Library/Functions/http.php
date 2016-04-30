@@ -149,3 +149,17 @@ function http_out_check($data){
         echo $OutData;
     }
 }
+
+/**
+ * 发送http_comment消息，
+ * @param string $fdName 链接命名
+ * @param string|int|array $data
+ * @param bool $online
+ * @return bool
+ */
+function http_comment($fdName,$data,$online=true){
+    //检测需要comment的消息是否在线，
+
+//    如果需要离线消息
+    return true;
+}
