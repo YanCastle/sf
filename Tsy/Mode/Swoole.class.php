@@ -37,6 +37,7 @@ class Swoole implements Mode
 //        读取配置文件、启动服务器
 //        清楚缓存
         cache('[cleartmp]');
+        fd_name([]);
         if($SwooleConfig = swoole_load_config()){
             $Server=null;
             foreach ($SwooleConfig['LISTEN'] as $Listen){

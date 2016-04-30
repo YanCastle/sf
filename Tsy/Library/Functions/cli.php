@@ -58,8 +58,14 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
 function fd_name($name=false){
     $CacheKey = C('CACHE_FD_NAME');
     $fdName = cache($CacheKey);
+//    获取当前连接的名称
     if(false===$name){
         return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
+    }
+    if([]===$name){
+        $fdName=[];
+        cache($CacheKey,$fdName);
+        return true;
     }
     if(null===$name){
         unset($fdName[$_GET['_fd']]);
@@ -79,7 +85,7 @@ function fd_name($name=false){
                 $fdName[$_GET['_fd']]=array_diff($fdName[$_GET['_fd']],$ClosedFD);
             }
         }
-        $fdName[$_GET['_fd']][]=$name;
+        $fdName[$_GET['_fd']]=$name;
 //        开始检测是否有该fdName的推送消息，如果有的话则推送，如果没有的话则不推送
         $PushData=cache(C('CACHE_FD_NAME_PUSH').$name);
         if(is_array($PushData)){
