@@ -1,0 +1,2 @@
+1、定义HTTP_COMMENT处理接口自动处理HTTP_COMMENT队列
+2、报警通知定义，允许HTTP模式和SMTP模式，允许设定报警级别
