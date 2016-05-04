@@ -60,6 +60,15 @@ class Db{
         $views = $this->Model->query('SHOW VIEWS WHERE tables_in_' . $this->db_name . ' like "' . $db_prefix . '%"');
         return $tables||$views;
     }
+
+    /**
+     * 执行SQL导入文件
+     * @param Model $Model
+     * @param string $file
+     * @param string $content
+     * @param string $db_prefix
+     * @return bool
+     */
     static function build(Model $Model,$file='',$content='',$db_prefix=''){
         if($db_prefix==''){$db_prefix=C('DB_PREFIX');}
         if(!$Model instanceof Model){return false;}
