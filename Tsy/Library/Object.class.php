@@ -42,7 +42,7 @@ abstract class Object
         if(!$this->main){
             $this->main = $this->getObjectName();
         }
-        if(defined(APP_DEBUG)&&APP_DEBUG){
+        if(APP_DEBUG){
             $this->setMapByColumns();
         }else{
             if($CachedMap = cache('ObjectMap'.$this->main)){
@@ -72,7 +72,22 @@ abstract class Object
         //生成map结构并缓存
         foreach ($Columns as $TableName=>$column){
 //            解析并生成格式限制和转化配置
+            foreach ($column as $item){
+                $type = explode(',',str_replace(['(',')',' '],',',$item['type']));
+                $this->map[$TableName.'.'.$item['field']]=[
+                    'U'=>strpos('unsigned',$item['type'])>0,//是否无符号
+                    'T'=>count($type)==1?$type:[$type[0],$type[1]],//数据库类型
+                    'D'=>$item['default'],//默认值
+                    'P'=>'PRI'==$item['key'],//是否主键
+                    'N'=>'YES'==$item['null'],//是否为null
+                    'A'=>'auto_increment'==$item['extra']//是否自增
+                ];
+                if(!$this->pk&&'PRI'==$item['key']){
+                    $this->pk=$item['field'];
+                }
+            }
         }
+        cache('ObjectMap'.$this->main,$this->map);
     }
     /**
      * 得到当前的数据对象名称
@@ -90,13 +105,35 @@ abstract class Object
         }
         return $this->name;
     }
+
+    /**
+     * 设置属性值
+     * @param $name
+     * @param $value
+     */
     function __set($name, $value)
     {
-        $this->data[$name]=$value;
+        if(property_exists($this,$name)){
+            $this->$name=$value;
+        }
+        else{
+            $this->data[$name]=$value;
+        }
     }
+
+    /**
+     * 获取属性值
+     * @param $name
+     * @return mixed
+     */
     function __get($name)
     {
-        return $this->data[$name];
+        if(property_exists($this,$name)){
+            return $this->$name;
+        }
+        else{
+            return $this->data[$name];
+        }
     }
 
     function add($data){
@@ -122,6 +159,9 @@ abstract class Object
      */
     function search($Keyword='',$W=[],$Sort='',$P=1,$N=20){
         $Model = new Model($this->main);
+        $DB_PREFIX = C('DB_PREFIX');
+        $FieldPrefix = $DB_PREFIX.strtolower($this->main).'.';
+        $Tables=['__'.strtoupper($this->main).'__'];
         $Where = [];
         if(is_string($Keyword)&&strlen($Keyword)>0){
             foreach ($this->searchFields as $Filed){
@@ -139,7 +179,7 @@ abstract class Object
                             $Where[$TableColumn[0]]=$v;
                             break;
                         case 2:
-//                            属性表中的搜索条件
+//TODO                             属性表中的搜索条件
 //                            读取属性映射列表，获取属性类型
 
                             break;
