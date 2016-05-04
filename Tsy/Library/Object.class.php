@@ -78,9 +78,12 @@ class Object
         if($PropertyTables = array_column($this->property,self::RELATION_TABLE_NAME)){
             $tables = array_merge($tables,$PropertyTables);
         }
-        if($LinkTables = array_keys(call_user_func_array('array_merge',array_column($this->link,self::RELATION_TABLE_LINK_TABLES)))){
+        if($LinkTables = array_keys(call_user_func_array('array_merge',array_values(array_column($this->link,self::RELATION_TABLE_LINK_TABLES))))){
             $tables = array_merge($tables,$LinkTables);
         }
+        $tables = array_map(function($data){
+            return parse_name($data);
+        },$tables);
         $Model = new Db();
         $Columns = $Model->getColumns($tables,true);
         //生成map结构并缓存
@@ -152,7 +155,7 @@ class Object
 
     function add(){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
-
+        $a=1;
     }
 
     /**
