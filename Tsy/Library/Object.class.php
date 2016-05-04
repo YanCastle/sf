@@ -28,10 +28,12 @@ abstract class Object
     protected $property=[];
     public $map=[
 //        自动生成
-    ];//字段=》表名 映射
+    ];//字段=》类型 表名 映射
     function __construct()
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
+//        提取数据库字段，合并到map中
+
         if(!$this->map){
             
         }
