@@ -78,7 +78,7 @@ class Object
         if($PropertyTables = array_column($this->property,self::RELATION_TABLE_NAME)){
             $tables = array_merge($tables,$PropertyTables);
         }
-        if($LinkTables = array_keys(array_column($this->link,self::RELATION_TABLE_LINK_TABLES))){
+        if($LinkTables = array_keys(call_user_func_array('array_merage',array_column($this->link,self::RELATION_TABLE_LINK_TABLES)))){
             $tables = array_merge($tables,$LinkTables);
         }
         $Model = new Db();
