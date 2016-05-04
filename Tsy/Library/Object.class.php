@@ -9,6 +9,8 @@
 namespace Tsy\Library;
 
 
+use Tsy\Plugs\Db\Db;
+
 abstract class Object
 {
     const PROPERTY_ONE="\x00";
@@ -22,10 +24,14 @@ abstract class Object
     const RELATION_TABLE_LINK_HAS_PROPERTY="\x06";
     const RELATION_TABLE_LINK_TABLES="\x07";
 
-    protected $main='';
-    protected $pk='';
-    protected $link=[];
-    protected $property=[];
+    protected $main='';//主表名称，默认为类名部分
+    protected $pk='';//表主键，默认自动获取
+    protected $link=[];//多对多属性配置
+    protected $property=[];//一对一或一对多属性配置
+    protected $data=[];//添加、修改时的数据
+    protected $searchFields=[];//参与Keywords搜索的字段列表
+    protected $propertyMap=[];//属性配置反向映射
+    protected $object=[];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     public $map=[
 //        自动生成
     ];//字段=》类型 表名 映射
@@ -33,24 +39,69 @@ abstract class Object
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
 //        提取数据库字段，合并到map中
-
-        if(!$this->map){
-            
+        if(!$this->main){
+            $this->main = $this->getObjectName();
         }
+        if(defined(APP_DEBUG)&&APP_DEBUG){
+            $this->setMapByColumns();
+        }else{
+            if($CachedMap = cache('ObjectMap'.$this->main)){
+                //有缓存存在的情况下
+                $this->map = array_merge($CachedMap,$this->map);
+            }else{
+//                没有缓存存在的情况下先获取缓存然后再缓存
+                $this->setMapByColumns();
+            }
+        }
+    }
+
+    /**
+     * 设置字段过滤配置相关信息
+     */
+    private function setMapByColumns(){
+        //        生成需要字段缓存的表列表
+        $tables = [$this->main];
+        if($PropertyTables = array_column($this->property,self::RELATION_TABLE_NAME)){
+            $tables = array_merge($tables,$PropertyTables);
+        }
+        if($LinkTables = array_keys(array_column($this->link,self::RELATION_TABLE_LINK_TABLES))){
+            $tables = array_merge($tables,$LinkTables);
+        }
+        $Model = new Db();
+        $Columns = $Model->getColumns($tables,true);
+        //生成map结构并缓存
+        foreach ($Columns as $TableName=>$column){
+//            解析并生成格式限制和转化配置
+        }
+    }
+    /**
+     * 得到当前的数据对象名称
+     * @access public
+     * @return string
+     */
+    public function getObjectName() {
+        if(empty($this->name)){
+            $name = substr(get_class($this),0,-strlen('Object'));
+            if ( $pos = strrpos($name,'\\') ) {//有命名空间
+                $this->name = substr($name,$pos+1);
+            }else{
+                $this->name = $name;
+            }
+        }
+        return $this->name;
     }
     function __set($name, $value)
     {
-        // TODO: Implement __set() method.
-        $this->$name=$value;
+        $this->data[$name]=$value;
     }
     function __get($name)
     {
-        // TODO: Implement __get() method.
-        return $this->$name;
+        return $this->data[$name];
     }
 
-    function add(){
+    function add($data){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
+
     }
 
     /**
@@ -69,8 +120,47 @@ abstract class Object
      * @param array $W
      * @param string $Sort
      */
-    function search($Keyword='',$W=[],$Sort=''){
+    function search($Keyword='',$W=[],$Sort='',$P=1,$N=20){
+        $Model = new Model($this->main);
+        $Where = [];
+        if(is_string($Keyword)&&strlen($Keyword)>0){
+            foreach ($this->searchFields as $Filed){
+                $Where[$Filed]=['LIKE','%'.str_replace([' ',';',"\r\n"],'',$Keyword).'%'];
+            }
+            $Model->where($Where);
+        }
+        if($W){
+            $Where=[];
+            foreach ($W as $k=>$v){
+                if(($TableColumn = explode('.',$k))&&$v){
+                    switch (count($TableColumn)){
+                        case 1:
+//                            主表属性搜索条件
+                            $Where[$TableColumn[0]]=$v;
+                            break;
+                        case 2:
+//                            属性表中的搜索条件
+//                            读取属性映射列表，获取属性类型
 
+                            break;
+                        default:
+                            // 返回失败
+                            L('ERROR_SEARCH_CONFIG',LOG_WARNING,[$k=>$v]);
+                            break;
+                    }
+                }
+                //TODO 如果开启强制校验模式则返回错误
+            }
+            $Model->where($Where);
+        }
+        $ObjectIDs=$Model->getField($this->pk,true);
+        $Objects = $ObjectIDs?$this->gets($ObjectIDs):[];
+        return [
+            'L'=>$Objects?array_values($Objects):[],
+            'P'=>$P,
+            'N'=>count($Objects),
+            'T'=>$Model->count(),
+        ];
     }
 
     /**
