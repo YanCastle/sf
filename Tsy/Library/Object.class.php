@@ -211,10 +211,18 @@ class Object
                 }
                 //TODO 如果开启强制校验模式则返回错误
             }
-            foreach ($ObjectSearchConfig as $item){
-
+            foreach ($ObjectSearchConfig as $tableName=>$item){
+                $Where=[];
+                foreach($item as $key=>$value){
+                    if(is_array($value)){
+                            $Where['_complex'][$key]=$value;
+                    }else{
+                        $Where[$key]=$value;
+                    }
+                }
+                $rs[$tableName]=$Model->table($DB_PREFIX.$tableName)->where($Where)->select();
             }
-            $Model->where($Where);
+//            $a=1;
         }
         $ObjectIDs=$Model->getField($this->pk,true);
         $Objects = $ObjectIDs?$this->gets($ObjectIDs):[];
