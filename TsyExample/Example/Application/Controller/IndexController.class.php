@@ -8,6 +8,7 @@
 
 namespace Application\Controller;
 
+use Application\Object\ClientObject;
 use Tsy\Library\Controller;
 use Tsy\Plugs\WebQQ\WebQQ;
 
@@ -30,7 +31,12 @@ class IndexController extends Controller
 ////            sleep(2);
 //            echo json_encode($value,JSON_UNESCAPED_UNICODE);
 //        }
-       return 's';
+        $Client = new ClientObject();
+        return $Client->search('8',[
+//            'SN'=>['EQ','B9C63246BEBEBA233E9C0F08D56AA0C8'],
+//            'Printer.PrinterID'=>26
+        ]);
+
     }
     /**
      * 空操作

@@ -17,7 +17,7 @@ return [
             ];
         },
         'OUT'=>function($data){
-            return http_build_query($data);
+            return json_encode($data);
         }
     ]
 ];
