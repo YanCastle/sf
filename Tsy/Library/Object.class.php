@@ -53,8 +53,20 @@ class Object
                 $this->setMapByColumns();
             }
         }
+        $this->setPropertyMap();
     }
 
+    /**
+     * 设置属性映射
+     */
+    private function setPropertyMap(){
+        foreach ($this->link as $name=>$item){
+            $this->propertyMap[$name]=array_merge(['Type'=>'LINK',],$item);
+        }
+        foreach ($this->property as $name=>$item){
+            $this->propertyMap[$name]=array_merge(['Type'=>'Property',],$item);
+        }
+    }
     /**
      * 设置字段过滤配置相关信息
      */
@@ -162,6 +174,7 @@ class Object
         $DB_PREFIX = C('DB_PREFIX');
         $FieldPrefix = $DB_PREFIX.strtolower($this->main).'.';
         $Tables=['__'.strtoupper($this->main).'__'];
+        $ObjectSearchConfig=[];
         $Where = [];
         if(is_string($Keyword)&&strlen($Keyword)>0){
             foreach ($this->searchFields as $Filed){
@@ -181,7 +194,12 @@ class Object
                         case 2:
 //TODO                             属性表中的搜索条件
 //                            读取属性映射列表，获取属性类型
-
+                            $TableName = $TableColumn[0];
+                            $ColumnName = $TableColumn[1];
+                            if(!isset($ObjectSearchConfig[$TableName])){
+                                $ObjectSearchConfig[$TableName]=[];
+                            }
+                            $ObjectSearchConfig[$TableName][$ColumnName]=$v;
                             break;
                         default:
                             // 返回失败
@@ -190,6 +208,9 @@ class Object
                     }
                 }
                 //TODO 如果开启强制校验模式则返回错误
+            }
+            foreach ($ObjectSearchConfig as $item){
+                
             }
             $Model->where($Where);
         }

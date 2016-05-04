@@ -20,7 +20,7 @@ class ClientObject extends Object
             self::RELATION_TABLE_PROPERTY=>self::PROPERTY_ARRAY
         ]
     ];
-    protected $pk='PrinterClientID';
+//    protected $pk='PrinterClientID';
     protected $searchFields=[
         'SN'
     ];
