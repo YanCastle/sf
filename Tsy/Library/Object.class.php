@@ -11,7 +11,7 @@ namespace Tsy\Library;
 
 use Tsy\Plugs\Db\Db;
 
-abstract class Object
+class Object
 {
     const PROPERTY_ONE="\x00";
     const PROPERTY_ARRAY="\x01";
