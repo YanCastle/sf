@@ -32,6 +32,8 @@ class Object
     protected $searchFields=[];//参与Keywords搜索的字段列表
     protected $propertyMap=[];//属性配置反向映射
     protected $object=[];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
+    protected $_write_filter=[];//输入写入过滤配置
+    protected $_read_filter=[];//输入读取过滤配置
     public $map=[
 //        自动生成
     ];//字段=》类型 表名 映射
@@ -148,7 +150,7 @@ class Object
         }
     }
 
-    function add($data){
+    function add(){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
 
     }
@@ -210,7 +212,7 @@ class Object
                 //TODO 如果开启强制校验模式则返回错误
             }
             foreach ($ObjectSearchConfig as $item){
-                
+
             }
             $Model->where($Where);
         }
