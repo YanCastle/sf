@@ -154,6 +154,7 @@ class Db{
                 if($Columns){
                     $TableColumns[$table]=$Columns;
                 }
+                cache('ColumnsCache'.$prefix.$table,$Columns);
             }
         }
         return $one?$TableColumns[$tables[0]]:$TableColumns;
