@@ -13,6 +13,7 @@ class Db{
     public $tablePrefix='';
     public $db_name;
     public $tables=[];
+    public $views=[];
     function __construct($name='',$tablePrefix='',$connection='',$db_name=''){
         $this->Model=new Model($name,$tablePrefix,$connection);
         $this->tablePrefix=$tablePrefix?$tablePrefix:C('DB_PREFIX');
@@ -95,20 +96,42 @@ class Db{
     function backup($type,$file=false,array $tables=[]){
 
     }
-    function getColumns($tables=[]){
+
+    /**
+     * 获取表的字段信息
+     * @param array $tables
+     * @param bool $prefix
+     * @return array|mixed
+     */
+    function getColumns($tables=[],$prefix=false){
+        $one = false;
         if(is_string($tables)){
             $tables=[$tables];
+            $one=true;
         }
         if(!$tables){
             $tables=$this->getTableList();
+        }else{
+            if(false===$prefix){
+                //不需要加前缀
+                $prefix='';
+            }elseif(true===$prefix){
+//                从当前环境中添加前缀
+                $prefix=C('DB_PREFIX');
+            }elseif(is_string($prefix)){
+//                设置前缀为
+//                $prefix=$prefix;
+            }else{
+                $prefix='';
+            }
         }
         $TableColumns=[];
         foreach($tables as $table){
-            $Columns = $this->Model->query("SHOW columns From {$table}");
+            $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
             if($Columns){
                 $TableColumns[$table]=$Columns;
             }
         }
-        return $TableColumns;
+        return $one?$TableColumns[$tables[0]]:$TableColumns;
     }
 }
