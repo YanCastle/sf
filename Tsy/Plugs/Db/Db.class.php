@@ -112,7 +112,7 @@ class Db{
      * @param bool $prefix
      * @return array|mixed
      */
-    function getColumns($tables=[],$prefix=false){
+    function getColumns($tables=[],$prefix=false,$cache=APP_DEBUG){
         $one = false;
         if(is_string($tables)){
             $tables=[$tables];
@@ -135,10 +135,25 @@ class Db{
             }
         }
         $TableColumns=[];
-        foreach($tables as $table){
-            $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
-            if($Columns){
-                $TableColumns[$table]=$Columns;
+        //是否强制刷新
+        if($cache){
+            foreach ($tables as $table){
+                if($CacheColumns = cache('ColumnsCache'.$prefix.$table)){
+                    $TableColumns[$table]=$CacheColumns;
+                }else{
+                    $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
+                    if($Columns){
+                        $TableColumns[$table]=$Columns;
+                    }
+                    cache('ColumnsCache'.$prefix.$table,$Columns);
+                }
+            }
+        }else{
+            foreach($tables as $table){
+                $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
+                if($Columns){
+                    $TableColumns[$table]=$Columns;
+                }
             }
         }
         return $one?$TableColumns[$tables[0]]:$TableColumns;
