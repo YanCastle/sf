@@ -225,7 +225,7 @@ class Object
                         $Where[$key]=$value;
                     }
                 }
-                if($rs=$MoreModel->table($DB_PREFIX.$tableName)->where($Where)->getField($this->pk,true)){
+                if($rs=$MoreModel->table($DB_PREFIX.strtolower($tableName))->where($Where)->getField(str_replace('_','',parse_name($this->pk)),true)){
                     $ObjectIDs = $ObjectIDs?array_intersect($ObjectIDs,$rs):$rs;
                 }
             }
