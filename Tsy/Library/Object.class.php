@@ -9,6 +9,8 @@
 namespace Tsy\Library;
 
 
+use Finance\Object\AccountObject;
+use Store\Model\GoodsPriceModel;
 use Tsy\Plugs\Db\Db;
 
 class Object
@@ -155,7 +157,45 @@ class Object
 
     function add(){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
-        $a=1;
+        $data=[];
+        foreach ($this->map as $key=>$map){
+            $TableName=explode('.',$key)[0];
+            $column=explode('.',$key)[1];
+            if (!$data[$TableName]['PK']){
+                $data[$TableName]['PK']=$map['P']===true?$column:'';
+            }
+            if (isset($_POST[$column])){
+                if (!call_user_func($map['T'][0],$_POST[$column])){
+                    return $column.'参数类型错误';
+                }
+                if (count($_POST[$column])>=$map['T'][1]){
+                    return $column.'参数过长';
+                }
+                $data[$TableName]['data'][$column]=$_POST[$column];
+            }else{
+                if (true===$map['N']&&$map['P']===false){
+                    //TODO 有外键时，数据初始化的问题
+//                    return $column.'参数不完整';
+                }
+                if (true===$map['P']){
+                    continue;
+                }
+                $data[$TableName]['data'][$column]=$_POST[$column];
+            }
+        }
+        if (!$data){
+            return '没有传参数或参数错误';
+        }
+        foreach ($data as $d){
+            if (array_filter($d)==[]){
+                return $d.'未传入任何参数';
+            }
+        }
+        foreach ($data as $key=>$Data){
+            $Model=M($key);
+            $$Data['PK']=$Model->add($Data['data']);
+        }
+        return $$this->pk?$this->get($$this->pk):false;
     }
 
     /**
