@@ -94,7 +94,7 @@ class Object
             foreach ($column as $item){
                 $type = explode(',',str_replace(['(',')',' '],',',$item['type']));
                 $this->map[$TableName.'.'.$item['field']]=[
-                    'U'=>strpos('unsigned',$item['type'])>0,//是否无符号
+                    'U'=>strpos($item['type'],'unsigned')>0,//是否无符号
                     'T'=>count($type)==1?$type:[$type[0],$type[1]],//数据库类型
                     'D'=>$item['default'],//默认值
                     'P'=>'PRI'==$item['key'],//是否主键
