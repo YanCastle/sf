@@ -55,6 +55,7 @@ class Swoole implements Mode
             swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
                 $Server->set($SwooleConfig['CONF']);
+                $GLOBALS['_TASK_WORKER_SUM']=$Server->setting['worker_num']+$Server->setting['task_worker_num'];
                 $Swoole = new \Tsy\Library\Server($SwooleConfig['PortModeMap']);
                 $GLOBALS['_PortModeMap']=$SwooleConfig['PortModeMap'];
                 $Server->on('receive',[$Swoole,'onReceive']);
@@ -84,7 +85,7 @@ class Swoole implements Mode
                                 $ProcessObject = new \swoole_process(function(\swoole_process $process)use($Process,$Server){
                                     call_user_func_array($Process['CALLBACK'],[$process,$Server]);
                                 },isset($Process['REDIRECT_STDIN_STDOUT'])?$Process['REDIRECT_STDIN_STDOUT']:true,2);
-                                $Processes[]=[$ProcessObject,$Process];
+                                $Processes[$GLOBALS['_TASK_WORKER_SUM']+$i]=[$ProcessObject,$Process];
                             }
                         }else{
                             die('SwooleProcess配置不正确');

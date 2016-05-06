@@ -232,6 +232,11 @@ class Server
     function onPipeMessage(\swoole_server $server,$from_worker_id,$message){
         $callback = swoole_get_callback('PIPE_MESSAGE');
 //       TODO 判断是否是task/worker进程，如果不是则判断是否是自定义进程，如果是则调用线程的write方法通信
+        if($from_worker_id>$GLOBALS['_TASK_WORKER_SUM']){
+            //自定义进程
+        }else{
+            //task 或者 worker 进程数据
+        }
 //       TODO 自定义进程中与其他进程通信需要用到sendMessage
         if(is_callable($callback)){
 //            做返回值检测
