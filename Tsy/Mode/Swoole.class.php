@@ -39,6 +39,8 @@ class Swoole implements Mode
         cache('[cleartmp]');
         if($SwooleConfig = swoole_load_config()){
             $Server=null;
+            $Processes=[];
+            $ProcessesConf=[];
             foreach ($SwooleConfig['LISTEN'] as $Listen){
                 if($Server){
                     call_user_func_array([$Server,'addListener'],$Listen);
@@ -46,6 +48,37 @@ class Swoole implements Mode
                     $Server=new \swoole_server($Listen[0],$Listen[1]);
                 }
             }
+            if(null===$Server){
+                die('创建Swool对象失败');
+            }
+            if($SwooleConfig['PROCESS']){
+                foreach ($SwooleConfig['PROCESS'] as $k=>$Process){
+                    if(isset($Process['CALLBACK'])&&is_callable($Process['CALLBACK'])){
+                        if(!isset($Process['NUMBER'])){
+                            $Process['NUMBER']=1;
+                        }
+                        for($i=0;$i<$Process['NUMBER'];$i++){
+                            $ProcessObject = new \swoole_process($Process['CALLBACK'],isset($Process['REDIRECT_STDIN_STDOUT'])?$Process['REDIRECT_STDIN_STDOUT']:true);
+                            if(!$Server->addProcess($ProcessObject)){
+                                die("Process创建失败");
+                            }
+                        }
+                    }else{
+                        die('SwooleProcess配置不正确');
+                    }
+                }
+//                foreach ($Processes as $processes){
+//                    foreach ($processes as $PID=>$process){
+//                        $Config = $ProcessesConf[$PID];
+//                        swoole_event_add($p->pipe,function($pipe)use($process,$Config){
+//                            if(isset($Config['PIPE'])&&is_callable($Config['PIPE'])){
+//                                call_user_func_array($Config['PIPE'],[$process,$pipe]);
+//                            }
+//                        });
+//                    }
+//                }
+            }
+            $GLOBALS['_PROCESS'] = $Processes;
             swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
                 $Server->set($SwooleConfig['CONF']);

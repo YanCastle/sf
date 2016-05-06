@@ -53,6 +53,27 @@ return [
                 }
             ],
         ],
+        'PROCESS'=>[
+            [
+                'NAME'=>'Router',
+                'NUMBER'=>1,//进程数量
+                'CALLBACK'=>function(\swoole_process $process){
+                    while(true){
+                        $process->write('ss');
+                        sleep(1);
+                    }
+                },
+                'REDIRECT_STDIN_STDOUT'=>false,//开启时echo不会输出到屏幕而是进入到可读队列
+                'PIPE'=>function(\swoole_process $process,$data){
+                    echo $data;
+                }
+            ],
+        ],
+        'CALLBACK'=>[
+            'PIPE_MESSAGE'=>function(\swoole_server $server,$from_worker_id,$data){
+                file_put_contents('PIPE_MAIN',$data);
+            }
+        ],
         //SWOOLE 配置
         'CONF'=>[
             'daemonize' => 0, //自动进入守护进程

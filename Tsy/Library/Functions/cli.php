@@ -364,7 +364,8 @@ function swoole_load_config(){
                 'dispatch_mode '=>3,//轮询模式
                 'worker_num'=>2,
             ],C('SWOOLE.CONF')),
-            'PortModeMap'=>[]
+            'PortModeMap'=>[],
+            'PROCESS'=>array_merge([],C('SWOOLE.PROCESS'))
         ];
         foreach ($Listen as $Config) {
             $Config['TYPE'] = isset($Config['TYPE']) ? $Config['TYPE'] : 'Socket';

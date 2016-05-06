@@ -798,8 +798,9 @@ class swoole_server
     public function listen($host, $port, $type = SWOOLE_SOCK_TCP){}
     /**
      * 添加一个自定义的进程到swoole_server，此进程会被Manager进程管理，退出后会被重新拉起
+     * @return bool
      */
-    public function addprocess(swoole_process $process) {}
+    public function addProcess(swoole_process $process) {}
     /**
      * 增加定时器
      *
