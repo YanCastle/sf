@@ -9,6 +9,8 @@
 namespace Tsy\Library;
 
 
+use Finance\Object\AccountObject;
+use Store\Model\GoodsPriceModel;
 use Tsy\Plugs\Db\Db;
 
 class Object
@@ -92,7 +94,7 @@ class Object
             foreach ($column as $item){
                 $type = explode(',',str_replace(['(',')',' '],',',$item['type']));
                 $this->map[$TableName.'.'.$item['field']]=[
-                    'U'=>strpos('unsigned',$item['type'])>0,//是否无符号
+                    'U'=>strpos($item['type'],'unsigned')>0,//是否无符号
                     'T'=>count($type)==1?$type:[$type[0],$type[1]],//数据库类型
                     'D'=>$item['default'],//默认值
                     'P'=>'PRI'==$item['key'],//是否主键
@@ -155,7 +157,45 @@ class Object
 
     function add(){
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
-        $a=1;
+        $data=[];
+        foreach ($this->map as $key=>$map){
+            $TableName=explode('.',$key)[0];
+            $column=explode('.',$key)[1];
+            if (!$data[$TableName]['PK']){
+                $data[$TableName]['PK']=$map['P']===true?$column:'';
+            }
+            if (isset($_POST[$column])){
+                if (!call_user_func($map['T'][0],$_POST[$column])){
+                    return $column.'参数类型错误';
+                }
+                if (count($_POST[$column])>=$map['T'][1]){
+                    return $column.'参数过长';
+                }
+                $data[$TableName]['data'][$column]=$_POST[$column];
+            }else{
+                if (true===$map['N']&&$map['P']===false){
+                    //TODO 有外键时，数据初始化的问题
+//                    return $column.'参数不完整';
+                }
+                if (true===$map['P']){
+                    continue;
+                }
+                $data[$TableName]['data'][$column]=$_POST[$column];
+            }
+        }
+        if (!$data){
+            return '没有传参数或参数错误';
+        }
+        foreach ($data as $d){
+            if (array_filter($d)==[]){
+                return $d.'未传入任何参数';
+            }
+        }
+        foreach ($data as $key=>$Data){
+            $Model=M($key);
+            $$Data['PK']=$Model->add($Data['data']);
+        }
+        return $$this->pk?$this->get($$this->pk):false;
     }
 
     /**
@@ -177,6 +217,7 @@ class Object
     function search($Keyword='',$W=[],$Sort='',$P=1,$N=20){
         $Model = new Model($this->main);
         $DB_PREFIX = C('DB_PREFIX');
+        $ObjectIDs=[];
         $FieldPrefix = $DB_PREFIX.strtolower($this->main).'.';
         $Tables=['__'.strtoupper($this->main).'__'];
         $ObjectSearchConfig=[];
@@ -214,6 +255,7 @@ class Object
                 }
                 //TODO 如果开启强制校验模式则返回错误
             }
+            $MoreModel = new Model();
             foreach ($ObjectSearchConfig as $tableName=>$item){
                 $Where=[];
                 foreach($item as $key=>$value){
@@ -223,17 +265,19 @@ class Object
                         $Where[$key]=$value;
                     }
                 }
-                $rs[$tableName]=$Model->table($DB_PREFIX.$tableName)->where($Where)->select();
+                if($rs=$MoreModel->table($DB_PREFIX.strtolower($tableName))->where($Where)->getField(str_replace('_','',parse_name($this->pk)),true)){
+                    $ObjectIDs = $ObjectIDs?array_intersect($ObjectIDs,$rs):$rs;
+                }
             }
-//            $a=1;
         }
-        $ObjectIDs=$Model->getField($this->pk,true);
-        $Objects = $ObjectIDs?$this->gets($ObjectIDs):[];
+        $ObjectIDs=$ObjectIDs?array_intersect($ObjectIDs,$Model->getField($this->pk,true)):$Model->getField($this->pk,true);
+        $PageIDs = array_chunk($ObjectIDs,$N);
+        $Objects = isset($PageIDs[$P-1])?$this->gets($PageIDs[$P-1]):[];
         return [
             'L'=>$Objects?array_values($Objects):[],
             'P'=>$P,
             'N'=>count($Objects),
-            'T'=>$Model->count(),
+            'T'=>count($ObjectIDs),
         ];
     }
 
