@@ -148,11 +148,12 @@ class Server
      * 在主线程回调
      * @param \swoole_server $server
      */
-    function onStart(\swoole_server $server){
+    function onStart(\swoole_server $Server){
         $callback = swoole_get_callback('START');
         if(is_callable($callback)){
-            call_user_func_array($callback,[$server]);
+            call_user_func_array($callback,[$Server]);
         }
+
     }
     /**
      * Server结束时
@@ -230,7 +231,10 @@ class Server
      */
     function onPipeMessage(\swoole_server $server,$from_worker_id,$message){
         $callback = swoole_get_callback('PIPE_MESSAGE');
+//       TODO 判断是否是task/worker进程，如果不是则判断是否是自定义进程，如果是则调用线程的write方法通信
+//       TODO 自定义进程中与其他进程通信需要用到sendMessage
         if(is_callable($callback)){
+//            做返回值检测
             call_user_func_array($callback,[$server,$from_worker_id,$message]);
         }
     }
@@ -253,11 +257,12 @@ class Server
      * 当管理进程启动时调用它
      * @param \swoole_server $server
      */
-    function onManagerStart(\swoole_server $server){
+    function onManagerStart(\swoole_server $Server){
+
         cache('[cleartmp]');
         $callback = swoole_get_callback('MANAGER_START');
         if(is_callable($callback)){
-            call_user_func_array($callback,[$server]);
+            call_user_func_array($callback,[$Server]);
         }
     }
 

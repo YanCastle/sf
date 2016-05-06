@@ -151,7 +151,7 @@ class File extends Cache implements CacheInterface{
      * @return boolean
      */
     public function rm($name) {
-        return unlink($this->filename($name));
+        return file_exists($name)?unlink($this->filename($name)):true;
     }
 
     /**

@@ -51,34 +51,7 @@ class Swoole implements Mode
             if(null===$Server){
                 die('创建Swool对象失败');
             }
-            if($SwooleConfig['PROCESS']){
-                foreach ($SwooleConfig['PROCESS'] as $k=>$Process){
-                    if(isset($Process['CALLBACK'])&&is_callable($Process['CALLBACK'])){
-                        if(!isset($Process['NUMBER'])){
-                            $Process['NUMBER']=1;
-                        }
-                        for($i=0;$i<$Process['NUMBER'];$i++){
-                            $ProcessObject = new \swoole_process($Process['CALLBACK'],isset($Process['REDIRECT_STDIN_STDOUT'])?$Process['REDIRECT_STDIN_STDOUT']:true);
-                            if(!$Server->addProcess($ProcessObject)){
-                                die("Process创建失败");
-                            }
-                        }
-                    }else{
-                        die('SwooleProcess配置不正确');
-                    }
-                }
-//                foreach ($Processes as $processes){
-//                    foreach ($processes as $PID=>$process){
-//                        $Config = $ProcessesConf[$PID];
-//                        swoole_event_add($p->pipe,function($pipe)use($process,$Config){
-//                            if(isset($Config['PIPE'])&&is_callable($Config['PIPE'])){
-//                                call_user_func_array($Config['PIPE'],[$process,$pipe]);
-//                            }
-//                        });
-//                    }
-//                }
-            }
-            $GLOBALS['_PROCESS'] = $Processes;
+
             swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
                 $Server->set($SwooleConfig['CONF']);
@@ -99,6 +72,33 @@ class Swoole implements Mode
                 $Server->on('WorkerError',[$Swoole,'onWorkerError']);
                 $Server->on('ManagerStart',[$Swoole,'onManagerStart']);
                 $Server->on('ManagerStop',[$Swoole,'onManagerStop']);
+                $Processes=[];
+//                $SwooleConfig = swoole_load_config();
+                if($SwooleConfig['PROCESS']){
+                    foreach ($SwooleConfig['PROCESS'] as $k=>$Process){
+                        if(isset($Process['CALLBACK'])&&is_callable($Process['CALLBACK'])){
+                            if(!isset($Process['NUMBER'])){
+                                $Process['NUMBER']=1;
+                            }
+                            for($i=0;$i<$Process['NUMBER'];$i++){
+                                $ProcessObject = new \swoole_process(function(\swoole_process $process)use($Process,$Server){
+                                    call_user_func_array($Process['CALLBACK'],[$process,$Server]);
+                                },isset($Process['REDIRECT_STDIN_STDOUT'])?$Process['REDIRECT_STDIN_STDOUT']:true,2);
+                                $Processes[]=[$ProcessObject,$Process];
+                            }
+                        }else{
+                            die('SwooleProcess配置不正确');
+                        }
+                    }
+                }
+                $GLOBALS['_PROCESS'] = $Processes;
+                foreach ($Processes as $process){
+                    if($Server->addProcess($process[0])){
+                        L('线程创建成功');
+                    }else{
+                        echo swoole_strerror(swoole_errno());
+                    }
+                }
                 $GLOBALS['_SWOOLE']=&$Server;
                 L('启动Swoole');
                 fd_name([]);

@@ -57,11 +57,21 @@ return [
             [
                 'NAME'=>'Router',
                 'NUMBER'=>1,//进程数量
-                'CALLBACK'=>function(\swoole_process $process){
-                    while(true){
-                        $process->write('ss');
-                        sleep(1);
-                    }
+                'CALLBACK'=>function(\swoole_process $process,\swoole_server $server){
+                    $client = new swoole_client(SWOOLE_TCP,SWOOLE_SOCK_ASYNC);
+                    $client->on('receive',function(\swoole_client $client,$data)use($server){
+                        $d = explode(',',$data);
+                        $server->sendMessage($d[0],$d[1]);
+                    });
+                    $client->on('close',function(\swoole_client $client){});
+                    $client->on('connect',function(\swoole_client $client){});
+                    $client->on('error',function(\swoole_client $client){
+                        echo 'error';
+                    });
+                    $client->connect('10.10.13.197',6000);
+                    swoole_event_add($process->pipe,function($data)use($process,$server){
+                        echo 'PIPE:'.$data."\r\n";
+                    });
                 },
                 'REDIRECT_STDIN_STDOUT'=>false,//开启时echo不会输出到屏幕而是进入到可读队列
                 'PIPE'=>function(\swoole_process $process,$data){
@@ -71,7 +81,12 @@ return [
         ],
         'CALLBACK'=>[
             'PIPE_MESSAGE'=>function(\swoole_server $server,$from_worker_id,$data){
+                $Process = static_keep('Client');
                 file_put_contents('PIPE_MAIN',$data);
+                if('ok'==substr(file_get_contents('PIPE'),0,2)){
+                    $GLOBALS['_PROCESS'][0][0]->write('ss');
+                    file_put_contents('PIPE','1');
+                }
             }
         ],
         //SWOOLE 配置
