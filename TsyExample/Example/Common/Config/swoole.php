@@ -63,7 +63,7 @@ return [
                     $client = new swoole_client(SWOOLE_TCP,SWOOLE_SOCK_ASYNC);
                     $client->on('receive',function(\swoole_client $client,$data)use($server){
                         $d = explode(',',$data);
-                        send_message($d[0],$d[1]);
+                        pipe_message($d[0],$d[1]);
                     });
                     $client->on('close',function(\swoole_client $client){});
                     $client->on('connect',function(\swoole_client $client){});

@@ -5,6 +5,12 @@
  * Date: 5/6/16
  * Time: 4:07 PM
  */
+/**
+ * 创建进程的静态内容
+ * @param $name
+ * @param null $value
+ * @return mixed|null
+ */
 function static_keep($name,$value=null){
     static $values = [];
     if($name&&$value){

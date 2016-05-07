@@ -23,7 +23,7 @@ function async($config,array $params=[]){}
  * @param $to
  * @param $message
  */
-function send_message($to,$message){
+function pipe_message($to,$message){
     if(is_numeric($to)){
         //按目标worker id 发送，在此处检测是否是用户自定义进程，如果是则调用process的write方法，否则调用swoole_server的sendmessage方法
         if($to>=$GLOBALS['_TASK_WORKER_SUM']){
@@ -33,6 +33,7 @@ function send_message($to,$message){
             $GLOBALS['_SWOOLE']->sendMessage($message,$to);
         }
     }else{
-//        解析指令发生欧冠你
+//        解析指令
+        
     }
 }
