@@ -37,3 +37,52 @@ function pipe_message($to,$message){
         
     }
 }
+
+/**
+ * 创建或获取SwooleClient
+ * @param string $ip
+ * @param int $port
+ * @param callable $receive
+ * @param callable $new
+ * @param callable $connect
+ * @param callable $close
+ * @param callable $error
+ * @return mixed
+ */
+function swoole_get_client($ip,$port,$receive,$new=false,$connect=null,$close=null,$error=null){
+    static $clients=[];
+    $host = $ip.$port;
+    if(isset($clients[$host])&&count($clients[$host])&&false==$new){
+        return $clients[$host][0];
+    }
+    $receiveCallback = function(\swoole_client $client,$data)use($clients,$receive){
+        if(is_callable($receive)){
+            call_user_func_array($receive,[$client,$data]);
+        }
+    };
+    $closeCallback=function(\swoole_client $client)use($close){
+        if(is_callable($close)){
+            call_user_func($close,[$client]);
+        }
+    };
+    $errorCallback=function(\swoole_client $client)use($error){
+        if(is_callable($error)){
+            call_user_func($error,[$client]);
+        }
+    };
+    $connectCallback = function(\swoole_client $client)use($connect){
+        if(is_callable($connect)){
+            call_user_func($connect,[$client]);
+        }
+    };
+    $client = new swoole_client(SWOOLE_SOCK_TCP,SWOOLE_SOCK_ASYNC);
+    $client->on('receive',$receiveCallback);
+    $client->on('error',$errorCallback);
+    $client->on('connect',$connectCallback);
+    $client->on('close',$closeCallback);
+    $client->connect($ip,$port);
+    if(!isset($clients[$host])){
+        $clients[$host]=[];
+    }
+    $clients[$host][]=$client;
+}
