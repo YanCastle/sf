@@ -1279,6 +1279,7 @@ define('SWOOLE_SOCK_UNIX_DGRAM', 5); //创建udp socket
 define('SWOOLE_SOCK_UNIX_STREAM', 6); //创建udp ipv6 socket
 define('SWOOLE_SSL', 5);
 define('SWOOLE_TCP', 1); //创建tcp socket
+define('SWOOLE_KEEP',12);//SWOOLE_KEEP 长链接
 define('SWOOLE_TCP6', 2); //创建tcp ipv6 socket
 define('SWOOLE_UDP', 3); //创建udp socket
 define('SWOOLE_UDP6', 4); //创建udp ipv6 socket

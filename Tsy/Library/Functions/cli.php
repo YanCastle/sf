@@ -448,15 +448,8 @@ function client_send($host,$port,$data,$timeout=5,$receive=null){
             }
             //检测连接是否存在，如果不存在则创建连接
             if(!isset($clients[$key])||!$clients[$key]){
-                $client=new swoole_client(SWOOLE_TCP);
-                if(!$client->connect($host,$port,$timeout)){
-                    L('SocketClientError:'.$client->errCode,LOG_ERR);
-                    return false;
-                }
+                $client = swoole_get_client($host,$ip,$receive);
                 $clients[$key]=$client;
-            }
-            if(is_callable($receive)){
-                $clients[$key]->on('receive',$receive);
             }
             //如果连接存在且发送内容为字符串则发送内容
             if(!is_string($data)&&isset($clients[$key])&&$clients[$key]->isConnected()){

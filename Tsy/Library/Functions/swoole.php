@@ -85,4 +85,5 @@ function swoole_get_client($ip,$port,$receive,$new=false,$connect=null,$close=nu
         $clients[$host]=[];
     }
     $clients[$host][]=$client;
+    return $client;
 }
