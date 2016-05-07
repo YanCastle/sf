@@ -84,7 +84,7 @@ class Swoole implements Mode
                             for($i=0;$i<$Process['NUMBER'];$i++){
                                 $ProcessObject = new \swoole_process(function(\swoole_process $process)use($Process,$Server){
                                     //框架中套启动函数并启动用户定义函数
-//                                    TODO 检测是否是需要实例化的类，如果是需要实例化的类则先实例化再传递到回调结构中
+//                                    检测是否是需要实例化的类，如果是需要实例化的类则先实例化再传递到回调结构中
                                     if(isset($Process['PIPE'])&&is_callable($Process['PIPE'])){
 //                                        加载用户定义的进程pipe回调函数
                                         swoole_event_add($process->pipe,function($pipe)use($process,$Server,$Process){
