@@ -180,6 +180,7 @@ function swoole_in_check($fd,$data){
     $Data=[
         'i'=>'Empty/_empty',
         'd'=>$data,
+        'm'=>'',
         't'=>''
     ];
 //            实例化Controller

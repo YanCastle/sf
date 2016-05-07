@@ -67,6 +67,9 @@ function C($name=null, $value=null,$default=null) {
  * @return array
  */
 function load_config($file,$parse='php'){
+    if(!file_exists($file)){
+        return [];
+    }
     $ext  = pathinfo($file,PATHINFO_EXTENSION);
     switch($ext){
         case 'php':
