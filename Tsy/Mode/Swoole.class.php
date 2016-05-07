@@ -83,6 +83,13 @@ class Swoole implements Mode
                             }
                             for($i=0;$i<$Process['NUMBER'];$i++){
                                 $ProcessObject = new \swoole_process(function(\swoole_process $process)use($Process,$Server){
+                                    //框架中套启动函数并启动用户定义函数
+                                    if(isset($Process['PIPE'])&&is_callable($Process['PIPE'])){
+//                                        加载用户定义的进程pipe回调函数
+                                        swoole_event_add($process->pipe,function($pipe)use($process,$Server,$Process){
+                                            call_user_func_array($Process['PIPE'],[$process,$Server,$pipe]);
+                                        });
+                                    }
                                     call_user_func_array($Process['CALLBACK'],[$process,$Server]);
                                 },isset($Process['REDIRECT_STDIN_STDOUT'])?$Process['REDIRECT_STDIN_STDOUT']:true,2);
                                 $Processes[$GLOBALS['_TASK_WORKER_SUM']+$i]=[$ProcessObject,$Process];

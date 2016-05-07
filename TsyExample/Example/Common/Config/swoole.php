@@ -69,12 +69,9 @@ return [
                         echo 'error';
                     });
                     $client->connect('10.10.13.197',6000);
-                    swoole_event_add($process->pipe,function($data)use($process,$server){
-                        echo 'PIPE:'.$data."\r\n";
-                    });
                 },
                 'REDIRECT_STDIN_STDOUT'=>false,//开启时echo不会输出到屏幕而是进入到可读队列
-                'PIPE'=>function(\swoole_process $process,$data){
+                'PIPE'=>function(\swoole_process $process,\swoole_server $server,$data){
                     echo $data;
                 }
             ],
