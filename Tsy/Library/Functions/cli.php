@@ -503,7 +503,7 @@ function client_send($host,$port,$data,$timeout=5,$receive=null){
             }
         }
 //    如果连接存在且发送内容为字符串则发送内容
-        if(!is_string($data)&&isset($clients[$key])){
+        if(is_string($data)&&isset($clients[$key])){
             return fwrite($clients[$key],$data)>0;
         }
     }    
