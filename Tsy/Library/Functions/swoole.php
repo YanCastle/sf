@@ -32,10 +32,17 @@ function pipe_message($to,$message){
         }else{
             $GLOBALS['_SWOOLE']->sendMessage($message,$to);
         }
-    }else{
+    }elseif (is_array($to)){
 //        解析指令
-        
+//        switch ()
     }
+}
+
+function swoole_get_process_type($id=null){
+    if($id==null){
+        $id=$GLOBALS['_SWOOLE']->worker_id;
+    }
+    //TODO 返回id是什么类型的进程
 }
 
 /**
