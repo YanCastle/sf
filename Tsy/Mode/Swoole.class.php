@@ -74,6 +74,7 @@ class Swoole implements Mode
                 $Server->on('ManagerStart',[$Swoole,'onManagerStart']);
                 $Server->on('ManagerStop',[$Swoole,'onManagerStop']);
                 $Processes=[];
+                $GLOBALS['_SWOOLE']=&$Server;
 //                $SwooleConfig = swoole_load_config();
                 if($SwooleConfig['PROCESS']){
                     foreach ($SwooleConfig['PROCESS'] as $k=>$Process){
