@@ -50,7 +50,7 @@ function async($config,array $params=[]){}
 function pipe_message($to,$message){
     if(is_numeric($to)){
         //按目标worker id 发送，在此处检测是否是用户自定义进程，如果是则调用process的write方法，否则调用swoole_server的sendmessage方法
-        if($to>=$GLOBALS['_TASK_WORKER_SUM']){
+        if(\Tsy\Library\Define\SwooleProcess::$PROCESS==swoole_get_process_type($to)){
             //调用process的write方法
             $GLOBALS['_PROCESS'][$to][0]->write($message);
         }else{
