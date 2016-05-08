@@ -72,8 +72,57 @@ function pipe_message($to,$message){
     }
 }
 
-function pipe_message_dispatch($pipe){
-
+function pipe_message_dispatch(\swoole_server $server,string $pipe,$from_worker_id=0,\swoole_process $process=null){
+//    解析pipe的信息并执行相关逻辑
+//    要区分是自定义进程还是系统进程
+    $Match = true;
+    try{
+//        优先按照Pipe类来解析，如果解析失败再进行其他解析
+        $Pipe = unserialize($pipe);
+        if(is_object($Pipe)){
+            switch ($Pipe->c){
+                case \Tsy\Library\Define\Pipe::$TASK:
+                    task($Pipe->d);
+                    break;
+                case \Tsy\Library\Define\Pipe::$CALLBACK:
+                    if(is_callable($Pipe->d['callback'])){
+                        call_user_func_array($Pipe->d['callback'],$Pipe->d['d']);
+                    }
+                    break;
+                case \Tsy\Library\Define\Pipe::$EXEC:
+                    @eval($Pipe->d);
+                    break;
+                case \Tsy\Library\Define\Pipe::$CONTROLLER:
+                    if(isset($Pipe->d['i'])&&isset($Pipe->d['d'])){
+                        controller($Pipe->d['i'],$Pipe->d['d']);
+                    }
+                    break;
+                default:
+                    $Match=false;
+                    break;
+            }
+        }else{
+            //解析失败，执行逻辑同catch部分
+            $Match=false;
+        }
+    }catch (Exception $e){
+        $Match=false;
+    }
+    if($Match){}else{
+        if(is_object($process)){
+            //在自定义进程中
+            if(is_callable($process[1])){
+                call_user_func_array($process[1],[$process,$server,$pipe]);
+            }
+        }else{
+            //不再自定义进程中
+            $callback = swoole_get_callback('PIPE_MESSAGE');
+            if(is_callable($callback)){
+//            做返回值检测
+                call_user_func_array($callback,[$server,$from_worker_id,$pipe]);
+            }
+        }
+    }
 }
 
 /**

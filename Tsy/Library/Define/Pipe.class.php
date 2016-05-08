@@ -16,6 +16,7 @@ namespace Tsy\Library\Define;
 class Pipe
 {
     static public $TASK='TASK';
+    static public $EXEC='EXEC';
     static public $CALLBACK='CALLBACK';
     static public $CONTROLLER='CONTROLLER';
 //    static public $TASK='TASK';
