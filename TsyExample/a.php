@@ -6,8 +6,14 @@
  * Time: 23:31
  */
 //echo 'a';
-$queue = new SplQueue();
-$queue->add(0,2);
-$b = serialize($queue);
-$v = unserialize($b);
-$a=1;
+class cc{
+    static public $b ='ss';
+    public $s = '';
+    function s(){echo 's';}
+}
+$c = new cc();
+$c->s='ss';
+$s = serialize($c);
+$b = unserialize($s);
+$s->s();
+echo $s;

@@ -26,10 +26,7 @@ function task(mixed $data,$wait=false){
 //        需要定义多线程之间通信协议
         pipe_message([
             't'=>'worker',
-        ],serialize([
-            'c'=>'TASK',
-            'd'=>$data,
-        ]));
+        ],serialize(new \Tsy\Library\Define\Pipe(\Tsy\Library\Define\Pipe::$TASK,$data)));
     }
 
 }
@@ -73,6 +70,25 @@ function pipe_message($to,$message){
     }else{
         return false;
     }
+}
+
+function pipe_message_dispatch($pipe){
+
+}
+
+/**
+ * 获取或设置当前进程的进程编号
+ * @param null $id
+ * @return null
+ */
+function swoole_get_process_id($id=null){
+    static $worker_id=null;
+    if($id){
+        $worker_id=$id;
+    }else{
+        return $GLOBALS['_SWOOLE']->worker_id;
+    }
+    return $worker_id;
 }
 
 /**
