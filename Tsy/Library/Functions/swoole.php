@@ -60,11 +60,14 @@ function pipe_message($to,$message){
 //        解析指令
         switch (strtolower($to['t'])){
             case 'worker':
-
+                //worker进程是0-worker_num,所以随机一个呗
+                $GLOBALS['_SWOOLE']->sendMessage($message,rand(0,$GLOBALS['_SWOOLE']->setting['worker_num']-1));
                 break;
             case 'task':
+                $GLOBALS['_SWOOLE']->sendMessage($message,rand($GLOBALS['_SWOOLE']->setting['worker_num'],$GLOBALS['_SWOOLE']->setting['worker_num']+$GLOBALS['_SWOOLE']->setting['task_worker_num']));
                 break;
             case 'process':
+                $GLOBALS['_PROCESS'][$to][0]->write($message);
                 break;
         }
     }else{
