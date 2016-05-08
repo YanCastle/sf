@@ -185,17 +185,17 @@ function swoole_get_client($ip,$port,$receive,$new=false,$connect=null,$close=nu
     };
     $closeCallback=function(\swoole_client $client)use($close){
         if(is_callable($close)){
-            call_user_func($close,[$client]);
+            call_user_func_array($close,[$client]);
         }
     };
     $errorCallback=function(\swoole_client $client)use($error){
         if(is_callable($error)){
-            call_user_func($error,[$client]);
+            call_user_func_array($error,[$client]);
         }
     };
     $connectCallback = function(\swoole_client $client)use($connect){
         if(is_callable($connect)){
-            call_user_func($connect,[$client]);
+            call_user_func_array($connect,[$client]);
         }
     };
     $client = new swoole_client(SWOOLE_SOCK_TCP,SWOOLE_SOCK_ASYNC);
