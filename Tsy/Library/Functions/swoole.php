@@ -11,12 +11,27 @@
  * @param bool $wait
  * @return mixed
  */
-function task($data,$wait=false){
-    if($wait){
-        return $GLOBALS['_SWOOLE']->taskwait($data,is_numeric($wait)?$wait:60);
+function task(mixed $data,$wait=false){
+    //检测当前进程是否是worker进程，如果是则投递，如果不是则sendMessage到worker线程，然后由worker线程发起投递
+    if(!$GLOBALS['_SWOOLE']->taskworker){
+        //这是worker线程，可以投递
+        if($wait){
+            return $GLOBALS['_SWOOLE']->taskwait($data,is_numeric($wait)?$wait:60);
+        }else{
+            $GLOBALS['_SWOOLE']->task($data);
+        }
+        return true;
     }else{
-        $GLOBALS['_SWOOLE']->task($data);
+//        不可投递，通过sendMessage发送到Worker进程再继续投递
+//        需要定义多线程之间通信协议
+        pipe_message([
+            't'=>'worker',
+        ],serialize([
+            'c'=>'TASK',
+            'd'=>$data,
+        ]));
     }
+
 }
 function task_controller(){}
 
@@ -41,17 +56,41 @@ function pipe_message($to,$message){
         }else{
             $GLOBALS['_SWOOLE']->sendMessage($message,$to);
         }
-    }elseif (is_array($to)){
+    }elseif (is_array($to)&&isset($to['t'])){
 //        解析指令
-//        switch ()
+        switch (strtolower($to['t'])){
+            case 'worker':
+
+                break;
+            case 'task':
+                break;
+            case 'process':
+                break;
+        }
+    }else{
+        return false;
     }
 }
 
+/**
+ * 获取指定的进程编号的进程类型
+ * @param null $id
+ * @return string
+ */
 function swoole_get_process_type($id=null){
     if($id==null){
         $id=$GLOBALS['_SWOOLE']->worker_id;
     }
-    //TODO 返回id是什么类型的进程
+    //返回id是什么类型的进程
+    if($id>=0&&$id<$GLOBALS['_SWOOLE']->setting['worker_num']){
+        return \Tsy\Library\Define\SwooleProcess::$WORK;
+    }elseif($id>=$GLOBALS['_SWOOLE']->setting['worker_num']&&$id<$GLOBALS['_SWOOLE']->setting['task_worker_num']){
+        return \Tsy\Library\Define\SwooleProcess::$TASK;
+    }elseif((null===$id)||($id>=$GLOBALS['_SWOOLE']->setting['worker_num']+$GLOBALS['_SWOOLE']->setting['task_worker_num'])){
+        return \Tsy\Library\Define\SwooleProcess::$PROCESS;
+    }else{
+        return \Tsy\Library\Define\SwooleProcess::$UNKNOW;
+    }
 }
 
 /**

@@ -15,6 +15,7 @@ class ProcessController extends Controller
 {
 //    json {"to":5,"m":"ss"}
     function a($to,$m){
-        pipe_message($to,$m);
+//        pipe_message($to,$m);
+        swoole_get_process_type();
     }
 }

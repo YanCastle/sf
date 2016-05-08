@@ -60,17 +60,8 @@ return [
                 'NAME'=>'Router',
                 'NUMBER'=>1,//进程数量
                 'CALLBACK'=>function(\swoole_process $process,\swoole_server $server){
-                    $client = new swoole_client(SWOOLE_TCP,SWOOLE_SOCK_ASYNC);
-                    $client->on('receive',function(\swoole_client $client,$data)use($server){
-                        $d = explode(',',$data);
-                        pipe_message($d[0],$d[1]);
-                    });
-                    $client->on('close',function(\swoole_client $client){});
-                    $client->on('connect',function(\swoole_client $client){});
-                    $client->on('error',function(\swoole_client $client){
-                        echo 'error';
-                    });
-                    $client->connect('127.0.0.1',6000);
+                    sleep(5);
+                    swoole_get_process_type();
                 },
                 'REDIRECT_STDIN_STDOUT'=>false,//开启时echo不会输出到屏幕而是进入到可读队列
                 'PIPE'=>function(\swoole_process $process,\swoole_server $server,$data){
