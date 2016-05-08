@@ -6,9 +6,18 @@
  * Time: 20:59
  */
 /**
- * 任务投递
+ * 异步任务投递功能完成
+ * @param $data
+ * @param bool $wait
+ * @return mixed
  */
-function task(){}
+function task($data,$wait=false){
+    if($wait){
+        return $GLOBALS['_SWOOLE']->taskwait($data,is_numeric($wait)?$wait:60);
+    }else{
+        $GLOBALS['_SWOOLE']->task($data);
+    }
+}
 function task_controller(){}
 
 /**
