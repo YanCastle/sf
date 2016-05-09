@@ -97,7 +97,7 @@ class Swoole implements Mode
                                                 $buffer .= static_keep('receive');
                                                 static_keep('receive','');
                                             }
-                                            pipe_message_dispatch($Server,$buffer,0,$Process);
+                                            pipe_message_dispatch($Server,$buffer,0,$process,$Process);
                                         });
                                     }
                                     call_user_func_array($Process['CALLBACK'],[$process,$Server]);

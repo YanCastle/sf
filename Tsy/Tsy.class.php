@@ -61,9 +61,13 @@ class Tsy
         !APP_DEBUG or C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/debug.php'));
 //        加载项目配置文件,http模式则加载http.php,swoole模式则加载swoole.php
         C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'config.php'));
+        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'config'.CONFIG_SUFFIX.'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug.php'));
+        !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug'.CONFIG_SUFFIX.'.php'));
         C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'.php'));
+        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
+        !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
     }
     function loadFunctions(){
