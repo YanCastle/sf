@@ -14,6 +14,10 @@ define('APP_PATH',realpath($APP_PATH));
 define('RUNTIME_PATH',$RUNTIME_PATH?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
 
+//定义配置文件后缀
+defined('CONFIG_SUFFIX') or define('CONFIG_SUFFIX','');
+
+
 define('HTTP_COMMENT',"\x01");
 
 if(!is_dir(RUNTIME_PATH)){
