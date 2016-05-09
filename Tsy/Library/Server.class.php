@@ -47,9 +47,9 @@ class Server
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
 //        接受数据次数统计
-        swoole_receive();
+//        swoole_receive();
         $Data = swoole_in_check($fd,$data);
-        if($Data){
+        if(is_array($Data)&&$Data){
             swoole_bridge_check($fd,$Data);
             $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
             if(HTTP_COMMENT!==$return){
@@ -78,7 +78,7 @@ class Server
         fd_name(null);
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
-        swoole_receive(null);
+//        swoole_receive(null);
         port_group($info['server_port'],null);
         http_header(null);
         cache('[-]tmp_HTTP_COMMENT',$fd);
