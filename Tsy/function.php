@@ -29,7 +29,16 @@ function session($name,$value=false){
         //清空session
         cache('sess_'.$session_id,[]);
     }
+
     $session = cache('sess_'.$session_id);
+    if(false===$name){
+//        获取全部
+        return $session;
+    }elseif(is_array($name)){
+        //设置全部
+        cache('sess_'.$session_id,$name);
+        return true;
+    }
     if($value){
         $session[$name]=$value;
     }else{

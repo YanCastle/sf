@@ -95,6 +95,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
     }
+    if(!$mid){$mid=$_POST['_mid'];}
     $ModuleClassAction=explode('/',$i);
     $MCACount = count($ModuleClassAction);
     if($MCACount==2){

@@ -52,6 +52,13 @@ class Controller
         return class_exists($this->className)?controller($this->className.'/'.$Action,$Data,'','Object'):"{$this->className}/{$Action}方法不存在";
     }
     function get($ID=[]){
+        if(!$ID){
+            $ClassName=$_GET['_c'];
+            if(property_exists($this,$ClassName.'Object')){
+                $ObjectName=$ClassName.'Object';
+            }
+            $ID = $_POST[$this->$ObjectName->pk];
+        }
         if($ID){
             $ClassName=$_GET['_c'];
             if(property_exists($this,$ClassName.'Object')){

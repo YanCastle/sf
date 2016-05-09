@@ -202,7 +202,7 @@ function swoole_bridge_check($fd,&$Data){
     //-----------------------------------------
     //开始进行t值检测，做桥链接处理
     //        生成mid
-    $_POST['_mid']=uniqid();
+    $_POST['_mid']=isset($Data['m'])&&$Data['m']?$Data['m']:uniqid();
     $Data['m']=$_POST['_mid'];
     //            响应检测
     $_POST['_i']=$Data['i'];

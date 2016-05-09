@@ -11,7 +11,7 @@ namespace Tsy\Library\Swoole;
 
 use Tsy\Library\Swoole;
 
-class WebSocket extends Swoole
+class Websocket extends Swoole
 {
     protected static $opcodes = array(
         'continuation' => 0,
