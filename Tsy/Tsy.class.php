@@ -117,6 +117,9 @@ class Tsy
             $error['line']  =   $e->getLine();
         }
         $error['trace']     =   $e->getTraceAsString();
+        if (is_callable(C('APP_EXCEPTION'))){
+            call_user_func(C('APP_EXCEPTION'),$e);
+        }
     }
 
     /**
@@ -142,6 +145,9 @@ class Tsy
                 $errorStr = "[$errno] $errstr ".$errfile." 第 $errline 行.";
                 break;
         }
+        if (is_callable(C('APP_ERROR'))){
+            call_user_func_array(C('APP_ERROR'),[$errno,$errstr,$errfile,$errline]);
+        }
     }
 
     // 致命错误捕获
@@ -153,8 +159,10 @@ class Tsy
                 case E_CORE_ERROR:
                 case E_COMPILE_ERROR:
                 case E_USER_ERROR:
-                    ob_end_clean();
                     break;
+            }
+            if (is_callable(C('FATAL_ERROR'))){
+                call_user_func(C('FATAL_ERROR'),$e);
             }
         }
     }
