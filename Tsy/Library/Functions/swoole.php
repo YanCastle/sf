@@ -67,7 +67,7 @@ function pipe_message($to,$message){
                 $GLOBALS['_SWOOLE']->sendMessage($message,rand($GLOBALS['_SWOOLE']->setting['worker_num'],$GLOBALS['_SWOOLE']->setting['worker_num']+$GLOBALS['_SWOOLE']->setting['task_worker_num']));
                 break;
             case 'process':
-                $GLOBALS['_PROCESS'][$to][0]->write($message);
+                $GLOBALS['_PROCESS'][$GLOBALS['_TASK_WORKER_SUM']][0]->write($message);
                 break;
         }
     }else{
@@ -75,7 +75,7 @@ function pipe_message($to,$message){
     }
 }
 
-function pipe_message_dispatch(\swoole_server $server,string $pipe,$from_worker_id=0,\swoole_process $process=null){
+function pipe_message_dispatch(\swoole_server $server,string $pipe,$from_worker_id=0,\swoole_process $process=null,$config=[]){
 //    解析pipe的信息并执行相关逻辑
 //    要区分是自定义进程还是系统进程
     $Match = true;
@@ -114,8 +114,8 @@ function pipe_message_dispatch(\swoole_server $server,string $pipe,$from_worker_
     if($Match){}else{
         if(is_object($process)){
             //在自定义进程中
-            if(is_callable($process[1])){
-                call_user_func_array($process[1],[$process,$server,$pipe]);
+            if(is_callable($config['PIPE'])){
+                call_user_func_array($config['PIPE'],[$process,$server,$pipe]);
             }
         }else{
             //不再自定义进程中
