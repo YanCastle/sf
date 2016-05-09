@@ -198,7 +198,7 @@ function swoole_in_check($fd,$data){
  * @param $Data
  * @return bool
  */
-function swoole_bridge_check($fd,$Data){
+function swoole_bridge_check($fd,&$Data){
     //-----------------------------------------
     //开始进行t值检测，做桥链接处理
     //        生成mid

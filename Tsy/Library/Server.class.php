@@ -51,7 +51,7 @@ class Server
         $Data = swoole_in_check($fd,$data);
         if($Data){
             swoole_bridge_check($fd,$Data);
-            $return = controller($Data['i'],$Data['d'],$Data['m']);
+            $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
             if(HTTP_COMMENT!==$return){
                 swoole_out_check($fd,$return);
             }
@@ -98,7 +98,7 @@ class Server
         $_GET['_fd']=$fd;
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
-//        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
+//        检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
         L("新连接 服务器:{$info['server_port']} 客户端:{$info['remote_ip']}:{$info['remote_port']} 链接标识符:{$fd}",LOG_DEBUG);
         if(swoole_connect_check($server,$info,$fd)){
             fd_name($fd);

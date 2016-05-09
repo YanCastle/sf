@@ -26,7 +26,7 @@ function task(mixed $data,$wait=false){
 //        需要定义多线程之间通信协议
         pipe_message([
             't'=>'worker',
-        ],serialize(new \Tsy\Library\Define\Pipe(\Tsy\Library\Define\Pipe::$TASK,$data)));
+        ],new \Tsy\Library\Define\Pipe(\Tsy\Library\Define\Pipe::$TASK,$data));
     }
 
 }
@@ -45,6 +45,9 @@ function async($config,array $params=[]){}
  * @param $message
  */
 function pipe_message($to,$message){
+    if(!is_string($message)){
+        $message=serialize($message);
+    }
     if(is_numeric($to)){
         //按目标worker id 发送，在此处检测是否是用户自定义进程，如果是则调用process的write方法，否则调用swoole_server的sendmessage方法
         if(\Tsy\Library\Define\SwooleProcess::$PROCESS==swoole_get_process_type($to)){
