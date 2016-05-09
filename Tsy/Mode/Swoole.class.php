@@ -51,7 +51,9 @@ class Swoole implements Mode
             if(null===$Server){
                 die('创建Swool对象失败');
             }
-
+//            开始创建共享table
+//            $HandleTable = new \swoole_table(1048576);
+//            $HandleTable->column()
             swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
                 $Server->set($SwooleConfig['CONF']);

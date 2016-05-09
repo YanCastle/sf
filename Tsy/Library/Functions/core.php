@@ -6,16 +6,23 @@
  * Time: 21:36
  */
 function load_module_config($module){
-    //清空配置缓存
-    C(false,false);
-    //加载公共配置
-    C($GLOBALS['Config']);
-    $ModuleConfigPath = APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR.'Config/';
+    static $CurrentModel = '';
+    if($CurrentModel==$module){
+        return ;
+    }else{
+        //清空配置缓存
+        C(false,false);
+        //加载公共配置
+        C($GLOBALS['Config']);
+        $ModuleConfigPath = APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR.'Config/';
 //        加载项目配置文件,http模式则加载http.php,swoole模式则加载swoole.php
-    C(load_config($ModuleConfigPath.'config.php'));
-    !APP_DEBUG or C(load_config($ModuleConfigPath.'debug.php'));
-    C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
-    !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
+        C(load_config($ModuleConfigPath.'config.php'));
+        !APP_DEBUG or C(load_config($ModuleConfigPath.'debug.php'));
+        C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
+        !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
+        $CurrentModel=$module;
+    }
+
 }
 
 /**
@@ -109,12 +116,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
     }
     $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
-    if(isset($GLOBALS['CurrentModule'])&&$GLOBALS['CurrentModule']==$M){
-
-    }else{
-        $GLOBALS['CurrentModule']=$M;
-        load_module_config($M);
-    }
+    load_module_config($M);
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
     $ClassName = implode('\\',[$M,$layer,$C.$layer]);
     if(!class_exists($ClassName)){

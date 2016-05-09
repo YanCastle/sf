@@ -164,13 +164,10 @@ function swoole_in_check($fd,$data){
     $Type = swoole_get_port_property($Port,'TYPE');
 
     $Class = swoole_get_mode_class($Type);
-    if(swoole_receive($_GET['_fd'])==1){
-//        第一次，做通道协议检测
-        if($HandData = $Class->handshake($data)){
-            //响应握手协议
-            L('握手响应:'.$HandData);
-            swoole_send($fd,$HandData);
-            return false;
+    if(method_exists($Class,'handshake')){
+        if($str = call_user_func([$Class,'handshake'],$data)){
+            swoole_send($fd,$str);
+            return true;
         }
     }
     //            解码协议，
