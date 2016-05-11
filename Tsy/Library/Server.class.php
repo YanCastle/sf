@@ -186,6 +186,7 @@ class Server
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$worker_id]);
         }
+        swoole_timer_tick(5000,[$this,'onTimer']);
     }
 
     /**
@@ -205,7 +206,7 @@ class Server
      * @param \swoole_server $server
      * @param $interval
      */
-    function onTimer(\swoole_server $server,$interval){
+    function onTimer($interval){
         $callback = swoole_get_callback('TIMER');
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$interval]);
@@ -216,10 +217,10 @@ class Server
         }
 //       开始检测系统定时器设定。如检测fdName缓存是否失效，fdGroup是否失效等
         //自动重启检测
-        $AutoReload = C('AUTO_RELOAD');
-        if($AutoReload){
+        $AutoReload = C('SWOOLE.AUTO_RELOAD');
+        if($AutoReload||is_callable($AutoReload)){
             $Time = is_callable($AutoReload)?call_user_func($AutoReload):(is_numeric($AutoReload)?$AutoReload:C('AUTO_RELOAD_TIME'));
-            if(date('h')==$Time){
+            if($Time){
                 $GLOBALS['_SWOOLE']->reload();
             }
         }
@@ -257,12 +258,12 @@ class Server
      * @param \swoole_server $server
      */
     function onManagerStart(\swoole_server $Server){
-
         cache('[cleartmp]');
         $callback = swoole_get_callback('MANAGER_START');
         if(is_callable($callback)){
             call_user_func_array($callback,[$Server]);
         }
+
     }
 
     /**
