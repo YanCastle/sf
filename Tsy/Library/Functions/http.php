@@ -28,6 +28,14 @@ function http_header($header=false){
         $headers=array_merge($headers,$header);
     }elseif(null===$header){
         $str='';
+        if($_SERVER['REQUEST_METHOD']=='OPTIONS'){
+            $headers = array_merge($headers,[
+                'Access-Control-Allow-Origin:'=>$_SERVER['Origin'],
+                'Access-Control-Allow-Credentials:'=>'true',
+                'Access-Control-Request-Method:'=>'GET,POST,OPTIONS',
+                'Access-Control-Allow-Headers:'=>'X-Requested-With,Cookie,ContentType',
+            ]);
+        }
         foreach ($headers as $k=>$v){
             $str.=($k.' '.$v."\r\n");
         }
@@ -35,10 +43,6 @@ function http_header($header=false){
             'HTTP/1.1'=>'200 OK',
             'Connection:'=>'keep-alive',
             'Content-Type:'=>'text/html',
-            'Access-Control-Allow-Origin:'=>$_SERVER['HTTP_ORIGIN'],
-            'Access-Control-Allow-Credentials:'=>'true',
-            'Access-Control-Request-Method:'=>'GET,POST,OPTION',
-            'Access-Control-Allow-Headers:'=>'X-Requested-With,Cookie,ContentType',
         ];
         return $str."\r\n";
     }
