@@ -54,9 +54,14 @@ class Server
             $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
             if(HTTP_COMMENT!==$return){
                 swoole_out_check($fd,$return);
+            }else{
+                //写入HTTP_COMMENT的链接队列中
+                cache('[+]tmp_HTTP_COMMENT',$fd);
             }
-            //写入HTTP_COMMENT的链接队列中
-            cache('[+]tmp_HTTP_COMMENT',$fd);
+        }elseif (is_string($Data)){
+            swoole_out_check($fd,$Data);
+        }else{
+            swoole_out_check($fd,'');
         }
         session('[id]',null);//删除session_id标识
     }

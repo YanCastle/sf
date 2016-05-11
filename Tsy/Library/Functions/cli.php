@@ -172,6 +172,16 @@ function swoole_in_check($fd,$data){
     }
     //            解码协议，
     $data = $Class->uncode($data);
+    if('Http'==$Type&&isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$_SERVER['REQUEST_METHOD']){
+//        if(isset($_SERVER['HTTP_ORIGIN'])) {
+//            define('Domain', $_SERVER['HTTP_ORIGIN']);
+//            header('Access-Control-Allow-Origin:' . $_SERVER['HTTP_ORIGIN']);
+//        }
+//        header('Access-Control-Allow-Credentials:true');
+//        header('Access-Control-Request-Method:GET,POST');
+//        header('Access-Control-Allow-Headers:X-Requested-With,Cookie,ContentType');
+        return '';
+    }
     $_GET['_str']=$data;
     if(false===$data){return;}
     $Data=[
