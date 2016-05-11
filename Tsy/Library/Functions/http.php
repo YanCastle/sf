@@ -35,9 +35,9 @@ function http_header($header=false){
             'HTTP/1.1'=>'200 OK',
             'Connection:'=>'keep-alive',
             'Content-Type:'=>'text/html',
-            'Access-Control-Allow-Origin:'=>$_SERVER['REQUEST_METHOD'],
+            'Access-Control-Allow-Origin:'=>$_SERVER['HTTP_ORIGIN'],
             'Access-Control-Allow-Credentials:'=>'true',
-            'Access-Control-Request-Method:'=>'GET,POST',
+            'Access-Control-Request-Method:'=>'GET,POST,OPTION',
             'Access-Control-Allow-Headers:'=>'X-Requested-With,Cookie,ContentType',
         ];
         return $str."\r\n";
