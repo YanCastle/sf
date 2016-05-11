@@ -35,7 +35,7 @@ abstract class Cache
                 $_map[$type]=$cache;
             }
             else{
-                L('缓存驱动类不存在',LOG_ERR);
+                L($type.':缓存驱动类不存在',LOG_ERR);
                 return false;
             }
         }else{
