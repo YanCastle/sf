@@ -7,14 +7,7 @@
  */
 return [
     'SWOOLE'=>[
-        'AUTO_RELOAD'=>function($int){
-            $Time = cache('LastRestartTime');
-            if((time()-$Time)>7200){
-                cache('LastRestartTime',time());
-                return true;
-            }
-            return false;
-        },
+        'AUTO_RELOAD'=>true,
         //监听配置
         'LISTEN'=>[
             [
@@ -94,9 +87,9 @@ return [
         //SWOOLE 配置
         'CONF'=>[
             'daemonize' => 0, //自动进入守护进程
-            'task_worker_num' => 0,//开启task功能，
+            'task_worker_num' => 1,//开启task功能，
             'dispatch_mode '=>3,//轮询模式
-            'worker_num'=>1,
+            'worker_num'=>4,
         ],
         //定时器配置
         'TIMER'=>[

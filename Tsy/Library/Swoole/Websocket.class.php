@@ -11,7 +11,7 @@ namespace Tsy\Library\Swoole;
 
 use Tsy\Library\Swoole;
 
-class WebSocket extends Swoole
+class Websocket extends Swoole
 {
     protected static $opcodes = array(
         'continuation' => 0,
@@ -28,15 +28,18 @@ class WebSocket extends Swoole
      * @return bool
      */
     function handshake($buffer){
-        $buf  = substr($buffer,strpos($buffer,'Sec-WebSocket-Key:')+18);
-        $key  = trim(substr($buf,0,strpos($buf,"\r\n")));
-        $new_key = base64_encode(sha1($key."258EAFA5-E914-47DA-95CA-C5AB0DC85B11",true));
-        $new_message = "HTTP/1.1 101 Switching Protocols\r\n";
-        $new_message .= "Upgrade: websocket\r\n";
-        $new_message .= "Sec-WebSocket-Version: 13\r\n";
-        $new_message .= "Connection: Upgrade\r\n";
-        $new_message .= "Sec-WebSocket-Accept: " . $new_key . "\r\n\r\n";
-        return $new_message;
+        if($pos = strpos($buffer,'Sec-WebSocket-Key:')){
+            $buf  = substr($buffer,$pos+18);
+            $key  = trim(substr($buf,0,strpos($buf,"\r\n")));
+            $new_key = base64_encode(sha1($key."258EAFA5-E914-47DA-95CA-C5AB0DC85B11",true));
+            $new_message = "HTTP/1.1 101 Switching Protocols\r\n";
+            $new_message .= "Upgrade: websocket\r\n";
+            $new_message .= "Sec-WebSocket-Version: 13\r\n";
+            $new_message .= "Connection: Upgrade\r\n";
+            $new_message .= "Sec-WebSocket-Accept: " . $new_key . "\r\n\r\n";
+            return $new_message;
+        }
+
     }
 
     function uncode($str){

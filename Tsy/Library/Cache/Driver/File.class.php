@@ -10,11 +10,12 @@
 // +----------------------------------------------------------------------
 namespace Tsy\Library\Cache\Driver;
 use Tsy\Library\Cache\Cache;
+use Tsy\Library\Cache\CacheInterface;
 
 /**
  * 文件类型缓存类
  */
-class File extends Cache {
+class File extends Cache implements CacheInterface{
 
     /**
      * 架构函数
@@ -118,7 +119,7 @@ class File extends Cache {
      * @return boolean
      */
     public function set($name,$value,$expire=null) {
-        N('cache_write',1);
+//        N('cache_write',1);
         if(is_null($expire)) {
             $expire =  $this->options['expire'];
         }
@@ -136,10 +137,6 @@ class File extends Cache {
         $data    = "<?php\n//".sprintf('%012d',$expire).$check.$data."\n?>";
         $result  =   file_put_contents($filename,$data);
         if($result) {
-            if($this->options['length']>0) {
-                // 记录缓存队列
-                $this->queue($name);
-            }
             clearstatcache();
             return true;
         }else {
@@ -154,7 +151,7 @@ class File extends Cache {
      * @return boolean
      */
     public function rm($name) {
-        return unlink($this->filename($name));
+        return file_exists($name)?unlink($this->filename($name)):true;
     }
 
     /**

@@ -58,12 +58,33 @@ function cli_fd_group($GroupName=false,$fd=false,$del=false){
 function fd_name($name=false){
     $CacheKey = C('CACHE_FD_NAME');
     $fdName = cache($CacheKey);
+//    获取当前连接的名称
     if(false===$name){
         return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
+    }
+    if([]===$name){
+        $fdName=[];
+        cache($CacheKey,$fdName);
+        return true;
     }
     if(null===$name){
         unset($fdName[$_GET['_fd']]);
     }else{
+        if(!isset($fdName[$_GET['_fd']])){
+            $fdName[$_GET['_fd']]=[];
+        }
+        //检测是否该连接已经被关闭，如果已经被关闭则删除该连接
+        if(isset($_GET['_server'])){
+            $ClosedFD=[];
+            foreach ($fdName[$_GET['_fd']] as $fd){
+                if(!$_GET['_server']->exist($fd)){
+                    $ClosedFD[]=$fd;
+                }
+            }
+            if($ClosedFD){
+                $fdName[$_GET['_fd']]=array_diff($fdName[$_GET['_fd']],$ClosedFD);
+            }
+        }
         $fdName[$_GET['_fd']]=$name;
 //        开始检测是否有该fdName的推送消息，如果有的话则推送，如果没有的话则不推送
         $PushData=cache(C('CACHE_FD_NAME_PUSH').$name);
@@ -90,9 +111,8 @@ function push($name,$value,$online=true){
         swoole_out_check($fd,$value);
     }else{
         if(!$online){
-            //TODO 处理不在线的情况
+            //处理不在线的情况
             cache('[+A]'.C('CACHE_FD_NAME_PUSH').$fdName,$value);
-//            cache('[+A]'.'')
         }
         return false;
     }
@@ -144,22 +164,30 @@ function swoole_in_check($fd,$data){
     $Type = swoole_get_port_property($Port,'TYPE');
 
     $Class = swoole_get_mode_class($Type);
-    if(swoole_receive($_GET['_fd'])==1){
-//        第一次，做通道协议检测
-        if($HandData = $Class->handshake($data)){
-            //响应握手协议
-            L('握手响应:'.$HandData);
-            swoole_send($fd,$HandData);
-            return false;
+    if(method_exists($Class,'handshake')){
+        if($str = call_user_func([$Class,'handshake'],$data)){
+            swoole_send($fd,$str);
+            return true;
         }
     }
     //            解码协议，
     $data = $Class->uncode($data);
+    if('Http'==$Type&&isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$_SERVER['REQUEST_METHOD']){
+//        if(isset($_SERVER['HTTP_ORIGIN'])) {
+//            define('Domain', $_SERVER['HTTP_ORIGIN']);
+//            header('Access-Control-Allow-Origin:' . $_SERVER['HTTP_ORIGIN']);
+//        }
+//        header('Access-Control-Allow-Credentials:true');
+//        header('Access-Control-Request-Method:GET,POST');
+//        header('Access-Control-Allow-Headers:X-Requested-With,Cookie,ContentType');
+        return '';
+    }
     $_GET['_str']=$data;
     if(false===$data){return;}
     $Data=[
         'i'=>'Empty/_empty',
         'd'=>$data,
+        'm'=>'',
         't'=>''
     ];
 //            实例化Controller
@@ -177,11 +205,11 @@ function swoole_in_check($fd,$data){
  * @param $Data
  * @return bool
  */
-function swoole_bridge_check($fd,$Data){
+function swoole_bridge_check($fd,&$Data){
     //-----------------------------------------
     //开始进行t值检测，做桥链接处理
     //        生成mid
-    $_POST['_mid']=uniqid();
+    $_POST['_mid']=isset($Data['m'])&&$Data['m']?$Data['m']:uniqid();
     $Data['m']=$_POST['_mid'];
     //            响应检测
     $_POST['_i']=$Data['i'];
@@ -238,7 +266,7 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
             }
         }
         if($Close){
-            //TODO 提示信息
+            // 提示信息
             L('ConnectClosedByConnectCheck:'.json_encode($info,JSON_UNESCAPED_UNICODE),LOG_NOTICE);
             return false;
         }
@@ -253,7 +281,8 @@ function swoole_connect_check(\swoole_server $server,$info,$fd){
             }
         }
         if(!$Close){
-            //TODO 提示信息
+            // 提示信息
+            L('ConnectClosedByConnectCheck:'.json_encode($info,JSON_UNESCAPED_UNICODE),LOG_NOTICE);
             return false;
         }
     }
@@ -285,12 +314,23 @@ function swoole_get_port_property($Port,$Property=''){
 function swoole_connect_info($fd){
     return $GLOBALS['_SWOOLE']->connection_info($fd);
 }
+
+/**
+ * swoole模式下给链接发送消息
+ * @param int $fd 链接标识符
+ * @param string $str 发送的消息内容
+ * @return bool
+ */
 function swoole_send($fd,$str){
-    $GLOBALS['_SWOOLE']->send($fd,$str);
-    if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
-        $GLOBALS['_SWOOLE']->close($fd);
-        $GLOBALS['_close']=false;
+    $rs=false;
+    if($GLOBALS['_SWOOLE']->exist($fd)){
+        $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
+        if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
+            $GLOBALS['_SWOOLE']->close($fd);
+            $GLOBALS['_close']=false;
+        }
     }
+    return $rs;
 }
 /**
  * @param bool $fd
@@ -313,6 +353,7 @@ function swoole_receive($fd=false){
 
 function swoole_get_mode_class($mode){
     static $mode_class=[];
+    $mode = ucfirst(strtolower($mode));
     if(!isset($mode_class[$mode])&&$mode){
         $class='Tsy\\Library\\Swoole\\'.$mode;
         $mode_class[$mode]=new $class();
@@ -331,7 +372,8 @@ function swoole_load_config(){
                 'dispatch_mode '=>3,//轮询模式
                 'worker_num'=>2,
             ],C('SWOOLE.CONF')),
-            'PortModeMap'=>[]
+            'PortModeMap'=>[],
+            'PROCESS'=>array_merge([],C('SWOOLE.PROCESS'))
         ];
         foreach ($Listen as $Config) {
             $Config['TYPE'] = isset($Config['TYPE']) ? $Config['TYPE'] : 'Socket';
@@ -413,15 +455,8 @@ function client_send($host,$port,$data,$timeout=5,$receive=null){
             }
             //检测连接是否存在，如果不存在则创建连接
             if(!isset($clients[$key])||!$clients[$key]){
-                $client=new swoole_client(SWOOLE_TCP);
-                if(!$client->connect($host,$port,$timeout)){
-                    L('SocketClientError:'.$client->errCode,LOG_ERR);
-                    return false;
-                }
+                $client = swoole_get_client($host,$ip,$receive);
                 $clients[$key]=$client;
-            }
-            if(is_callable($receive)){
-                $clients[$key]->on('receive',$receive);
             }
             //如果连接存在且发送内容为字符串则发送内容
             if(!is_string($data)&&isset($clients[$key])&&$clients[$key]->isConnected()){
@@ -468,8 +503,17 @@ function client_send($host,$port,$data,$timeout=5,$receive=null){
             }
         }
 //    如果连接存在且发送内容为字符串则发送内容
-        if(!is_string($data)&&isset($clients[$key])){
+        if(is_string($data)&&isset($clients[$key])){
             return fwrite($clients[$key],$data)>0;
         }
     }    
+}
+
+function swoole_get_callback($callback){
+    static $conf=[];
+    if(is_array($callback)){
+        $conf=$callback;
+    }else{
+        return isset($conf[$callback])?$conf[$callback]:null;
+    }
 }

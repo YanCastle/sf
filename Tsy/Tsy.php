@@ -14,6 +14,10 @@ define('APP_PATH',realpath($APP_PATH));
 define('RUNTIME_PATH',$RUNTIME_PATH?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
 
+//定义配置文件后缀
+defined('CONFIG_SUFFIX') or define('CONFIG_SUFFIX','');
+
+
 define('HTTP_COMMENT',"\x01");
 
 if(!is_dir(RUNTIME_PATH)){
@@ -32,6 +36,16 @@ if(extension_loaded('swoole')&&!defined('APP_MODE')){
 //结束Define检测
 if(version_compare(PHP_VERSION,'5.5.0','<')) {
     die('需要5.5.0以上的PHP版本');
+}
+
+if('http'==strtolower(APP_MODE)&&isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$_SERVER['REQUEST_METHOD']){
+    if(isset($_SERVER['HTTP_ORIGIN'])) {
+        define('Domain', $_SERVER['HTTP_ORIGIN']);
+        header('Access-Control-Allow-Origin:' . $_SERVER['HTTP_ORIGIN']);
+    }
+    header('Access-Control-Allow-Credentials:true');
+    header('Access-Control-Request-Method:GET,POST');
+    header('Access-Control-Allow-Headers:X-Requested-With,Cookie,ContentType');
 }
 include_once TSY_PATH.DIRECTORY_SEPARATOR.'Tsy.class.php';
 $Tsy = new Tsy\Tsy();

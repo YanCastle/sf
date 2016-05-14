@@ -8,8 +8,9 @@
 
 namespace Tsy\Library\Cache\Driver;
 use Tsy\Library\Cache\Cache;
+use Tsy\Library\Cache\CacheInterface;
 
-class Redis extends Cache
+class Redis extends Cache implements CacheInterface
 {
     /**
      * 架构函数
@@ -32,7 +33,7 @@ class Redis extends Cache
         $this->options['prefix'] =  isset($options['prefix'])?  $options['prefix']  :   C('DATA_CACHE_PREFIX');
         $this->options['length'] =  isset($options['length'])?  $options['length']  :   0;
         $func = $options['persistent'] ? 'pconnect' : 'connect';
-        $this->handler  = new \Redis;
+        $this->handler  = new \Redis();
         $options['timeout'] === false ?
             $this->handler->$func($options['host'], $options['port']) :
             $this->handler->$func($options['host'], $options['port'], $options['timeout']);
@@ -45,7 +46,7 @@ class Redis extends Cache
      * @return mixed
      */
     public function get($name) {
-        N('cache_read',1);
+//        N('cache_read',1);
         $value = $this->handler->get($this->options['prefix'].$name);
         $jsonData  = unserialize( $value);
         return ($jsonData === NULL) ? $value : $jsonData;	//检测是否为JSON数据 true 返回JSON解析数组, false返回源数据
@@ -60,7 +61,7 @@ class Redis extends Cache
      * @return boolean
      */
     public function set($name, $value, $expire = null) {
-        N('cache_write',1);
+//        N('cache_write',1);
         if(is_null($expire)) {
             $expire  =  $this->options['expire'];
         }
@@ -71,10 +72,6 @@ class Redis extends Cache
             $result = $this->handler->setex($name, $expire, $value);
         }else{
             $result = $this->handler->set($name, $value);
-        }
-        if($result && $this->options['length']>0) {
-            // 记录缓存队列
-            $this->queue($name);
         }
         return $result;
     }

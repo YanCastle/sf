@@ -37,19 +37,31 @@ class Server
      * @param $data
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
+        $callback = swoole_get_callback('RECEIVE');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$fd,$from_id,$data]);
+        }
 //        标记变量，是否是第一次接受请求
         $_POST['_fd']=$fd;
         $_GET['_fd']=$fd;
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
 //        接受数据次数统计
-        swoole_receive();
+//        swoole_receive();
         $Data = swoole_in_check($fd,$data);
-        if($Data){
+        if(is_array($Data)&&$Data){
             swoole_bridge_check($fd,$Data);
-            $return = controller($Data['i'],$Data['d'],$Data['m']);
-            if(HTTP_COMMENT!==$return)
+            $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
+            if(HTTP_COMMENT!==$return){
                 swoole_out_check($fd,$return);
+            }else{
+                //写入HTTP_COMMENT的链接队列中
+                cache('[+]tmp_HTTP_COMMENT',$fd);
+            }
+        }elseif (is_string($Data)){
+            swoole_out_check($fd,$Data);
+        }else{
+            swoole_out_check($fd,'');
         }
         session('[id]',null);//删除session_id标识
     }
@@ -61,15 +73,20 @@ class Server
      * @param $from_id
      */
     function onClose(\swoole_server $server,$fd,$from_id){
+        $callback = swoole_get_callback('CLOSE');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$fd,$from_id]);
+        }
         unset($this->first[$fd]);
         $_GET['_fd']=$fd;
         L("连接断开：{$fd}");
         fd_name(null);
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
-        swoole_receive(null);
+//        swoole_receive(null);
         port_group($info['server_port'],null);
         http_header(null);
+        cache('[-]tmp_HTTP_COMMENT',$fd);
     }
 
     /**
@@ -79,10 +96,14 @@ class Server
      * @param $from_id
      */
     function onConnect(\swoole_server $server,$fd,$from_id){
+        $callback = swoole_get_callback('CONNECT');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$fd,$from_id]);
+        }
         $_GET['_fd']=$fd;
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
-//        TODO 检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
+//        检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
         L("新连接 服务器:{$info['server_port']} 客户端:{$info['remote_ip']}:{$info['remote_port']} 链接标识符:{$fd}",LOG_DEBUG);
         if(swoole_connect_check($server,$info,$fd)){
             fd_name($fd);
@@ -99,7 +120,12 @@ class Server
      * @param $from_id
      * @param $data
      */
-    function onTask(\swoole_server $server,$task_id,$from_id,$data){}
+    function onTask(\swoole_server $server,$task_id,$from_id,$data){
+        $callback = swoole_get_callback('TASK');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$task_id,$from_id,$data]);
+        }
+    }
 
     /**
      * 异步任务完成回调
@@ -107,17 +133,32 @@ class Server
      * @param $task_id
      * @param $data
      */
-    function onFinish(\swoole_server $server,$task_id,$data){}
+    function onFinish(\swoole_server $server,$task_id,$data){
+        $callback = swoole_get_callback('FINISH');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$task_id,$data]);
+        }
+    }
 
     /**
      * UDP回调
      */
-    function onPacket(\swoole_server $server,$data,array $client_info){}
+    function onPacket(\swoole_server $server,$data,array $client_info){
+        $callback = swoole_get_callback('PACKET');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$data,$client_info]);
+        }
+    }
     /**
      * 在主线程回调
      * @param \swoole_server $server
      */
-    function onStart(\swoole_server $server){
+    function onStart(\swoole_server $Server){
+        $callback = swoole_get_callback('START');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$Server]);
+        }
+
     }
     /**
      * Server结束时
@@ -128,7 +169,10 @@ class Server
      * @param \swoole_server $server
      */
     function onShutdown(\swoole_server $server){
-
+        $callback = swoole_get_callback('SHUTDOWN');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server]);
+        }
     }
 
     /**
@@ -138,6 +182,11 @@ class Server
      */
     function onWorkerStart(\swoole_server $server, $worker_id){
         $_GET['_server']=$server;
+        $callback = swoole_get_callback('WORKER_START');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$worker_id]);
+        }
+        swoole_timer_tick(5000,[$this,'onTimer']);
     }
 
     /**
@@ -145,18 +194,38 @@ class Server
      * @param \swoole_server $server
      * @param $worker_id
      */
-    function onWorkerStop(\swoole_server $server,$worker_id){}
+    function onWorkerStop(\swoole_server $server,$worker_id){
+        $callback = swoole_get_callback('WORKER_STOP');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$worker_id]);
+        }
+    }
 
     /**
      * 定时器触发
      * @param \swoole_server $server
      * @param $interval
      */
-    function onTimer(\swoole_server $server,$interval){
+    function onTimer($interval){
+        $callback = swoole_get_callback('TIMER');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$interval]);
+        }
         $Timer = C('SWOOLE.TIMER');
         if(isset($Timer[$interval])&&is_callable($Timer[$interval])){
             call_user_func_array($Timer[$interval],[$server,$interval]);
         }
+//       开始检测系统定时器设定。如检测fdName缓存是否失效，fdGroup是否失效等
+        //自动重启检测
+        $AutoReload = C('SWOOLE.AUTO_RELOAD');
+        if($AutoReload||is_callable($AutoReload)){
+            $Time = is_callable($AutoReload)?call_user_func($AutoReload):(is_numeric($AutoReload)?$AutoReload:C('AUTO_RELOAD_TIME'));
+            if($Time){
+                $GLOBALS['_SWOOLE']->reload();
+            }
+        }
+//        检测Db连接，超过20分钟未动作的链接将被释放掉
+        
     }
 
     /**
@@ -166,7 +235,9 @@ class Server
      * @param $from_worker_id
      * @param $message
      */
-    function onPipeMessage(\swoole_server $server,$from_worker_id,$message){}
+    function onPipeMessage(\swoole_server $server,$from_worker_id,$message){
+        pipe_message_dispatch($server,$message,$from_worker_id);
+    }
 
     /**
      * 当worker/task_worker进程发生异常后会在Manager进程内回调此函数。
@@ -175,14 +246,24 @@ class Server
      * @param $worker_pid
      * @param $exit_code
      */
-    function onWorkerError(\swoole_server $server,$worker_id,$worker_pid,$exit_code){}
+    function onWorkerError(\swoole_server $server,$worker_id,$worker_pid,$exit_code){
+        $callback = swoole_get_callback('WORKER_ERROR');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server,$worker_id,$worker_pid,$exit_code]);
+        }
+    }
 
     /**
      * 当管理进程启动时调用它
      * @param \swoole_server $server
      */
-    function onManagerStart(\swoole_server $server){
+    function onManagerStart(\swoole_server $Server){
         cache('[cleartmp]');
+        $callback = swoole_get_callback('MANAGER_START');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$Server]);
+        }
+
     }
 
     /**
@@ -191,6 +272,10 @@ class Server
      */
     function onManagerStop(\swoole_server $server){
         cache('[cleartmp]');
+        $callback = swoole_get_callback('MANAGER_STOP');
+        if(is_callable($callback)){
+            call_user_func_array($callback,[$server]);
+        }
     }
     protected function getModeClass($mode){
         if(!isset($this->_swoole[$mode])){

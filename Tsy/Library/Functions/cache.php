@@ -11,33 +11,58 @@ function S($key,$value=false,$expire=false,$Default=''){
 }
 
 /**
+ * 数值缓存操作
+ * @param $name
+ * @param $op
+ * @param int $value
+ * @param string $type
+ */
+function number_cache($name,$op,$value=1,$type=''){
+    $cache = \Tsy\Library\Cache\Cache::getCacheHandler($type);
+    if($name&&in_array($op,[\Tsy\Library\Cache\Cache::$setDec,\Tsy\Library\Cache\Cache::$setInc])){
+        if(\Tsy\Library\Cache\Cache::$setInc==$op){
+            $cache->setInc($name,$value);
+        }else{
+            $cache->setDec($name,$value);
+        }
+    }
+}
+
+/**
+ * 缓存值加
+ * @param $name
+ * @param int $value
+ * @return mixed
+ */
+function cache_inc($name,$value=1){
+    $cache = \Tsy\Library\Cache\Cache::getCacheHandler();
+    return $cache->setInc($name,$value);
+}
+
+/**
+ * 缓存值减
+ * @param $name
+ * @param int $value
+ * @return mixed
+ */
+function cache_dec($name,$value=1){
+    $cache = \Tsy\Library\Cache\Cache::getCacheHandler();
+    return $cache->setDec($name,$value);
+}
+/**
  * 缓存
  * @param $key
  * @param bool $value
  * @param bool $expire
  */
 function cache($key,$value=false,$expire=null,$type=''){
-    static $_map =[];
-    if(empty($type))  $type = C('DATA_CACHE_TYPE');
-    if(!isset($_map[$type])){
-        $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
-        if(class_exists($class)){
-            $cache = new $class([]);
-            $_map[$type]=$cache;
-        }
-        else{
-            L('缓存驱动类不存在',LOG_ERR);
-            return false;
-        }
-    }else{
-        $cache = $_map[$type];
-    }
+    $cache = \Tsy\Library\Cache\Cache::getCacheHandler($type);
     //开始数据处理
     if($cache){
         if(preg_match('/^\[[a-z]+\]$/',$key)){
             switch (substr($key,1,strlen($key)-2)){
                 case 'clear':
-                    if(method_exists($class,'clear'))
+                    if(method_exists($cache,'clear'))
                         $cache->clear();
                     break;
                 case 'cleartmp':
@@ -154,6 +179,7 @@ function cache($key,$value=false,$expire=null,$type=''){
  * @param bool $value
  * @param int $order 1表示先进先出 0 先进后出
  */
-function queue($key,$value=false,$order=1){
-
+function queue($key,$value=''){
+    $cache = \Tsy\Library\Cache\Cache::getCacheHandler();
+    return $cache->queue($key,$value);
 }

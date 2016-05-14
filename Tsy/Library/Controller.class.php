@@ -52,14 +52,29 @@ class Controller
         return class_exists($this->className)?controller($this->className.'/'.$Action,$Data,'','Object'):"{$this->className}/{$Action}方法不存在";
     }
     function get($ID=[]){
+        if(!$ID){
+            $ClassName=$_GET['_c'];
+            if(property_exists($this,$ClassName.'Object')){
+                $ObjectName=$ClassName.'Object';
+            }
+            $ID = $_POST[$this->$ObjectName->pk];
+        }
         if($ID){
-            return array_values(array_values(D($_GET['_c'])->obj($ID)))[0];
+            $ClassName=$_GET['_c'];
+            if(property_exists($this,$ClassName.'Object')){
+                $ObjectName=$ClassName.'Object';
+                $objs=$this->$ObjectName->get($ID);
+                return $objs;
+            }
         }
-        if(isset($this->Controller[$_GET['_c']])&&isset($this->Controller[$_GET['_c']][$_GET['_a']])){
-            return array_values(array_values(D($_GET['_c'])->obj([$_REQUEST[array_keys($this->Controller[$_GET['_c']][$_GET['_a']])[0]]])))[0];
-        }else{
-            return FALSE;
-        }
+//        if($ID){
+//            return array_values(array_values(D($_GET['_c'])->obj($ID)))[0];
+//        }
+//        if(isset($this->Controller[$_GET['_c']])&&isset($this->Controller[$_GET['_c']][$_GET['_a']])){
+//            return array_values(array_values(D($_GET['_c'])->obj([$_REQUEST[array_keys($this->Controller[$_GET['_c']][$_GET['_a']])[0]]])))[0];
+//        }else{
+//            return FALSE;
+//        }
     }
     function gets($P=1,$N=20,$Sort=[]){
         if($this->PRIKey){

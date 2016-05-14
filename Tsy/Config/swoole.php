@@ -7,6 +7,15 @@
  */
 return [
     'SWOOLE'=>[
+        'AUTO_RELOAD'=>function($int){
+            $Time = cache('LastRestartTime');
+            if((time()-$Time)>7200){
+                cache('LastRestartTime',time());
+                return true;
+            }
+            return false;
+        },
+        'AUTO_RELOAD_TIME'=>3,
         'CONF'=>[
             'daemonize' => !APP_DEBUG, //自动进入守护进程
             'task_worker_num' => 5,//开启task功能，

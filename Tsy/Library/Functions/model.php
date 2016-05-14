@@ -181,7 +181,7 @@ function import($class, $baseUrl = '', $ext=EXT) {
     if (substr($baseUrl, -1) != '/')
         $baseUrl    .= '/';
     $classfile       = $baseUrl . $class . $ext;
-    if (!class_exists(basename($class),false)) {
+    if (!class_exists(basename($class),false)&&file_exists($classfile)) {
         // 如果类不存在 则导入类库文件
         return require($classfile);
     }
@@ -191,4 +191,40 @@ function import($class, $baseUrl = '', $ext=EXT) {
 function db_connect($linkNum='',$config=[],$force){
     static $_dbs=[];
 //    需要监听数据库链接的最后动作时间，如果最后动作时间超时
+}
+
+/**
+ * 解析资源地址并导入类库文件
+ * 例如 module/controller addon://module/behavior
+ * @param string $name 资源地址 格式：[扩展://][模块/]资源名
+ * @param string $layer 分层名称
+ * @param integer $level 控制器层次
+ * @return string
+ */
+function parse_res_name($name,$layer,$level=1){
+    if(strpos($name,'://')) {// 指定扩展资源
+        list($extend,$name)  =   explode('://',$name);
+    }else{
+        $extend  =   '';
+    }
+    if(strpos($name,'/') && substr_count($name, '/')>=$level){ // 指定模块
+        list($module,$name) =  explode('/',$name,2);
+    }else{
+        $module =   $_GET['_m'] ? $_GET['_m'] : '' ;
+    }
+    $array  =   explode('/',$name);
+    if(!C('APP_USE_NAMESPACE')){
+        $class  =   parse_name($name, 1);
+        import($module.'/'.$layer.'/'.$class.$layer);
+    }else{
+        $class  =   $module.'\\'.$layer;
+        foreach($array as $name){
+            $class  .=   '\\'.parse_name($name, 1);
+        }
+        // 导入资源类库
+        if($extend){ // 扩展资源
+            $class      =   $extend.'\\'.$class;
+        }
+    }
+    return $class.$layer;
 }

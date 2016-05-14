@@ -13,6 +13,7 @@ class Db{
     public $tablePrefix='';
     public $db_name;
     public $tables=[];
+    public $views=[];
     function __construct($name='',$tablePrefix='',$connection='',$db_name=''){
         $this->Model=new Model($name,$tablePrefix,$connection);
         $this->tablePrefix=$tablePrefix?$tablePrefix:C('DB_PREFIX');
@@ -59,6 +60,15 @@ class Db{
         $views = $this->Model->query('SHOW VIEWS WHERE tables_in_' . $this->db_name . ' like "' . $db_prefix . '%"');
         return $tables||$views;
     }
+
+    /**
+     * 执行SQL导入文件
+     * @param Model $Model
+     * @param string $file
+     * @param string $content
+     * @param string $db_prefix
+     * @return bool
+     */
     static function build(Model $Model,$file='',$content='',$db_prefix=''){
         if($db_prefix==''){$db_prefix=C('DB_PREFIX');}
         if(!$Model instanceof Model){return false;}
@@ -95,20 +105,58 @@ class Db{
     function backup($type,$file=false,array $tables=[]){
 
     }
-    function getColumns($tables=[]){
+
+    /**
+     * 获取表的字段信息
+     * @param array $tables
+     * @param bool $prefix
+     * @return array|mixed
+     */
+    function getColumns($tables=[],$prefix=false,$cache=APP_DEBUG){
+        $one = false;
         if(is_string($tables)){
             $tables=[$tables];
+            $one=true;
         }
         if(!$tables){
             $tables=$this->getTableList();
-        }
-        $TableColumns=[];
-        foreach($tables as $table){
-            $Columns = $this->Model->query("SHOW columns From {$table}");
-            if($Columns){
-                $TableColumns[$table]=$Columns;
+        }else{
+            if(false===$prefix){
+                //不需要加前缀
+                $prefix='';
+            }elseif(true===$prefix){
+//                从当前环境中添加前缀
+                $prefix=C('DB_PREFIX');
+            }elseif(is_string($prefix)){
+//                设置前缀为
+//                $prefix=$prefix;
+            }else{
+                $prefix='';
             }
         }
-        return $TableColumns;
+        $TableColumns=[];
+        //是否强制刷新
+        if($cache){
+            foreach ($tables as $table){
+                if($CacheColumns = cache('ColumnsCache'.$prefix.$table)){
+                    $TableColumns[$table]=$CacheColumns;
+                }else{
+                    $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
+                    if($Columns){
+                        $TableColumns[$table]=$Columns;
+                    }
+                    cache('ColumnsCache'.$prefix.$table,$Columns);
+                }
+            }
+        }else{
+            foreach($tables as $table){
+                $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
+                if($Columns){
+                    $TableColumns[$table]=$Columns;
+                }
+                cache('ColumnsCache'.$prefix.$table,$Columns);
+            }
+        }
+        return $one?$TableColumns[$tables[0]]:$TableColumns;
     }
 }

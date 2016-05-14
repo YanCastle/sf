@@ -82,13 +82,21 @@ class Model {
         }elseif(!isset($this->tablePrefix)){
             $this->tablePrefix = C('DB_PREFIX');
         }
-
+        $this->getDbConfig($connection);
         // 数据库初始化操作
         // 获取数据库操作对象
         // 当前模型有独立的数据库连接信息
-        $this->db(0,empty($this->connection)?$connection:$this->connection,true);
+        $this->db(0,$this->connection,true);
     }
-
+    protected function getDbConfig($connection){
+        $Config = [];
+        foreach (C() as $Key=>$Value){
+            if(substr($Key,0,3)=='DB_'){
+                $Config[$Key]=$Value;
+            }
+        }
+        $this->connection = is_array($connection)?array_merge($Config,$connection):$Config;
+    }
     protected function _auto_map(){
 //        if(defined('APP_DEBUG')&&APP_DEBUG){
             $db   =  $this->dbName?:C('DB_NAME');
@@ -145,6 +153,9 @@ class Model {
      */
     public function flush() {
         // 缓存不存在则查询数据表信息
+        if(null==$this->db){
+            $this->db=$this->db(0,$this->connection,true);
+        }
         $this->db->setModel($this->name);
         $fields =   $this->db->getFields($this->getTableName());
         if(!$fields) { // 无法获取字段信息
@@ -1982,11 +1993,14 @@ class Model {
         }
         return $data;
 	}
-//    function get(){
-//	    func_get_args();
-//    }
-//    function gets(){}
-//    function put(){}
-//    function post(){}
-//    function del(){}
+
+    /**
+     * 开启异步操作，仅在swoole模块被加载的情况下可用，如果不是在该模块下被使用则需要定时触发
+     * @param null|callable $callback
+     * @return $this
+     */
+    function async($callback=null){
+        $this->options['async']=$callback;
+        return $this;
+    }
 }

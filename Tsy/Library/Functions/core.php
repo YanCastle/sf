@@ -6,16 +6,23 @@
  * Time: 21:36
  */
 function load_module_config($module){
-    //清空配置缓存
-    C(false,false);
-    //加载公共配置
-    C($GLOBALS['Config']);
-    $ModuleConfigPath = APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR.'Config/';
+    static $CurrentModel = '';
+    if($CurrentModel==$module){
+        return ;
+    }else{
+        //清空配置缓存
+        C(false,false);
+        //加载公共配置
+        C($GLOBALS['Config']);
+        $ModuleConfigPath = APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR.'Config/';
 //        加载项目配置文件,http模式则加载http.php,swoole模式则加载swoole.php
-    C(load_config($ModuleConfigPath.'config.php'));
-    !APP_DEBUG or C(load_config($ModuleConfigPath.'debug.php'));
-    C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
-    !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
+        C(load_config($ModuleConfigPath.'config.php'));
+        !APP_DEBUG or C(load_config($ModuleConfigPath.'debug.php'));
+        C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
+        !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
+        $CurrentModel=$module;
+    }
+
 }
 
 /**
@@ -67,6 +74,9 @@ function C($name=null, $value=null,$default=null) {
  * @return array
  */
 function load_config($file,$parse='php'){
+    if(!file_exists($file)){
+        return [];
+    }
     $ext  = pathinfo($file,PATHINFO_EXTENSION);
     switch($ext){
         case 'php':
@@ -92,6 +102,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
     }
+    if(!$mid){$mid=$_POST['_mid'];}
     $ModuleClassAction=explode('/',$i);
     $MCACount = count($ModuleClassAction);
     if($MCACount==2){
@@ -105,12 +116,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
     }
     $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
-    if(isset($GLOBALS['CurrentModule'])&&$GLOBALS['CurrentModule']==$M){
-
-    }else{
-        $GLOBALS['CurrentModule']=$M;
-        load_module_config($M);
-    }
+    load_module_config($M);
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
     $ClassName = implode('\\',[$M,$layer,$C.$layer]);
     if(!class_exists($ClassName)){
@@ -179,7 +185,7 @@ function invokeClass($Class,$A,$data){
         }else{
             $result = $ReflectMethod->invoke($Class);
         }
-//        TODO 判断result内容
+//        判断result内容
     }else{
         L('方法不是公共方法',LOG_ERR);
     }
@@ -190,7 +196,7 @@ function E($msg){
     L($msg);
 }
 
-function L($msg = false,$Type=6){
+function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
     if($msg){
         if(isset($_log[$Type])){
@@ -208,16 +214,25 @@ function L($msg = false,$Type=6){
 
 }
 
-function build_cache(){
+/**
+ * 创建初始化环境和缓存
+ * 创建缓存支持指定模块来创建
+ * @param array $Models
+ */
+function build_cache($Models=[]){
     $Builder=new \Tsy\Plugs\Build\Build();
-    foreach (scandir(APP_PATH) as $dir){
-        if(in_array($dir,['.','..','Common'])||!is_dir(APP_PATH.DIRECTORY_SEPARATOR.$dir)||APP_PATH.DIRECTORY_SEPARATOR.$dir==realpath(RUNTIME_PATH)){
-            continue;
+    if(!$Models){
+        foreach (scandir(APP_PATH) as $dir){
+            if(in_array($dir,['.','..','Common'])||!is_dir(APP_PATH.DIRECTORY_SEPARATOR.$dir)||APP_PATH.DIRECTORY_SEPARATOR.$dir==realpath(RUNTIME_PATH)){
+                continue;
+            }
+            $Models[]=$dir;
         }
-
+    }
+    foreach ($Models as $dir){
+        $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
         //Switch the Module Config
         load_module_config($dir);
-        $path = APP_PATH.DIRECTORY_SEPARATOR.$dir;
         $Builder->ModulePath=$path.DIRECTORY_SEPARATOR;
         $Builder->ModuleName= $dir;
         foreach (['db','controller','model'] as $conf){

@@ -25,10 +25,10 @@ class Http extends Swoole
         $HTTP = http_parse($str);
         if(is_array($HTTP)){
             if(isset($HTTP['Header'])){
-
+                $_SERVER = array_merge($_SERVER,$HTTP['Header']);
             }
             if(isset($HTTP['Method'])){
-
+                $_SERVER['REQUEST_METHOD']=$HTTP['Method'];
             }
             if(isset($HTTP['POST'])){
                 $_POST = array_merge($_POST,$HTTP['POST']);

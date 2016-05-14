@@ -8,6 +8,7 @@
 
 namespace Application\Controller;
 
+use Application\Object\ClientObject;
 use Tsy\Library\Controller;
 use Tsy\Plugs\WebQQ\WebQQ;
 
@@ -30,7 +31,17 @@ class IndexController extends Controller
 ////            sleep(2);
 //            echo json_encode($value,JSON_UNESCAPED_UNICODE);
 //        }
-       return 's';
+//        $o = O('Client');
+        
+        $Client = new ClientObject();
+        return $Client->search('8',[
+//            'SN'=>['EQ','B9C63246BEBEBA233E9C0F08D56AA0C8'],
+            'Printer.PrinterID'=>26,
+            'Printer.FullName'=>['LIKE',"%4725%"],
+            'Client.PrinterClientID'=>4,
+            'Client.SN'=>['LIKE',"%B9C6%"]
+        ]);
+
     }
     /**
      * 空操作
@@ -38,4 +49,11 @@ class IndexController extends Controller
      * @param array|string $Data 数据
      */
     function _empty($Action,$Data){}
+    function sleep(){
+        sleep(10);
+        return 'out';
+    }
+    function check(){
+        return 'sds';
+    }
 }
