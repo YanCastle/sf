@@ -69,6 +69,7 @@ class AuthController extends Auth
             $User=M($this->Prefix.'User')->where(['Mail'=>$UN,'PWD'=>password_hash($PWD,PASSWORD_DEFAULT)])->find();
             if($User['UID']){
                  session('UID',$User['UID']);
+                return true;
             }else{
                 return '登录名或密码错误';
             }
@@ -76,6 +77,7 @@ class AuthController extends Auth
             $User=M($this->Prefix.'User')->where(['Phone'=>['like',$UN],'_logic'=>'OR','UN'=>['like'=>$UN]])->find();
             if(password_hash($PWD,PASSWORD_DEFAULT)==$User['PWD']){
                 session('UID',$User['UID']);
+                return true;
             }else{
                 return '登录名或密码错误';
             }
