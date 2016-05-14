@@ -66,11 +66,20 @@ class AuthController extends Auth
 //        用户名解析
         $MailCheck=strpos ($UN,'@');
         if($MailCheck){
-
+            $User=M($this->Prefix.'User')->where(['Mail'=>$UN,'PWD'=>password_hash($PWD,PASSWORD_DEFAULT)])->find();
+            if($User['UID']){
+                 session('UID',$User['UID']);
+            }else{
+                return '登录名或密码错误';
+            }
         }else{
-
+            $User=M($this->Prefix.'User')->where(['Phone'=>['like',$UN],'_logic'=>'OR','UN'=>['like'=>$UN]])->find();
+            if(password_hash($PWD,PASSWORD_DEFAULT)==$User['PWD']){
+                session('UID',$User['UID']);
+            }else{
+                return '登录名或密码错误';
+            }
         }
-
     }
 
 }
