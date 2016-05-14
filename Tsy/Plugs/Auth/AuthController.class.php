@@ -49,7 +49,7 @@ class AuthController extends Auth
     }
     //用户绑定到用户组
     function bindGroup($UID,$GroupID){
-        $UID=M($this->Prefix.'AuthGroupAccess')->add('UID',$GroupID);
+        $UID=M($this->Prefix.'AuthGroupAccess')->add(['UID'=>$UID,'GroupID'=>$GroupID]);
         return $UID?$UID:'用户组绑定失败';
     }
 //    用户从用户组中解绑
