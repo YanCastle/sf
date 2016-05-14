@@ -4,7 +4,7 @@
 -- ----------------------------
  DROP TABLE IF EXISTS `{$PREFIX}auth_rule`;
 CREATE TABLE `{$PREFIX}auth_rule` (
-    `ID` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+    `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `Name` char(80) NOT NULL DEFAULT '',
     `Title` char(20) NOT NULL DEFAULT '',
     `Status` tinyint(1) NOT NULL DEFAULT '1',
@@ -18,7 +18,7 @@ CREATE TABLE `{$PREFIX}auth_rule` (
 -- ----------------------------
  DROP TABLE IF EXISTS `{$PREFIX}auth_group`;
 CREATE TABLE `{$PREFIX}auth_group` (
-    `ID` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+    `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `Title` char(100) NOT NULL DEFAULT '',
     `Status` tinyint(1) NOT NULL DEFAULT '1',
     `Rules` char(80) NOT NULL DEFAULT '',
@@ -30,8 +30,8 @@ CREATE TABLE `{$PREFIX}auth_group` (
 -- ----------------------------
 DROP TABLE IF EXISTS `{$PREFIX}auth_group_access`;
 CREATE TABLE `{$PREFIX}auth_group_access` (
-    `UID` mediumint(8) unsigned NOT NULL,
-    `GroupID` mediumint(8) unsigned NOT NULL,
+    `UID` int(11) unsigned NOT NULL,
+    `GroupID` int(11) unsigned NOT NULL,
     UNIQUE KEY `UIDGroupID` (`UID`,`GroupID`),
     KEY `UID` (`UID`),
     KEY `GroupID` (`GroupID`)
