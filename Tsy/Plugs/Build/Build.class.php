@@ -159,5 +159,45 @@ class {$ModelName}Model extends  Model{}";
         file_put_contents($ModelPath,"<?php \r\nreturn $ModelConfig;");
         file_put_contents($ModelPath,php_strip_whitespace($ModelPath));
     }
-
+    function buildObjectConfig(){
+        $db_php_path = $this->ModulePath.'Config/db.php';
+        $dbConf = include $db_php_path;
+        $ObjectConfig = [];
+        $ModuleName  = $this->ModuleName;
+        foreach($dbConf as $table=>$columns){
+            if(!isset($ObjectConfig[$table])){$ObjectConfig[$table]=[];}
+            $ObjectName = '';
+            foreach(explode('_',$table) as $tb){
+                $ObjectName.=ucwords($tb);
+            }
+            $pk='';
+            foreach($columns as $field){
+                if($field['extra']=="auto_increment"||$field['key']=="PRI"){
+                    $pk=$field['field'];
+                    $ObjectConfig[$ObjectName]['_pk']=explode(' ',trim(str_replace(['(',')'],' ',$field['type'])));
+                }
+                $ObjectConfig[$ObjectName][$field['field']]=explode(' ',trim(str_replace(['(',')'],' ',$field['type'])));
+            }
+            $ObjectFileContent = "<?php
+namespace {$this->ModuleName}\\Object;
+use Tsy\\Library\\Object;
+class {$ObjectName}Object extends  Object{
+    protected \$main='{$ObjectName}';
+    protected \$pk='{$pk}';
+    protected \$link=[];
+    protected \$property=[];
+}";
+            $ObjectFilePath = $this->ModulePath."Object/{$ObjectName}Object.class.php";
+            if(!is_dir(dirname($ObjectFilePath))){
+                @mkdir(dirname($ObjectFilePath));
+            }
+            if(!file_exists($ObjectFilePath))
+                file_put_contents($ObjectFilePath,$ObjectFileContent);
+        }
+        $ObjectConfig = var_export($ObjectConfig,true);
+        $ObjectConfig = str_replace(['array (',')'],['[',']'],$ObjectConfig);
+        $ObjectPath = $this->ModulePath.'Config/object.php';
+        file_put_contents($ObjectPath,"<?php \r\nreturn $ObjectConfig;");
+        file_put_contents($ObjectPath,php_strip_whitespace($ObjectPath));
+    }
 }
