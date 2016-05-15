@@ -293,7 +293,7 @@ class Model {
             foreach ($data as $key=>$val){
                 if(!in_array($key,$fields,true)){
                     if(!empty($this->options['strict'])){
-                        E(L('_DATA_TYPE_INVALID_').':['.$key.'=>'.$val.']');
+                        L(E('_DATA_TYPE_INVALID_').':['.$key.'=>'.$val.']');
                     }
                     unset($data[$key]);
                 }elseif(is_scalar($val)) {
@@ -695,7 +695,7 @@ class Model {
                     }
                 }elseif(!is_numeric($key) && '_' != substr($key,0,1) && false === strpos($key,'.') && false === strpos($key,'(') && false === strpos($key,'|') && false === strpos($key,'&')){
                     if(!empty($this->options['strict'])){
-                        E(L('_ERROR_QUERY_EXPRESS_').':['.$key.'=>'.$val.']');
+                        L(E('_ERROR_QUERY_EXPRESS_').':['.$key.'=>'.$val.']');
                     }
                     unset($options['where'][$key]);
                 }
@@ -1649,7 +1649,7 @@ class Model {
         }elseif(is_string($data)){
             parse_str($data,$data);
         }elseif(!is_array($data)){
-            E(L('_DATA_TYPE_INVALID_'));
+            L(E('_DATA_TYPE_INVALID_'));
         }
         $this->data = $data;
 	    $this->_serialize();
@@ -1743,7 +1743,7 @@ class Model {
                 $options =  $union;
             }
         }else{
-            E(L('_DATA_TYPE_INVALID_'));
+            L(E('_DATA_TYPE_INVALID_'));
         }
         $this->options['union'][]  =   $options;
         return $this;

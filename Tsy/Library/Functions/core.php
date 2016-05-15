@@ -93,7 +93,7 @@ function load_config($file,$parse='php'){
             if(function_exists($parse)){
                 return $parse($file);
             }else{
-                E(L('_NOT_SUPPORT_').':'.$ext);
+                L(E('_NOT_SUPPORT_').':'.$ext);
             }
     }
 }
@@ -192,8 +192,18 @@ function invokeClass($Class,$A,$data){
     return $result;
 }
 
-function E($msg){
-    L($msg);
+/**
+ * @param $Code
+ * @return bool|float|int|mixed|string
+ */
+function E($Code){
+    static $_arrays=[];
+    if(is_array($Code)){
+        $_arrays=array_merge($_arrays,$Code);
+    }elseif(is_scalar($Code)){
+        return isset($_arrays[$Code])?$_arrays[$Code]:$Code;
+    }
+    return false;
 }
 
 function L($msg = false,$Type=6,$trace=''){
