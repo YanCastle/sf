@@ -12,7 +12,7 @@ function http_header($header=false){
     static $headers=[
         'HTTP/1.1'=>'200 OK',
         'Connection:'=>'keep-alive',
-        'Content-Type:'=>'text/html',
+        'Content-Type:'=>'text/html; charset=utf-8',
     ];
     if(false===$header){
         return $headers;
