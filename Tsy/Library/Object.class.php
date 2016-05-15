@@ -25,6 +25,9 @@ class Object
     const RELATION_TABLE_PROPERTY="\x05";
     const RELATION_TABLE_LINK_HAS_PROPERTY="\x06";
     const RELATION_TABLE_LINK_TABLES="\x07";
+    const RELATION_OBJECT="\x08";
+    const RELATION_OBJECT_NAME="\x09";
+    const RELATION_OBJECT_COLUMN="\x10";
 
     protected $main='';//主表名称，默认为类名部分
     protected $pk='';//表主键，默认自动获取
@@ -310,6 +313,7 @@ class Object
             return false;
         }
         $Objects = [];
+        $PropertyObjects = [];
         $Model = M($this->main);
         $UpperMainTable = strtoupper(parse_name($this->main));
         $ArrayProperties=[];
@@ -326,6 +330,8 @@ class Object
                     //一对多
                     $ArrayProperties[$PropertyName]=$Config;
                 }
+            }elseif(isset($Config[self::RELATION_TABLE_PROPERTY])&&isset($Config[self::PROPERTY_OBJECT])&&true===$Config[self::PROPERTY_OBJECT]&&isset($Config[self::RELATION_OBJECT_COLUMN])&&isset($Config[self::RELATION_OBJECT_NAME])){
+                $PropertyObjects[$PropertyName]=$Config;
             }
         }
         $Objects = $Model->where([$this->pk=>['IN',$IDs]])->select();
@@ -363,14 +369,31 @@ class Object
                 L('Obj配置有问题',LOG_ERR,$Config);
             }
         }
+        //处理对象配置
+        $PropertyObjectValues=[];
+        foreach ($PropertyObjects as $Key=>$Config){
+            $ObjectFullName = $Config[self::RELATION_OBJECT_NAME].'Object';
+            if(!property_exists($this,$ObjectFullName)){
+                $ClassName = $_GET['_m'].'\\Object\\'.$ObjectFullName;
+                $this->$ObjectFullName=new $ClassName;
+            }
+            $ObjectIDs = array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN]);
+            $PropertyObjectValues[$Key]=is_array($ObjectIDs)&&$ObjectIDs?$this->$ObjectFullName->gets($ObjectIDs):[];
+        }
 //         组合生成最终的Object对象
         $Objects = array_key_set($Objects,$this->pk);
         foreach ($Objects as $ID=>$Object){
+//            处理一对多关系
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig){
                 $Objects[$ID][$PropertyName]=isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
             }
+//            处理多对多关系
             foreach ($this->link as $PropertyName=>$PropertyConfig){
                 $Objects[$ID][$PropertyName]=isset($LinkPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]])?$LinkPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]:[];
+            }
+//            处理Object配置
+            foreach ($PropertyObjects as $Key=>$Config){
+                $Objects[$ID][$Key]=isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]])?$PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]:[];
             }
         }
         return $Objects;
