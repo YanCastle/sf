@@ -408,7 +408,13 @@ class Object
             $ObjectFullName = $Config[self::RELATION_OBJECT_NAME] . 'Object';
             if (!property_exists($this, $ObjectFullName)) {
                 $ClassName = $_GET['_m'] . '\\Object\\' . $ObjectFullName;
-                $this->$ObjectFullName = new $ClassName;
+                if(class_exists($ClassName)){
+                    $this->$ObjectFullName = new $ClassName;
+                }else{
+                    $PropertyObjectValues[$Key]=[];
+                    L('对象化配置中配置的对象类不存在：'.$ClassName,LOG_ERR);
+                    continue;
+                }
             }
             $ObjectIDs = array_column($Objects, $Config[self::RELATION_OBJECT_COLUMN]);
             $PropertyObjectValues[$Key] = is_array($ObjectIDs) && $ObjectIDs ? $this->$ObjectFullName->gets($ObjectIDs) : [];
