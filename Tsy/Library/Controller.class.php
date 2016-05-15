@@ -54,8 +54,10 @@ class Controller
     function get($ID=[]){
         if(!$ID){
             $ClassName=$_GET['_c'];
-            if(property_exists($this,$ClassName.'Object')){
-                $ObjectName=$ClassName.'Object';
+            $ObjectName=$ClassName.'Object';
+            $NameSpace = implode('\\',[$_GET['_m'],'Object',$ObjectName]);
+            if(!property_exists($this,$ClassName.'Object')){
+                $this->$ObjectName=new $NameSpace;
             }
             $ID = $_POST[$this->$ObjectName->pk];
         }
