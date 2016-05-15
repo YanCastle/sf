@@ -52,8 +52,9 @@ class Swoole implements Mode
                 die('创建Swool对象失败');
             }
 //            开始创建共享table
-//            $HandleTable = new \swoole_table(1048576);
-//            $HandleTable->column()
+            foreach ($SwooleConfig['TABLE'] as $table){
+                
+            }
             swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
                 $Server->set($SwooleConfig['CONF']);
