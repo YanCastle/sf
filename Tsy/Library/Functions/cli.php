@@ -373,7 +373,8 @@ function swoole_load_config(){
                 'worker_num'=>2,
             ],C('SWOOLE.CONF')),
             'PortModeMap'=>[],
-            'PROCESS'=>array_merge([],C('SWOOLE.PROCESS'))
+            'PROCESS'=>array_merge([],C('SWOOLE.PROCESS')),
+            'TABLE'=>array_merge([],C('SWOOLE.TABLE'))
         ];
         foreach ($Listen as $Config) {
             $Config['TYPE'] = isset($Config['TYPE']) ? $Config['TYPE'] : 'Socket';

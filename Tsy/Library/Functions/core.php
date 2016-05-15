@@ -235,7 +235,7 @@ function build_cache($Models=[]){
         load_module_config($dir);
         $Builder->ModulePath=$path.DIRECTORY_SEPARATOR;
         $Builder->ModuleName= $dir;
-        foreach (['db','controller','model'] as $conf){
+        foreach (['db','controller','model','object'] as $conf){
             if(!file_exists($path.DIRECTORY_SEPARATOR.'Config'.DIRECTORY_SEPARATOR.$conf.'.php')){
                 call_user_func([$Builder,'build'.ucfirst($conf).'Config']);
             }
