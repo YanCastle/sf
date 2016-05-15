@@ -57,6 +57,7 @@ class Tsy
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config'.CONFIG_SUFFIX.'.php'));
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).'.php'));
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
+        E(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/error.php'));
 //        加载调试配置
         !APP_DEBUG or C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/debug.php'));
 //        加载项目配置文件,http模式则加载http.php,swoole模式则加载swoole.php

@@ -17,6 +17,7 @@ function load_module_config($module){
         $ModuleConfigPath = APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR.'Config/';
 //        加载项目配置文件,http模式则加载http.php,swoole模式则加载swoole.php
         C(load_config($ModuleConfigPath.'config.php'));
+        E(load_config($ModuleConfigPath.'error.php'));
         !APP_DEBUG or C(load_config($ModuleConfigPath.'debug.php'));
         C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
         !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
