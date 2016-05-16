@@ -94,6 +94,10 @@ class Tsy
                 $file_path = dirname(TSY_PATH) . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.class.php';
             }else{
                 $file_path = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.class.php';
+                if(!file_exists($file_path)){
+//                    TODO 需要检测文件是否存在，如果不存在的情况下要遍历Vendor目录检查是否有这个类的名称存在
+//                    foreach ([TSY_PATH.DIR])
+                }
             }
             if(file_exists($file_path)){
                 include($file_path);
