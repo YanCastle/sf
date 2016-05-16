@@ -27,6 +27,10 @@ class Controller
             $this->PRIKey = $this->Controller[$_GET['_c']]['_pki'];
             $this->Params=$this->Controller[$_GET['_c']][$_GET['_a']];
         }
+        $ObjectName = $_GET['_m'].'\\Object\\'.$_GET['_c'].'Object';
+        if(class_exists($ObjectName)){
+            $this->PRIKey = (new $ObjectName)->pk;
+        }
     }
     function __call($name, $arguments)
     {

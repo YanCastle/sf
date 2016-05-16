@@ -371,7 +371,9 @@ class Model {
     // 插入数据前的回调方法
     protected function _before_insert(&$data,$options) {}
     // 插入成功后的回调方法
-    protected function _after_insert($data,$options) {}
+    protected function _after_insert($data,$options) {
+        L($this->getLastSql(),LOG_SQL);
+    }
 
     public function addAll($dataList,$options=array(),$replace=false){
         $this->_auto_map();
@@ -492,7 +494,9 @@ class Model {
     // 更新数据前的回调方法
     protected function _before_update(&$data,$options) {}
     // 更新成功后的回调方法
-    protected function _after_update($data,$options) {}
+    protected function _after_update($data,$options) {
+        L($this->getLastSql(),LOG_SQL);
+    }
 
     /**
      * 删除数据
@@ -647,7 +651,9 @@ class Model {
         return $this->_unserialize($resultSet);
     }
     // 查询成功后的回调方法
-    protected function _after_select(&$resultSet,$options) {}
+    protected function _after_select(&$resultSet,$options) {
+        L($this->getLastSql(),LOG_SQL);
+    }
 
     /**
      * 生成查询SQL 可用于子查询
@@ -1417,7 +1423,9 @@ class Model {
             array_shift($parse);
         }
         $sql  =   $this->parseSql($sql,$parse);
-        return $this->db->query($sql);
+        $rs = $this->db->query($sql);
+        L($this->getLastSql(),LOG_SQL);
+        return $rs;
     }
 
     /**
@@ -1433,7 +1441,9 @@ class Model {
             array_shift($parse);
         }
         $sql  =   $this->parseSql($sql,$parse);
-        return $this->db->execute($sql);
+        $rs = $this->db->execute($sql);
+        L($this->getLastSql(),LOG_SQL);
+        return $rs;
     }
 
     /**
