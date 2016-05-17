@@ -4,6 +4,21 @@
 2. 集成Model模型管理，移植TP的Model实现
 3. 自动缓存，基于Redis做缓存
 
+环境要求：
+1/Linux
+2/php5.5+
+
+扩展要求
+swoole
+redis
+msgpack
+json
+fileinfo
+pdo
+pdo-mysql
+mysqlnd
+mysqli
+
 **注意事项**
 需要区分缓存级别，一个是应用CLI应用模式下的临时缓存，这部分缓存需要在每次启动服务时清空
 一种是持久缓存，启动应用不需要清空，如Session
