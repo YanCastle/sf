@@ -8,7 +8,11 @@
 
 namespace Tsy\Library;
 
-
+/**
+ * Class Controller
+ * 请尽量不要在Controller中直接调用Model
+ * @package Tsy\Library
+ */
 class Controller
 {
     protected $className='';

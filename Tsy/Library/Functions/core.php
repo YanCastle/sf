@@ -173,12 +173,12 @@ function invokeClass($Class,$A,$data){
             foreach ($ReflectMethod->getParameters() as $Param){
                 $ParamName=$Param->getName();
                 if(isset($data[$ParamName])){
-                    if(!(is_string($data[$ParamName])&&strlen($data[$ParamName])>0)){
-                        L($ParamName.':参数为空',LOG_ERR);
-                        return null;
-                    }else{
+//                    if(!(is_string($data[$ParamName])&&strlen($data[$ParamName])>0)){
+//                        L($ParamName.':参数为空',LOG_ERR);
+//                        return null;
+//                    }else{
                         $args[]=$data[$ParamName];
-                    }
+//                    }
                 }elseif($Param->isDefaultValueAvailable()){
                     $args[]=$Param->getDefaultValue();
                 }else{
