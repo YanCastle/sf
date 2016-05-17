@@ -435,8 +435,27 @@ class Object
         return $Objects;
     }
 
-    function save()
+    function save($ID,$Params)
     {
+        $Where=[];
+        if(is_array($ID)){
+            foreach ($ID as $v){
+                if(!is_numeric($v)){
+                    L(E('_SAVE_ID_'));
+                    return false;
+                }
+            }
+            $Where[$this->pk]=['IN',$ID];
+        }elseif (is_numeric($ID)){
+            $Where[$this->pk]=$ID;
+        }else{
+            L(E('_SAVE_ID_'));
+        }
+        if($Params&&is_array($Params)){
+            return M($this->main)->where($Where)->save($Params)!==false;
+        }else{
+            L(E('_SAVE_DATA_'));
+        }
     }
     function __call($name, $arguments)
     {
