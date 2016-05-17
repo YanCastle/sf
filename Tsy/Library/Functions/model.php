@@ -228,3 +228,34 @@ function parse_res_name($name,$layer,$level=1){
     }
     return $class.$layer;
 }
+
+/**
+ *
+ * @param $Group
+ * @param $Params
+ * @param bool $Kv
+ * @return array
+ */
+function param_group($Group,$Params,$Kv=false){
+    if(!$Kv){
+        $T = $Group;
+        $Group=[];
+        foreach ($T as $k=>$v){
+            foreach ($v as $p){
+                $Group[$p]=$k;
+            }
+        }
+    }
+    $Data=[[]];
+    foreach ($Params as $K=>$V){
+        if($Key = array_search($K,$Group)){
+            if(!isset($Data[$Key])){
+                $Data[$Key]=[];
+            }
+            $Data[$Key][$K]=$V;
+        }else{
+            $Data[0][$K]=$V;
+        }
+    }
+    return $Data;
+}
