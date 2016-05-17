@@ -9,7 +9,7 @@
  * 实例化对象类
  * @param string $Name 对象名
  * @param array $Config 初始化对象时的参数
- * @return mixed|\TSy\Library\Object
+ * @return \TSy\Library\Object
  */
 function O($Name,$Config=[]){
 //    $Config=[
@@ -36,4 +36,10 @@ function O($Name,$Config=[]){
         $OBJ=new \TSy\Library\Object($Name);
     }
     return $OBJ;
+}
+
+function object_generate($Objects,$Properties){
+    foreach ($Objects as $ObjectID=>$Object){
+//        $Objects[$ObjectID]
+    }
 }

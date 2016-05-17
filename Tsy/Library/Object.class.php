@@ -438,4 +438,13 @@ class Object
     function save()
     {
     }
+    function __call($name, $arguments)
+    {
+        $cmd = explode('_',$name);
+        switch ($cmd[0]){
+            case 'parent':
+                return call_user_func_array([$this,$cmd[1]],$arguments);
+                break;
+        }
+    }
 }

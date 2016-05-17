@@ -209,7 +209,7 @@ function E($Code){
 
 function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
-    if($msg){
+    if($msg||is_numeric($Type)){
         if(isset($_log[$Type])){
             $_log[$Type]=$msg;
         }else{
@@ -217,9 +217,9 @@ function L($msg = false,$Type=6,$trace=''){
         }
         //TODO 完善log函数
         echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
-    }elseif(false===$msg){
+    }elseif(false===$msg&&$Type===false){
         return $Type==0?$_log:$_log[$Type];
-    }elseif(null===$msg){
+    }elseif(null===$msg&&$Type===null){
         $_log=[];
     }
 
