@@ -447,4 +447,7 @@ class Object
                 break;
         }
     }
+    function where($Where){
+        return M($this->main)->where($Where)->getField($this->pk,true);
+    }
 }
