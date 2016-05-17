@@ -70,7 +70,7 @@ class Controller
             if(property_exists($this,$ClassName.'Object')){
                 $ObjectName=$ClassName.'Object';
                 $objs=$this->$ObjectName->get($ID);
-                return $objs;
+                return $objs?$objs[$ID]:[];
             }
         }
 //        if($ID){
