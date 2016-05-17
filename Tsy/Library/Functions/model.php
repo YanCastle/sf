@@ -248,11 +248,11 @@ function param_group($Group,$Params,$Kv=false){
     }
     $Data=[[]];
     foreach ($Params as $K=>$V){
-        if($Key = array_search($K,$Group)){
-            if(!isset($Data[$Key])){
-                $Data[$Key]=[];
+        if(isset($Group[$K])){
+            if(!isset($Data[$Group[$K]])){
+                $Data[$Group[$K]]=[];
             }
-            $Data[$Key][$K]=$V;
+            $Data[$Group[$K]][$K]=$V;
         }else{
             $Data[0][$K]=$V;
         }
