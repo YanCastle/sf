@@ -39,7 +39,7 @@ if(extension_loaded('swoole')&&!defined('APP_MODE')){
 if(version_compare(PHP_VERSION,'5.5.0','<')) {
     die('需要5.5.0以上的PHP版本');
 }
-
+define('APP_MODE_LOW',strtolower(APP_MODE));
 if('http'==strtolower(APP_MODE)&&isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$_SERVER['REQUEST_METHOD']){
     if(isset($_SERVER['HTTP_ORIGIN'])) {
         define('Domain', $_SERVER['HTTP_ORIGIN']);

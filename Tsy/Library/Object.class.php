@@ -36,6 +36,7 @@ class Object
     protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
     protected $_read_filter = [];//输入读取过滤配置
+    public $is_dic=false;
     public $map = [
 //        自动生成
     ];//字段=》类型 表名 映射
@@ -468,5 +469,16 @@ class Object
     }
     function where($Where){
         return M($this->main)->where($Where)->getField($this->pk,true);
+    }
+
+    /**
+     * 获取所有对象，当且仅当这个对象被定义成字典对象时可用
+     * @return array|bool|null
+     */
+    function getAll(){
+        if($this->is_dic){
+            return $this->gets(M($this->main)->getField($this->pk,true));
+        }
+        return null;
     }
 }

@@ -86,7 +86,7 @@ class Controller
 //            return FALSE;
 //        }
     }
-    function gets($P=1,$N=20,$Sort=[]){
+    function gets(){
         if($this->PRIKey){
             $Model = D($_GET['_c']);
             if(isset($_REQUEST[$this->PRIKey.'s'])&&is_array($_REQUEST[$this->PRIKey.'s'])){
@@ -94,12 +94,7 @@ class Controller
             }else{
                 $IDs = $Model->page($P,$N)->order($Sort)->getField($this->PRIKey,true);
             }
-            return $IDs!==false?[
-                'L'=>array_values($Model->obj($IDs)),
-                'P'=>$P,
-                'N'=>$N,
-                'T'=>isset($_REQUEST[$this->PRIKey.'s'])&&is_array($_REQUEST[$this->PRIKey.'s'])?count($_REQUEST[$this->PRIKey.'s']):$Model->count()
-            ]:FALSE;
+            return $IDs!==false?array_values($Model->obj($IDs)):FALSE;
         }else{
             return FALSE;
         }
