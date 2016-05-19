@@ -20,6 +20,7 @@ class Controller
     public $Controller=[];
     public $PRIKey="";
     public $Params=[];
+    public $__CLASS__='';
 
     function __construct()
     {
@@ -35,6 +36,7 @@ class Controller
         if(class_exists($ObjectName)){
             $this->PRIKey = (new $ObjectName)->pk;
         }
+        $this->__CLASS__ = get_class($this);
     }
     function __call($name, $arguments)
     {
@@ -47,7 +49,7 @@ class Controller
         }
     }
     protected function getControllerName(){
-        return substr(__CLASS__,0,strlen(__CLASS__)-10);
+        return substr($this->__CLASS__,0,strlen($this->__CLASS__)-10);
     }
     function set_swoole($swoole){
         $this->swoole=$swoole;
@@ -87,6 +89,10 @@ class Controller
 //        }
     }
     function gets(){
+        $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
+        if(class_exists($ObjectClass)&&$this->PRIKey&&isset($_POST[$this->PRIKey.'s'])){
+            return array_values((new $ObjectClass)->gets($_POST[$this->PRIKey.'s']));
+        }
         if($this->PRIKey){
             $Model = D($_GET['_c']);
             if(isset($_REQUEST[$this->PRIKey.'s'])&&is_array($_REQUEST[$this->PRIKey.'s'])){
