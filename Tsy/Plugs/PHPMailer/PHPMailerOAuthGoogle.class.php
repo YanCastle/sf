@@ -16,7 +16,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.
  */
-
+namespace Tsy\Plugs\PHPMailer;
 /**
  * PHPMailerOAuthGoogle - Wrapper for League OAuth2 Google provider.
  * @package PHPMailer

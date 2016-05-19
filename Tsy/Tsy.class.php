@@ -86,9 +86,9 @@ class Tsy
         }
     }
     static function autoload($class){
-        if(isset(self::$class_map[$class])){
-            include_once self::$class_map[$class];
-        }elseif(false !== strpos($class,'\\')) {
+//        if(isset(self::$class_map[$class])){
+//            include_once self::$class_map[$class];
+        if(false !== strpos($class,'\\')) {
             //带命名空间的类
             if ('Tsy' == substr($class, 0, 3)){
                 $file_path = dirname(TSY_PATH) . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.class.php';
@@ -97,13 +97,43 @@ class Tsy
                 if(!file_exists($file_path)){
 //                    TODO 需要检测文件是否存在，如果不存在的情况下要遍历Vendor目录检查是否有这个类的名称存在
 //                    foreach ([TSY_PATH.DIR])
+                    $ClassPath = explode('/',$class);
+                    $ClassName = $ClassPath[count($ClassPath)-1];
+                    $PlugsPath = TSY_PATH.'/Plugs/'.$ClassName;
+                    if(is_dir($PlugsPath)){
+                        foreach ([
+                                     $PlugsPath.'/'.$ClassName.'.class.php',
+                                     $PlugsPath.'/'.$ClassName.'.php',
+                                     $PlugsPath.'/'.$ClassName.'Autoload.php',
+                                 ] as $file_path){
+                            if(file_exists($file_path)){
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if(file_exists($file_path)){
+                include($file_path);
+            }
+        }else{
+            $ClassName = trim($class,'\\');
+            $PlugsPath = TSY_PATH.'/Plugs/'.$ClassName;
+            if(is_dir($PlugsPath)){
+                foreach ([
+                             $PlugsPath.'/'.$ClassName.'.class.php',
+                             $PlugsPath.'/'.$ClassName.'.php',
+                             $PlugsPath.'/'.$ClassName.'Autoload.php',
+                         ] as $file_path){
+                    if(file_exists($file_path)){
+                        break;
+                    }
                 }
             }
             if(file_exists($file_path)){
                 include($file_path);
             }
         }
-
     }
     /**
      * 自定义异常处理

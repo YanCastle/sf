@@ -170,6 +170,7 @@ function invokeClass($Class,$A,$data){
 //        是否需要参数绑定
         if($ReflectMethod->getNumberOfParameters()>0){
             $args = [];
+//            $Parameters = $ReflectMethod->getParameters();
             foreach ($ReflectMethod->getParameters() as $Param){
                 $ParamName=$Param->getName();
                 if(isset($data[$ParamName])){
