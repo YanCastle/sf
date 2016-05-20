@@ -100,6 +100,10 @@ function load_config($file,$parse='php'){
 }
 
 function controller($i,$data,$mid='',$layer="Controller"){
+    static $LoginRequire=null;
+    if(null===$LoginRequire){
+        $LoginRequire=C('LOGIN_REQUIRE');
+    }
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
     }
@@ -114,6 +118,30 @@ function controller($i,$data,$mid='',$layer="Controller"){
     }else{
         L($i.'错误',LOG_ERR);
         return null;
+    }
+    //TODO 检查是否需要登录
+    if(is_callable('is_login')){
+        $LoginCheck = false;
+        if(in_array($M,$LoginRequire )){
+            //整个模块都需要登录
+            $LoginCheck=true;
+        }elseif (isset($LoginRequire[$M])&&is_array($LoginRequire[$M])){
+            if(in_array($C,$LoginRequire[$M])){
+                //整个类下面的都需要
+                $LoginCheck=true;
+            }elseif(isset($LoginRequire[$M][$C])&&is_array($LoginRequire[$M][$C])){
+                if(in_array($A,$LoginRequire[$M][$A] )){
+                    $LoginCheck=true;
+                }
+            }
+        }else{
+//            这个模块不需要登录验证
+        }
+        if($LoginCheck&&call_user_func('is_login')){
+
+        }else{
+            return E('NOT_LOGIN');
+        }
     }
     $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件

@@ -21,6 +21,7 @@ function session($name,$value=false){
                 }else{
                     return $session_id;
                 }
+//                cache('sess_'.$session_id,[]);
                 break;
         }
         return '';
@@ -36,7 +37,9 @@ function session($name,$value=false){
         return $session;
     }elseif(is_array($name)){
         //设置全部
-        cache('sess_'.$session_id,$name);
+//        cache('sess_'.$session_id,$name);
+        $session = is_array($session)?array_merge($session,$name):$name;
+        cache('sess_'.$session_id,$session);
         return true;
     }
     if($value){
