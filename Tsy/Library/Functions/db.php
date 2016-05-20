@@ -15,3 +15,12 @@
 //        // HTTP-FPM模式 回到同步模式
 //    }
 //}
+function startTrans($ID=null){
+    M()->startTrans();
+}
+function rollback($ID=null){
+    M()->rollback();
+}
+function commit($ID=null){
+    M()->commit();
+}

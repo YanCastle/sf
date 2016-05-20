@@ -36,6 +36,7 @@ class Object
     protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
     protected $_read_filter = [];//输入读取过滤配置
+    protected $_read_deny=[];
     public $is_dic=false;
     public $map = [
 //        自动生成
@@ -362,6 +363,9 @@ class Object
             ) {
                 $PropertyObjects[$PropertyName] = $Config;
             }
+        }
+        if($this->_read_deny){
+            $Model->field($this->_read_deny, true);
         }
         $Objects = $Model->where([$this->pk => ['IN', $IDs]])->select();
         if (!$Objects) {
