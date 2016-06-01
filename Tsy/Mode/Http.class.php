@@ -33,7 +33,7 @@ class Http implements Mode
 //        if($_SERVER['HTTP_ORIGIN']){
             header("Access-Control-Allow-Origin: " . isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'*');
             header("Access-Control-Allow-Credentials: true");
-            header('Access-Control-Request-Method: GET,POST,OPTIONS');
+            header('Access-Control-Request-Method: '.$_SERVER['REQUEST_METHOD']);
             header('Access-Control-Allow-Headers: X-Requested-With,Cookie,Content-Type');
 //        }
         if($_SERVER['REQUEST_METHOD']=='OPTIONS'){
