@@ -11,7 +11,7 @@ namespace Tsy\Plugs\Auth;
 //权限管控控制器类，用于实现权限管控表的各种接口
 class AuthController extends Auth
 {
-    public $Prefix;
+    public $Prefix; 
     function __construct($Prefix)
     {
         $this->Prefix=C('AUTO_PREFIX');

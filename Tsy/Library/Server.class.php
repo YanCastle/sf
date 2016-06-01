@@ -181,6 +181,7 @@ class Server
      * @param $worker_id
      */
     function onWorkerStart(\swoole_server $server, $worker_id){
+        define('PROCESS_ID',$worker_id);
         $_GET['_server']=$server;
         $callback = swoole_get_callback('WORKER_START');
         if(is_callable($callback)){

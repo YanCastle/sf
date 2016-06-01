@@ -31,7 +31,11 @@ abstract class Driver {
     // 数据库连接ID 支持多个连接
     protected $linkID     = array();
     // 当前连接ID
+    /**
+     * @var PDO
+     */
     protected $_linkID    = null;
+    protected $_linkIDTimeout=[];
     // 数据库连接参数配置
     protected $config     = array(
         'type'              =>  '',     // 数据库类型
@@ -93,11 +97,15 @@ abstract class Driver {
                 if(empty($config['dsn'])) {
                     $config['dsn']  =   $this->parseDsn($config);
                 }
-                if(version_compare(PHP_VERSION,'5.3.6','<=')){ 
-                    // 禁用模拟预处理语句
-                    $this->options[PDO::ATTR_EMULATE_PREPARES]  =   false;
-                }
+//                if(version_compare(PHP_VERSION,'5.3.6','<=')){
+//                    // 禁用模拟预处理语句
+//                    $this->options[PDO::ATTR_EMULATE_PREPARES]  =   false;
+//                }
                 $this->linkID[$linkNum] = new PDO( $config['dsn'], $config['username'], $config['password'],$this->options);
+                $timeout = $this->linkID[$linkNum]->query('show global variables like \'wait_timeout\';');
+//                if(){
+                    $this->_linkIDTimeout[$linkNum]=is_array($timeout)&&isset($timeout['wait_timeout'])?$timeout['wait_timeout']:0;
+//                }
             }catch (\PDOException $e) {
                 if($autoConnection){
                     trace($e->getMessage(),'','ERR');
@@ -1064,12 +1072,23 @@ abstract class Driver {
      * @return void
      */
     protected function initConnect($master=true) {
+
         if(!empty($this->config['deploy']))
             // 采用分布式数据库
             $this->_linkID = $this->multiConnect($master);
         else
             // 默认单数据库
             if ( !$this->_linkID ) $this->_linkID = $this->connect();
+//        TODO 记录最后执行时间，写入到缓存中
+        $LinkID = array_search($this->_linkID,$this->linkID);
+//        如果是Swoole模式下则需要区分是哪个进程的链接
+        if($LinkID){
+            if('swoole'==APP_MODE_LOW){
+                cache('[=]tmp_DB_LINK_TIME_OUT',time());
+            }else{
+
+            }
+        }
     }
 
     /**
