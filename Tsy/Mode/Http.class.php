@@ -34,8 +34,11 @@ class Http implements Mode
             header("Access-Control-Allow-Origin: " . isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'*');
             header("Access-Control-Allow-Credentials: true");
             header('Access-Control-Request-Method: GET,POST,OPTIONS');
-            header('Access-Control-Allow-Headers: X-Requested-With,Cookie');
+            header('Access-Control-Allow-Headers: X-Requested-With,Cookie,Content-Type');
 //        }
+        if($_SERVER['REQUEST_METHOD']=='OPTIONS'){
+            exit();
+        }
         $HttpDispatch = http_in_check();
         http_out_check(controller($HttpDispatch['i'],$HttpDispatch['d']));
     }
