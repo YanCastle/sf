@@ -88,14 +88,18 @@ class Db{
             $content = str_replace('{$PREFIX}',$db_prefix,$content);
             $Sqls = explode(";\r\n",$content);
             if(is_array($Sqls)&&count($Sqls)>0){
+                $Model->startTrans();
                 try{
                     foreach($Sqls as $sql){
                         if($sql)
                             $Model->execute($sql);
                     }
                 }catch (\Exception $e){
+                    $Model->rollback();
                     return false;
                 }
+                $Model->commit();
+                return true;
             }
         }else{
             return false;
