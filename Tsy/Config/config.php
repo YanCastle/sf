@@ -21,14 +21,5 @@ return [
     'DATA_CACHE_SUBDIR'     =>  true,    // 使用子目录缓存 (自动根据缓存标识的哈希创建子目录)
     'DATA_PATH_LEVEL'       =>  1,        // 子目录缓存级别
     'LOGIN_REQUIRE'=>[],
-    'HTTP'=>[
-//        'DISPATCH'=>function(){},
-        'OUT'=>function($data){
-            return json_encode([
-                'i'=>$_GET['i'],
-                'd'=>$data,
-                
-            ],JSON_UNESCAPED_UNICODE);
-        }
-    ]
+    
 ];
