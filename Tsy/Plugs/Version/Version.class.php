@@ -40,7 +40,7 @@ class Version
         }
     }
     function db_execute($Config,$Version){
-        $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.'add';
+        $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.$Version;
         $Model = new Model('',isset($Config['DB_PREFIX'])?$Config['DB_PREFIX']:'',$Config);
         $Db = new Db('',isset($Config['DB_PREFIX'])?$Config['DB_PREFIX']:'',$Config);
         if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.$Version.'.sql')){
@@ -49,7 +49,7 @@ class Version
         return false;
     }
     function php_execute($Version,$Config,$file=''){
-        $ClassName = "\\Common\\Version\\{$Version}";
+        $ClassName = "\\Common\\Version\\{$Version}\\{$Version}";
         if(file_exists($file)){
             include $file;
         }
