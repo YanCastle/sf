@@ -250,7 +250,7 @@ function L($msg = false,$Type=6,$trace=''){
             $_log[$Type]=$msg;
         }
         //TODO 完善log函数
-        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
+//        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg&&$Type===false){
         return $Type==0?$_log:$_log[$Type];
     }elseif(null===$msg&&$Type===null){
