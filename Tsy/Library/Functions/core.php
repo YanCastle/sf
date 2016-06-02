@@ -22,6 +22,10 @@ function load_module_config($module){
         C(load_config($ModuleConfigPath.strtolower(APP_MODE).'.php'));
         !APP_DEBUG or C(load_config($ModuleConfigPath.strtolower(APP_MODE).'_debug.php'));
         $CurrentModel=$module;
+//        为SaaS模式的数据库切换做准备
+        if(in_array($module,C('SAAS_MODULE'))){
+            C('DB_PREFIX',session('DB_PREFIX').C('DB_PREFIX'));
+        }
     }
 
 }

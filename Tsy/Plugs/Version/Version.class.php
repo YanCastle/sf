@@ -45,7 +45,7 @@ class Version
         $Model = new Model('',isset($Config['DB_PREFIX'])?$Config['DB_PREFIX']:'',$Config);
         $Db = new Db('',isset($Config['DB_PREFIX'])?$Config['DB_PREFIX']:'',$Config);
         if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.$Version.'.sql')){
-            return $Db->build($Model,$AddPath.DIRECTORY_SEPARATOR.$Version.'.sql');
+            return $Db->build($Model,$AddPath.DIRECTORY_SEPARATOR.$Version.'.sql','',$Config['DB_PREFIX']);
         }
         return false;
     }
@@ -66,10 +66,10 @@ class Version
     }
     function add($DB_CONF){
 //        创建一个新的数据库
-        $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.'add';
-        if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.'add.sql')){
-            $this->db_execute($DB_CONF, 'add');
-            $this->php_execute('add',$DB_CONF );
+        $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.'Add';
+        if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.'Add.sql')){
+            $this->db_execute($DB_CONF, 'Add');
+            $this->php_execute('Add',$DB_CONF );
         }else{
             L(E('_NO_ADD_CONFIG_'));
             return false;
