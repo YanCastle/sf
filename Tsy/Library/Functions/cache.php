@@ -71,6 +71,7 @@ function cache($key,$value=false,$expire=null,$type=''){
                     foreach ($tmp as $k){
                         $cache->rm($k);
                     }
+                    $cache->set('_tmp_keys',[]);
                     break;
                 default:
                     L('UnknowOperateOfCache',LOG_WARNING);
@@ -161,7 +162,9 @@ function cache($key,$value=false,$expire=null,$type=''){
                 if('tmp_'==substr($key,0,4)){
                     $tmp = $cache->get('_tmp_keys');
                     $tmp = is_array($tmp)?$tmp:[];
-                    $tmp[]=$key;
+                    if(!in_array($key,$tmp)){
+                        $tmp[]=$key;
+                    }
                     $cache->set('_tmp_keys',$tmp);
                 }
                 return $cache->set($key,$value,$expire);

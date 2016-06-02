@@ -167,6 +167,10 @@ function swoole_in_check($fd,$data){
     if(method_exists($Class,'handshake')){
         if($str = call_user_func([$Class,'handshake'],$data)){
             swoole_send($fd,$str);
+            $HandShake = swoole_get_port_property($Port,'HANDSHAKE');
+            if(is_callable($HandShake)){
+                call_user_func($HandShake);
+            }
             return true;
         }
     }
@@ -194,6 +198,9 @@ function swoole_in_check($fd,$data){
     $Dispatch = swoole_get_port_property($Port,'DISPATCH');
     if(is_callable($Dispatch)){
         $tmpData = call_user_func($Dispatch,$data);
+        if($tmpData===null){
+            return null;
+        }
         $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
     }
     return $Data;

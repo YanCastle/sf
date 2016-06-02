@@ -40,6 +40,7 @@ class Version
         }
     }
     function db_execute($Config,$Version){
+        $Version=is_numeric($Version)?'V'.$Version:$Version;
         $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.$Version;
         $Model = new Model('',isset($Config['DB_PREFIX'])?$Config['DB_PREFIX']:'',$Config);
         $Db = new Db('',isset($Config['DB_PREFIX'])?$Config['DB_PREFIX']:'',$Config);
@@ -49,6 +50,8 @@ class Version
         return false;
     }
     function php_execute($Version,$Config,$file=''){
+//        if($Version)
+        $Version=is_numeric($Version)?'V'.$Version:$Version;
         $ClassName = "\\Common\\Version\\{$Version}\\{$Version}";
         if(file_exists($file)){
             include $file;
