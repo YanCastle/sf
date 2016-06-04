@@ -20,6 +20,11 @@ class Version
 
     }
 
+    /**
+     * 在启动时和reload时检查是否需要升级
+     * @param $VersionMap
+     * @param $TargetVersion
+     */
     function check($VersionMap,$TargetVersion){
         $VersionMap=[
             [
@@ -39,6 +44,13 @@ class Version
             }
         }
     }
+
+    /**
+     * 执行SQL代码
+     * @param $Config
+     * @param $Version
+     * @return bool
+     */
     function db_execute($Config,$Version){
         $Version=is_numeric($Version)?'V'.$Version:$Version;
         $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.$Version;
@@ -47,8 +59,16 @@ class Version
         if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.$Version.'.sql')){
             return $Db->build($Model,$AddPath.DIRECTORY_SEPARATOR.$Version.'.sql','',$Config['DB_PREFIX']);
         }
-        return false;
+        return true;//当sql文件不存在时表示不需要进行sql升级
     }
+
+    /**
+     * 执行PHP升级代码
+     * @param $Version
+     * @param $Config
+     * @param string $file
+     * @return bool
+     */
     function php_execute($Version,$Config,$file=''){
 //        if($Version)
         $Version=is_numeric($Version)?'V'.$Version:$Version;
@@ -61,15 +81,23 @@ class Version
             if(method_exists($Class,'update')){
                 return $Class->update();
             }
+            return true;
         }
         return false;
     }
+
+    /**
+     * 添加
+     * @param $DB_CONF
+     * @return bool
+     */
     function add($DB_CONF){
 //        创建一个新的数据库
         $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.'Add';
         if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.'Add.sql')){
-            $this->db_execute($DB_CONF, 'Add');
-            $this->php_execute('Add',$DB_CONF );
+            if($this->db_execute($DB_CONF, 'Add'))
+                return $this->php_execute('Add',$DB_CONF );
+            return false;
         }else{
             L(E('_NO_ADD_CONFIG_'));
             return false;

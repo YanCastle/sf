@@ -200,8 +200,11 @@ function swoole_in_check($fd,$data){
         $tmpData = call_user_func($Dispatch,$data);
         if($tmpData===null){
             return null;
+        }elseif(is_string($tmpData)&&strlen($tmpData)>0){
+            return $tmpData;
+        }else{
+            $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
         }
-        $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
     }
     return $Data;
 }
