@@ -67,7 +67,7 @@ class Redis extends Cache implements CacheInterface
         }
         $name   =   $this->options['prefix'].$name;
         //对数组/对象数据进行缓存处理，保证数据完整性
-        $value  =  (is_object($value) || is_array($value)) ? serialize($value) : $value;
+        $value  =  serialize($value);
         if(is_int($expire) && $expire) {
             $result = $this->handler->setex($name, $expire, $value);
         }else{

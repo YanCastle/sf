@@ -155,6 +155,7 @@ class Tsy
         if (is_callable(C('APP_EXCEPTION'))){
             call_user_func(C('APP_EXCEPTION'),$e);
         }
+        L($error,LOG_ERR);
     }
 
     /**
@@ -183,6 +184,7 @@ class Tsy
         if (is_callable(C('APP_ERROR'))){
             call_user_func_array(C('APP_ERROR'),[$errno,$errstr,$errfile,$errline]);
         }
+        L($errstr,LOG_ERR);
     }
 
     // 致命错误捕获
@@ -199,6 +201,7 @@ class Tsy
             if (is_callable(C('FATAL_ERROR'))){
                 call_user_func(C('FATAL_ERROR'),$e);
             }
+            L($e,LOG_ERR);
         }
     }
 }
