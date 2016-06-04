@@ -43,27 +43,41 @@ class Websocket extends Swoole
     }
 
     function uncode($str){
-        $mask = array();
-        $data = '';
-        $msg = unpack('H*',$str);
-        $head = substr($msg[1],0,2);
-        if (hexdec($head{1}) === 8) {
-            $data = false;
-        }else if (hexdec($head{1}) === 1){
-            $mask[] = hexdec(substr($msg[1],4,2));
-            $mask[] = hexdec(substr($msg[1],6,2));
-            $mask[] = hexdec(substr($msg[1],8,2));
-            $mask[] = hexdec(substr($msg[1],10,2));
+        $opcode = ord(substr($str, 0, 1)) & 0x0F;
+        $payloadlen = ord(substr($str, 1, 1)) & 0x7F;
+        $ismask = (ord(substr($str, 1, 1)) & 0x80) >> 7;
+        $maskkey = null;
+        $oridata = null;
+        $decodedata = null;
 
-            $s = 12;
-            $e = strlen($msg[1])-2;
-            $n = 0;
-            for ($i=$s; $i<= $e; $i+= 2) {
-                $data .= chr($mask[$n%4]^hexdec(substr($msg[1],$i,2)));
-                $n++;
-            }
+        //关闭连接
+        if ($ismask != 1 || $opcode == 0x8)
+        {
+            return null;
         }
-        return $data;
+
+        //获取掩码密钥和原始数据
+        if ($payloadlen <= 125 && $payloadlen >= 0)
+        {
+            $maskkey = substr($str, 2, 4);
+            $oridata = substr($str, 6);
+        }
+        else if ($payloadlen == 126)
+        {
+            $maskkey = substr($str, 4, 4);
+            $oridata = substr($str, 8);
+        }
+        else if ($payloadlen == 127)
+        {
+            $maskkey = substr($str, 10, 4);
+            $oridata = substr($str, 14);
+        }
+        $len = strlen($oridata);
+        for($i = 0; $i < $len; $i++)
+        {
+            $decodedata .= $oridata[$i] ^ $maskkey[$i % 4];
+        }
+        return $decodedata;
     }
 
     function code($message) {
