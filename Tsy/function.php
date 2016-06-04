@@ -47,7 +47,7 @@ function session($name,$value=false){
     }else{
         return isset($session[$name])?$session[$name]:null;
     }
-    cache('sess_'.$session_id,$session);
+    cache('sess_'.$session_id,$session,1200);
 }
 
 
