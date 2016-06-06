@@ -294,3 +294,29 @@ function build_cache($Models=[]){
         }
     }
 }
+
+/**
+ * 目录遍历
+ * @param string $dir
+ * @param callable|null $dir_callback
+ * @param callable|null $file_callback
+ */
+function each_dir(string $dir,callable $dir_callback=null,callable $file_callback=null){
+    if(is_dir($dir)){
+        foreach (scandir($dir) as $path){
+            if(!in_array($path, ['.','..'])){
+                $path = $dir.DIRECTORY_SEPARATOR.$path;
+                if(is_dir($path)){
+                    if(is_callable($dir_callback)){
+                        call_user_func($dir_callback,$path);
+                    }
+                    each_dir($path, $dir_callback, $file_callback);
+                }else{
+                    if(is_callable($file_callback)){
+                        call_user_func($file_callback,$path);
+                    }
+                }
+            }
+        }
+    }
+}
