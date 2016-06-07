@@ -100,19 +100,12 @@ function http_parse($data){
     $Version=$Datas[0][2];
     $Method=$Datas[0][0];
 //    if('GET'==$Method){
-        $GETData=explode('?',$Datas[0][1])[1];
-        $GETData=explode('&',$GETData);
-        foreach ($GETData as $get){
-            $res=explode('=',$get);
-            $GET[$res[0]]=$res[1];
-        }
+
+    $GETData=explode('?',$Datas[0][1])[1];
+    parse_str($GETData,$GET);
 //    }else
     if ('POST'==$Method){
-        $POSTData=explode('&',$Datas[1][0]);
-        foreach ($POSTData as $get){
-            $res=explode('=',$get);
-            $POST[$res[0]]=$res[1];
-        }
+        parse_str($Datas[1][0],$POST);
     }
     return array_merge(['Header'=>$Header,'Method'=>$Method,'Version'=>$Version],isset($GET)?['GET'=>$GET]:[],isset($POST)?['POST'=>$POST]:[]);
 }
