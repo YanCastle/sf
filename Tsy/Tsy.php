@@ -12,8 +12,8 @@ define('LOG_SQL','SQL');
 //开始各种define检测
 defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
 defined('APP_DEBUG') or define('APP_DEBUG',false);
-define('APP_PATH',realpath($APP_PATH));
-define('RUNTIME_PATH',$RUNTIME_PATH?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
+define('APP_PATH',isset($APP_PATH)?realpath($APP_PATH):realpath('.'));
+define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
 
 //定义配置文件后缀

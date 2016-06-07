@@ -9,6 +9,7 @@
 namespace Tsy;
 
 
+use Tsy\Library\Cache\Driver\File;
 use Tsy\Library\Session;
 
 class Tsy
@@ -37,6 +38,19 @@ class Tsy
             include_once TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.ucfirst(strtolower(APP_MODE)).'.class.php';
         }else{
             die('MODE:'.APP_MODE.'不存在');
+        }
+        //扫描有哪些模块
+        if(!defined('MODULES')){
+            $Modules=[];
+            foreach (scandir(APP_PATH) as $dir){
+                if(!in_array($dir, ['.','..','Common','Runtime'])&&substr($dir, 0,1)!='.'&&is_dir($dir)){
+                    $Modules[]=$dir;
+                }
+            }
+            define('MODULES',implode(',',$Modules ));
+        }
+        if(APP_DEBUG){
+            $this->build();
         }
 //        $Session = new Session();
 //        session_set_save_handler($Session,true);
@@ -203,5 +217,78 @@ class Tsy
             }
             L($e,LOG_ERR);
         }
+    }
+    function build(){
+        foreach ([APP_PATH,CONF_PATH,RUNTIME_PATH,TEMP_PATH,] as $dir){
+            if(!is_dir($dir)){
+                @mkdir($dir,0777,true);
+                file_put_contents($dir.DIRECTORY_SEPARATOR.'README.md', '#');
+            }
+        }
+        $ConfigFiles=[
+            [
+                CONF_PATH.DIRECTORY_SEPARATOR.'config.php',
+                []
+            ],[
+                CONF_PATH.DIRECTORY_SEPARATOR.'swoole.php',
+                [
+                    'SWOOLE'=>[
+                        'AUTO_RELOAD'=>function($int){
+                            $Time = cache('LastRestartTime');
+                            if((time()-$Time)>7200){
+                                cache('LastRestartTime',time());
+                                return true;
+                            }
+                            return false;
+                        },
+                        'AUTO_RELOAD_TIME'=>3,
+                        'CONF'=>[
+                            'daemonize' => !APP_DEBUG, //自动进入守护进程
+                            'task_worker_num' => 5,//开启task功能，
+                            'dispatch_mode '=>3,//轮询模式
+                            'worker_num'=>5,
+                        ],
+                        'TABLE'=>[],
+                        'LISTEN'=>[]
+                    ],
+                    'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
+                    'CACHE_FD_NAME_PUSH'=>'fd_name_push',//缓存不在线的push推送信息，禁止带上tmp_前缀
+                ]
+            ],[
+                CONF_PATH.DIRECTORY_SEPARATOR.'http.php',
+                [
+                    'HTTP'=>[
+                        'DISPATCH'=>'',
+                        'OUT'=>''
+                    ]
+                ]
+            ],
+        ];
+        //创建配置文件
+        foreach ([
+            [
+
+            ],
+                 ] as $conf_file){
+            if(!file_exists($conf_file)[0]){
+                if(isset($conf_file[1]))
+                    file_put_contents($conf_file[0],"<?php\r\n return ".var_export($conf_file[1]).';');
+            }
+        }
+        //创建模块目录，创建
+        foreach (explode(',',MODULES) as $Module){
+            foreach (['Config','Model','Controller','Object'] as $dir){
+                $dir_path = APP_PATH.DIRECTORY_SEPARATOR.$Module.DIRECTORY_SEPARATOR.$dir;
+                if(!is_dir($dir_path)){
+                    @mkdir($dir_path,0777,true);
+                    file_put_contents($dir_path.DIRECTORY_SEPARATOR.'README.md', '#');
+                }
+            }
+        }
+        each_dir(APP_PATH,function($path){
+            if(is_dir($path)&&strpos($path,DIRECTORY_SEPARATOR.'.')===false&&!file_exists($path).DIRECTORY_SEPARATOR.'README.md'){
+                file_put_contents($path.DIRECTORY_SEPARATOR.'README.md','#');
+            }
+        });
     }
 }

@@ -37,6 +37,7 @@ class Server
      * @param $data
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
+        $_GET=[];$_POST=[];$_REQUEST=[];
         $callback = swoole_get_callback('RECEIVE');
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$fd,$from_id,$data]);

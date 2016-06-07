@@ -74,6 +74,7 @@ define('WEBSOCKET_STATUS_CONNECTION',1);
 define('WEBSOCKET_STATUS_HANDSHAKE',2);
 define('WEBSOCKET_STATUS_FRAME',3);
 define('WEBSOCKET_STATUS_ACTIVE',3);
+define('SWOOLE_SSL',1 );
 function swoole_version(){}
 
 function swoole_cpu_num(){}
@@ -1096,4 +1097,26 @@ class swoole_websocket_server extends swoole_http_server{
  */
 class swoole_websocket_frame{
 
+}
+class swoole_http_client{
+    function __construct()
+    {
+    }
+    function __destruct()
+    {
+        // TODO: Implement __destruct() method.
+    }
+    function set(){}
+    function setMethod(){}
+    function setHeaders(){}
+    function setCookies(){}
+    function setData(){}
+    function execute(){}
+    function push(){}
+    function get(){}
+    function post(){}
+    function upgrade(){}
+    function isConnected(){}
+    function close(){}
+    function on(){}
 }

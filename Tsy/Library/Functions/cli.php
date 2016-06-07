@@ -187,7 +187,7 @@ function swoole_in_check($fd,$data){
         return '';
     }
     $_GET['_str']=$data;
-    if(false===$data){return;}
+    if(false===$data||null===$data){return;}
     $Data=[
         'i'=>'Empty/_empty',
         'd'=>$data,
