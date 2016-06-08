@@ -158,7 +158,7 @@ class HttpClient
         $str = '';
         $Cookies = [];
         foreach ($this->cookie as $Domain=>$Array){
-            if(in_array($Domain,[$parse['host'],0])){
+            if($Domain==$parse['host']||$Domain===0){
                 foreach ($Array as $CookieKey=>$Cookie){
                     $Cookies[]=$CookieKey.'='.$Cookie['value'];
                 }
@@ -166,8 +166,11 @@ class HttpClient
         }
         $header_array = [
             "HOST"=>$parse['host'],
+            'Accept'=>'*/*',
+            'Accept-Language'=>'zh-cn',
+            'Content-Type'=>'text/html; charset=utf-8',
             "User-Agent"=>"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36",
-            'Cookie'=>implode('; ',$Cookies )
+            'Cookie'=>implode('; ',$Cookies ),
         ];
         $header_array = array_merge($header_array,$this->request_header,$Header);
         switch (strtoupper($Method)){

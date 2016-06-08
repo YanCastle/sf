@@ -87,17 +87,19 @@ class Tsy
     }
     function loadFunctions(){
         $FunctionPath = TSY_PATH.'/Library/Functions';
-        foreach (scandir($FunctionPath) as $path){
-            if(!in_array($path,['.','..'])&&'php'==substr($path,-3)){
-                include ($FunctionPath.'/'.$path);
+        if(is_dir($FunctionPath))
+            foreach (scandir($FunctionPath) as $path){
+                if(!in_array($path,['.','..'])&&'php'==substr($path,-3)){
+                    include ($FunctionPath.'/'.$path);
+                }
             }
-        }
         $FunctionPath = APP_PATH.'/Common/Functions';
-        foreach (scandir($FunctionPath) as $path){
-            if(!in_array($path,['.','..'])&&'php'==substr($path,-3)){
-                include ($FunctionPath.'/'.$path);
+        if(is_dir($FunctionPath))
+            foreach (scandir($FunctionPath) as $path){
+                if(!in_array($path,['.','..'])&&'php'==substr($path,-3)){
+                    include ($FunctionPath.'/'.$path);
+                }
             }
-        }
     }
     static function autoload($class){
 //        if(isset(self::$class_map[$class])){
@@ -270,7 +272,7 @@ class Tsy
 
             ],
                  ] as $conf_file){
-            if(!file_exists($conf_file)[0]){
+            if(isset($conf_file[0])&&!file_exists($conf_file[0])){
                 if(isset($conf_file[1]))
                     file_put_contents($conf_file[0],"<?php\r\n return ".var_export($conf_file[1]).';');
             }

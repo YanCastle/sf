@@ -166,7 +166,7 @@ class Curl
         $this->error = curl_error($ch);
         $this->info = curl_getinfo($ch);
         curl_close($ch);
-        $this->cookie = file_get_contents($this->cookie_jar);
+        $this->cookie = file_exists($this->cookie_jar)?file_get_contents($this->cookie_jar):'';
 //    var_dump($rs,$error,$info);
         return $rs;
     }

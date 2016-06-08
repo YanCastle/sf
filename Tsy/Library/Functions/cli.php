@@ -374,6 +374,8 @@ function swoole_get_mode_class($mode){
 function swoole_load_config(){
     $Listen = C('SWOOLE.LISTEN');
     if($Listen) {
+        $SwooleTable = C('SWOOLE.TABLE');
+        $SwooleProcess = C('SWOOLE.PROCESS');
         $Returns = [
             'LISTEN'=>[],
             'CONF'=>array_merge([
@@ -383,8 +385,8 @@ function swoole_load_config(){
                 'worker_num'=>2,
             ],C('SWOOLE.CONF')),
             'PortModeMap'=>[],
-            'PROCESS'=>array_merge([],C('SWOOLE.PROCESS')),
-            'TABLE'=>array_merge([],C('SWOOLE.TABLE'))
+            'PROCESS'=>is_array($SwooleProcess)?$SwooleProcess:[],
+            'TABLE'=>is_array($SwooleTable)?$SwooleTable:[]
         ];
         foreach ($Listen as $Config) {
             $Config['TYPE'] = isset($Config['TYPE']) ? $Config['TYPE'] : 'Socket';
