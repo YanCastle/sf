@@ -14,7 +14,7 @@ function session($name,$value=false){
     if(substr($name,0,1)=='['&&substr($name,-1)==']'){
         switch (strtolower(substr($name,1,strlen($name)-2))){
             case 'id':
-                if($value){
+                if(is_string($value)&&strlen($value)>5){
                     $session_id=$value;
                 }elseif(null===$value){
                     $session_id='';

@@ -64,7 +64,7 @@ class Server
         }else{
             swoole_out_check($fd,'');
         }
-        session('[id]',null);//删除session_id标识
+//        session('[id]',null);//删除session_id标识
     }
 
     /**
