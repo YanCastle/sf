@@ -12,9 +12,9 @@ namespace Tsy\Plugs\HttpClient;
 class HttpClient
 {
     public $url;
-    public $cookie;
-    public $response_header;
-    public $request_header;
+    public $cookie=[];
+    public $response_header=[];
+    public $request_header=[];
     /**
      * @var \swoole_client $client
      */
@@ -35,14 +35,24 @@ class HttpClient
     function post(callable $func,$data,$url='',$header=[],$cookie=[]){
         $this->getClient($url?$url:$this->url);
         $sendStr = $this->http_build($url?$url:$this->url,[],$data,$header,$cookie);
-        $this->clients[$this->client->sock]=[$sendStr,$func];
+        $this->queue($func, $this->client, $sendStr, $data);
+//        $this->clients[$this->client->sock]=[$sendStr,$func];
         return $this->client->sock;
     }
     function get(callable $func,$data=[],$url='',$header=[],$cookie=[]){
         $this->getClient($url?$url:$this->url);
         $sendStr = $this->http_build($url?$url:$this->url,$data,[],$header,$cookie);
-        $this->clients[$this->client->sock]=[$sendStr,$func];
+//        $this->clients[$this->client->sock]=[$sendStr,$func];
+        $this->queue($func, $this->client, $sendStr, $data);
         return $this->client->sock;
+    }
+    function queue(callable $func,\swoole_client $client,$send,$data){
+        $this->clients[$client->sock]=[$send,$func,$data];
+    }
+    function callback($sock,$body,$header,$cookie){
+        if(is_callable($this->clients[$sock][1])){
+            call_user_func_array($this->clients[$sock][1],[$body,$this->clients[$sock][2],$header,$cookie]);
+        }
     }
     function put(callable $func,$data,$url='',$header=[],$cookie=[]){}
     function delete(callable $func,$data,$url='',$header=[],$cookie=[]){}
@@ -63,7 +73,7 @@ class HttpClient
         }elseif($name===null)
             $this->cookie[$domain]=[];
         elseif($name===false){
-            return $this->cookie[$domain];
+            return isset($this->cookie[0])?array_merge($this->cookie[0],$this->cookie[$domain]):$this->cookie[$domain];
         }elseif($name===-1){
             return call_user_func_array('array_merge',$this->cookie);
         }
@@ -137,9 +147,7 @@ class HttpClient
                 $this->response_header[$key]=$value;
             }
         }
-        if(is_callable($this->clients[$sock][1])){
-            call_user_func($this->clients[$sock][1],$body);
-        }
+        $this->callback($sock, $body, $this->response_header, $this->cookie(false));
     }
     function error(\swoole_client $client){}
     function http_build($URL,$GET=[],$POST=[],$Header=[],$Cookie=[],$Method='GET'){
@@ -173,9 +181,12 @@ class HttpClient
             'Cookie'=>implode('; ',$Cookies ),
         ];
         $header_array = array_merge($header_array,$this->request_header,$Header);
+        $body='';
         switch (strtoupper($Method)){
             case 'GET':break;
-            case 'POST':break;
+            case 'POST':
+                $body = is_string($POST)?$POST:http_build_query($POST);
+                break;
             case 'DELETE':break;
             case 'OPTIONS':break;
             case 'PUT':break;
@@ -183,8 +194,8 @@ class HttpClient
         foreach ($header_array as $k=>$v){
             $header[]=$k.': '.$v;
         }
-        $str = implode("\r\n",$header)."\r\n";
-        return $str."\r\n\r\n";
+        $str = implode("\r\n",$header)."\r\n\r\n".$body;
+        return $str;
     }
     function __set($name, $value)
     {
