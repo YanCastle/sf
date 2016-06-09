@@ -1108,15 +1108,21 @@ class swoole_http_client{
     }
     function set(){}
     function setMethod(){}
-    function setHeaders(){}
-    function setCookies(){}
-    function setData(){}
-    function execute(){}
-    function push(){}
-    function get(){}
-    function post(){}
-    function upgrade(){}
+    function setHeaders(array $header){}
+    function setCookies(array $cookie){}
+    function setData($data){}
+    function execute($url,callable $callbale){}
+    function push($data){}
+    function get($url,callable $function){}
+
+    /**
+     * @param string $url 请求地址
+     * @param string|array $data 请求内容
+     * @param callable $function
+     */
+    function post($url,$data,callable $function){}
+    function upgrade($url,callable $function){}
     function isConnected(){}
     function close(){}
-    function on(){}
+    function on(string $callbackName,callable $func){}
 }
