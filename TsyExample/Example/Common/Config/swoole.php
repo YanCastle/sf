@@ -63,33 +63,33 @@ return [
 //            ],
         ],
         'PROCESS'=>[
-            [
-                'NAME'=>'Router',
-                'NUMBER'=>1,//进程数量
-                'CALLBACK'=>function(\swoole_process $process,\swoole_server $server){
-                    sleep(5);
-                    swoole_get_process_type();
-                    $client = swoole_get_client('127.0.0.1',9000,function(\swoole_client $client,$msg)use($server,$process){
-//                        pipe_message(['t'=>'task'],serialize(new \Tsy\Library\Define\Pipe(\Tsy\Library\Define\Pipe::$CONTROLLER,[
-//                            'i'=>'...',
-//                            'd'=>[
-//
-//                            ]
-//                        ])));
-                    },false,function(\swoole_client $client){
-                        $client->send('ss');
-                    });
-                },
-                'REDIRECT_STDIN_STDOUT'=>false,//开启时echo不会输出到屏幕而是进入到可读队列
-                'PIPE'=>function(\swoole_process $process,\swoole_server $server,$data){
-                    echo $data;
-                }
-            ],
+//            [
+//                'NAME'=>'Router',
+//                'NUMBER'=>1,//进程数量
+//                'CALLBACK'=>function(\swoole_process $process,\swoole_server $server){
+//                    sleep(5);
+//                    swoole_get_process_type();
+//                    $client = swoole_get_client('127.0.0.1',9000,function(\swoole_client $client,$msg)use($server,$process){
+////                        pipe_message(['t'=>'task'],serialize(new \Tsy\Library\Define\Pipe(\Tsy\Library\Define\Pipe::$CONTROLLER,[
+////                            'i'=>'...',
+////                            'd'=>[
+////
+////                            ]
+////                        ])));
+//                    },false,function(\swoole_client $client){
+//                        $client->send('ss');
+//                    });
+//                },
+//                'REDIRECT_STDIN_STDOUT'=>false,//开启时echo不会输出到屏幕而是进入到可读队列
+//                'PIPE'=>function(\swoole_process $process,\swoole_server $server,$data){
+//                    echo $data;
+//                }
+//            ],
         ],
         'CALLBACK'=>[
-            'PIPE_MESSAGE'=>function(\swoole_server $server,$from_worker_id,$data){
-                $Process = static_keep('Client');
-            }
+//            'PIPE_MESSAGE'=>function(\swoole_server $server,$from_worker_id,$data){
+//                $Process = static_keep('Client');
+//            }
         ],
         //SWOOLE 配置
         'CONF'=>[
