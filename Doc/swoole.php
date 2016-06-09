@@ -1106,7 +1106,7 @@ class swoole_http_client{
     {
         // TODO: Implement __destruct() method.
     }
-    function set(){}
+    function set($array){}
     function setMethod(){}
     function setHeaders(array $header){}
     function setCookies(array $cookie){}
