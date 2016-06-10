@@ -1,4 +1,12 @@
 <?php
+/**
+ * Copyright (c) 2016. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+ * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan. 
+ * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna. 
+ * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus. 
+ * Vestibulum commodo. Ut rhoncus gravida arcu. 
+ */
+
 namespace Tsy\Plugs\Async;
 /**
  * 参考TSF框架，使用tick函数处理超时功能，避免使用after计时器可能导致的内存泄漏问题

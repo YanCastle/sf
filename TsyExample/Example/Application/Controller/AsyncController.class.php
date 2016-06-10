@@ -17,7 +17,7 @@ use Tsy\Plugs\Async\HttpClientFuture;
 class AsyncController extends Controller
 {
     function async(){
-        Async::create(new HttpClientFuture('http://w.qq.com/'))->then([$this,'a'])->start(new AsyncContext());
+        Async::create(new HttpClientFuture('https://www.baidu.com/'))->then([$this,'a'])->start(new AsyncContext());
     }
     function e(&$promise,$data){
         echo 'e';

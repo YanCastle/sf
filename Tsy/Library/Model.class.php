@@ -13,6 +13,8 @@ class Model {
     const EXISTS_VALIDATE       =   0;      // 表单存在字段则验证
     const VALUE_VALIDATE        =   2;      // 表单值不为空则验证
 
+    const ASYNC=101;
+
     // 当前数据库操作对象
     protected $db               =   null;
 	// 数据库对象池
@@ -2009,7 +2011,7 @@ class Model {
      * @param null|callable $callback
      * @return $this
      */
-    function async($callback=null){
+    function async(callable $callback){
         $this->options['async']=$callback;
         return $this;
     }

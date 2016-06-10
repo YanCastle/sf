@@ -1099,7 +1099,7 @@ class swoole_websocket_frame{
 
 }
 class swoole_http_client{
-    function __construct()
+    function __construct(string $ip,int $port,bool $ssl=false)
     {
     }
     function __destruct()

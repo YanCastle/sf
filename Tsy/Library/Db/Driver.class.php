@@ -155,9 +155,9 @@ abstract class Driver {
         //释放前次的查询结果
         if ( !empty($this->PDOStatement) ) $this->free();
         $this->queryTimes++;
-        N('db_query',1); // 兼容代码
+//        N('db_query',1); // 兼容代码
         // 调试开始
-        $this->debug(true);
+//        $this->debug(true);
         $this->PDOStatement = $this->_linkID->prepare($str);
         if(false === $this->PDOStatement){
             $this->error();
