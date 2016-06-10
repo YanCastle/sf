@@ -12,7 +12,7 @@ class HttpClientFuture implements FutureIntf {
 	protected $proxy = false;
 	protected $timeout = 0.5;
 	
-	public function __construct($url, $post = array(), $proxy = array(), $timeout = 0.5) {
+	public function __construct($url, $post = array(), $proxy = array(), $timeout = 5) {
 		$this->url = $url;
 		$this->post = $post;
 		if($proxy){
@@ -23,7 +23,7 @@ class HttpClientFuture implements FutureIntf {
 	
 
 	
-	public function run(Async &$promise) {
+	public function run(Async &$promise,$content) {
 		$urlInfo = parse_url ( $this->url );
 		$timeout = $this->timeout;
 		if(!isset($urlInfo ['port']))$urlInfo ['port'] = 80;

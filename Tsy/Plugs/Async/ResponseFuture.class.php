@@ -12,7 +12,7 @@ class ResponseFuture implements FutureIntf {
 		$this->response = $response;
 	}
 	
-	public function run(Async &$promise) {
+	public function run(Async &$promise,$content) {
 		$data = json_encode($promise->getData());
 		$this->response->end($data);
 		//echo "Mem: ",\memory_get_usage() / 1024,"k \n";

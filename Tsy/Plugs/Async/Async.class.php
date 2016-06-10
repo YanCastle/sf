@@ -110,16 +110,18 @@ class Async {
 	}
 	protected function run(AsyncContext $context) {
 		$this->context = $context;
-		$ret = $this->future->run ( $this, $context );
-		unset($this->future);
+		if($this->future instanceof FutureIntf){
+			$ret = $this->future->run ( $this, $context );
+			unset($this->future);
 
-		// 如果返回值是个promise，那么把后续的promise链条挂载到这个promise后面，然后继续执行
-		if ($ret instanceof Async) {
-			$ret->nextAsync = $this->nextAsync;
-			if ($this->nextAsync) {
-				$this->nextAsync->lastAsync = $ret;
+			// 如果返回值是个promise，那么把后续的promise链条挂载到这个promise后面，然后继续执行
+			if ($ret instanceof Async) {
+				$ret->nextAsync = $this->nextAsync;
+				if ($this->nextAsync) {
+					$this->nextAsync->lastAsync = $ret;
+				}
+				$ret->start ( $context );
 			}
-			$ret->start ( $context );
 		}
 	}
 }

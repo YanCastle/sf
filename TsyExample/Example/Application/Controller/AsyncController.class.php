@@ -12,18 +12,19 @@ namespace Application\Controller;
 use Tsy\Library\Controller;
 use Tsy\Plugs\Async\Async;
 use Tsy\Plugs\Async\AsyncContext;
+use Tsy\Plugs\Async\HttpClientFuture;
 
 class AsyncController extends Controller
 {
     function async(){
-        Async::create([$this,'e'])->then([$this,'a'])->start(new AsyncContext());
+        Async::create(new HttpClientFuture('http://w.qq.com/'))->then([$this,'a'])->start(new AsyncContext());
     }
-    function e(&$promise){
+    function e(&$promise,$data){
         echo 'e';
         return $promise;
     }
-    function a(&$promise){
-        echo 'a';
+    function a(&$promise,$data){
+        var_dump($data);
         return $promise;
     }
 }

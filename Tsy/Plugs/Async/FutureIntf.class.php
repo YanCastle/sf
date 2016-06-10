@@ -6,5 +6,5 @@ namespace Tsy\Plugs\Async;
  * @date 2015-11-5
  */
 interface FutureIntf {
-	public function run(Async &$promise);
+	public function run(Async &$promise,$content);
 }

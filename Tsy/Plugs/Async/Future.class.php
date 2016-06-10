@@ -10,8 +10,8 @@ class Future implements FutureIntf {
 	public function __construct($callback) {
 		$this->callback = $callback;
 	}
-	public function run(Async &$promise) {
+	public function run(Async &$promise,$content) {
 		$cb = $this->callback;
-		return $cb ( $promise );
+		return $cb ( $promise ,$content);
 	}
 }
