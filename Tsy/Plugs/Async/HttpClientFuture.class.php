@@ -31,12 +31,7 @@ class HttpClientFuture implements FutureIntf {
 	private $UserID;
 	private $clients=[];
 	
-	public function __construct($url, $post = array(), $header = [],$cookie=[], $timeout = 5) {
-		$this->url = $url;
-		$this->post = $post;
-//		if($proxy){
-//			$this->proxy = $proxy;
-//		}
+	public function __construct($header = [],$cookie=[], $timeout = 5) {
 		$this->timeout = $timeout;
 		if($Cookie = cache('cookie_'.$this->UserID)){
 			$this->cookie = json_decode($Cookie);
@@ -76,7 +71,7 @@ class HttpClientFuture implements FutureIntf {
 				return false;
 				break;
 		}
-		$client->on('receive',function (\swoole_client $client,$data)use(&$promise,$this){
+		$client->on('receive',function (\swoole_client $client,$data)use(&$promise,&$this){
 			Timer::del($client->sock);
 			$client->isDone = true;
 			list($header,$body)=explode("\r\n\r\n",$data);
@@ -107,7 +102,7 @@ class HttpClientFuture implements FutureIntf {
 			Timer::del($cli->sock);
 			$promise->accept(['http_data'=>null, 'http_error'=>'Connect error']);
 		} ]);
-		$client->on('connect',function (\swoole_client $client)use($this){
+		$client->on('connect',function (\swoole_client $client)use(&$this){
 			if($this->send_str){
 				$client->send($this->send_str);
 			}else{}
