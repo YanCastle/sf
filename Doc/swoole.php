@@ -1126,3 +1126,5 @@ class swoole_http_client{
     function close(){}
     function on(string $callbackName,callable $func){}
 }
+
+function swoole_mysql_query(mysqli $mysqli,string $sql,callable $callback){}
