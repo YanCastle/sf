@@ -29,27 +29,29 @@ class HttpClientFuture implements FutureIntf {
 	 */
 	private $client;
 	private $UserID;
-	private $clients=[];
-	
-	public function __construct($header = [],$cookie=[], $timeout = 5) {
+	public $err;
+	public function __construct($UID=0,$header = [],$cookie=[], $timeout = 5) {
 		$this->timeout = $timeout;
 		if($Cookie = cache('cookie_'.$this->UserID)){
-			$this->cookie = json_decode($Cookie);
+			$this->cookie = json_decode($Cookie,true);
 		}
 	}
 	
 	function get($url,$data=[],$header=[],$cookie=[]){
 		$this->url=$url;
 		$this->send_str = $this->http_build($url?$url:$this->url,$data,[],$header,$cookie);
+        return $this;
 	}
 	function post($url,$data,$get=[],$header=[],$cookie=[]){
 		$this->url=$url;
 		$this->send_str = $this->http_build($url?$url:$this->url,$get,$data,$header,$cookie,'POST');
+        return $this;
 	}
 	public function run(Async &$promise,$content) {
 		$parse = parse_url($this->url);
 		if(!isset($parse['host'])||isset($parse['user'])||isset($parse['pass'])){
-			return false;
+            $this->err=E('_ERROR_HOST_');
+			$promise->accept(['http_client'=>$this]);
 		}
 		if(!isset($parse['scheme'])){
 			$parse['scheme']='http';
@@ -67,7 +69,7 @@ class HttpClientFuture implements FutureIntf {
 				return false;
 				break;
 		}
-		$client->on('receive',function (\swoole_client $client,$data)use(&$promise,&$this){
+		$client->on('receive',function (\swoole_client $client,$data)use(&$promise){
 			Timer::del($client->sock);
 			$client->isDone = true;
 			list($header,$body)=explode("\r\n\r\n",$data);
@@ -94,11 +96,11 @@ class HttpClientFuture implements FutureIntf {
 			$promise->accept(['http_client'=>$this]);
 		});
 		$client->on('close',[$this,'close']);
-		$client->on('error',[$this,function($cli)use(&$promise){
+		$client->on('error',function($cli)use(&$promise){
 			Timer::del($cli->sock);
 			$promise->accept(['http_data'=>null, 'http_error'=>'Connect error']);
-		} ]);
-		$client->on('connect',function (\swoole_client $client)use(&$this){
+		});
+		$client->on('connect',function (\swoole_client $client){
 			if($this->send_str){
 				$client->send($this->send_str);
 			}else{}
@@ -117,6 +119,7 @@ class HttpClientFuture implements FutureIntf {
 			});
 		}
 	}
+    function close(){}
 	function cookie($name=false,$value='',$path='',$domain=0,$expires=0){
 		if(!isset($this->cookie[$domain])){
 			$this->cookie[$domain]=[];
@@ -162,13 +165,13 @@ class HttpClientFuture implements FutureIntf {
 		];
 		$str = '';
 		$Cookies = [];
-		foreach ($this->cookie as $Domain=>$Array){
-			if($Domain==$parse['host']||$Domain===0){
-				foreach ($Array as $CookieKey=>$Cookie){
+//		foreach ($this->cookie() as $Domain=>$Array){
+//			if($Domain==$parse['host']||$Domain===0){
+				foreach ($this->cookie() as $CookieKey=>$Cookie){
 					$Cookies[]=$CookieKey.'='.$Cookie['value'];
 				}
-			}
-		}
+//			}
+//		}
 		$header_array = [
 			"HOST"=>$parse['host'],
 			'Accept'=>'*/*',
