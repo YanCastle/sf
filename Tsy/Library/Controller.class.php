@@ -21,7 +21,11 @@ class Controller
     public $PRIKey="";
     public $Params=[];
     public $__CLASS__='';
-
+    protected $ModuleName;
+    protected $ControllerName;
+    protected $MethodName;
+    protected $ObjectVarName;
+    public $Object;
     function __construct()
     {
         $this->className = $this->getControllerName();
@@ -32,11 +36,14 @@ class Controller
             $this->PRIKey = $this->Controller[$_GET['_c']]['_pki'];
             $this->Params=$this->Controller[$_GET['_c']][$_GET['_a']];
         }
-        $ObjectName = $_GET['_m'].'\\Object\\'.$_GET['_c'].'Object';
-        if(class_exists($ObjectName)){
-            $this->PRIKey = (new $ObjectName)->pk;
-        }
         $this->__CLASS__ = get_class($this);
+        $ObjectName = str_replace('Controller','Object',$this->__CLASS__);
+        if(class_exists($ObjectName)){
+            list($this->ModuleName,$this->ControllerName,$this->MethodName)=explode('\\',$this->__CLASS__);
+            $this->Object=new $ObjectName();
+            $this->PRIKey = $this->Object->pk;
+            $this->ObjectVarName=$ObjectVarName;
+        }
     }
     function __call($name, $arguments)
     {
@@ -136,76 +143,85 @@ class Controller
             }
         }else{return FALSE;}
     }
-    function search($keyword='',$W=[],$P=1,$N=20,$Sort=[]){
-        $where = [];
-        if($keyword&&isset($this->Controller[$_GET['_c']]['_search'])){
-            foreach($this->Controller[$_GET['_c']]['_search'] as $column){
-                $where[$column]=['like',"%{$keyword}%"];
-            }
+    function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[]){
+        if($this->Object instanceof Object){
+//            $OBVN = $this->ObjectVarName;
+//            $obj=$this->$OBVN;
+//            if((is_string($Keyword)&&strlen($Keyword)>0)||(is_array($W)&&count($W)>0))
+                return $this->Object->search($Keyword,$W,$Sort,$P,$N);
+//            elseif($Keyword===''&&$W===[]){
+//                return
+//            }
         }
-        $Relation=[];//关系处理规则定义
-        if(is_array($W)&&count($W)){
-            foreach($W as $k=>$v){
-                if(substr($k,0,1)=='_'){
-                    //这是特殊处理字段
-                }else{
-                    $Router = explode('.',$k);
-                    if(count($Router)==2){
-                        //初始化关联查询数组
-                        if(!isset($Relation[$Router[0]])){$Relation[$Router[0]]=[];}
-                        $Relation[$Router[0]][$Router[1]]=$v;
-                    }else{
-                        $where[$k]=$v;
-                    }
-                }
-            }
-        }
-        //检测关联查询
-        $IDs=[];
-        if(count($Relation)){
-            foreach($Relation as $ModelName=>$ModelWhere){
-                if($ModelName&&$ModelWhere){
-                    $Rs = D($ModelName)->where($ModelWhere)->order($Sort)->getField($this->PRIKey,TRUE);
-                    if($Rs){
-                        if(strtoupper($W['_logic'])=='AND'){
-                            $IDs=array_intersect($IDs,$Rs);
-                        }else{
-                            $IDs=array_merge($IDs,$Rs);
-                        }
-                    }
-                }
-            }
-        }
-        if($where){
-            $IDs = D($_GET['_c'])->where($where)->order($Sort)->getField($this->PRIKey,TRUE);
-        }
-        $IDs=array_unique($IDs);
-        //开始分页处理
-        if(isset($W['_logic'])&&$where){
-            $Rs = D($_GET['_c'])->order($Sort)->where($where)->getField($this->PRIKey,TRUE);
-            if(strtoupper($W['_logic'])=='AND'){
-                $IDs = array_intersect($IDs,$Rs);
-            }else{
-                $IDs = array_merge($IDs,$Rs);
-            }
-        }
-        $IDs=array_unique($IDs);
-//	    分页控制
-        $PRIKeyIDs = [];
-        for($i=$P-1;$i<($P*$N-1);$i++){
-            if($IDs[$i])
-                $PRIKeyIDs[]=$IDs[$i];
-        }
-        if(false!==$IDs){
-            return [
-                'L'=>array_values(D($_GET['_c'])->obj($PRIKeyIDs)),
-                'P'=>$P,
-                'N'=>$N,
-                'T'=>count($IDs)
-            ];
-        }else{
-            return FALSE;
-        }
+//        $where = [];
+//        if($keyword&&isset($this->Controller[$_GET['_c']]['_search'])){
+//            foreach($this->Controller[$_GET['_c']]['_search'] as $column){
+//                $where[$column]=['like',"%{$keyword}%"];db5757c0ed18381_store_combine
+//            }
+//        }
+//        $Relation=[];//关系处理规则定义
+//        if(is_array($W)&&count($W)){
+//            foreach($W as $k=>$v){
+//                if(substr($k,0,1)=='_'){
+//                    //这是特殊处理字段
+//                }else{
+//                    $Router = explode('.',$k);
+//                    if(count($Router)==2){
+//                        //初始化关联查询数组
+//                        if(!isset($Relation[$Router[0]])){$Relation[$Router[0]]=[];}
+//                        $Relation[$Router[0]][$Router[1]]=$v;
+//                    }else{
+//                        $where[$k]=$v;
+//                    }
+//                }
+//            }
+//        }
+//        //检测关联查询
+//        $IDs=[];
+//        if(count($Relation)){
+//            foreach($Relation as $ModelName=>$ModelWhere){
+//                if($ModelName&&$ModelWhere){
+//                    $Rs = D($ModelName)->where($ModelWhere)->order($Sort)->getField($this->PRIKey,TRUE);
+//                    if($Rs){
+//                        if(strtoupper($W['_logic'])=='AND'){
+//                            $IDs=array_intersect($IDs,$Rs);
+//                        }else{
+//                            $IDs=array_merge($IDs,$Rs);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if($where){
+//            $IDs = D($_GET['_c'])->where($where)->order($Sort)->getField($this->PRIKey,TRUE);
+//        }
+//        $IDs=array_unique($IDs);
+//        //开始分页处理
+//        if(isset($W['_logic'])&&$where){
+//            $Rs = D($_GET['_c'])->order($Sort)->where($where)->getField($this->PRIKey,TRUE);
+//            if(strtoupper($W['_logic'])=='AND'){
+//                $IDs = array_intersect($IDs,$Rs);
+//            }else{
+//                $IDs = array_merge($IDs,$Rs);
+//            }
+//        }
+//        $IDs=array_unique($IDs);
+////	    分页控制
+//        $PRIKeyIDs = [];
+//        for($i=$P-1;$i<($P*$N-1);$i++){
+//            if($IDs[$i])
+//                $PRIKeyIDs[]=$IDs[$i];
+//        }
+//        if(false!==$IDs){
+//            return [
+//                'L'=>array_values(D($_GET['_c'])->obj($PRIKeyIDs)),
+//                'P'=>$P,
+//                'N'=>$N,
+//                'T'=>count($IDs)
+//            ];
+//        }else{
+//            return FALSE;
+//        }
     }
     function add(){
         $ID = D($_GET['_c'])->add($_POST);
