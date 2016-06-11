@@ -255,7 +255,7 @@ function L($msg = false,$Type=6,$trace=''){
         }
         //TODO 完善log函数
         if(APP_DEBUG){
-            echo $msg;
+            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg;
         }
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg&&$Type===false){
