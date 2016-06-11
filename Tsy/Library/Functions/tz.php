@@ -193,10 +193,10 @@ function test_io()
 
 function GetCoreInformation() {$data = file('/proc/stat');$cores = array();foreach( $data as $line ) {if( preg_match('/^cpu[0-9]/', $line) ){$info = explode(' ', $line);$cores[]=array('user'=>$info[1],'nice'=>$info[2],'sys' => $info[3],'idle'=>$info[4],'iowait'=>$info[5],'irq' => $info[6],'softirq' => $info[7]);}}return $cores;}
 function GetCpuPercentages($stat1, $stat2) {if(count($stat1)!==count($stat2)){return;}$cpus=array();for( $i = 0, $l = count($stat1); $i < $l; $i++) {	$dif = array();	$dif['user'] = $stat2[$i]['user'] - $stat1[$i]['user'];$dif['nice'] = $stat2[$i]['nice'] - $stat1[$i]['nice'];	$dif['sys'] = $stat2[$i]['sys'] - $stat1[$i]['sys'];$dif['idle'] = $stat2[$i]['idle'] - $stat1[$i]['idle'];$dif['iowait'] = $stat2[$i]['iowait'] - $stat1[$i]['iowait'];$dif['irq'] = $stat2[$i]['irq'] - $stat1[$i]['irq'];$dif['softirq'] = $stat2[$i]['softirq'] - $stat1[$i]['softirq'];$total = array_sum($dif);$cpu = array();foreach($dif as $x=>$y) $cpu[$x] = round($y / $total * 100, 2);$cpus['cpu' . $i] = $cpu;}return $cpus;}
-$stat1 = GetCoreInformation();sleep(1);$stat2 = GetCoreInformation();$data = GetCpuPercentages($stat1, $stat2);
-$cpu_show = $data['cpu0']['user']."%us,  ".$data['cpu0']['sys']."%sy,  ".$data['cpu0']['nice']."%ni, ".$data['cpu0']['idle']."%id,  ".$data['cpu0']['iowait']."%wa,  ".$data['cpu0']['irq']."%irq,  ".$data['cpu0']['softirq']."%softirq";
+//$stat1 = GetCoreInformation();sleep(1);$stat2 = GetCoreInformation();$data = GetCpuPercentages($stat1, $stat2);
+//$cpu_show = $data['cpu0']['user']."%us,  ".$data['cpu0']['sys']."%sy,  ".$data['cpu0']['nice']."%ni, ".$data['cpu0']['idle']."%id,  ".$data['cpu0']['iowait']."%wa,  ".$data['cpu0']['irq']."%irq,  ".$data['cpu0']['softirq']."%softirq";
 function makeImageUrl($title, $data) {$api='http://api.yahei.net/tz/cpu_show.php?id=';$url.=$data['user'].',';$url.=$data['nice'].',';$url.=$data['sys'].',';$url.=$data['idle'].',';$url.=$data['iowait'];$url.='&chdl=User|Nice|Sys|Idle|Iowait&chdlp=b&chl=';$url.=$data['user'].'%25|';$url.=$data['nice'].'%25|';$url.=$data['sys'].'%25|';$url.=$data['idle'].'%25|';$url.=$data['iowait'].'%25';$url.='&chtt=Core+'.$title;return $api.base64_encode($url);}
-if($_GET['act'] == "cpu_percentage"){echo "<center><b><font face='Microsoft YaHei' color='#666666' size='3'>图片加载慢，请耐心等待！</font></b><br /><br />";foreach( $data as $k => $v ) {echo '<img src="' . makeImageUrl( $k, $v ) . '" style="width:360px;height:240px;border: #CCCCCC 1px solid;background: #FFFFFF;margin:5px;padding:5px;" />';}echo "</center>";exit();}
+//if($_GET['act'] == "cpu_percentage"){echo "<center><b><font face='Microsoft YaHei' color='#666666' size='3'>图片加载慢，请耐心等待！</font></b><br /><br />";foreach( $data as $k => $v ) {echo '<img src="' . makeImageUrl( $k, $v ) . '" style="width:360px;height:240px;border: #CCCCCC 1px solid;background: #FFFFFF;margin:5px;padding:5px;" />';}echo "</center>";exit();}
 
 
 
@@ -693,42 +693,42 @@ function GetWMI($wmi,$strClass, $strValue = array())
 
 
 //判断内存如果小于1G，就显示M，否则显示G单位
-if($sysInfo['memTotal']<1024)
-{
-    $memTotal = $sysInfo['memTotal']." M";
-    $mt = $sysInfo['memTotal']." M";
-    $mu = $sysInfo['memUsed']." M";
-    $mf = $sysInfo['memFree']." M";
-    $mc = $sysInfo['memCached']." M";	//cache化内存
-    $mb = $sysInfo['memBuffers']." M";	//缓冲
-    $st = $sysInfo['swapTotal']." M";
-    $su = $sysInfo['swapUsed']." M";
-    $sf = $sysInfo['swapFree']." M";
-    $swapPercent = $sysInfo['swapPercent'];
-    $memRealUsed = $sysInfo['memRealUsed']." M"; //真实内存使用
-    $memRealFree = $sysInfo['memRealFree']." M"; //真实内存空闲
-    $memRealPercent = $sysInfo['memRealPercent']; //真实内存使用比率
-    $memPercent = $sysInfo['memPercent']; //内存总使用率
-    $memCachedPercent = $sysInfo['memCachedPercent']; //cache内存使用率
-}
-else
-{
-    $memTotal = round($sysInfo['memTotal']/1024,3)." G";
-    $mt = round($sysInfo['memTotal']/1024,3)." G";
-    $mu = round($sysInfo['memUsed']/1024,3)." G";
-    $mf = round($sysInfo['memFree']/1024,3)." G";
-    $mc = round($sysInfo['memCached']/1024,3)." G";
-    $mb = round($sysInfo['memBuffers']/1024,3)." G";
-    $st = round($sysInfo['swapTotal']/1024,3)." G";
-    $su = round($sysInfo['swapUsed']/1024,3)." G";
-    $sf = round($sysInfo['swapFree']/1024,3)." G";
-    $swapPercent = $sysInfo['swapPercent'];
-    $memRealUsed = round($sysInfo['memRealUsed']/1024,3)." G"; //真实内存使用
-    $memRealFree = round($sysInfo['memRealFree']/1024,3)." G"; //真实内存空闲
-    $memRealPercent = $sysInfo['memRealPercent']; //真实内存使用比率
-    $memPercent = $sysInfo['memPercent']; //内存总使用率
-    $memCachedPercent = $sysInfo['memCachedPercent']; //cache内存使用率
-}
+//if($sysInfo['memTotal']<1024)
+//{
+//    $memTotal = $sysInfo['memTotal']." M";
+//    $mt = $sysInfo['memTotal']." M";
+//    $mu = $sysInfo['memUsed']." M";
+//    $mf = $sysInfo['memFree']." M";
+//    $mc = $sysInfo['memCached']." M";	//cache化内存
+//    $mb = $sysInfo['memBuffers']." M";	//缓冲
+//    $st = $sysInfo['swapTotal']." M";
+//    $su = $sysInfo['swapUsed']." M";
+//    $sf = $sysInfo['swapFree']." M";
+//    $swapPercent = $sysInfo['swapPercent'];
+//    $memRealUsed = $sysInfo['memRealUsed']." M"; //真实内存使用
+//    $memRealFree = $sysInfo['memRealFree']." M"; //真实内存空闲
+//    $memRealPercent = $sysInfo['memRealPercent']; //真实内存使用比率
+//    $memPercent = $sysInfo['memPercent']; //内存总使用率
+//    $memCachedPercent = $sysInfo['memCachedPercent']; //cache内存使用率
+//}
+//else
+//{
+//    $memTotal = round($sysInfo['memTotal']/1024,3)." G";
+//    $mt = round($sysInfo['memTotal']/1024,3)." G";
+//    $mu = round($sysInfo['memUsed']/1024,3)." G";
+//    $mf = round($sysInfo['memFree']/1024,3)." G";
+//    $mc = round($sysInfo['memCached']/1024,3)." G";
+//    $mb = round($sysInfo['memBuffers']/1024,3)." G";
+//    $st = round($sysInfo['swapTotal']/1024,3)." G";
+//    $su = round($sysInfo['swapUsed']/1024,3)." G";
+//    $sf = round($sysInfo['swapFree']/1024,3)." G";
+//    $swapPercent = $sysInfo['swapPercent'];
+//    $memRealUsed = round($sysInfo['memRealUsed']/1024,3)." G"; //真实内存使用
+//    $memRealFree = round($sysInfo['memRealFree']/1024,3)." G"; //真实内存空闲
+//    $memRealPercent = $sysInfo['memRealPercent']; //真实内存使用比率
+//    $memPercent = $sysInfo['memPercent']; //内存总使用率
+//    $memCachedPercent = $sysInfo['memCachedPercent']; //cache内存使用率
+//}
 
 
 //网卡流量

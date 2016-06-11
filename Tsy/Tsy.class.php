@@ -23,12 +23,16 @@ class Tsy
         register_shutdown_function('Tsy\Tsy::fatalError');
         set_error_handler('Tsy\Tsy::appError');
         set_exception_handler('Tsy\Tsy::appException');
+
     }
     function start(){
 //        加载配置文件
         $this->loadFunctions();//加载框架function和项目function
         
         $this->loadConfig();
+        if(APP_DEBUG){
+            $this->build();
+        }
         $GLOBALS['Config']=C();
         if(defined('APP_BUILD')&&APP_BUILD)
             build_cache();
@@ -49,9 +53,7 @@ class Tsy
             }
             define('MODULES',implode(',',$Modules ));
         }
-        if(APP_DEBUG){
-            $this->build();
-        }
+
 //        $Session = new Session();
 //        session_set_save_handler($Session,true);
 //        开始实例化Mode类，进行初始化操作
@@ -168,8 +170,8 @@ class Tsy
             $error['line']  =   $e->getLine();
         }
         $error['trace']     =   $e->getTraceAsString();
-        if (is_callable(C('APP_EXCEPTION'))){
-            call_user_func(C('APP_EXCEPTION'),$e);
+        if (is_callable(\C('APP_EXCEPTION'))){
+            call_user_func(\C('APP_EXCEPTION'),$e);
         }
         L($error,LOG_ERR);
     }
