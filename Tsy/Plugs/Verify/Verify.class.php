@@ -3,14 +3,14 @@
 namespace Tsy\Plugs\Verify;
 class Verify{
 	static $V_INT='INT';
-	static $V_STRING='STRING';
-	static $V_DOUBLE='DOUBLE';
-	static $V_ARRAY='ARRAY';
-	static $V_EMAIL='EMAIL';
-	static $V_URL='URL';
-	static $V_MONEY='MONEY';
+	static $V_STRING='STRING';//字符串
+	static $V_DOUBLE='DOUBLE';//双精度浮点数
+	static $V_ARRAY='ARRAY';//数组
+	static $V_EMAIL='EMAIL';//email
+	static $V_URL='URL';//地址
+	static $V_MONEY='MONEY';//金额
 	static $V_IN='IN';
-	static $V_BOOL='BOOL';
+	static $V_BOOL='BOOL';//布尔值
 	static $V_PLUS='PLUS';//正数
 	static $V_NEGATIVE='NEGATIVE';//负数
 	static $V_PLUS_ZERO='PLUS_ZERO';//正数
@@ -53,11 +53,12 @@ class Verify{
 
 	}
 	function err($err=false){
-		if($err){
-			$this->err=$err;
-		}else{
-			return $this->err;
-		}
+//		if($err){
+//			$this->err=$err;
+//		}else{
+//			return $this->err;
+//		}
+		L($err);
 	}
 	public function _v($Config,$Param){
 		//要取得必要参数列表，和所有参数列表，并取得

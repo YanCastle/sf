@@ -31,10 +31,10 @@ class Tree
      * @param int $Sort
      */
     function add($ID,$LID,$Sort=0){
-//        $this->Model->where(['LID'=>$LID])->
+        $this->Model->where(['LID'=>$LID])->getField('ID');
     }
     function get(){
-        $lists = $this->Model->order('LFT')->select();
+        $lists = $this->Model->order('LID')->select();
 
         //相邻的两条记录的右值第一条的右值比第二条的大那么就是他的父类
         //我们用一个数组来存储上一条记录的右值，再把它和本条记录的右值比较，如果前者比后者小，说明不是父子关系，就用array_pop弹出数组，否则就保留

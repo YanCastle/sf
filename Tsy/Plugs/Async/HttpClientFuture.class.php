@@ -39,19 +39,15 @@ class HttpClientFuture implements FutureIntf {
 	}
 	
 	function get($url,$data=[],$header=[],$cookie=[]){
+		$this->url=$url;
 		$this->send_str = $this->http_build($url?$url:$this->url,$data,[],$header,$cookie);
 	}
 	function post($url,$data,$get=[],$header=[],$cookie=[]){
+		$this->url=$url;
 		$this->send_str = $this->http_build($url?$url:$this->url,$get,$data,$header,$cookie,'POST');
 	}
 	public function run(Async &$promise,$content) {
-		$urlInfo = parse_url ( $this->url );
-		$timeout = $this->timeout;
-		$https=false;
-		if('http'==$urlInfo['scheme']&&!isset($urlInfo ['port']))$urlInfo ['port'] = 80;
-		if('https'==$urlInfo['scheme']&&!isset($urlInfo ['port'])){$urlInfo ['port'] = 443;$https=true;}
-
-		$parse = parse_url($url);
+		$parse = parse_url($this->url);
 		if(!isset($parse['host'])||isset($parse['user'])||isset($parse['pass'])){
 			return false;
 		}
