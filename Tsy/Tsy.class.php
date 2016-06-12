@@ -224,7 +224,7 @@ class Tsy
     }
     function build(){
         foreach ([APP_PATH,CONF_PATH,RUNTIME_PATH,TEMP_PATH,] as $dir){
-            if(!is_dir($dir)){
+            if(!is_dir($dir)&&is_string($dir)){
                 @mkdir($dir,0777,true);
                 file_put_contents($dir.DIRECTORY_SEPARATOR.'README.md', '#');
             }

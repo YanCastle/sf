@@ -210,7 +210,8 @@ function parse_res_name($name,$layer,$level=1){
     if(strpos($name,'/') && substr_count($name, '/')>=$level){ // 指定模块
         list($module,$name) =  explode('/',$name,2);
     }else{
-        $module =   $_GET['_m'] ? $_GET['_m'] : '' ;
+        $Model = process_queue('controller','get');
+        $module =   $Model[0] ? $Model[0] : '' ;
     }
     $array  =   explode('/',$name);
     if(!C('APP_USE_NAMESPACE')){

@@ -26,24 +26,27 @@ class Controller
     protected $MethodName;
     protected $ObjectVarName;
     public $Object;
+    protected $MC;
     function __construct()
     {
-        $this->className = $this->getControllerName();
-        if(file_exists(APP_PATH.DIRECTORY_SEPARATOR.$_GET['_m'].'Config/controller.php'))
-            $this->Controller=include APP_PATH.DIRECTORY_SEPARATOR.$_GET['_m'].'Config/controller.php';
-        if(isset($this->Controller[$_GET['_c']])&&
-            isset($this->Controller[$_GET['_c']][$_GET['_a']])) {
-            $this->PRIKey = $this->Controller[$_GET['_c']]['_pki'];
-            $this->Params=$this->Controller[$_GET['_c']][$_GET['_a']];
-        }
         $this->__CLASS__ = get_class($this);
+        $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         $ObjectName = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectName)){
             list($this->ModuleName,$this->ControllerName,$this->MethodName)=explode('\\',$this->__CLASS__);
             $this->Object=new $ObjectName();
             $this->PRIKey = $this->Object->pk;
-            $this->ObjectVarName=$ObjectVarName;
+//            $this->ObjectVarName=$ObjectVarName;
         }
+        $this->className = $this->getControllerName();
+        if(file_exists(APP_PATH.DIRECTORY_SEPARATOR.$this->ModuleName.'Config/controller.php'))
+            $this->Controller=include APP_PATH.DIRECTORY_SEPARATOR.$this->ModuleName.'/Config/controller.php';
+        if(isset($this->Controller[$this->ControllerName])&&
+            isset($this->Controller[$this->ControllerName][$this->MethodName])) {
+            $this->PRIKey = $this->Controller[$this->ControllerName]['_pki'];
+//            $this->Params=$this->Controller[$this->ControllerName][$this->MethodName];
+        }
+
     }
     function __call($name, $arguments)
     {
@@ -70,7 +73,7 @@ class Controller
     }
     function get($ID=[]){
         if(!$ID){
-            $ClassName=$_GET['_c'];
+            $ClassName=$this->__CLASS__;
             $ObjectName=$ClassName.'Object';
             $NameSpace = implode('\\',[$_GET['_m'],'Object',$ObjectName]);
             if(!property_exists($this,$ClassName.'Object')){
@@ -79,7 +82,7 @@ class Controller
             $ID = $_POST[$this->$ObjectName->pk];
         }
         if($ID){
-            $ClassName=$_GET['_c'];
+            $ClassName=$this->ControllerName;
             if(property_exists($this,$ClassName.'Object')){
                 $ObjectName=$ClassName.'Object';
                 $objs=$this->$ObjectName->get($ID);
@@ -87,10 +90,10 @@ class Controller
             }
         }
 //        if($ID){
-//            return array_values(array_values(D($_GET['_c'])->obj($ID)))[0];
+//            return array_values(array_values(D($this->ControllerName)->obj($ID)))[0];
 //        }
-//        if(isset($this->Controller[$_GET['_c']])&&isset($this->Controller[$_GET['_c']][$_GET['_a']])){
-//            return array_values(array_values(D($_GET['_c'])->obj([$_REQUEST[array_keys($this->Controller[$_GET['_c']][$_GET['_a']])[0]]])))[0];
+//        if(isset($this->Controller[$this->ControllerName])&&isset($this->Controller[$this->ControllerName][$this->MethodName])){
+//            return array_values(array_values(D($this->ControllerName)->obj([$_REQUEST[array_keys($this->Controller[$this->ControllerName][$this->MethodName])[0]]])))[0];
 //        }else{
 //            return FALSE;
 //        }
@@ -101,7 +104,7 @@ class Controller
             return array_values((new $ObjectClass)->gets($_POST[$this->PRIKey.'s']));
         }
         if($this->PRIKey){
-            $Model = D($_GET['_c']);
+            $Model = D($this->ControllerName);
             if(isset($_REQUEST[$this->PRIKey.'s'])&&is_array($_REQUEST[$this->PRIKey.'s'])){
                 $IDs = $Model->where([$this->PRIKey=>['in',$_REQUEST[$this->PRIKey.'s']]])->page($P,$N)->order($Sort)->getField($this->PRIKey,true);
             }else{
@@ -114,7 +117,7 @@ class Controller
     }
     function save(array $Params){
         if($this->PRIKey&&isset($_REQUEST[$this->PRIKey])&&is_numeric($_REQUEST[$this->PRIKey])){
-            $Model = D($_GET['_c']);
+            $Model = D($this->ControllerName);
             return $Model->where([$this->PRIKey=>$_REQUEST[$this->PRIKey]])->save($Params);
         }else{return FALSE;}
     }
@@ -133,7 +136,7 @@ class Controller
                 $IDs=[$_REQUEST[$this->PRIKey]];
             }
             if($IDs){
-                $Model = D($_GET['_c']);
+                $Model = D($this->ControllerName);
                 $Deletes = $Model->obj($IDs);
                 if($Model->where([$this->PRIKey=>['in',$IDs]])->delete()){
                     return array_values($Deletes);
@@ -154,8 +157,8 @@ class Controller
 //            }
         }
 //        $where = [];
-//        if($keyword&&isset($this->Controller[$_GET['_c']]['_search'])){
-//            foreach($this->Controller[$_GET['_c']]['_search'] as $column){
+//        if($keyword&&isset($this->Controller[$this->ControllerName]['_search'])){
+//            foreach($this->Controller[$this->ControllerName]['_search'] as $column){
 //                $where[$column]=['like',"%{$keyword}%"];db5757c0ed18381_store_combine
 //            }
 //        }
@@ -193,12 +196,12 @@ class Controller
 //            }
 //        }
 //        if($where){
-//            $IDs = D($_GET['_c'])->where($where)->order($Sort)->getField($this->PRIKey,TRUE);
+//            $IDs = D($this->ControllerName)->where($where)->order($Sort)->getField($this->PRIKey,TRUE);
 //        }
 //        $IDs=array_unique($IDs);
 //        //开始分页处理
 //        if(isset($W['_logic'])&&$where){
-//            $Rs = D($_GET['_c'])->order($Sort)->where($where)->getField($this->PRIKey,TRUE);
+//            $Rs = D($this->ControllerName)->order($Sort)->where($where)->getField($this->PRIKey,TRUE);
 //            if(strtoupper($W['_logic'])=='AND'){
 //                $IDs = array_intersect($IDs,$Rs);
 //            }else{
@@ -214,7 +217,7 @@ class Controller
 //        }
 //        if(false!==$IDs){
 //            return [
-//                'L'=>array_values(D($_GET['_c'])->obj($PRIKeyIDs)),
+//                'L'=>array_values(D($this->ControllerName)->obj($PRIKeyIDs)),
 //                'P'=>$P,
 //                'N'=>$N,
 //                'T'=>count($IDs)
@@ -224,7 +227,7 @@ class Controller
 //        }
     }
     function add(){
-        $ID = D($_GET['_c'])->add($_POST);
-        return $ID?array_values(D($_GET['_c'])->obj([$ID]))[0]:false;
+        $ID = D($this->ControllerName)->add($_POST);
+        return $ID?array_values(D($this->ControllerName)->obj([$ID]))[0]:false;
     }
 }

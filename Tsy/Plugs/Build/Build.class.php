@@ -20,7 +20,7 @@ class Build
     function __construct($ModulePath=''){
         $this->Model=M();
         $this->Db=new Db();
-        $this->ModulePath=$ModulePath?$ModulePath:APP_PATH.DIRECTORY_SEPARATOR.$_GET['_m'];
+        $this->ModulePath=$ModulePath?$ModulePath:APP_PATH.DIRECTORY_SEPARATOR.process_queue('controller','get')[0];
     }
 
     /**

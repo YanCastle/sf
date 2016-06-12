@@ -147,7 +147,11 @@ function controller($i,$data,$mid='',$layer="Controller"){
             return E('NOT_LOGIN');
         }
     }
-    $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
+    //存储调用之前的配置参数
+    $LastController = process_queue('controller','get');
+    $Config = C();
+    process_queue('controller','push',[$M,$C,$A]);
+//    $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
     load_module_config($M);
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
@@ -189,6 +193,11 @@ function controller($i,$data,$mid='',$layer="Controller"){
         $result = array_merge($result,$after);
     }
     $Class=null;
+    process_queue('controller','pop');
+    if($LastController){
+        load_module_config($LastController[0]);
+        C($Config);
+    }
     return $result;
 }
 
@@ -255,7 +264,7 @@ function L($msg = false,$Type=6,$trace=''){
         }
         //TODO 完善log函数
         if(APP_DEBUG){
-            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg;
+            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
         }
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg&&$Type===false){
@@ -319,4 +328,31 @@ function each_dir(string $dir,callable $dir_callback=null,callable $file_callbac
             }
         }
     }
+}
+
+/**
+ * 一个线程内有效的队列
+ * @param $key
+ * @param string $op
+ * @param string $value
+ * @return bool|mixed
+ */
+function process_queue($key,$op='push',$value=''){
+    static $queue=[];
+    isset($queue[$key]) or $queue[$key]=[];
+    switch (strtolower($op)){
+        case 'pop':
+            return array_pop($queue[$key]);
+            break;
+        case 'push':
+            $queue[$key][]=$value;
+            break;
+        case 'get':
+            return end($queue[$key]);
+            break;
+        case 'getAll':
+            return $queue[$key];
+            break;
+    }
+    return true;
 }

@@ -26,7 +26,7 @@ function O($Name,$Config=[]){
     if (isset($Objects[$CacheKey])){
         return $Objects[$CacheKey];
     }
-    if(class_exists($Obj=implode('\\',[$_GET['_m'],'Object',$Name.'Object']))){
+    if(class_exists($Obj=implode('\\',[process_queue('controller','get')[0],'Object',$Name.'Object']))){
         $OBJ=new $Obj($Name);
         foreach ($Config as $K=>$config){
             $OBJ->$K=$config;
