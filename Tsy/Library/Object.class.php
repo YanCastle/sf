@@ -47,7 +47,7 @@ class Object
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
 //        提取数据库字段，合并到map中
-        $this->__CLASS__ = get_class();
+        $this->__CLASS__ = get_class($this);
         $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         if (!$this->main) {
             $this->main = $this->getObjectName();
