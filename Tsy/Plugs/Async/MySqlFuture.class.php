@@ -22,6 +22,7 @@ use Tsy\Plugs\Async\MySql\MySqlResult;
 class MySqlFuture implements FutureIntf
 {
     static private $instances=[];
+    static private $InstanceID='';
     static private $inUse=[];
     private $config=[];
     private $SQL='';
@@ -33,6 +34,11 @@ class MySqlFuture implements FutureIntf
         $this->md5=md5(serialize($config));
     }
 
+    /**
+     * 执行
+     * @param Async $promise
+     * @param $content
+     */
     function run(Async &$promise, $content)
     {
         if($this->SQL&&$this->config){
@@ -49,15 +55,64 @@ class MySqlFuture implements FutureIntf
             }
         }
     }
+
+    /**
+     * 获取一个实例
+     * @param $config
+     * @return mixed
+     */
     static private function getInstance($config){
         $md5    =   md5(serialize($config));
-        if(isset(self::$instances[$md5])&&!isset(self::$inUse[$md5])){
-
-        }else{
+        if(!isset(self::$instances[$md5])){
+            self::$instances[$md5]=[];
+        }
+        $new_client = function ()use($config,$md5){
             $mysqli=new \mysqli();
             $mysqli->connect($config['DB_HOST'],$config['DB_USER'],$config['DB_PWD'],$config['DB_NAME'],$config['DB_PORT']);
-            self::$instances[$md5]=$mysqli;
+            self::$instances[$md5][]=$mysqli;
+            $IDs = array_keys(self::$instances[$md5]);
+            $InstanceID = $md5.','.$IDs[count($IDs)-1];
+            self::$InstanceID=$InstanceID;
+            return $mysqli;
+        };
+        if(count(self::$instances[$md5])>self::$inUse[$md5]){
+//            有空余
+            if($IDs = array_diff(self::$instances[$md5],self::$inUse[$md5])){
+                $ID = array_shift($IDs);
+                if(isset(self::$instances[$ID])){
+                    self::$InstanceID = $md5.','.$ID;
+                    return self::$instances[$ID];
+                }else{
+
+                }
+            }else{
+
+            }
+        }else{
+
         }
-        return self::$instances[$md5];
+        return $new_client();
+    }
+
+    /**
+     * 开始标记
+     * @param bool $InstanceID
+     */
+    static private function start($InstanceID=false){
+        if(!$InstanceID){$InstanceID=self::$InstanceID;}
+        list($md5,$ID)=explode(',',$InstanceID);
+        self::$inUse[$md5][]=$ID;
+    }
+
+    /**
+     * 完成标记
+     * @param bool $InstanceID
+     */
+    static private function finish($InstanceID=false){
+        if(!$InstanceID){$InstanceID=self::$InstanceID;}
+        list($md5,$ID)=explode(',',$InstanceID);
+        if($Key = array_search($ID, self::$inUse[$md5])){
+            unset(self::$inUse[$md5][$Key]);
+        }
     }
 }
