@@ -5,6 +5,12 @@
  * Date: 2016/4/11
  * Time: 22:20
  */
+function vendor($class, $baseUrl = '', $ext='.php') {
+    if (empty($baseUrl))
+        $baseUrl = VENDOR_PATH;
+    return import($class, $baseUrl, $ext);
+}
+
 function is_first_receive($fd){
     return true;
 }
