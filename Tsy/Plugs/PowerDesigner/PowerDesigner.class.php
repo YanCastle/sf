@@ -14,9 +14,9 @@ class PowerDesigner
      * 入口函数，获取Controller，Model，Object参数
      * @return array
      */
-    function get(){
+    function get($FilePath){
         $Pdm=new Pdm();
-        $Pdm->load('C:\Users\ghost\Desktop\1.pdm');
+        $Pdm->load($FilePath);
         $Tables=$Pdm->json['Tables'];
         $ModelAndController=$this->modelGet($Tables);
         $Data=[];
@@ -27,7 +27,7 @@ class PowerDesigner
                 }
             }
             $Comment=$this->getComment($Table['Comment']);
-            $main=ucwords(str_replace('_',' ',substr($Table['Code'],9)));
+            $main=str_replace(' ','',ucwords(str_replace('_',' ',substr($Table['Code'],9))));
 //            不能用序列号和json，冒号读取不出来
             $Data[$main.'Object']=['main'=>$main,'pk'=>$pk,'property'=>$Comment['property'],'link'=>$Comment['link']];
         }
