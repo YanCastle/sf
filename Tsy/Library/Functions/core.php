@@ -266,6 +266,7 @@ function L($msg = false,$Type=6,$trace=''){
         if(APP_DEBUG){
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
         }
+        return $msg;
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg&&$Type===false){
         return $Type==0?$_log:$_log[$Type];

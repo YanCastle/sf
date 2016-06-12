@@ -1715,13 +1715,13 @@ class Model {
         $prefix =   $this->tablePrefix;
         if(is_array($join)) {
             foreach ($join as $key=>&$_join){
-                $_join  =   preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return $prefix.strtolower($match[1]);}, $_join);
+                $_join  =   preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return strtolower($prefix.$match[1]);}, $_join);
                 $_join  =   false !== stripos($_join,'JOIN')? $_join : $type.' JOIN ' .$_join;
             }
             $this->options['join']      =   $join;
         }elseif(!empty($join)) {
             //将__TABLE_NAME__字符串替换成带前缀的表名
-            $join  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return $prefix.strtolower($match[1]);}, $join);
+            $join  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return strtolower($prefix.$match[1]);}, $join);
             $this->options['join'][]    =   false !== stripos($join,'JOIN')? $join : $type.' JOIN '.$join;
         }
         return $this;
