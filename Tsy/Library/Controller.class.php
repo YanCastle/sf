@@ -33,7 +33,7 @@ class Controller
         $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         $ObjectName = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectName)){
-            list($this->ModuleName,$this->ControllerName,$this->MethodName)=explode('\\',$this->__CLASS__);
+            list($this->ModuleName,$this->ControllerName)=explode('\\\\',str_replace('Controller','' ,$this->__CLASS__));
             $this->Object=new $ObjectName();
             $this->PRIKey = $this->Object->pk;
 //            $this->ObjectVarName=$ObjectVarName;
@@ -73,13 +73,7 @@ class Controller
     }
     function get($ID=[]){
         if(!$ID){
-            $ClassName=$this->__CLASS__;
-            $ObjectName=$ClassName.'Object';
-            $NameSpace = implode('\\',[$_GET['_m'],'Object',$ObjectName]);
-            if(!property_exists($this,$ClassName.'Object')){
-                $this->$ObjectName=new $NameSpace;
-            }
-            $ID = $_POST[$this->$ObjectName->pk];
+            !isset($_POST[$this->PRIKey]) or $ID = $_POST[$this->PRIKey];
         }
         if($ID){
             $ClassName=$this->ControllerName;
@@ -89,20 +83,15 @@ class Controller
                 return $objs;
             }
         }
-//        if($ID){
-//            return array_values(array_values(D($this->ControllerName)->obj($ID)))[0];
-//        }
-//        if(isset($this->Controller[$this->ControllerName])&&isset($this->Controller[$this->ControllerName][$this->MethodName])){
-//            return array_values(array_values(D($this->ControllerName)->obj([$_REQUEST[array_keys($this->Controller[$this->ControllerName][$this->MethodName])[0]]])))[0];
-//        }else{
-//            return FALSE;
-//        }
+        return [];
     }
-    function gets(){
+    function gets($IDs){
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectClass)){
             if($this->Object->is_dic){
                 return $this->Object->getAll();
+            }elseif ($IDs){
+                return array_values($this->Object->gets($_POST[$this->PRIKey.'s']));
             }elseif($this->PRIKey&&isset($_POST[$this->PRIKey.'s'])){
                 return array_values($this->Object->gets($_POST[$this->PRIKey.'s']));
             }
