@@ -100,8 +100,12 @@ class Controller
     }
     function gets(){
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
-        if(class_exists($ObjectClass)&&$this->PRIKey&&isset($_POST[$this->PRIKey.'s'])){
-            return array_values((new $ObjectClass)->gets($_POST[$this->PRIKey.'s']));
+        if(class_exists($ObjectClass)){
+            if($this->Object->is_dic){
+                return $this->Object->getAll();
+            }elseif($this->PRIKey&&isset($_POST[$this->PRIKey.'s'])){
+                return array_values($this->Object->gets($_POST[$this->PRIKey.'s']));
+            }
         }
         if($this->PRIKey){
             $Model = D($this->ControllerName);
