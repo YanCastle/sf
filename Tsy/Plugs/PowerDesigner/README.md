@@ -11,7 +11,7 @@ Goods/GoodsObject
 property,Basic&Basic&BasicID&ONE,OldVersion&OldVersion&VersionID&ARRAY|link,Class&ClassLink&GoodsID&true#ClassDic&CID
 
 对应
-
+````php
 protected $main='Goods';
     protected $pk='GoodsID';
     protected $property=[
@@ -38,5 +38,5 @@ protected $main='Goods';
             ]
         ]
     ];
-
+```
 
