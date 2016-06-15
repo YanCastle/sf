@@ -40,7 +40,7 @@ class Version
                         $this->db_execute($Config['DB_CONF'],$Config[0]);
                     }
                 }
-                $this->php_execute();
+                $this->php_execute($Config[0],$Config['DB_CONF']);
             }
         }
     }
@@ -100,6 +100,18 @@ class Version
             return false;
         }else{
             L(E('_NO_ADD_CONFIG_'));
+            return false;
+        }
+    }
+    function install($DB_CONF){
+        //        创建一个新的数据库
+        $AddPath = VERSION_PATH.DIRECTORY_SEPARATOR.'Install';
+        if(is_dir($AddPath)&&file_exists($AddPath.DIRECTORY_SEPARATOR.'Install.sql')){
+            if($this->db_execute($DB_CONF, 'Install'))
+                return $this->php_execute('Install',$DB_CONF );
+            return false;
+        }else{
+            L(E('_NO_INSTALL_CONFIG_'));
             return false;
         }
     }
