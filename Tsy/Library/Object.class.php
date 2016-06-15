@@ -327,7 +327,7 @@ class Object
      * @param array|int $IDs 主键字段编号值
      * @return array|bool
      */
-    function gets($IDs)
+    function gets($IDs,$Properties=false)
     {
         if (is_numeric($IDs) &&
             $IDs > 0
@@ -343,6 +343,8 @@ class Object
         $UpperMainTable = strtoupper(parse_name($this->main));
         $ArrayProperties = [];
         foreach ($this->property as $PropertyName => $Config) {
+//            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
+            if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
             if (isset($Config[self::RELATION_TABLE_PROPERTY]) &&
                 isset($Config[self::RELATION_TABLE_NAME]) &&
                 isset($Config[self::RELATION_TABLE_COLUMN])
@@ -377,6 +379,8 @@ class Object
         //处理一对多的情况
         $ArrayPropertyValues = [];
         foreach ($ArrayProperties as $PropertyName => $Config) {
+            //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
+            if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
             $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN], true);
         }
         //处理多对多属性
