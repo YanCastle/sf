@@ -32,9 +32,11 @@ function session($name,$value=false){
         }
         return '';
     }
+    $session_expire = C('SESSION_EXPIRE');
+//    $session_expire = is_numeric($session_expire)
     if(null===$name){
         //清空session
-        cache('sess_'.$session_id,[],1200);
+        cache('sess_'.$session_id,[],$session_expire);
     }
 
     $session = cache('sess_'.$session_id);
@@ -45,7 +47,7 @@ function session($name,$value=false){
         //设置全部
 //        cache('sess_'.$session_id,$name);
         $session = is_array($session)?array_merge($session,$name):$name;
-        cache('sess_'.$session_id,$session,1200);
+        cache('sess_'.$session_id,$session,$session_expire);
         return true;
     }
     if($value){
@@ -53,7 +55,7 @@ function session($name,$value=false){
     }else{
         return isset($session[$name])?$session[$name]:null;
     }
-    cache('sess_'.$session_id,$session,1200);
+    cache('sess_'.$session_id,$session,$session_expire);
 }
 
 

@@ -105,12 +105,16 @@ function load_config($file,$parse='php'){
 
 function controller($i,$data,$mid='',$layer="Controller"){
     static $LoginRequire=null;
+    if($layer=='Object'){
+        $a=1;
+    }
     if(null===$LoginRequire){
         $LoginRequire=C('LOGIN_REQUIRE');
     }
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
     }
+//    切换mid,如果当前环境下存在mid则
     if(!$mid){$mid=$_POST['_mid'];}
     $ModuleClassAction=explode('/',$i);
     $MCACount = count($ModuleClassAction);

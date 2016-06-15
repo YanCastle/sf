@@ -21,5 +21,5 @@ return [
     'DATA_CACHE_SUBDIR'     =>  true,    // 使用子目录缓存 (自动根据缓存标识的哈希创建子目录)
     'DATA_PATH_LEVEL'       =>  1,        // 子目录缓存级别
     'LOGIN_REQUIRE'=>[],
-    
+    'SESSION_EXPIRE'=>5600
 ];
