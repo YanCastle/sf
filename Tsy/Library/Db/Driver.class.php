@@ -189,6 +189,7 @@ abstract class Driver {
 //                    sleep(1);
                     echo "数据库重新连接失败(try:{$count})\n";
                     $count++;
+                    if($count>5){return false;}
                 };
                 return $this->query($str,$fetchSql);
             }
@@ -255,6 +256,7 @@ abstract class Driver {
 //                    sleep(1);
                     echo "数据库重新连接失败(try:{$count})\n";
                     $count++;
+                    if($count>5){return false;}
                 };
                 return $this->query($str,$fetchSql);
             }
