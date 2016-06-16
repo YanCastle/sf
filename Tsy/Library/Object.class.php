@@ -231,7 +231,7 @@ class Object
      * @param array $W
      * @param string $Sort
      */
-    function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20)
+    function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
         $Model = new Model($this->main);
         $DB_PREFIX = C('DB_PREFIX');
@@ -294,7 +294,7 @@ class Object
         }
         $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
         $PageIDs = array_chunk($ObjectIDs, $N);
-        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1]) : [];
+        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
@@ -329,6 +329,7 @@ class Object
      */
     function gets($IDs,$Properties=false)
     {
+        !(false===$Properties&&isset($_POST['Properties'])) or $Properties=$_POST['Properties'];
         if (is_numeric($IDs) &&
             $IDs > 0
         ) {
