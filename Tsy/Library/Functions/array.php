@@ -178,3 +178,15 @@ function array_object(array &$array,string $key,array $properties){
         }
     }
 }
+
+/**
+ * 针对二位数组设置键值关系
+ * @param $array
+ * @param $key
+ * @param $value
+ */
+function array_set_key_value(&$array,$key,$value){
+    foreach ($array as $k=>$item){
+        $array[$k][$key]=$value;
+    }
+}

@@ -280,7 +280,7 @@ function L($msg = false,$Type=6,$trace=''){
     }elseif(null===$msg&&$Type===null){
         $_log=[];
     }
-
+    return $msg;
 }
 
 /**
