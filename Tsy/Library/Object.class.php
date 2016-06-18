@@ -89,7 +89,7 @@ class Object
         if ($PropertyTables = array_column($this->property, self::RELATION_TABLE_NAME)) {
             $tables = array_merge($tables, $PropertyTables);
         }
-        if ($LinkTables = array_keys(call_user_func_array('array_merge', array_values(array_column($this->link, self::RELATION_TABLE_LINK_TABLES))))) {
+        if ($this->link&&$LinkTables = array_keys(call_user_func_array('array_merge', array_values(array_column($this->link, self::RELATION_TABLE_LINK_TABLES))))) {
             $tables = array_merge($tables, $LinkTables);
         }
         $tables = array_map(function ($data) {
