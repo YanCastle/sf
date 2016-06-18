@@ -2033,4 +2033,8 @@ class Model {
         $this->options['async']=$callback;
         return $this;
     }
+
+//    function auto_save($ID,$Data){}
+//    function auto_add(){}
+//    function auto_del(){}
 }

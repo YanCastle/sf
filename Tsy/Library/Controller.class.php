@@ -89,7 +89,7 @@ class Controller
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectClass)){
             if($this->Object->is_dic){
-                return $this->Object->getAll();
+                return array_values($this->Object->getAll());
             }elseif ($IDs){
                 return array_values($this->Object->gets($_POST[$this->PRIKey.'s']));
             }elseif($this->PRIKey&&isset($_POST[$this->PRIKey.'s'])){
