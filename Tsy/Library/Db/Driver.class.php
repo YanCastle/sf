@@ -1183,4 +1183,11 @@ abstract class Driver {
         // 关闭连接
         $this->close();
     }
+    function __get($name)
+    {
+        if(property_exists($this,$name )){
+            return $this->$name;
+        }
+        return null;
+    }
 }
