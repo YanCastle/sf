@@ -202,7 +202,7 @@ class Tsy
         if (is_callable(C('APP_ERROR'))){
             call_user_func_array(C('APP_ERROR'),[$errno,$errstr,$errfile,$errline]);
         }
-        L($errstr,LOG_ERR);
+        L($errorStr,LOG_ERR);
     }
 
     // 致命错误捕获
