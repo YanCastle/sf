@@ -217,7 +217,7 @@ class Object
      * @param int $ID 对象唯一标示
      * @return array|bool|mixed
      */
-    function get($ID)
+    function get($ID=false)
     {
         if (!is_numeric($ID)) {
             return false;
@@ -327,9 +327,10 @@ class Object
      * @param array|int $IDs 主键字段编号值
      * @return array|bool
      */
-    function gets($IDs,$Properties=false)
+    function gets($IDs=[],$Properties=false)
     {
         !(false===$Properties&&isset($_POST['Properties'])) or $Properties=$_POST['Properties'];
+        if(!$IDs&&isset($_POST[$this->pk.'s'])){$IDs=$_POST[$this->pk.'s'];}
         if (is_numeric($IDs) &&
             $IDs > 0
         ) {

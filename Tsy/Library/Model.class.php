@@ -15,6 +15,8 @@ class Model {
 
     const ASYNC=101;
 
+    static public $InTranscation=0;
+
     // 当前数据库操作对象
     protected $db               =   null;
 	// 数据库对象池
@@ -1550,10 +1552,22 @@ class Model {
      * @access public
      * @return void
      */
-    public function startTrans() {
-        $this->commit();
-        $this->db->startTrans();
-        return ;
+    public function startTrans($force=false) {
+        if($force){
+            Model::$InTranscation++;
+            $this->db->commit();
+            $this->db->startTrans();
+            return ;
+        }
+        if(Model::$InTranscation){
+            Model::$InTranscation++;
+            return true;
+        }else{
+            Model::$InTranscation++;
+            $this->db->commit();
+            $this->db->startTrans();
+            return ;
+        }
     }
 
     /**
@@ -1562,7 +1576,9 @@ class Model {
      * @return boolean
      */
     public function commit() {
-        return $this->db->commit();
+        Model::$InTranscation--;
+        if(Model::$InTranscation==0)
+            return $this->db->commit();
     }
 
     /**
@@ -1571,7 +1587,9 @@ class Model {
      * @return boolean
      */
     public function rollback() {
-        return $this->db->rollback();
+        Model::$InTranscation--;
+        if(Model::$InTranscation==0)
+            return $this->db->rollback();
     }
 
     /**

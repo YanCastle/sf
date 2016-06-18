@@ -34,19 +34,19 @@ function parse_name($name, $type=0) {
  * @return mixed
  */
 function N($key, $step=0,$save=false) {
-    static $_num    = array();
-    if (!isset($_num[$key])) {
-        $_num[$key] = (false !== $save)? S('N_'.$key) :  0;
-    }
-    if (empty($step)){
-        return $_num[$key];
-    }else{
-        $_num[$key] = $_num[$key] + (int)$step;
-    }
-    if(false !== $save){ // 保存结果
-        S('N_'.$key,$_num[$key],$save);
-    }
-    return null;
+//    static $_num    = array();
+//    if (!isset($_num[$key])) {
+//        $_num[$key] = (false !== $save)? S('N_'.$key) :  0;
+//    }
+//    if (empty($step)){
+//        return $_num[$key];
+//    }else{
+//        $_num[$key] = $_num[$key] + (int)$step;
+//    }
+//    if(false !== $save){ // 保存结果
+//        S('N_'.$key,$_num[$key],$save);
+//    }
+//    return null;
 }
 /**
  * 记录和统计时间（微秒）和内存使用情况
@@ -66,24 +66,24 @@ function N($key, $step=0,$save=false) {
  * @return mixed
  */
 function G($start,$end='',$dec=4) {
-    static $_info       =   array();
-    static $_mem        =   array();
-    if(is_float($end)) { // 记录时间
-        $_info[$start]  =   $end;
-    }elseif(!empty($end)){ // 统计时间和内存使用
-        if(!isset($_info[$end])) $_info[$end]       =  microtime(TRUE);
-        if(MEMORY_LIMIT_ON && $dec=='m'){
-            if(!isset($_mem[$end])) $_mem[$end]     =  memory_get_usage();
-            return number_format(($_mem[$end]-$_mem[$start])/1024);
-        }else{
-            return number_format(($_info[$end]-$_info[$start]),$dec);
-        }
-
-    }else{ // 记录时间和内存使用
-        $_info[$start]  =  microtime(TRUE);
-        if(MEMORY_LIMIT_ON) $_mem[$start]           =  memory_get_usage();
-    }
-    return null;
+//    static $_info       =   array();
+//    static $_mem        =   array();
+//    if(is_float($end)) { // 记录时间
+//        $_info[$start]  =   $end;
+//    }elseif(!empty($end)){ // 统计时间和内存使用
+//        if(!isset($_info[$end])) $_info[$end]       =  microtime(TRUE);
+//        if(MEMORY_LIMIT_ON && $dec=='m'){
+//            if(!isset($_mem[$end])) $_mem[$end]     =  memory_get_usage();
+//            return number_format(($_mem[$end]-$_mem[$start])/1024);
+//        }else{
+//            return number_format(($_info[$end]-$_info[$start]),$dec);
+//        }
+//
+//    }else{ // 记录时间和内存使用
+//        $_info[$start]  =  microtime(TRUE);
+//        if(MEMORY_LIMIT_ON) $_mem[$start]           =  memory_get_usage();
+//    }
+//    return null;
 }
 /**
  * 添加和获取页面Trace记录

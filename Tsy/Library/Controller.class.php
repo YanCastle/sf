@@ -85,7 +85,7 @@ class Controller
         }
         return [];
     }
-    function gets($IDs){
+    function gets($IDs=[]){
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectClass)){
             if($this->Object->is_dic){

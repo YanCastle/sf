@@ -8,6 +8,7 @@
 
 
 define('LOG_SQL','SQL');
+define('LOG_MSG','MSG');
 
 //开始各种define检测
 defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');

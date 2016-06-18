@@ -46,7 +46,7 @@ function array_key_map_change($map, $data)
  * @param $data
  * @return array
  */
-function array_map_format($map, $data)
+function array_map_format($map, $data,$data_row=1,$default='')
 {
 //    $map = [
 //        '要转换的键'=>'转换键结果'
@@ -64,15 +64,19 @@ function array_map_format($map, $data)
 //    ];
     $d = [];
     $tmp = [];
-    foreach ($data[0] as $k => $v) {
-        if (isset($map[$v]))
-            $tmp[$k] = $map[$v];
+    if($data_row===1){
+        foreach ($data[0] as $k => $v) {
+            if (isset($map[$v]))
+                $tmp[$k] = $map[$v];
+        }
+        unset($data[0]);
     }
-    unset($data[0]);
+    else
+        $tmp=$map;
+
     foreach ($data as $k => $v) {
         foreach ($v as $key => $value) {
-            if (isset($tmp[$key]))
-                $d[$k][$tmp[$key]] = $value;
+            $d[$k][$tmp[$key]] = isset($tmp[$key])?$value:$default;
         }
     }
     return $d;
@@ -157,4 +161,20 @@ function array_key_set($array, $key, $repeat = false)
         }
     }
     return $a;
+}
+
+/**
+ * 对象化时的结构整合
+ * @param array $array
+ * @param string $key
+ * @param array $properties
+ */
+function array_object(array &$array,string $key,array $properties){
+    foreach ($array as $k=>$v){
+        foreach ($properties as $propertyName=>$propertyValues){
+            isset($array[$k][$propertyName]) or $array[$k][$propertyName]=[];
+//            $array[$k][$propertyName]
+//            !isset($propertyValues) or $array[$k][$propertyName][]=$propertyValues[]
+        }
+    }
 }

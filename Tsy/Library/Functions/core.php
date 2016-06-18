@@ -105,9 +105,9 @@ function load_config($file,$parse='php'){
 
 function controller($i,$data,$mid='',$layer="Controller"){
     static $LoginRequire=null;
-    if($layer=='Object'){
-        $a=1;
-    }
+//    if($layer=='Object'){
+//        $a=1;
+//    }
     if(null===$LoginRequire){
         $LoginRequire=C('LOGIN_REQUIRE');
     }
@@ -229,8 +229,11 @@ function invokeClass($Class,$A,$data){
                     $args[]=$Param->getDefaultValue();
                 }else{
                     //必填参数未传入完整
+//                    if(in_array($A,['ID','IDs'])){
+//
+//                    }
                     L($ParamName.':必填参数未传入完整',LOG_ERR);
-                    return null;
+                    return false;
                 }
             }
             $result = $ReflectMethod->invokeArgs($Class,$args);
@@ -272,7 +275,7 @@ function L($msg = false,$Type=6,$trace=''){
         }
         return $msg;
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
-    }elseif(false===$msg&&$Type===false){
+    }elseif(false===$msg){
         return $Type==0?$_log:$_log[$Type];
     }elseif(null===$msg&&$Type===null){
         $_log=[];
