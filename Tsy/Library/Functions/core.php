@@ -105,6 +105,10 @@ function load_config($file,$parse='php'){
 
 function controller($i,$data,$mid='',$layer="Controller"){
     static $LoginRequire=null;
+    /**
+     * SplQueue
+     */
+    static $controllers=[];
 //    if($layer=='Object'){
 //        $a=1;
 //    }
@@ -152,55 +156,61 @@ function controller($i,$data,$mid='',$layer="Controller"){
         }
     }
     //存储调用之前的配置参数
-    $LastController = process_queue('controller','get');
-    $Config = C();
-    process_queue('controller','push',[$M,$C,$A]);
+//    $LastController = process_queue('controller','get');
+//    $Config = C();
+//    process_queue('controller','push',[$M,$C,$A]);
 //    $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
-//    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
-    load_module_config($M);
+    $controllers[]=$M;
+    try{
+        load_module_config($M);
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
-    $ClassName = implode('\\',[$M,$layer,$C.$layer]);
-    if(!class_exists($ClassName)){
-        $ClassName=str_replace($C,'Empty',$ClassName);
+        $ClassName = implode('\\',[$M,$layer,$C.$layer]);
         if(!class_exists($ClassName)){
-            L($C.'类不存在',LOG_ERR);
-            return null;
+            $ClassName=str_replace($C,'Empty',$ClassName);
+            if(!class_exists($ClassName)){
+                L($C.'类不存在',LOG_ERR);
+                return null;
+            }
         }
-    }
-    $result = '';//返回结果
-    $Class = new $ClassName();
-    if(!method_exists($Class,$A)){
-        //方法不存在
-        if(method_exists($Class,'_empty')){
-            $result = call_user_func_array([$Class,'_empty'],[$i,$data]);
-        }elseif(method_exists($Class,'__call')){
-            $result = call_user_func_array([$Class,$A],$data);
-        }else{
-            L($A.'方法不存在',LOG_ERR);
-            return null;
+        $result = '';//返回结果
+        $Class = new $ClassName();
+        if(!method_exists($Class,$A)){
+            //方法不存在
+            if(method_exists($Class,'_empty')){
+                $result = call_user_func_array([$Class,'_empty'],[$i,$data]);
+            }elseif(method_exists($Class,'__call')){
+                $result = call_user_func_array([$Class,$A],$data);
+            }else{
+                L($A.'方法不存在',LOG_ERR);
+                return null;
+            }
+            return $result;
         }
-        return $result;
+        //前置检测，其返回结果将跟Data部分合并。如果返回false则不会再调用，此部分的返回内容为数组时会合并
+        if(method_exists($Class,'_before_'.$A)){
+            $before = invokeClass($Class,'_before_'.$A,$data);
+        }
+        if(isset($before)&&is_array($before)){
+            $data = array_merge($data,$before);
+        }
+        $result = invokeClass($Class,$A,$data);
+        //后置检测
+        if(method_exists($Class,'_after_'.$A)){
+            $after = invokeClass($Class,'_after_'.$A,$data);
+        }
+        if(isset($after)&&is_array($after)&&is_array($result)){
+            $result = array_merge($result,$after);
+        }
+        $Class=null;
+    }catch (Exception $e){
+        var_dump($e);
     }
-    //前置检测，其返回结果将跟Data部分合并。如果返回false则不会再调用，此部分的返回内容为数组时会合并
-    if(method_exists($Class,'_before_'.$A)){
-        $before = invokeClass($Class,'_before_'.$A,$data);
-    }
-    if(isset($before)&&is_array($before)){
-        $data = array_merge($data,$before);
-    }
-    $result = invokeClass($Class,$A,$data);
-    //后置检测
-    if(method_exists($Class,'_after_'.$A)){
-        $after = invokeClass($Class,'_after_'.$A,$data);
-    }
-    if(isset($after)&&is_array($after)&&is_array($result)){
-        $result = array_merge($result,$after);
-    }
-    $Class=null;
-    process_queue('controller','pop');
-    if($LastController){
-        load_module_config($LastController[0]);
-        C($Config);
+//    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
+
+//    process_queue('controller','pop');
+    array_pop($controllers);
+    if($lastModule = end($controllers)){
+        load_module_config($lastModule);
     }
     return $result;
 }
