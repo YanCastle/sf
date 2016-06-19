@@ -32,6 +32,7 @@ class Object
     protected $property = [];//一对一或一对多属性配置
     protected $data = [];//添加、修改时的数据
     protected $searchFields = [];//参与Keywords搜索的字段列表
+    protected $searchTable='';
     protected $propertyMap = [];//属性配置反向映射
     protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
@@ -233,7 +234,7 @@ class Object
      */
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
-        $Model = new Model($this->main);
+        $Model = new Model($this->searchTable?$this->searchTable:$this->main);
         $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = [];
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
