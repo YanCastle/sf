@@ -247,6 +247,7 @@ class Object
             foreach ($this->searchFields as $Filed) {
                 $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';', "\r\n"], '', $Keyword) . '%'];
             }
+            $Where['_logic']='OR';
             $Model->where($Where);
         }
         if ($W) {
@@ -294,7 +295,7 @@ class Object
             }
         }
         $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
-        $PageIDs = array_chunk($ObjectIDs, $N);
+        $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
         $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
