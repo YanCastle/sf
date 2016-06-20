@@ -104,7 +104,7 @@ class Model {
     protected function _auto_map(){
 //        if(defined('APP_DEBUG')&&APP_DEBUG){
             $db   =  $this->dbName?:C('DB_NAME');
-            $map = APP_DEBUG?[]:S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name));
+            $map = APP_DEBUG&&DB_DEBUG?[]:cache('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name));
             if($map){
                 $this->_map = array_merge($map,$this->_map);
             }else{
@@ -113,7 +113,7 @@ class Model {
                     foreach($Fields as $Field){
                         $this->_map[$Field]=strtolower($Field);
                     }
-                    S('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name),$this->_map,C('DB_MAP_EXPIRE'));
+                    cache('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name),$this->_map,C('DB_MAP_EXPIRE'));
                 }
             }
 //        }
@@ -752,9 +752,21 @@ class Model {
         // 检查字段映射
         if(!empty($this->_map) ) {
             $map = array_flip($this->_map);
+//            需要解决join带来的字段名称没法恢复的问题
+            if(preg_match_all('/'.$this->tablePrefix.'[a-zA-Z0-9_]+/',$this->db->queryStr,$match)>1){
+                $tables = array_unique($match[0]);$this->getLastSql();
+//                if(count($tables)>1){
+                    foreach(array_diff($tables,[$this->trueTableName]) as $table){
+                        $fields = $this->getDbFields($table);
+                        foreach ($fields as $field){
+                            $map[strtolower($field)]=$field;
+                        }
+                    }
+//                }
+            }
 //            map的键为小写态
             foreach($data as $key=>$val){
-                if($key==$map[$key]){continue;}
+                if(isset($map[$key])&&$key==$map[$key]){continue;}
                 if(isset($map[$key])){
                     $data[$map[$key]]=$val;
                 }else{
@@ -1646,7 +1658,23 @@ class Model {
      * @access public
      * @return array
      */
-    public function getDbFields(){
+    public function getDbFields($table=null){
+        if($table){
+            $db   =  $this->dbName?:C('DB_NAME');
+            if(DB_DEBUG){
+                $rs = $this->db->getFields($table);
+                cache('_field/'.strtolower($db.'.'.$this->tablePrefix.$table),array_keys($rs));
+                return $rs?array_keys($rs):false;
+            }else{
+                $map = cache('_field/'.strtolower($db.'.'.$this->tablePrefix.$table));
+                if(!$map){
+                    $rs = $this->db->getFields($table);
+                    cache('_field/'.strtolower($db.'.'.$this->tablePrefix.$table),array_keys($rs));
+                    return $rs?array_keys($rs):false;
+                }
+                return $map;
+            }
+        }
         if(isset($this->options['table'])) {// 动态指定表名
             if(is_array($this->options['table'])){
                 $table  =   key($this->options['table']);

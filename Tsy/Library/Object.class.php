@@ -32,6 +32,7 @@ class Object
     protected $property = [];//一对一或一对多属性配置
     protected $data = [];//添加、修改时的数据
     protected $searchFields = [];//参与Keywords搜索的字段列表
+    protected $searchTable='';
     protected $propertyMap = [];//属性配置反向映射
     protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
@@ -89,7 +90,7 @@ class Object
         if ($PropertyTables = array_column($this->property, self::RELATION_TABLE_NAME)) {
             $tables = array_merge($tables, $PropertyTables);
         }
-        if ($LinkTables = array_keys(call_user_func_array('array_merge', array_values(array_column($this->link, self::RELATION_TABLE_LINK_TABLES))))) {
+        if ($this->link&&$LinkTables = array_keys(call_user_func_array('array_merge', array_values(array_column($this->link, self::RELATION_TABLE_LINK_TABLES))))) {
             $tables = array_merge($tables, $LinkTables);
         }
         $tables = array_map(function ($data) {
@@ -233,7 +234,7 @@ class Object
      */
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
-        $Model = new Model($this->main);
+        $Model = new Model($this->searchTable?$this->searchTable:$this->main);
         $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = [];
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
@@ -246,6 +247,7 @@ class Object
             foreach ($this->searchFields as $Filed) {
                 $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';', "\r\n"], '', $Keyword) . '%'];
             }
+            $Where['_logic']='OR';
             $Model->where($Where);
         }
         if ($W) {
@@ -292,8 +294,9 @@ class Object
                 }
             }
         }
-        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
-        $PageIDs = array_chunk($ObjectIDs, $N);
+//        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
+        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $ObjectIDs;
+        $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
         $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
@@ -449,6 +452,7 @@ class Object
                 $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : [];
             }
         }
+        krsort($Objects);
         return $Objects;
     }
 

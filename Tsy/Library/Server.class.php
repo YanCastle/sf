@@ -43,8 +43,7 @@ class Server
             call_user_func_array($callback,[$server,$fd,$from_id,$data]);
         }
 //        标记变量，是否是第一次接受请求
-        $_POST['_fd']=$fd;
-        $_GET['_fd']=$fd;
+        fd($fd);
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
 //        接受数据次数统计
@@ -79,7 +78,7 @@ class Server
             call_user_func_array($callback,[$server,$fd,$from_id]);
         }
         unset($this->first[$fd]);
-        $_GET['_fd']=$fd;
+        fd($fd);
         L("连接断开：{$fd}");
         fd_name(null);
         $info = swoole_connect_info($fd);
@@ -101,7 +100,7 @@ class Server
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$fd,$from_id]);
         }
-        $_GET['_fd']=$fd;
+        fd($fd);
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
 //        检测该链接是否在允许的IP范围内或者是否在禁止的IP范围内
@@ -285,5 +284,5 @@ class Server
             $this->_swoole[$mode]=new $class();
         }
         return $this->_swoole[$mode];
-    }
+    }    
 }
