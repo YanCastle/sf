@@ -60,7 +60,7 @@ function fd_name($name=false){
     $fdName = cache($CacheKey);
 //    获取当前连接的名称
     if(false===$name){
-        return isset($fdName[$_GET['_fd']])?$fdName[$_GET['_fd']]:$_GET['_fd'];
+        return fd();
     }
     if([]===$name){
         $fdName=[];
@@ -68,24 +68,24 @@ function fd_name($name=false){
         return true;
     }
     if(null===$name){
-        unset($fdName[$_GET['_fd']]);
+        unset($fdName[fd()]);
     }else{
-        if(!isset($fdName[$_GET['_fd']])){
-            $fdName[$_GET['_fd']]=[];
+        if(!isset($fdName[fd()])){
+            $fdName[fd()]=[];
         }
         //检测是否该连接已经被关闭，如果已经被关闭则删除该连接
         if(isset($_GET['_server'])){
             $ClosedFD=[];
-            foreach ($fdName[$_GET['_fd']] as $fd){
+            foreach ($fdName[fd()] as $fd){
                 if(!$_GET['_server']->exist($fd)){
                     $ClosedFD[]=$fd;
                 }
             }
             if($ClosedFD){
-                $fdName[$_GET['_fd']]=array_diff($fdName[$_GET['_fd']],$ClosedFD);
+                $fdName[fd()]=array_diff($fdName[fd()],$ClosedFD);
             }
         }
-        $fdName[$_GET['_fd']]=$name;
+        $fdName[fd()]=$name;
 //        开始检测是否有该fdName的推送消息，如果有的话则推送，如果没有的话则不推送
         $PushData=cache(C('CACHE_FD_NAME_PUSH').$name);
         if(is_array($PushData)){
@@ -145,7 +145,7 @@ function port_group($port,$fd=false){
     }elseif(null===$fd){
         $g = cache('tmp_port_group'.$port);
         $g = is_array($g)?$g:[];
-        if($k = array_search($_GET['_fd'],$g)){
+        if($k = array_search(fd(),$g)){
             unset($g[$k]);
         }
         cache('tmp_port_group'.$port,$fd);
@@ -349,15 +349,15 @@ function swoole_send($fd,$str){
 function swoole_receive($fd=false){
     if(null===$fd){
         //删除该链接的计数缓存
-        cache('tmp_swoole_receive_count_'.$_GET['_fd'],null);
+        cache('tmp_swoole_receive_count_'.fd(),null);
     }elseif($fd){
         //返回接受次数
-        $count =  cache('tmp_swoole_receive_count_'.$_GET['_fd']);
+        $count =  cache('tmp_swoole_receive_count_'.fd());
         return is_numeric($count)?$count:0;
     }else{
 //        计数+1
-        $count =  cache('tmp_swoole_receive_count_'.$_GET['_fd']);
-        cache('tmp_swoole_receive_count_'.$_GET['_fd'],is_numeric($count)?$count+1:1);
+        $count =  cache('tmp_swoole_receive_count_'.fd());
+        cache('tmp_swoole_receive_count_'.fd(),is_numeric($count)?$count+1:1);
     }
 }
 
@@ -529,4 +529,9 @@ function swoole_get_callback($callback){
     }else{
         return isset($conf[$callback])?$conf[$callback]:null;
     }
+}
+
+function fd($fd=null){
+    static $fd_static=0;
+    return $fd?$fd_static=$fd:$fd_static;
 }
