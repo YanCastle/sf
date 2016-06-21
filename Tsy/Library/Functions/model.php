@@ -100,7 +100,7 @@ function trace($value='[think]',$label='',$level='DEBUG',$record=false) {
  * 实例化模型类 格式 [资源://][模块/]模型
  * @param string $name 资源地址
  * @param string $layer 模型层名称
- * @return Think\Model
+ * @return \Tsy\Library\Model
  */
 function D($name='',$layer='') {
     if(empty($name)) return new Tsy\Library\Model;
@@ -237,7 +237,7 @@ function parse_res_name($name,$layer,$level=1){
  * @param bool $Kv 传入的是否是KV映射
  * @return array
  */
-function param_group(array $Group,array $Params,bool $Kv=false){
+function param_group(array $Group,array $Params,$Kv=false){
     if(!$Kv){
         $T = $Group;
         $Group=[];

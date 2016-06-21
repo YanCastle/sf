@@ -228,6 +228,10 @@ function invokeClass($Class,$A,$data){
 //            $Parameters = $ReflectMethod->getParameters();
             foreach ($ReflectMethod->getParameters() as $Param){
                 $ParamName=$Param->getName();
+                //必填参数未传入完整
+                if($A=='gets'&&substr($ParamName,-3)=='IDs'&&!isset($data[$ParamName])){
+                    $ParamName='IDs';
+                }
                 if(isset($data[$ParamName])){
 //                    if(!(is_string($data[$ParamName])&&strlen($data[$ParamName])>0)){
 //                        L($ParamName.':参数为空',LOG_ERR);
@@ -238,10 +242,6 @@ function invokeClass($Class,$A,$data){
                 }elseif($Param->isDefaultValueAvailable()){
                     $args[]=$Param->getDefaultValue();
                 }else{
-                    //必填参数未传入完整
-//                    if(in_array($A,['ID','IDs'])){
-//
-//                    }
                     L($ParamName.':必填参数未传入完整',LOG_ERR);
                     return false;
                 }
