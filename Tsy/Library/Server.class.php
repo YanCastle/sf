@@ -48,20 +48,23 @@ class Server
         $_GET['_Port']=$info['server_port'];
 //        接受数据次数统计
 //        swoole_receive();
-        $Data = swoole_in_check($fd,$data);
-        if(is_array($Data)&&$Data){
-            swoole_bridge_check($fd,$Data);
-            $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
-            if(HTTP_COMMENT!==$return){
-                swoole_out_check($fd,$return);
+        foreach (explode(PACKAGE_EOF,$data) as $item){
+            if(!$item)continue;
+            $Data = swoole_in_check($fd,$item);
+            if(is_array($Data)&&$Data){
+                swoole_bridge_check($fd,$Data);
+                $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
+                if(HTTP_COMMENT!==$return){
+                    swoole_out_check($fd,$return);
+                }else{
+                    //写入HTTP_COMMENT的链接队列中
+                    cache('[+]tmp_HTTP_COMMENT',$fd);
+                }
+            }elseif (is_string($Data)){
+                swoole_out_check($fd,$Data);
             }else{
-                //写入HTTP_COMMENT的链接队列中
-                cache('[+]tmp_HTTP_COMMENT',$fd);
+                swoole_out_check($fd,'');
             }
-        }elseif (is_string($Data)){
-            swoole_out_check($fd,$Data);
-        }else{
-            swoole_out_check($fd,'');
         }
 //        session('[id]',null);//删除session_id标识
     }
