@@ -493,11 +493,11 @@ class Object
             $ModuleObject = explode('\\',$ObjectName);
             if(is_array($ModuleObject)){
                 if(count($ModuleObject)==2){
-                    $ObjectName = implode('\\',[$ModuleObject[0],'Object',$ModuleObject[1]]);
+                    $ObjectName = implode('\\',[$ModuleObject[0],'Object',$ModuleObject[1]]).'Object';
                     if(class_exists($ObjectName)){
 //                        判断是否在当前这个模块下，如果不在则使用controller来切换
 //                        $Object = new $ObjectName();
-                        $PropertyObjectValues[$Key] = controller($ModuleObject[0].'/'.$ModuleObject[1].'/gets',['IDs'=>array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN])]);
+                        $PropertyObjectValues[$Key] = controller($ModuleObject[0].'/'.$ModuleObject[1].'/gets',['IDs'=>array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN])],'','Object');
 //                        $PropertyObjectValues[$Key] = $Object->gets(array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN]));
                     }else{
                         L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);

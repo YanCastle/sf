@@ -14,7 +14,7 @@ define('LOG_TIP','TIP');
 defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
 defined('APP_DEBUG') or define('APP_DEBUG',false);
 defined('DB_DEBUG') or define('DB_DEBUG',false);
-defined('PACKAGE_EOF') or define('PACKAGE_EOF',"\r\n");
+defined('PACKAGE_EOF') or define('PACKAGE_EOF',"\r\n\r\n");
 isset($APP_PATH) or $APP_PATH='.';
 if(isset($APP_PATH)&&!is_dir($APP_PATH)){
     mkdir($APP_PATH);

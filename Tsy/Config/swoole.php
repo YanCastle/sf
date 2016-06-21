@@ -21,9 +21,9 @@ return [
             'task_worker_num' => 5,//开启task功能，
             'dispatch_mode '=>3,//轮询模式
             'worker_num'=>5,
-            'open_eof_check'=>true,
-            'package_eof'=>"\r\n",
-            'open_eof_split'=>true
+//            'open_eof_check'=>true,
+//            'package_eof'=>"\r\n",
+//            'open_eof_split'=>true
         ],
         'TABLE'=>[]
     ],
