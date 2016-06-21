@@ -489,19 +489,37 @@ class Object
         //处理对象配置
         $PropertyObjectValues = [];
         foreach ($PropertyObjects as $Key => $Config) {
-            $ObjectFullName = $Config[self::RELATION_OBJECT_NAME] . 'Object';
-            if (!property_exists($this, $ObjectFullName)) {
-                $ClassName = $this->MC[0] . '\\Object\\' . $ObjectFullName;
-                if(class_exists($ClassName)){
-                    $this->$ObjectFullName = new $ClassName;
+            $ObjectName = $Config[self::RELATION_OBJECT_NAME];
+            $ModuleObject = explode('\\',$ObjectName);
+            if(is_array($ModuleObject)){
+                if(count($ModuleObject)==2){
+                    $ObjectName = implode('\\',[$ModuleObject[0],'Object',$ModuleObject[1]]);
+                    if(class_exists($ObjectName)){
+//                        判断是否在当前这个模块下，如果不在则使用controller来切换
+//                        $Object = new $ObjectName();
+                        $PropertyObjectValues[$Key] = controller($ModuleObject[0].'/'.$ModuleObject[1].'/gets',['IDs'=>array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN])]);
+//                        $PropertyObjectValues[$Key] = $Object->gets(array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN]));
+                    }else{
+                        L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);
+                    }
+                }elseif(count($ModuleObject)==1){
+                    //TODO 当前模块下的。。
                 }else{
-                    $PropertyObjectValues[$Key]=[];
-                    L('对象化配置中配置的对象类不存在：'.$ClassName,LOG_ERR);
-                    continue;
+                    L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);
                 }
             }
-            $ObjectIDs = array_column($Objects, $Config[self::RELATION_OBJECT_COLUMN]);
-            $PropertyObjectValues[$Key] = is_array($ObjectIDs) && $ObjectIDs ? $this->$ObjectFullName->gets($ObjectIDs) : [];
+//            if (!property_exists($this, $ObjectFullName)) {
+//                $ClassName = $this->MC[0] . '\\Object\\' . $ObjectFullName;
+//                if(class_exists($ClassName)){
+//                    $this->$ObjectFullName = new $ClassName;
+//                }else{
+//                    $PropertyObjectValues[$Key]=[];
+//                    L('对象化配置中配置的对象类不存在：'.$ClassName,LOG_ERR);
+//                    continue;
+//                }
+//            }
+//            $ObjectIDs = array_column($Objects, $Config[self::RELATION_OBJECT_COLUMN]);
+//            $PropertyObjectValues[$Key] = is_array($ObjectIDs) && $ObjectIDs ? $this->$ObjectFullName->gets($ObjectIDs) : [];
         }
 //         组合生成最终的Object对象
         $Objects = array_key_set($Objects, $this->pk);
