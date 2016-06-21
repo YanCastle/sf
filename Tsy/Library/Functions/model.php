@@ -237,11 +237,11 @@ function parse_res_name($name,$layer,$level=1){
  * @param bool $Kv
  * @return array
  */
-function param_group($Group,$Params,$Kv=false){
+function param_group($Group,$Params,$Kv=false){//这个函数的作用
     if(!$Kv){
         $T = $Group;
         $Group=[];
-        foreach ($T as $k=>$v){
+        foreach ($T as $k=>$v){// $BasicFields=['Name','Disable','Virtual','Memo','ProducerDicID','Number'];改为 Name =》‘BasicFields’,'Disable'=》‘BasicFields’,'Virtual'=》‘BasicFields’,'Memo'=》‘BasicFields’,'ProducerDicID'=》‘BasicFields’,'Number'=》‘BasicFields’
             foreach ($v as $p){
                 $Group[$p]=$k;
             }
