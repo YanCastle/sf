@@ -232,7 +232,7 @@ class Object
             return false;
         }
         $Object = $this->gets([$ID]);
-        return is_array($Object) ? $Object[$ID] : [];
+        return is_array($Object)&&isset($Object[$ID])? $Object[$ID] : [];
     }
 
     /**
