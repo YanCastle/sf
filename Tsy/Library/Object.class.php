@@ -37,7 +37,15 @@ class Object
     protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
     protected $_read_filter = [];//输入读取过滤配置
-    protected $_read_deny=[];
+    protected $_read_deny=[];//禁止读取字段
+
+    protected $searchWFieldsGroup=[
+        'GroupName'=>['Fields1','Fields2']
+    ];
+    protected $searchWFieldsConf=[
+    
+    ];
+    
     public $is_dic=false;
     public $map = [
 //        自动生成
@@ -228,6 +236,16 @@ class Object
     }
 
     /**
+     * @param string $TableName
+     * @param array $Where
+     * @param string $Field
+     * @return mixed
+     */
+    protected function searchW(string $TableName,array $Where,string $Field){
+        return M($TableName)->where($Where)->getField($Field,true);
+    }
+
+    /**
      * @param string $Keyword
      * @param array $W
      * @param string $Sort
@@ -251,51 +269,100 @@ class Object
             $Model->where($Where);
         }
         if ($W) {
-            $Where = [];
-            foreach ($W as $k => $v) {
-                if (($TableColumn = explode('.', $k)) &&
-                    $v
-                ) {
-                    switch (count($TableColumn)) {
-                        case 1:
-//                            主表属性搜索条件
-                            $Where[$TableColumn[0]] = $v;
-                            break;
-                        case 2:
-//TODO                             属性表中的搜索条件
-//                            读取属性映射列表，获取属性类型
-                            $TableName = $TableColumn[0];
-                            $ColumnName = $TableColumn[1];
-                            if (!isset($ObjectSearchConfig[$TableName])) {
-                                $ObjectSearchConfig[$TableName] = [];
-                            }
-                            $ObjectSearchConfig[$TableName][$ColumnName] = $v;
-                            break;
-                        default:
-                            // 返回失败
-                            L('ERROR_SEARCH_CONFIG', LOG_WARNING, [$k => $v]);
-                            break;
+            $Data = param_group($this->searchWFieldsGroup,$W);
+            unset($Data[0]);
+//            $Data=[
+//                'Order'=>[
+//                    'OrderID'=>1,
+//                    'Time'=>['between',[1,10]],
+//                    'TraderID'=>['eq',1]
+//                ]
+//            ];
+            $WObjectIDArray=[];
+            foreach ($Data as $ObjectName => $Params){
+//                $Params=[
+//                    'OrderID'=>1,
+//                    'Time'=>['between',[1,10]],
+//                    'TraderID'=>['eq',1]
+//                ];
+                if(isset($this->searchWFieldsConf[$ObjectName])){
+                    //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
+                    if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_]+[a-z]$/',$this->searchWFieldsConf[$ObjectName])){
+                        //直接值为表名
+                        $WObjectIDArray[] =$this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
+                    }elseif(is_callable($this->searchWFieldsConf[$ObjectName])){
+                        //回调
+                        $Result = call_user_func($this->searchWFieldsConf[$ObjectName],$Params);
+                        if(is_string($Result)&&preg_match('/^[a-z_]+[a-z]$/',$Result)){
+                            //吧这个当作表名，再参与上一个逻辑
+                        $WObjectIDArray[] = $this->searchW($Result,$Params,$this->pk);
+                        }elseif(is_array($Result)
+                            &&preg_match('/^\d+$/',implode('',$Result))
+//                            &&!in_array(false,array_map(function($d){return is_numeric($d);},$Result ) )
+                        ){
+                            //继续检测是否是以为数组且数组值全为数字且大于0
+                            $WObjectIDArray[]=$Result;
+                        }else{
+                            //回调函数的返回值错误
+                            L(E('_ERROR_SEARCH_CALLBACK_').json_encode($this->searchWFiledsConf[$ObjectName],JSON_UNESCAPED_UNICODE));
+                        }
+                    }else{
+
                     }
-                }
-                //TODO 如果开启强制校验模式则返回错误
-            }
-            $MoreModel = new Model();
-            foreach ($ObjectSearchConfig as $tableName => $item) {
-                $Where = [];
-                foreach ($item as $key => $value) {
-                    if (is_array($value)) {
-                        $Where['_complex'][$key] = $value;
-                    } else {
-                        $Where[$key] = $value;
-                    }
-                }
-                if ($rs = $MoreModel->table($DB_PREFIX . strtolower($tableName))->where($Where)->getField(str_replace('_', '', parse_name($this->pk)), true)) {
-                    $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $rs) : $rs;
+                }else{
+                    L(E('_NO_SEARCH_TABLE_CONFIG_'));
                 }
             }
+            if($WObjectIDArray){
+                $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
+            }
+//            $Where = [];
+//            foreach ($W as $k => $v) {
+//                if (($TableColumn = explode('.', $k)) &&
+//                    $v
+//                ) {
+//                    switch (count($TableColumn)) {
+//                        case 1:
+////                            主表属性搜索条件
+//                            $Where[$TableColumn[0]] = $v;
+//                            break;
+//                        case 2:
+////TODO                             属性表中的搜索条件
+////                            读取属性映射列表，获取属性类型
+//                            $TableName = $TableColumn[0];
+//                            $ColumnName = $TableColumn[1];
+//                            if (!isset($ObjectSearchConfig[$TableName])) {
+//                                $ObjectSearchConfig[$TableName] = [];
+//                            }
+//                            $ObjectSearchConfig[$TableName][$ColumnName] = $v;
+//                            break;
+//                        default:
+//                            // 返回失败
+//                            L('ERROR_SEARCH_CONFIG', LOG_WARNING, [$k => $v]);
+//                            break;
+//                    }
+//                }
+//                //TODO 如果开启强制校验模式则返回错误
+//            }
+//            $MoreModel = new Model();
+//            foreach ($ObjectSearchConfig as $tableName => $item) {
+//                $Where = [];
+//                foreach ($item as $key => $value) {
+//                    if (is_array($value)) {
+//                        $Where['_complex'][$key] = $value;
+//                    } else {
+//                        $Where[$key] = $value;
+//                    }
+//                }
+//                if ($rs = $MoreModel->table($DB_PREFIX . strtolower($tableName))->where($Where)->getField(str_replace('_', '', parse_name($this->pk)), true)) {
+//                    $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $rs) : $rs;
+//                }
+//            }
         }
 //        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
+        //交集组合方式
         $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $ObjectIDs;
+        //TODO 需要支持并集组合
         $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
         $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
         return [
@@ -333,12 +400,14 @@ class Object
     function gets($IDs=[],$Properties=false)
     {
         !(false===$Properties&&isset($_POST['Properties'])) or $Properties=$_POST['Properties'];
+//        ID检测
         if(!$IDs&&isset($_POST[$this->pk.'s'])){$IDs=$_POST[$this->pk.'s'];}
         if (is_numeric($IDs) &&
             $IDs > 0
         ) {
             $IDs = [$IDs];
         }
+//        配置检测
         if (!$this->main || !$this->pk || !$IDs || !is_array($IDs) || count($IDs) < 1) {
             return false;
         }
@@ -377,6 +446,7 @@ class Object
         if($this->_read_deny){
             $Model->field($this->_read_deny, true);
         }
+//        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
         $Objects = $Model->where([$this->pk => ['IN', $IDs]])->select();
         if (!$Objects) {
             return [];

@@ -231,13 +231,13 @@ function parse_res_name($name,$layer,$level=1){
 }
 
 /**
- *
- * @param $Group
- * @param $Params
- * @param bool $Kv
+ * 参数分组
+ * @param array $Group 分组配置
+ * @param array $Params 需要分组的参数
+ * @param bool $Kv 传入的是否是KV映射
  * @return array
  */
-function param_group($Group,$Params,$Kv=false){//这个函数的作用
+function param_group(array $Group,array $Params,bool $Kv=false){
     if(!$Kv){
         $T = $Group;
         $Group=[];
