@@ -9,7 +9,10 @@
 namespace Tsy\Library\Cache\Driver;
 use Tsy\Library\Cache\Cache;
 use Tsy\Library\Cache\CacheInterface;
-
+/**
+ * Redis缓存驱动
+ * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
+ */
 class Redis extends Cache implements CacheInterface
 {
     /**
