@@ -109,6 +109,13 @@ class Controller
         }
     }
     function save(array $Params){
+        $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
+        if(class_exists($ObjectClass)){
+            $Class = new $ObjectClass();
+            if(method_exists($Class,'save')){
+                return invokeClass($Class,'save' ,$_POST );
+            }
+        }
         if($this->PRIKey&&isset($_REQUEST[$this->PRIKey])&&is_numeric($_REQUEST[$this->PRIKey])){
             $Model = D($this->ControllerName);
             return $Model->where([$this->PRIKey=>$_REQUEST[$this->PRIKey]])->save($Params);

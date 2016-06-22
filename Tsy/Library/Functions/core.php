@@ -242,7 +242,7 @@ function invokeClass($Class,$A,$data){
                 }elseif($Param->isDefaultValueAvailable()){
                     $args[]=$Param->getDefaultValue();
                 }else{
-                    L($ParamName.':必填参数未传入完整',LOG_ERR);
+                    L($ParamName.':必填参数未传入完整',LOG_TIP);
                     return false;
                 }
             }
