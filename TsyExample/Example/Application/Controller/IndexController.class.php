@@ -33,15 +33,15 @@ class IndexController extends Controller
 //        }
 //        $o = O('Client');
         
-        $Client = new ClientObject();
-        return $Client->search('8',[
-//            'SN'=>['EQ','B9C63246BEBEBA233E9C0F08D56AA0C8'],
-            'Printer.PrinterID'=>26,
-            'Printer.FullName'=>['LIKE',"%4725%"],
-            'Client.PrinterClientID'=>4,
-            'Client.SN'=>['LIKE',"%B9C6%"]
-        ]);
-
+//        $Client = new ClientObject();
+//        return $Client->search('8',[
+////            'SN'=>['EQ','B9C63246BEBEBA233E9C0F08D56AA0C8'],
+//            'Printer.PrinterID'=>26,
+//            'Printer.FullName'=>['LIKE',"%4725%"],
+//            'Client.PrinterClientID'=>4,
+//            'Client.SN'=>['LIKE',"%B9C6%"]
+//        ]);
+        
     }
     /**
      * 空操作

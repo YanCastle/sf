@@ -122,7 +122,7 @@ class Tsy
                         foreach ([
                                      $PlugsPath.'/'.$ClassName.'.class.php',
                                      $PlugsPath.'/'.$ClassName.'.php',
-                                     $PlugsPath.'/'.$ClassName.'Autoload.php',
+                                     $PlugsPath.'/'.$ClassName.'/Autoload.php',
                                  ] as $file_path){
                             if(file_exists($file_path)){
                                 break;
@@ -148,7 +148,7 @@ class Tsy
                     }
                 }
             }
-            if(file_exists($file_path)){
+            if(file_exists($file_path))
                 include($file_path);
             }
         }
@@ -237,14 +237,6 @@ class Tsy
                 CONF_PATH.DIRECTORY_SEPARATOR.'swoole.php',
                 [
                     'SWOOLE'=>[
-                        'AUTO_RELOAD'=>function($int){
-                            $Time = cache('LastRestartTime');
-                            if((time()-$Time)>7200){
-                                cache('LastRestartTime',time());
-                                return true;
-                            }
-                            return false;
-                        },
                         'AUTO_RELOAD_TIME'=>3,
                         'CONF'=>[
                             'daemonize' => !APP_DEBUG, //自动进入守护进程
@@ -255,8 +247,8 @@ class Tsy
                         'TABLE'=>[],
                         'LISTEN'=>[]
                     ],
-                    'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
-                    'CACHE_FD_NAME_PUSH'=>'fd_name_push',//缓存不在线的push推送信息，禁止带上tmp_前缀
+//                    'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
+//                    'CACHE_FD_NAME_PUSH'=>'fd_name_push',//缓存不在线的push推送信息，禁止带上tmp_前缀
                 ]
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'http.php',
@@ -269,11 +261,7 @@ class Tsy
             ],
         ];
         //创建配置文件
-        foreach ([
-            [
-
-            ],
-                 ] as $conf_file){
+        foreach ($ConfigFiles as $conf_file){
             if(isset($conf_file[0])&&!file_exists($conf_file[0])){
                 if(isset($conf_file[1]))
                     file_put_contents($conf_file[0],"<?php\r\n return ".var_export($conf_file[1]).';');
