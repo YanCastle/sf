@@ -254,7 +254,7 @@ class Object
     {
         $Model = new Model($this->searchTable?$this->searchTable:$this->main);
         $DB_PREFIX = C('DB_PREFIX');
-        $ObjectIDs = [];
+        $ObjectIDs = false;
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
         $Tables = ['__' . strtoupper($this->main) . '__'];
         $ObjectSearchConfig = [];
@@ -364,6 +364,7 @@ class Object
         //交集组合方式
         $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
         //TODO 需要支持并集组合
+        $T = count($ObjectIDs);
         rsort($ObjectIDs,SORT_NUMERIC);
         $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
         $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
@@ -371,7 +372,7 @@ class Object
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
             'N' => $N,
-            'T' => count($ObjectIDs),
+            'T' => $T,
         ];
     }
 
