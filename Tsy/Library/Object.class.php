@@ -40,7 +40,7 @@ class Object
     protected $_read_deny=[];//禁止读取字段
 
     protected $searchWFieldsGroup=[
-        'GroupName'=>['Fields1','Fields2']
+//        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
     ];
     protected $searchWFieldsConf=[
     
@@ -285,6 +285,7 @@ class Object
 //                    'Time'=>['between',[1,10]],
 //                    'TraderID'=>['eq',1]
 //                ];
+                $a=isset($this->searchWFieldsConf[$ObjectName]);
                 if(isset($this->searchWFieldsConf[$ObjectName])){
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
                     if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_]+[a-z]$/',$this->searchWFieldsConf[$ObjectName])){
@@ -369,7 +370,7 @@ class Object
         return [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
-            'N' => count($Objects),
+            'N' => $N,
             'T' => count($ObjectIDs),
         ];
     }
