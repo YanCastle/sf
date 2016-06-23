@@ -40,7 +40,7 @@ class Object
     protected $_read_deny=[];//禁止读取字段
 
     protected $searchWFieldsGroup=[
-        'GroupName'=>['Fields1','Fields2']
+//        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
     ];
     protected $searchWFieldsConf=[
     
@@ -254,7 +254,7 @@ class Object
     {
         $Model = new Model($this->searchTable?$this->searchTable:$this->main);
         $DB_PREFIX = C('DB_PREFIX');
-        $ObjectIDs = [];
+        $ObjectIDs = false;
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
         $Tables = ['__' . strtoupper($this->main) . '__'];
         $ObjectSearchConfig = [];
@@ -285,6 +285,7 @@ class Object
 //                    'Time'=>['between',[1,10]],
 //                    'TraderID'=>['eq',1]
 //                ];
+                $a=isset($this->searchWFieldsConf[$ObjectName]);
                 if(isset($this->searchWFieldsConf[$ObjectName])){
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
                     if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_]+[a-z]$/',$this->searchWFieldsConf[$ObjectName])){
@@ -363,14 +364,15 @@ class Object
         //交集组合方式
         $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
         //TODO 需要支持并集组合
+        $T = count($ObjectIDs);
         rsort($ObjectIDs,SORT_NUMERIC);
         $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
         $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
-            'N' => count($Objects),
-            'T' => count($ObjectIDs),
+            'N' => $N,
+            'T' => $T,
         ];
     }
 
