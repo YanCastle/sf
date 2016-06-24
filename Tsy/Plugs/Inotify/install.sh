@@ -1,2 +1,2 @@
 #!/bin/bash
-pecl install php
+pecl install inotify
