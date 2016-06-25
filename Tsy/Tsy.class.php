@@ -150,7 +150,6 @@ class Tsy
             }
             if(file_exists($file_path))
                 include($file_path);
-            }
         }
     }
     /**
