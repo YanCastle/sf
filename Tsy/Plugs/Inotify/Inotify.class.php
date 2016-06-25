@@ -35,7 +35,11 @@ class Inotify
         }
         return false;
     }
-    function unwatch(){}
+    function unwatch($Dir){
+        if(in_array($Dir,$this->watched )){
+            inotify_rm_watch($this->inotify,$Dir );
+        }
+    }
     function start(callable $function){
         swoole_event_add($this->inotify,function($fd)use($function){
             $events = inotify_read($fd);
