@@ -28,7 +28,7 @@ function http_header($header=false){
         $headers=array_merge($headers,$header);
     }elseif(null===$header){
         $str='';
-        $headers['Access-Control-Allow-Origin:'] = $_SERVER['Origin'];
+        $headers['Access-Control-Allow-Origin:'] = isset($_SERVER['Origin'])?$_SERVER['Origin']:'*';
         foreach ($headers as $k=>$v){
             $str.=($k.' '.$v."\r\n");
         }
