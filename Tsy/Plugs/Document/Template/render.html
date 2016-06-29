@@ -46,11 +46,11 @@
 
 参数列表：
 
-<if condition="$cla['params']">
+<if condition="$method['params']">
 | 参数名称 |参数代码   | 类型  | 默认值 | 说明 |
 | --------   | -----:  | :----:  | :----:  | :----:  |
-<foreach name="cla['params']" item="param">
-| {$param['zh']} |{$param['name']}   | {$param['type']} | {$param['default']} | {$param['memo']} |
+<foreach name="method['params']" item="param">
+| {$param['zh']} |{$param['name']}   | {$param['type']} | {$param['default']} | {$param['memo']} |<php>echo "\r\n";</php>
 </foreach>
 </if>
 返回值：

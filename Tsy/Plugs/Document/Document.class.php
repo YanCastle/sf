@@ -238,7 +238,7 @@ class Document
         }elseif($Method instanceof ReflectionFunction){
             $data['name']=$Method->getName();
             foreach ($Method->getParameters() as $parameter){
-                $name = $parameter->getName();
+                $name = '$'.$parameter->getName();
                 $param=[
                     'name'=>$name,
                     'must'=>!$parameter->isOptional(),
