@@ -282,4 +282,19 @@ class Tsy
             }
         });
     }
+    /**
+     * 取得对象实例 支持调用类的静态方法
+     * @param string $class 对象类名
+     * @param string $method 类的静态方法名
+     * @return object
+     */
+    static public function instance($class,$method='') {
+        if(class_exists($class)){
+            $o = new $class();
+            if(!empty($method) && method_exists($o,$method))
+                $o = call_user_func(array(&$o, $method));
+            return $o;
+        }
+        return false;
+    }
 }

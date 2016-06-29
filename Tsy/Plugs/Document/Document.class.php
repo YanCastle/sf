@@ -84,7 +84,9 @@ class Document
      * @login true
      *
      */
-    function renderMD(){}
+    function renderMD(){
+        
+    }
     function renderHTML(){}
     function renderDOC(){}
     function renderUML(){}
