@@ -62,6 +62,27 @@ class Document
                         ]
                     ]
                 ]
+            ],
+            'functions'=>[
+                '函数名称'=>[
+                    'params'=>[ //参数列表
+                        '参数名称'=>[
+                            'name'=>'参数名称',
+                            'zh'=>'中文名称',
+                            'memo'=>'参数备注',
+                            'type'=>'参数类型',
+                            'default'=>'参数默认值'
+                        ]
+                    ],
+                    'name'=>'方法名称',
+                    'zh'=>'方法中文名',
+                    'memo'=>'注释',
+                    'author'=>'作者信息',
+                    'link'=>'帮助信息链接地址',
+                    'return'=>[//返回类型
+
+                    ]
+                ]
             ]
         ];
         if(is_string($Class)){
@@ -85,7 +106,7 @@ class Document
      *
      */
     function renderMD(){
-        
+
     }
     function renderHTML(){}
     function renderDOC(){}
