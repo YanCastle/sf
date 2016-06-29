@@ -11,6 +11,7 @@ namespace Tsy;
 
 use Tsy\Library\Cache\Driver\File;
 use Tsy\Library\Session;
+use Tsy\Library\Storage;
 
 class Tsy
 {
@@ -27,6 +28,7 @@ class Tsy
     }
     function start(){
 //        加载配置文件
+        Storage::connect();
         $this->loadFunctions();//加载框架function和项目function
         
         $this->loadConfig();

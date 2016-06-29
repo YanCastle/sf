@@ -7,6 +7,7 @@
  */
 
 namespace Tsy\Library;
+use Tsy\Library\View;
 
 /**
  * Class Controller
@@ -27,6 +28,10 @@ class Controller
     protected $ObjectVarName;
     public $Object;
     protected $MC;
+    /**
+     * @var View View
+     */
+    protected $view;
     function __construct()
     {
         $this->__CLASS__ = get_class($this);
@@ -46,8 +51,91 @@ class Controller
             $this->PRIKey = $this->Controller[$this->ControllerName]['_pki'];
 //            $this->Params=$this->Controller[$this->ControllerName][$this->MethodName];
         }
-
+        $this->view = new View();
     }
+
+    /**
+     * 模板显示 调用内置的模板引擎显示方法，
+     * @access protected
+     * @param string $templateFile 指定要调用的模板文件
+     * 默认为空 由系统自动定位模板文件
+     * @param string $charset 输出编码
+     * @param string $contentType 输出类型
+     * @param string $content 输出内容
+     * @param string $prefix 模板缓存前缀
+     * @return void
+     */
+    protected function display($templateFile='',$charset='',$contentType='',$content='',$prefix='') {
+        $this->view->display($templateFile,$charset,$contentType,$content,$prefix);
+    }
+
+    /**
+     * 输出内容文本可以包括Html 并支持内容解析
+     * @access protected
+     * @param string $content 输出内容
+     * @param string $charset 模板输出字符集
+     * @param string $contentType 输出类型
+     * @param string $prefix 模板缓存前缀
+     * @return mixed
+     */
+    protected function show($content,$charset='',$contentType='',$prefix='') {
+        $this->view->display('',$charset,$contentType,$content,$prefix);
+    }
+
+    /**
+     *  获取输出页面内容
+     * 调用内置的模板引擎fetch方法，
+     * @access protected
+     * @param string $templateFile 指定要调用的模板文件
+     * 默认为空 由系统自动定位模板文件
+     * @param string $content 模板输出内容
+     * @param string $prefix 模板缓存前缀*
+     * @return string
+     */
+    protected function fetch($templateFile='',$content='',$prefix='') {
+        return $this->view->fetch($templateFile,$content,$prefix);
+    }
+
+    /**
+     *  创建静态页面
+     * @access protected
+     * @htmlfile 生成的静态文件名称
+     * @htmlpath 生成的静态文件路径
+     * @param string $templateFile 指定要调用的模板文件
+     * 默认为空 由系统自动定位模板文件
+     * @return string
+     */
+    protected function buildHtml($htmlfile='',$htmlpath='',$templateFile='') {
+        $content    =   $this->fetch($templateFile);
+        $htmlpath   =   !empty($htmlpath)?$htmlpath:HTML_PATH;
+        $htmlfile   =   $htmlpath.$htmlfile.C('HTML_FILE_SUFFIX');
+        Storage::put($htmlfile,$content,'html');
+        return $content;
+    }
+
+    /**
+     * 模板主题设置
+     * @access protected
+     * @param string $theme 模版主题
+     * @return Action
+     */
+    protected function theme($theme){
+        $this->view->theme($theme);
+        return $this;
+    }
+
+    /**
+     * 模板变量赋值
+     * @access protected
+     * @param mixed $name 要显示的模板变量
+     * @param mixed $value 变量的值
+     * @return Action
+     */
+    protected function assign($name,$value='') {
+        $this->view->assign($name,$value);
+        return $this;
+    }
+
     function __call($name, $arguments)
     {
         $Object = $this->className.'Object';

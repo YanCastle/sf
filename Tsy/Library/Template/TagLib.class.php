@@ -66,7 +66,7 @@ class TagLib {
      */
     public function __construct() {
         $this->tagLib  = strtolower(substr(get_class($this),6));
-        $this->tpl     = Tsy::instance('Think\\Template');
+        $this->tpl     = Tsy::instance('Tsy\\Library\\Template');
     }
 
     /**

@@ -119,7 +119,8 @@ function controller($i,$data,$mid='',$layer="Controller"){
         $_POST=array_merge($_POST,$data);
     }
 //    切换mid,如果当前环境下存在mid则
-    if(!$mid){$mid=$_POST['_mid'];}
+    $mid&&!isset($_POST['_mid']) or $mid=$_POST['_mid'];
+//    if(!$mid){$mid=$_POST['_mid'];}
     $ModuleClassAction=explode('/',$i);
     $MCACount = count($ModuleClassAction);
     if($MCACount==2){
@@ -162,6 +163,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
 //    $_GET['_m']=$M;$_GET['_a']=$A;$_GET['_c']=$C;
     $controllers[]=$M;
     try{
+        current_MCA($M,$C,$A,$layer);
         load_module_config($M);
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
         $ClassName = implode('\\',[$M,$layer,$C.$layer]);
@@ -211,10 +213,23 @@ function controller($i,$data,$mid='',$layer="Controller"){
     array_pop($controllers);
     if($lastModule = end($controllers)){
         load_module_config($lastModule);
+
     }
     return $result;
 }
 
+/**
+ * 获取当前正在执行的模块/控制器/方法名称
+ * @param string $M
+ * @param string $C
+ * @param string $A
+ * @return mixed|string
+ */
+function current_MCA($M='',$C='',$A='',$L=''){
+    static $MCA=[];
+    if($M&&$C&&$A){$MCA=['M'=>$M,'C'=>$C,'A'=>$A,'L'=>$L];}
+    return isset($MCA[$M])?$MCA[$M]:'';
+}
 function invokeClass($Class,$A,$data){
     $result = '';
     //方法存在时

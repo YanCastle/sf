@@ -9,6 +9,8 @@
 namespace Tsy\Library;
 
 
+use Tsy\Tsy;
+
 class View
 {
     /**
@@ -93,7 +95,7 @@ class View
      */
     public function fetch($templateFile='',$content='',$prefix='') {
         if(empty($content)) {
-            $templateFile   =   $this->parseTemplate($templateFile);
+            $templateFile   =   $this->parseTemplateFile($templateFile);
             // 模板文件不存在直接返回
             if(!is_file($templateFile)) E(L('_TEMPLATE_NOT_EXIST_').':'.$templateFile);
         }else{
@@ -112,6 +114,7 @@ class View
             // 视图解析标签
             $params = array('var'=>$this->tVar,'file'=>$templateFile,'content'=>$content,'prefix'=>$prefix);
         }
+        $this->generaTemplate($params);
         // 获取并清空缓存
         $content = ob_get_clean();
         // 输出模板文件
@@ -124,32 +127,33 @@ class View
      * @param string $template 模板文件规则
      * @return string
      */
-    public function parseTemplate($template='') {
+    public function parseTemplateFile($template='') {
         if(is_file($template)) {
             return $template;
         }
-        $depr       =   C('TMPL_FILE_DEPR');
+        $depr       =   DIRECTORY_SEPARATOR;
         $template   =   str_replace(':', $depr, $template);
 
         // 获取当前模块
-        $module   =  MODULE_NAME;
+        $module   =  current_MCA('M');
         if(strpos($template,'@')){ // 跨模块调用模版文件
             list($module,$template)  =   explode('@',$template);
         }
         // 获取当前主题的模版路径
-        defined('THEME_PATH') or    define('THEME_PATH', $this->getThemePath($module));
-
+//        defined('THEME_PATH') or    define('THEME_PATH', $this->getThemePath($module));
+        $ThemePath = defined('THEME_PATH')?THEME_PATH:$this->getThemePath($module);
+//        $ThemePath .= DIRECTORY_SEPARATOR;
         // 分析模板文件规则
         if('' == $template) {
             // 如果模板文件名为空 按照默认规则定位
-            $template = CONTROLLER_NAME . $depr . ACTION_NAME;
+            $template = current_MCA('C') . $depr . current_MCA('A');
         }elseif(false === strpos($template, $depr)){
-            $template = CONTROLLER_NAME . $depr . $template;
+            $template = current_MCA('C') . $depr . $template;
         }
-        $file   =   THEME_PATH.$template.C('TMPL_TEMPLATE_SUFFIX');
-        if(C('TMPL_LOAD_DEFAULTTHEME') && THEME_NAME != C('DEFAULT_THEME') && !is_file($file)){
+        $file   =   $ThemePath.$template.C('TMPL_TEMPLATE_SUFFIX');
+        if(C('TMPL_LOAD_DEFAULTTHEME') && $ThemePath != C('DEFAULT_THEME') && !is_file($file)){
             // 找不到当前主题模板的时候定位默认主题中的模板
-            $file   =   dirname(THEME_PATH).'/'.C('DEFAULT_THEME').'/'.$template.C('TMPL_TEMPLATE_SUFFIX');
+            $file   =   dirname($ThemePath).DIRECTORY_SEPARATOR.C('DEFAULT_THEME').DIRECTORY_SEPARATOR.$template.C('TMPL_TEMPLATE_SUFFIX');
         }
         return $file;
     }
@@ -160,14 +164,15 @@ class View
      * @param  string $module 模块名
      * @return string
      */
-    protected function getThemePath($module=MODULE_NAME){
+    protected function getThemePath($module=''){
+        $module or $module = current_MCA('M');
         // 获取当前主题名称
         $theme = $this->getTemplateTheme();
         // 获取当前主题的模版路径
         $tmplPath   =   C('VIEW_PATH'); // 模块设置独立的视图目录
         if(!$tmplPath){
             // 定义TMPL_PATH 则改变全局的视图目录到模块之外
-            $tmplPath   =   defined('TMPL_PATH')? TMPL_PATH.$module.'/' : APP_PATH.$module.'/'.C('DEFAULT_V_LAYER').'/';
+            $tmplPath   =   defined('TMPL_PATH')? TMPL_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR : APP_PATH.DIRECTORY_SEPARATOR.$module.DIRECTORY_SEPARATOR.C('DEFAULT_V_LAYER').DIRECTORY_SEPARATOR;
         }
         return $tmplPath.$theme;
     }
@@ -208,6 +213,92 @@ class View
             }
         }
         defined('THEME_NAME') || define('THEME_NAME',   $theme);                  // 当前模板主题名称
-        return $theme?$theme . '/':'';
+        return $theme?$theme . DIRECTORY_SEPARATOR:'';
+    }
+
+    public function generaTemplate(&$_data){
+        $engine             =   strtolower(C('TMPL_ENGINE_TYPE'));
+        $_content           =   empty($_data['content'])?$_data['file']:$_data['content'];
+        $_data['prefix']    =   !empty($_data['prefix'])?$_data['prefix']:C('TMPL_CACHE_PREFIX');
+        if('think'==$engine){ // 采用Think模板引擎
+            if((!empty($_data['content']) && $this->checkContentCache($_data['content'],$_data['prefix']))
+                ||  $this->checkCache($_data['file'],$_data['prefix'])) { // 缓存有效
+                //载入模版缓存文件
+                Storage::load(C('CACHE_PATH').$_data['prefix'].md5($_content).C('TMPL_CACHFILE_SUFFIX'),$_data['var']);
+            }else{
+                $tpl = Tsy::instance('Tsy\\Library\\Template');
+                // 编译并加载模板文件
+                $tpl->fetch($_content,$_data['var'],$_data['prefix']);
+            }
+        }else{
+            // 调用第三方模板引擎解析和输出
+            if(strpos($engine,'\\')){
+                $class  =   $engine;
+            }else{
+                $class   =  'Tsy\\Library\\Template\\Driver\\'.ucwords($engine);
+            }
+            if(class_exists($class)) {
+                $tpl   =  new $class;
+                $tpl->fetch($_content,$_data['var']);
+            }else {  // 类没有定义
+                E(L('_NOT_SUPPORT_').': ' . $class);
+            }
+        }
+    }
+
+    /**
+     * 检查缓存文件是否有效
+     * 如果无效则需要重新编译
+     * @access public
+     * @param string $tmplTemplateFile  模板文件名
+     * @return boolean
+     */
+    protected function checkCache($tmplTemplateFile,$prefix='') {
+        if (!C('TMPL_CACHE_ON')) // 优先对配置设定检测
+            return false;
+        $tmplCacheFile = C('CACHE_PATH').$prefix.md5($tmplTemplateFile).C('TMPL_CACHFILE_SUFFIX');
+        if(!Storage::has($tmplCacheFile)){
+            return false;
+        }elseif (filemtime($tmplTemplateFile) > Storage::get($tmplCacheFile,'mtime')) {
+            // 模板文件如果有更新则缓存需要更新
+            return false;
+        }elseif (C('TMPL_CACHE_TIME') != 0 && time() > Storage::get($tmplCacheFile,'mtime')+C('TMPL_CACHE_TIME')) {
+            // 缓存是否在有效期
+            return false;
+        }
+        // 开启布局模板
+        if(C('LAYOUT_ON')) {
+            $layoutFile  =  THEME_PATH.C('LAYOUT_NAME').C('TMPL_TEMPLATE_SUFFIX');
+            if(filemtime($layoutFile) > Storage::get($tmplCacheFile,'mtime')) {
+                return false;
+            }
+        }
+        // 缓存有效
+        return true;
+    }
+
+    /**
+     * 检查缓存内容是否有效
+     * 如果无效则需要重新编译
+     * @access public
+     * @param string $tmplContent  模板内容
+     * @return boolean
+     */
+    protected function checkContentCache($tmplContent,$prefix='') {
+        if(Storage::has(C('CACHE_PATH').$prefix.md5($tmplContent).C('TMPL_CACHFILE_SUFFIX'))){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public function writeHtmlCache($content) {
+        //2014-11-28 修改 如果有HTTP 4xx 3xx 5xx 头部，禁止存储
+        //2014-12-1 修改 对注入的网址 防止生成，例如 /game/lst/SortType/hot/-e8-90-8c-e5-85-94-e7-88-b1-e6-b6-88-e9-99-a4/-e8-bf-9b-e5-87-bb-e7-9a-84-e9-83-a8-e8-90-bd/-e9-a3-8e-e4-ba-91-e5-a4-a9-e4-b8-8b/index.shtml
+        if (C('HTML_CACHE_ON') && defined('HTML_FILE_NAME')
+            && !preg_match('/Status.*[345]{1}\d{2}/i', implode(' ', headers_list()))
+            && !preg_match('/(-[a-z0-9]{2}){3,}/i',HTML_FILE_NAME)) {
+            //静态文件写入
+            Storage::put(HTML_FILE_NAME, $content, 'html');
+        }
     }
 }

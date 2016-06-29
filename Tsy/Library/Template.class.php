@@ -129,11 +129,11 @@ class  Template {
         // 还原被替换的Literal标签
         $tmplContent =  preg_replace_callback('/<!--###literal(\d+)###-->/is', array($this, 'restoreLiteral'), $tmplContent);
         // 添加安全代码
-        $tmplContent =  '<?php if (!defined(\'THINK_PATH\')) exit();?>'.$tmplContent;
+
         // 优化生成的php代码
         $tmplContent = str_replace('?><?php','',$tmplContent);
         // 模版编译过滤标签
-        Hook::listen('template_filter',$tmplContent);
+        $tmplContent = template_content_replace($tmplContent);
         return strip_whitespace($tmplContent);
     }
 
