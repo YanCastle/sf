@@ -11,10 +11,19 @@ namespace Application\Controller;
 
 use Tsy\Library\Controller;
 
+/**
+ * 视图测试类
+ * Class ViewController
+ * @package Application\Controller
+ */
 class ViewController extends Controller
 {
+    /**
+     * 视图测试方法
+     */
     function view(){
-        $this->assign(['a'=>1]);
-        $this->display();
+        $Document = new \Document();
+        $Document->getDoc('Application\Controller\ViewController');
+        echo $Document->renderMD();
     }
 }
