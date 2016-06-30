@@ -112,7 +112,7 @@ class Document
             'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
             'properties'=>[],
             'methods'=>[]
-        ],$this->parseDocComment($RelClass->getDocComment()));
+        ],$this->parseDocComment($RelClass->getDocComment(),null,$RelClass));
 //        foreach ($RelClass->getProperties() as $property){
 //
 //        }
@@ -130,7 +130,7 @@ class Document
         }
         self::$docs['classes'][$RelClass->getName()]['methods']=$methods;
     }
-    protected function parseDocComment($Comment,ReflectionMethod $Method=null){
+    protected function parseDocComment($Comment,$Method=null,ReflectionClass $class=null){
         $Comment = str_replace(['/**','*/'," * "],'' ,$Comment);
         $Comment = str_replace("\r\n","\n" ,$Comment );
         $Comment = trim($Comment,"\n");
@@ -197,7 +197,8 @@ class Document
 
                             break;
                         case 'return':
-
+                            unset($fields[0]);
+                            $data['return']=implode(' ',$fields );
                             break;
                     }
                 }
@@ -221,7 +222,7 @@ class Document
         if($Method instanceof ReflectionMethod){
             $data['name']=$Method->getName();
             foreach ($Method->getParameters() as $parameter){
-                $name = $parameter->getName();
+                $name = '$'.$parameter->getName();
                 $param=[
                     'name'=>$name,
                     'must'=>!$parameter->isOptional(),
@@ -254,6 +255,11 @@ class Document
             }
         }else{
 
+        }
+        if($class instanceof ReflectionClass){
+            $data['name']=$class->getName();
+            $data['namespace']=$class->getNamespaceName();
+            
         }
         return $data;
     }

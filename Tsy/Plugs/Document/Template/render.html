@@ -10,13 +10,13 @@
 <foreach name="functions" item="func">
 ##{$func.zh}({$func.name})
 作者:{$func['author']}  链接:{$func['link']}
->{$func.memo}
+>{$func.memo}<php>echo "\r\n";</php>
 参数列表：
 <if condition="$func['params']">
-| 参数名称 |参数代码   | 类型  | 默认值 | 说明 |
-| --------   | -----:  | :----:  | :----:  | :----:  |
+| 参数名称 |参数代码   | 数据类型 | 必填 | 默认值 | 说明 |
+| --------   | :-----:  | :----:  | :----:  | :----:  | :----:  |
 <foreach name="func['params']" item="param">
-| {$param['zh']} |{$param['name']}   | {$param['type']} | {$param['default']} | {$param['memo']} |
+| {$param['zh']} |{$param['name']}   | {$param['type']} | {$param['must']} | {$param['default']} | {$param['memo']} |<php>echo "\r\n";</php>
 </foreach>
 </if>
 
@@ -26,10 +26,10 @@
 
 #类列表
 <foreach name="classes" item="cla">
-##{$cla.zh}({$cla.name})
+##{$cla['zh']} ({$cla['name']})
 作者:{$cla['author']}  链接:{$cla['link']}
 
->{$cla.memo}
+>{$cla['memo']}<php>echo "\r\n\r\n";</php>
 
 ###属性
 <if condition="$cla['properties']">
@@ -41,21 +41,24 @@
 <if condition="$cla['methods']">
 <foreach name="cla['methods']" item="method">
 
-####[{$method.access}]{$method.zh}({$method.name})
+####[{$method.access}] {$method.zh} ({$method.name})
+请求地址：<?php echo str_replace(["\\\\","\\"],['/','/'],str_replace(['Controller','Object'],'',$cla['name'])),'/',$method['name'],"\r\n"; ?>
 作者:{$method['author']}  链接:{$method['link']}
 
-参数列表：
-
+参数列表：<php>echo "\r\n\r\n";</php>
 <if condition="$method['params']">
-| 参数名称 |参数代码   | 类型  | 默认值 | 说明 |
-| --------   | -----:  | :----:  | :----:  | :----:  |
+| 参数名称 |参数代码   | 数据类型 | 必填 | 默认值 | 说明 |
+| --------   | :-----:  | :----: | :----:  | :----:  | :----:  |
 <foreach name="method['params']" item="param">
-| {$param['zh']} |{$param['name']}   | {$param['type']} | {$param['default']} | {$param['memo']} |<php>echo "\r\n";</php>
+| {$param['zh']} |{$param['name']}   | {$param['type']} | <if condition="$param['must']">是<else/>否</if> | {$param['default']} | {$param['memo']} |<php>echo "  \r\n";</php>
 </foreach>
 </if>
+<php>echo "\r\n";</php>
 返回值：
 {$param['return']}
+<php>echo "\r\n";</php>
 </foreach>
 
 </if>
 </foreach>
+<php>echo "\r\n";</php>
