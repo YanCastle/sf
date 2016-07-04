@@ -7,6 +7,8 @@
  */
 namespace Tsy\Plugs\Excel;
 
+use Tsy\Plugs\Curl\Curl;
+
 class Excel {
     function __construct(){
         if(!class_exists('\PHPExcel'));
@@ -137,7 +139,7 @@ class Excel {
             $Save = $Path.''.uniqid().'.'.explode('.',$saveFile)[1];
             $objWriter->save($Save);
 //            TODO 推送下载
-//            Curl::download($Save,$saveFile);
+            Curl::download($Save,$saveFile);
             unlink($Save);
         }else{
             $objWriter->save($saveFile);
