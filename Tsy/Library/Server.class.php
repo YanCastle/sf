@@ -86,7 +86,7 @@ class Server
         }
         session('[id]',null);//删除session_id标识
     }
-
+     
     /**
      * 连接断开
      * @param \swoole_server $server

@@ -334,10 +334,14 @@ function swoole_connect_info($fd){
 function swoole_send($fd,$str){
     $rs=false;
     if($GLOBALS['_SWOOLE']->exist($fd)){
-        $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
-        if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
-            $GLOBALS['_SWOOLE']->close($fd);
-            $GLOBALS['_close']=false;
+        if(method_exists('Tsy\\Mode\\'.APP_MODE,'send' )){
+            call_user_func_array('Tsy\\Mode\\'.APP_MODE.'::send',[$fd,$str] );
+        }else{
+            $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
+            if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
+                $GLOBALS['_SWOOLE']->close($fd);
+                $GLOBALS['_close']=false;
+            }
         }
     }
     return $rs;

@@ -28,18 +28,24 @@ abstract class Cache
     public static function getCacheHandler($type=''){
         static $_map =[];
         if(empty($type))  $type = C('DATA_CACHE_TYPE');
-        if(!isset($_map[$type])){
+        if(defined('PROCESS_ID')){
+            $key = PROCESS_ID.$type;
+        }else{
+            $key = $type;
+        }
+        if(!isset($_map[$key])){
             $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
             if(class_exists($class)){
                 $cache = new $class([]);
-                $_map[$type]=$cache;
+                $_map[$key]=$cache;
             }
             else{
                 L($type.':缓存驱动类不存在',LOG_ERR);
                 return false;
             }
-        }else{
-            $cache = $_map[$type];
+        }
+        if(isset($_map[$key])){
+            $cache = $_map[$key];
         }
         return $cache;
     }
