@@ -28,6 +28,9 @@ class Websocket extends Swoole
      * @return bool
      */
     function handshake($buffer){
+        if(APP_MODE_LOW=='websocket'){
+            return false;
+        }
         if($pos = strpos($buffer,'Sec-WebSocket-Key:')){
             $buf  = substr($buffer,$pos+18);
             $key  = trim(substr($buf,0,strpos($buf,"\r\n")));
@@ -43,6 +46,9 @@ class Websocket extends Swoole
     }
 
     function uncode($str){
+        if(APP_MODE_LOW=='websocket'){
+            return $str;
+        }
         $opcode = ord(substr($str, 0, 1)) & 0x0F;
         $payloadlen = ord(substr($str, 1, 1)) & 0x7F;
         $ismask = (ord(substr($str, 1, 1)) & 0x80) >> 7;
@@ -81,6 +87,9 @@ class Websocket extends Swoole
     }
 
     function code($message) {
+        if(APP_MODE_LOW=='websocket'){
+            return $message;
+        }
         $messageType='text';
         switch ($messageType) {
             case 'continuous':

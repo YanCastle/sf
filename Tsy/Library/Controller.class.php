@@ -173,6 +173,13 @@ class Controller
         }
         return [];
     }
+
+    /**
+     * 获取对象的列表
+     * @param array $IDs 参数为各自对象的主键 此处不做限制
+     * @param array $Properties 限定取出属性范围
+     * @return array|bool
+     */
     function gets($IDs=[]){
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectClass)){

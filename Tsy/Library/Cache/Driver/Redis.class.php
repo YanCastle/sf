@@ -51,8 +51,15 @@ class Redis extends Cache implements CacheInterface
     public function get($name) {
 //        N('cache_read',1);
         $value = $this->handler->get($this->options['prefix'].$name);
-        $jsonData  = unserialize( $value);
-        return ($jsonData === NULL) ? $value : $jsonData;	//检测是否为JSON数据 true 返回JSON解析数组, false返回源数据
+        if($value){
+            try{
+                $jsonData  = unserialize( $value);
+            }catch (\Exception $e){
+                echo var_export($e);
+            }
+            return ($jsonData === NULL) ? $value : $jsonData;	//检测是否为JSON数据 true 返回JSON解析数组, false返回源数据
+        }
+        return null;
     }
 
     /**

@@ -1096,7 +1096,10 @@ class swoole_websocket_server extends swoole_http_server{
  *@since 1.8.2-beta
  */
 class swoole_websocket_frame{
-
+    public $fd;
+    public $data;
+    public $opcode; //WEBSOCKET_OPCODE_TEXT = 0x1 ，文本数据.WEBSOCKET_OPCODE_BINARY = 0x2 ，二进制数据
+    public $finish;
 }
 class swoole_http_client{
     function __construct(string $ip,int $port,bool $ssl=false)

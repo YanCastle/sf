@@ -10,15 +10,20 @@
 /**
  * Created by PhpStorm.
  * User: castle
- * Date: 6/24/16
- * Time: 10:57 PM
+ * Date: 7/1/16
+ * Time: 11:21 AM
  */
-include 'Inotify.class.php';
-$infotify = new Inotify();
-$infotify->watch('.');
-//$infotify->watch('/home/castle');
 
-$infotify->start(function($path,$mask){
-//    $path 文件路径
-//    $mask 触发类型
-});
+namespace Tsy\Library;
+
+
+class Task
+{
+    public $cmd;
+    public $data;
+    function __construct($cmd,$data)
+    {
+        $this->cmd=$cmd;
+        $this->data=$data;
+    }
+}

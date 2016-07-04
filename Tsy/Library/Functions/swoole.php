@@ -11,7 +11,7 @@
  * @param bool $wait
  * @return mixed
  */
-function task(mixed $data,$wait=false){
+function task(\Tsy\Library\Task $data,$wait=false){
     //检测当前进程是否是worker进程，如果是则投递，如果不是则sendMessage到worker线程，然后由worker线程发起投递
     if(!$GLOBALS['_SWOOLE']->taskworker){
         //这是worker线程，可以投递
