@@ -47,6 +47,9 @@ class Object
     ];
     
     public $is_dic=false;
+    public $allow_add=true;//是否允许添加
+    public $allow_save=true;//是否允许修改
+    public $allow_del=true;//是否允许删除
     public $map = [
 //        自动生成
     ];//字段=》类型 表名 映射
@@ -178,6 +181,7 @@ class Object
     function add()
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
+        if(!$this->allow_add)return false;
         $data = [];
         foreach ($this->map as $key => $map) {
             $TableName = explode('.', $key)[0];
@@ -383,6 +387,7 @@ class Object
      */
     function del($IDs)
     {
+        if(!$this->allow_del)return false;
         if (is_numeric($IDs) &&
             $IDs > 0
         ) {
@@ -546,6 +551,7 @@ class Object
 
     function save($ID,$Params)
     {
+        if(!$this->allow_save)return false;
         $Where=[];
         if(is_array($ID)){
             foreach ($ID as $v){
