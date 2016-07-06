@@ -80,9 +80,9 @@ class Swoolehttp
                             $dir = $Domain[$request->header['host']]['root'];//realpath部分工作在加载配置文件时处理
                             $file =$dir.$_SERVER['request_uri'];
                             if(file_exists($file)){
-                                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                                $fencoding = finfo_open(FILEINFO_MIME_ENCODING);
-                                $response->header('Content-Type',finfo_file($finfo, $file).'; charset='.finfo_file($fencoding,$file ));
+                                $fencoding = finfo_file(finfo_open(FILEINFO_MIME_ENCODING),$file);
+                                $ContentType = mime($file).';'.('binary'==$fencoding?'':'charset='.$fencoding);
+                                $response->header('Content-Type',$ContentType);
                                 $response->sendfile($file);
                             }else{
                                 $response->status(404);

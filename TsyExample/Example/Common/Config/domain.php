@@ -9,7 +9,12 @@ return [
     'localhost:8000'=>[
         'root'=>'/home/castle/www/Chest',
         'location'=>[
-            ''=>[]
+            '/'=>[//目录
+                '\.php$'=>[//匹配规则
+                    //定义
+                ],
+
+            ]
         ],
     ],
     'api.tansuyun.cn'=>[]

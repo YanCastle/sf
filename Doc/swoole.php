@@ -1119,6 +1119,7 @@ class swoole_websocket_frame{
     public $finish;
 }
 class swoole_http_client{
+    public $body;
     function __construct(string $ip,int $port,bool $ssl=false)
     {
     }
