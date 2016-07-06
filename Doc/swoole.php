@@ -191,6 +191,11 @@ function swoole_errno(){}
  *@since 1.8.2-beta
  */
 class swoole_server{
+    static $taskworker=true;
+    public $setting=[
+        'worker_num'=>1,
+        'task_worker_num'=>1,
+    ];
     /**
      * @param $serv_host[required]
      * @param $serv_port[required]
@@ -858,13 +863,13 @@ class swoole_http_response{
 
     public function gzip(){}
 
-    public function header(){}
+    public function header($name,$value){}
 
-    public function write(){}
+    public function write($content){}
 
-    public function end(){}
+    public function end($content =''){}
 
-    public function sendfile(){}
+    public function sendfile($path){}
 
 
 }
@@ -872,8 +877,20 @@ class swoole_http_response{
  *@since 1.8.2-beta
  */
 class swoole_http_request{
-    public function rawcontent(){}
-
+    public $rawContent='';
+    public $files=[];
+    public $cookie=[];
+    public $post=[];
+    public $get=[];
+    /**
+     * @var array
+     */
+    public $server=[];
+    public $header=[];
+    function __construct()
+    {
+        $this->server=$_SERVER;
+    }
 
 }
 /**

@@ -39,7 +39,6 @@ class Inotify
                     $this->each_dir($Dir,[$this,'eachDir']);
                 }
             }
-
             return true;
         }
         return false;
