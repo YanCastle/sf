@@ -698,14 +698,14 @@ class Model {
         if(isset($options['where']) && is_array($options['where']) && !empty($fields) && !isset($options['join'])) {
             // 对数组查询条件进行字段类型检查
             foreach ($options['where'] as $key=>$val){
-                $key  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, trim($key));
+//                $key  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, trim($key));
                 if(in_array($key,$fields,true)){
                     if(is_scalar($val)) {
                         $this->_parseType($options['where'],$key);
                     }
                 }elseif(!is_numeric($key) && '_' != substr($key,0,1) && false === strpos($key,'.') && false === strpos($key,'(') && false === strpos($key,'|') && false === strpos($key,'&')){
                     if(!empty($this->options['strict'])){
-                        L(E('_ERROR_QUERY_EXPRESS_').':['.$key.'=>'.$val.']');
+                        trigger_error(E('_ERROR_QUERY_EXPRESS_').':['.$key.'=>'.$val.']',E_USER_WARNING);
                     }
                     unset($options['where'][$key]);
                 }
@@ -878,7 +878,9 @@ class Model {
         }
         return $data;
     }
-
+    protected function parseColumnName($key){
+        return preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $key);
+    }
     /**
      * 处理字段映射
      * @access public
@@ -1726,7 +1728,7 @@ class Model {
             $this->options['table'] =   $table;
         }elseif(!empty($table)) {
             //将__TABLE_NAME__替换成带前缀的表名
-            $table  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return $prefix.strtolower($match[1]);}, $table);
+            $table  = $this->parseColumnName($table);
             $this->options['table'] =   $table;
         }
         return $this;
@@ -1744,7 +1746,7 @@ class Model {
             $this->options['using'] =   $using;
         }elseif(!empty($using)) {
             //将__TABLE_NAME__替换成带前缀的表名
-            $using  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return $prefix.strtolower($match[1]);}, $using);
+            $using  = $this->parseColumnName($using);
             $this->options['using'] =   $using;
         }
         return $this;
@@ -1761,13 +1763,13 @@ class Model {
         $prefix =   $this->tablePrefix;
         if(is_array($join)) {
             foreach ($join as $key=>&$_join){
-                $_join  =   preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return strtolower($prefix.$match[1]);}, $_join);
+                $_join  =   $this->parseColumnName($_join);
                 $_join  =   false !== stripos($_join,'JOIN')? $_join : $type.' JOIN ' .$_join;
             }
             $this->options['join']      =   $join;
         }elseif(!empty($join)) {
             //将__TABLE_NAME__字符串替换成带前缀的表名
-            $join  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return strtolower($prefix.$match[1]);}, $join);
+            $join  = $this->parseColumnName($join);
             $this->options['join'][]    =   false !== stripos($join,'JOIN')? $join : $type.' JOIN '.$join;
         }
         return $this;
@@ -1792,7 +1794,7 @@ class Model {
         if(is_string($union) ) {
             $prefix =   $this->tablePrefix;
             //将__TABLE_NAME__字符串替换成带前缀的表名
-            $options  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match) use($prefix){ return $prefix.strtolower($match[1]);}, $union);
+            $options  = $this->_parseOptions($union);
         }elseif(is_array($union)){
             if(isset($union[0])) {
                 $this->options['union']  =  array_merge($this->options['union'],$union);
@@ -1903,11 +1905,12 @@ class Model {
         }
         if(is_string($where) && '' != $where){
             $map    =   array();
-            $map['_string']   =   preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $where);
+            $map['_string']   =  $this->parseColumnName($where);
             $where  =   $map;
         }
         foreach ($where as $k=>$v){
-            $new = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $k);
+            //转换__TABLE_NAME__这种形式成实际的表，用于在Where中做查询
+            $new = $this->parseColumnName($k);
             if($new!=$k){
                 $where[$new]=$v;
                 unset($where[$k]);
