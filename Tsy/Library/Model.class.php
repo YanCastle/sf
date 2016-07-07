@@ -1905,7 +1905,14 @@ class Model {
             $map    =   array();
             $map['_string']   =   preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $where);
             $where  =   $map;
-        }        
+        }
+        foreach ($where as $k=>$v){
+            $new = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $k);
+            if($new!=$k){
+                $where[$new]=$v;
+                unset($where[$k]);
+            }
+        }
         if(isset($this->options['where'])){
             $this->options['where'] =   array_merge($this->options['where'],$where);
         }else{
