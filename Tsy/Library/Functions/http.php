@@ -35,11 +35,7 @@ function http_header($header=false){
         $headers=[
             'HTTP/1.1'=>'200 OK',
             'Connection:'=>'keep-alive',
-            'Content-Type:'=>'application/json',
-            'Access-Control-Allow-Origin:'=>$_SERVER['Origin'],
-            'Access-Control-Allow-Credentials:'=>'true',
-            'Access-Control-Request-Method:'=>'GET,POST,OPTIONS',
-            'Access-Control-Allow-Headers:'=>'X-Requested-With,Cookie,ContentType',
+            'Content-Type:'=>'text/html; charset=utf-8',
         ];
         return $str."\r\n";
     }
@@ -152,4 +148,22 @@ function http_comment($fdName,$data,$online=true){
 
 //    如果需要离线消息
     return true;
+}
+
+/**
+ * 设置或获取server数组信息
+ * @param $name
+ * @return mixed|string
+ */
+function server($name){
+    static $server=[];
+    if(is_array($name)&&$name){
+        $_SERVER = array_merge($_SERVER,$name);
+    }
+    if(!$server){
+        foreach ($_SERVER as $k=>$v){
+            $server[strtolower($k)]=$v;
+        }
+    }
+    return is_string($name)&&isset($server[strtolower($name)])?$server[strtolower($name)]:'';
 }
