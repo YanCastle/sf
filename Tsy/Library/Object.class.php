@@ -422,7 +422,7 @@ class Object
         $Objects = [];
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
-        $Model = M()->table("__{$UpperMainTable}__ AS main");
+        $Model = M($this->main);
         $ArrayProperties = [];
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
@@ -436,7 +436,7 @@ class Object
 //                    TODO 字段映射
                     $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                     $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
-                    $Model->join("__{$TableName}__ ON main.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                    $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                 } else {
                     //一对多
                     $ArrayProperties[$PropertyName] = $Config;
@@ -455,7 +455,7 @@ class Object
             $Model->field($this->_read_deny, true);
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
-        $Objects = $Model->where(['main.'.$this->pk => ['IN', $IDs]])->field('',false)->select();
+        $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->select();
         if (!$Objects) {
             return [];
         }
