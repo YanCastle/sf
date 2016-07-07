@@ -8,6 +8,7 @@
 return [
     'localhost:8000'=>[
         'root'=>'/home/castle/www/Chest',
+        'index'=>['index.html'],
         'location'=>[
             '/'=>[//目录
                 '\.php$'=>[//匹配规则
