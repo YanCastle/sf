@@ -455,7 +455,7 @@ class Object
             $Model->field($this->_read_deny, true);
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
-        $Objects = $Model->where([$this->pk => ['IN', $IDs]])->select();
+        $Objects = $Model->where(['main.'.$this->pk => ['IN', $IDs]])->field('',false)->select();
         if (!$Objects) {
             return [];
         }
@@ -464,7 +464,7 @@ class Object
         foreach ($ArrayProperties as $PropertyName => $Config) {
             //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
-            $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where(['main.'.$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN], true);
+            $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN], true);
         }
         //处理多对多属性
         $LinkPropertyValues = [];
