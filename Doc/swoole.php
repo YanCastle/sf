@@ -859,9 +859,9 @@ class swoole_http_response{
 
     public function rawcookie(){}
 
-    public function status(){}
+    public function status($code){}
 
-    public function gzip(){}
+    public function gzip($level){}
 
     public function header($name,$value){}
 

@@ -9,6 +9,8 @@ return [
     'localhost:8000'=>[
         'root'=>'/home/castle/www/Chest',
         'index'=>['index.html'],
+        404=>'',
+        'expire'=>'',
         'location'=>[
             '/'=>[//目录
                 '\.php$'=>[//匹配规则

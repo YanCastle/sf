@@ -74,25 +74,39 @@ class Swoolehttp
                     $_FILES = $request->files;
 //                    TODO 在swoole HTTP模式下加载文件
                     //读取域名配置信息，检查文件是否存在，如果存在则发送文件内容，如果不存在则调用404规则
+                    $Status = 404;
+                    $host = $request->header['host'];
                     if($Domain = static_keep('domain')){
 //                        isset($Domain[$_SERVER['']])
-                        if(isset($Domain[$request->header['host']])){
-                            $dir = $Domain[$request->header['host']]['root'];//realpath部分工作在加载配置文件时处理
+                        if(isset($Domain[$host])){
+                            $dir = $Domain[$host]['root'];//realpath部分工作在加载配置文件时处理
                             $file =$dir.$_SERVER['request_uri'];
+                            if($_SERVER['request_uri']=='/'){
+                                //默认文件查找
+                                foreach ($Domain['index'] as $index){
+                                    if(file_exists($file.$index)){
+                                        $file .=$index;
+                                        break;
+                                    }
+                                }
+                            }
                             if(file_exists($file)){
+                                $Status = 200;
                                 $fencoding = finfo_file(finfo_open(FILEINFO_MIME_ENCODING),$file);
                                 $ContentType = mime($file).';'.('binary'==$fencoding?'':'charset='.$fencoding);
                                 $response->header('Content-Type',$ContentType);
                                 $response->sendfile($file);
-                            }else{
-                                $response->status(404);
                             }
-                        }else{
-                            $response->status(404);
                         }
-                    }else{
-                        $response->status(404);
                     }
+                    $response->status($Status);
+                    switch ($Status){
+                        case 404:
+                            $NotFoundConfig = $Domain[$host][404];
+//                            if(file_exists($dir))
+                            break;
+                    }
+                    $response->header('Server','TanSuYun');
                     $response->end('');
                 });
                 $Server->on('open',[$Swoole,'onConnect']);
