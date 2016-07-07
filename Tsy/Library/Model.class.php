@@ -698,7 +698,7 @@ class Model {
         if(isset($options['where']) && is_array($options['where']) && !empty($fields) && !isset($options['join'])) {
             // 对数组查询条件进行字段类型检查
             foreach ($options['where'] as $key=>$val){
-                $key            =   trim($key);
+                $key  = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, trim($key));
                 if(in_array($key,$fields,true)){
                     if(is_scalar($val)) {
                         $this->_parseType($options['where'],$key);
@@ -1903,7 +1903,7 @@ class Model {
         }
         if(is_string($where) && '' != $where){
             $map    =   array();
-            $map['_string']   =   $where;
+            $map['_string']   =   preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $where);
             $where  =   $map;
         }        
         if(isset($this->options['where'])){
