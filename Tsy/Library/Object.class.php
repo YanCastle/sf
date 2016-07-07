@@ -436,7 +436,7 @@ class Object
 //                    TODO 字段映射
                     $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                     $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
-                    $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                    $Model->join("__{$TableName}__ ON main.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                 } else {
                     //一对多
                     $ArrayProperties[$PropertyName] = $Config;
