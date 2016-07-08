@@ -9,6 +9,7 @@
 namespace Tsy;
 
 
+use Tsy\Library\Aop;
 use Tsy\Library\Cache\Driver\File;
 use Tsy\Library\Session;
 use Tsy\Library\Storage;
@@ -28,6 +29,7 @@ class Tsy
     }
     function start(){
 //        加载配置文件
+        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
         Storage::connect();
         $this->loadFunctions();//加载框架function和项目function
         
@@ -66,6 +68,7 @@ class Tsy
             die(APP_MODE.':模式不存在');
         }
 //        加载模式处理类，开始模式处理
+        Aop::exec(__METHOD__,Aop::$AOP_AFTER);
         $ModeClass->start();
     }
     function loadConfig(){

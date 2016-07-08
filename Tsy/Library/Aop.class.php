@@ -41,7 +41,7 @@ class Aop
      * @param $where
      * @param array $data
      */
-    public static function exec(string $name,$where,array &$data,$async=null){
+    public static function exec(string $name,$where,array &$data=[],$async=null){
         if(isset(self::$config[$name][$where])){
             foreach (self::$config[$name][$where] as $callback){
                 if(is_callable($callback))
