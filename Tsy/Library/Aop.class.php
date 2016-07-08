@@ -23,7 +23,7 @@ class Aop
      * @param int $order
      * @return bool
      */
-    public static function add(string $name,callable $callback,$where,$order=0){
+    public static function add(string $name,callable $callback,$where,$async=false,$order=0){
         if(!isset(self::$config[$name])){
             self::$config[$name]=[[],[]];
         }
@@ -41,7 +41,7 @@ class Aop
      * @param $where
      * @param array $data
      */
-    public static function exec(string $name,$where,array &$data){
+    public static function exec(string $name,$where,array &$data,$async=null){
         if(isset(self::$config[$name][$where])){
             foreach (self::$config[$name][$where] as $callback){
                 if(is_callable($callback))
