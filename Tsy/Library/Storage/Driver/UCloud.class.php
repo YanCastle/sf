@@ -10,7 +10,13 @@
 // +----------------------------------------------------------------------
 namespace Tsy\Library\Storage\Driver;
 use Tsy\Library\Storage;
-// 本地文件写入存储类
+
+/**
+ *
+ *  UCloud 文件存储
+ * @link https://docs.ucloud.cn/storage_cdn/ufile/tools.html#id11
+ * @package Tsy\Library\Storage\Driver
+ */
 class UCloud extends Storage{
     static $UCloudSDKPath=__DIR__.DIRECTORY_SEPARATOR.'UCloud';
     private $contents=array();
