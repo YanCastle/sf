@@ -67,7 +67,7 @@ class Swoolehttp
 //                static_keep('domain',)
                 $Server->on('request',function(\swoole_http_request $request, \swoole_http_response $response)use($Server,$Swoole){
                     $_COOKIE=$request->cookie;
-                    $_SERVER = $request->server;
+                    server(array_merge($request->server,$request->header));
                     $_POST = $request->post;
                     $_GET=  $request->get;
                     $_REQUEST  = array_merge($_GET,$_POST);
@@ -75,12 +75,15 @@ class Swoolehttp
 //                    TODO 在swoole HTTP模式下加载文件
                     //读取域名配置信息，检查文件是否存在，如果存在则发送文件内容，如果不存在则调用404规则
                     $Status = 404;
+                    $End='';
                     $host = $request->header['host'];
+                    $Found = false;//是否有找到配置文件
                     if($Domain = static_keep('domain')){
 //                        isset($Domain[$_SERVER['']])
                         if(isset($Domain[$host])){
+                            $Found=true;
                             $dir = $Domain[$host]['root'];//realpath部分工作在加载配置文件时处理
-                            $file =$dir.$_SERVER['request_uri'];
+                            $file =$dir.server('request_uri');
                             if($_SERVER['request_uri']=='/'){
                                 //默认文件查找
                                 foreach ($Domain['index'] as $index){
@@ -98,16 +101,52 @@ class Swoolehttp
                                 $response->sendfile($file);
                             }
                         }
-                    }
-                    $response->status($Status);
-                    switch ($Status){
-                        case 404:
-                            $NotFoundConfig = $Domain[$host][404];
+                        $response->status($Status);
+                        switch ($Status){
+                            case 404:
+                                $NotFoundConfig = $Domain[$host][404];
 //                            if(file_exists($dir))
-                            break;
+                                break;
+                        }
+                        $response->header('Server','TanSuYun');
                     }
-                    $response->header('Server','TanSuYun');
-                    $response->end('');
+                    if(!$Found){
+                        $Data=[
+                            'i'=>'Empty/_empty',
+                            'd'=>[],
+                            'm'=>'',
+                            't'=>''
+                        ];
+                        $Dispatch = swoole_get_port_property($_SERVER['server_port'],'DISPATCH');
+                        if(is_callable($Dispatch)){
+                            $tmpData = call_user_func_array($Dispatch,[$request,$response]);
+                            if($tmpData===null){
+//                                return null;
+                            }elseif(is_string($tmpData)&&strlen($tmpData)>0){
+                                $End = $tmpData;
+                            }else{
+                                $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
+                            }
+                        }
+                        if(is_array($Data)&&$Data){
+                            ob_start();
+                            $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
+                            $content = ob_get_clean();
+                            $Out = swoole_get_port_property($_SERVER['server_port'],'OUT');
+                            if(HTTP_COMMENT===$return){
+                                return '';
+                            }elseif(is_callable($Out)){
+                                ob_start();
+                                $content = call_user_func_array($Out, [$return,$content]);
+                                $cs = ob_get_clean();
+                                $response->write($cs);
+                                $response->write($content);
+                            }else{
+                                $End='';
+                            }
+                        }
+                    }
+                    $response->end($End);
                 });
                 $Server->on('open',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);
