@@ -14,9 +14,9 @@ class Log
 
     private static function write($level, $msg)
     {
-        $filename = C('DD_DIR_ROOT') . "isv.log";
-        $logFile = fopen($filename, "aw");
-        fwrite($logFile, $level . "/" . date(" Y-m-d h:i:s") . "  " . $msg . "\n");
-        fclose($logFile);
+//        $filename = C('DD_DIR_ROOT') . "isv.log";
+//        $logFile = fopen($filename, "aw");
+//        fwrite($logFile, $level . "/" . date(" Y-m-d h:i:s") . "  " . $msg . "\n");
+//        fclose($logFile);
     }
 }

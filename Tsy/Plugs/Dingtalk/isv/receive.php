@@ -20,7 +20,7 @@ $errCode = $crypt->DecryptMsg($signature, $timeStamp, $nonce, $encrypt, $msg);
 
 if ($errCode != 0)
 {
-    Log::e(json_encode($_GET) . "  ERR:" . $errCode);
+    L(json_encode($_GET) . "  ERR:" . $errCode);
     
     /**
      * 创建套件时检测回调地址有效性，使用C('DD_CREATE_SUITE_KEY')作为SuiteKey
@@ -29,7 +29,7 @@ if ($errCode != 0)
     $errCode = $crypt->DecryptMsg($signature, $timeStamp, $nonce, $encrypt, $msg);
     if ($errCode == 0)
     {
-        Log::i("DECRYPT CREATE SUITE MSG SUCCESS " . json_encode($_GET) . "  " . $msg);
+        L("DECRYPT CREATE SUITE MSG SUCCESS " . json_encode($_GET) . "  " . $msg);
         $eventMsg = json_decode($msg);
         $eventType = $eventMsg->EventType;
         if ("check_create_suite_url" === $eventType)
@@ -41,12 +41,12 @@ if ($errCode != 0)
             $errCode = $crypt->EncryptMsg($random, $timeStamp, $nonce, $encryptMsg);
             if ($errCode == 0) 
             {
-                Log::i("CREATE SUITE URL RESPONSE: " . $encryptMsg);
+                L("CREATE SUITE URL RESPONSE: " . $encryptMsg);
                 echo $encryptMsg;
             } 
             else 
             {
-                Log::e("CREATE SUITE URL RESPONSE ERR: " . $errCode);
+                L("CREATE SUITE URL RESPONSE ERR: " . $errCode);
             }
         }
         else
@@ -56,7 +56,7 @@ if ($errCode != 0)
     }
     else 
     {
-        Log::e(json_encode($_GET) . "CREATE SUITE ERR:" . $errCode);
+        L(json_encode($_GET) . "CREATE SUITE ERR:" . $errCode);
     }
     return;
 }
@@ -65,7 +65,7 @@ else
     /**
      * 套件创建成功后的回调推送
      */
-    Log::i("DECRYPT MSG SUCCESS " . json_encode($_GET) . "  " . $msg);
+    L("DECRYPT MSG SUCCESS " . json_encode($_GET) . "  " . $msg);
     $eventMsg = json_decode($msg);
     $eventType = $eventMsg->EventType;
     /**
@@ -101,19 +101,19 @@ else
 
     else if ("user_add_org" === $eventType)
     {
-        Log::e(json_encode($_GET) . "  ERR:user_add_org");
+        L(json_encode($_GET) . "  ERR:user_add_org");
         //handle auth change event
     }
 
     else if ("user_modify_org" === $eventType)
     {
-        Log::e(json_encode($_GET) . "  ERR:user_modify_org");
+        L(json_encode($_GET) . "  ERR:user_modify_org");
         //handle auth change event
     }
 
     else if ("user_leave_org" === $eventType)
     {
-        Log::e(json_encode($_GET) . "  ERR:user_leave_org");
+        L(json_encode($_GET) . "  ERR:user_leave_org");
         //handle auth change event
     }
 
@@ -134,13 +134,13 @@ else
         $errCode = $crypt->EncryptMsg($random, $timeStamp, $nonce, $encryptMsg);
         if ($errCode == 0) 
         {
-            Log::i("UPDATE SUITE URL RESPONSE: " . $encryptMsg);
+            L("UPDATE SUITE URL RESPONSE: " . $encryptMsg);
             echo $encryptMsg;
             return;
         } 
         else 
         {
-            Log::e("UPDATE SUITE URL RESPONSE ERR: " . $errCode);
+            L("UPDATE SUITE URL RESPONSE ERR: " . $errCode);
         }
     }
     else
@@ -154,10 +154,10 @@ else
     if ($errCode == 0) 
     {
         echo $encryptMsg;
-        Log::i("RESPONSE: " . $encryptMsg);
+        L("RESPONSE: " . $encryptMsg);
     } 
     else 
     {
-        Log::e("RESPONSE ERR: " . $errCode);
+        L("RESPONSE ERR: " . $errCode);
     }
 }

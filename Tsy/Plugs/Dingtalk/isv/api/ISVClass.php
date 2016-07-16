@@ -10,7 +10,7 @@ class ISVClass{
     public static function getSuiteAccessToken(){
         $suiteTicket = Cache::getSuiteTicket();
         if(!$suiteTicket){
-            Log::e("ERROR: suiteTicket not cached,please check the callback url");
+            L("ERROR: suiteTicket not cached,please check the callback url");
             return false;
         }
         $suiteAccessToken = Service::getSuiteAccessToken($suiteTicket);
@@ -22,7 +22,7 @@ class ISVClass{
         $corpAccessToken = Service::getIsvCorpAccessToken($suiteAccessToken, $corpId, $permanetCode);
         $status = Cache::getActiveStatus($key);
         if($status<=0&&$corpAccessToken!=""){
-            Log::i("[activeSuite]".$status);
+            L("[activeSuite]".$status);
             Service::activeSuite($suiteAccessToken, $corpId, $permanetCode);
         }
 

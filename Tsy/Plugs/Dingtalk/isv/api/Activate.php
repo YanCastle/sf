@@ -19,35 +19,35 @@ class Activate
         //Cache::setTmpAuthCode($tmpAuthCode);
         $suiteTicket = Cache::getSuiteTicket();
         $suiteAccessToken = Service::getSuiteAccessToken($suiteTicket);
-        Log::i("[Activate] getSuiteToken: " . $suiteAccessToken);
+        L("[Activate] getSuiteToken: " . $suiteAccessToken);
 
         //获取永久授权码以及corpid等信息，持久化，并激活临时授权码
         $permanetCodeInfo = Service::getPermanentCodeInfo($suiteAccessToken, $tmpAuthCode);
 
-        Log::i("[Activate] getPermanentCodeInfo: " . json_encode($permanetCodeInfo));
+        L("[Activate] getPermanentCodeInfo: " . json_encode($permanetCodeInfo));
         
         $permanetCode = $permanetCodeInfo['permanent_code'];
         $authCorpId = $permanetCodeInfo['corp_id'];
-        Log::i("[Activate] permanetCode: " . $permanetCode . ",  authCorpId: " . $authCorpId);
+        L("[Activate] permanetCode: " . $permanetCode . ",  authCorpId: " . $authCorpId);
         
         /**
          * 获取企业access token
          */
         $corpAccessToken = Service::getIsvCorpAccessToken($suiteAccessToken, $authCorpId, $permanetCode);
-        Log::i("[Activate] getCorpToken: " . $corpAccessToken);
+        L("[Activate] getCorpToken: " . $corpAccessToken);
         
         /**
          * 获取企业授权信息
          */
         $res = Service::getAuthInfo($suiteAccessToken, $authCorpId, $permanetCode);
-        Log::i("[Activate] getAuthInfo: " . json_encode($res));
+        L("[Activate] getAuthInfo: " . json_encode($res));
         self::check($res);
         
         /**
          * 激活套件
          */
         $res = Service::activeSuite($suiteAccessToken, $authCorpId, $permanetCode);
-        Log::i("[Activate] activeSuite: " . json_encode($res));
+        L("[Activate] activeSuite: " . json_encode($res));
         self::check($res);
     }
     

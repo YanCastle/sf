@@ -9,10 +9,11 @@
 class Dingtalk
 {
     protected $IsOk=true;
+    protected $DD_DIR_ROOT=__DIR__.DIRECTORY_SEPARATOR.'isv'.DIRECTORY_SEPARATOR;
     function __construct()
     {
         C([
-            'DD_DIR_ROOT'=>RUNTIME_PATH.DIRECTORY_SEPARATOR.'Dingtalk'.DIRECTORY_SEPARATOR,
+            'DD_DIR_ROOT'=>$this->DD_DIR_ROOT,
             'DD_OAPI_HOST'=>'https://oapi.dingtalk.com',
         ]);
         foreach ([
@@ -23,6 +24,16 @@ class Dingtalk
                 $this->IsOk=false;
             }
         }
+        require_once($this->DD_DIR_ROOT . "util/Http.php");
+        require_once($this->DD_DIR_ROOT . "util/Log.php");
+        require_once($this->DD_DIR_ROOT . "util/Cache.php");
+        require_once($this->DD_DIR_ROOT . "api/Auth.php");
+        require_once($this->DD_DIR_ROOT . "api/User.php");
+        require_once($this->DD_DIR_ROOT . "api/Message.php");
+        require_once($this->DD_DIR_ROOT . "api/ISVClass.php");
+        require_once($this->DD_DIR_ROOT . "api/Activate.php");
+        require_once($this->DD_DIR_ROOT . "crypto/DingtalkCrypt.php");
+        require_once($this->DD_DIR_ROOT . "api/ISVService.php");
     }
 
 }

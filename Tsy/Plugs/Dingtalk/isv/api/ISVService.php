@@ -68,7 +68,7 @@ class Service
                     "tmp_auth_code" => $tmpAuthCode
                 )));
             self::check($permanentCodeResult);
-            Log::i("[permanentCodeInfo]".json_encode($permanentCodeResult));
+            L("[permanentCodeInfo]".json_encode($permanentCodeResult));
             $permanentCodeInfo = self::savePermanentCodeInfo($permanentCodeResult,$tmpAuthCode);
         }
         return $permanentCodeInfo;
@@ -216,7 +216,7 @@ class Service
     {
         if ($res->errcode != 0)
         {
-            Log::e("[FAIL]: " . json_encode($res));
+            L("[FAIL]: " . json_encode($res));
             exit("Failed: " . json_encode($res));
         }
     }

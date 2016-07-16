@@ -48,7 +48,7 @@ class Auth
     public static function isvConfig($corpId)
     {
         $corpInfo = ISVClass::getCorpInfo($corpId);
-	    Log::i("[corpinfo-->]".json_encode($corpInfo));
+	    L("[corpinfo-->]".json_encode($corpInfo));
         $agentId = Service::getCurAgentId(C('DD_APPID'));
         $corpId = $corpInfo['corp_id'];
         $nonceStr = 'abcdefg';
@@ -86,7 +86,7 @@ class Auth
     {
         if ($res->errcode != 0)
         {
-            Log::e("FAIL: " . json_encode($res));
+            L("FAIL: " . json_encode($res));
             exit("Failed: " . json_encode($res));
         }
     }

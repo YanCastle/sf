@@ -34,9 +34,9 @@ switch($event){
         $corpInfo = ISVClass::getCorpInfo($corpId);
         $accessToken = $corpInfo['corpAccessToken'];
         $code = $_POST["code"];
-        Log::i("accessToken:".$accessToken."][code".$code);
+        L("accessToken:".$accessToken."][code".$code);
         $userInfo = User::getUserInfo($accessToken, $code);
-        Log::i("[userinfo]".json_encode($userInfo));
+        L("[userinfo]".json_encode($userInfo));
         echo json_encode($userInfo);
         break;
 }
