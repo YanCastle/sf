@@ -223,18 +223,15 @@ function array_2d_merge(&$array,$properties,$properties_map){
 //    }
     foreach ($array as $k=>$v){
         foreach ($properties_map as $propertyName=>$config){
-            if($config['Type']=='array'){
-
-            }
-            switch (strtolower(substr($config['Type']))){
+            switch (strtolower(substr($config['Type'],0,1))){
                 case 'a':
                     //数组
-                    $array[$k][$propertyName]=isset($properties[$propertyName][$k])?$properties[$propertyName][$k]:[];
+                    $array[$k][$propertyName]=isset($properties[$propertyName][$v[$config['Column']]])?$properties[$propertyName][$v[$config['Column']]]:[];
                     break;
                 case 'p':
                     //属性合并
-                    if(isset($properties[$propertyName][$k]))
-                        $array[$k] = array_merge($v,$properties[$propertyName][$k]);
+                    if(isset($properties[$propertyName][$v[$config['Column']]]))
+                        $array[$k] = array_merge($v,$properties[$propertyName][$v[$config['Column']]]);
                     break;
             }
         }
