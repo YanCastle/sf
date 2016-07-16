@@ -190,3 +190,53 @@ function array_set_key_value(&$array,$key,$value){
         $array[$k][$key]=$value;
     }
 }
+
+/**
+ * 二维数组的对象组合
+ * @param $array
+ * @param $properties
+ * @param $properties_map
+ */
+function array_2d_merge(&$array,$properties,$properties_map){
+//    $array = [
+//        1=>[
+//            'a'=>'a',
+//            'b'=>1
+//        ]
+//    ];
+//    $properties = [
+//        'name'=>[
+//            [$key=>1,'ss'=>1]
+//        ]
+//    ];
+//    $result = [
+//        1=>[
+//            'a'=>'a',
+//            'b'=>1,
+//            'name'=>[$key=>1,'ss'=>1]
+//        ]
+//    ];
+//    foreach ($properties_map as $propertyName=>$config){
+//        if('a'==strtolower(substr($config['Type']))){
+//            $properties_map[$propertyName] = array_key_set($properties,$config['Column'],true);
+//        }
+//    }
+    foreach ($array as $k=>$v){
+        foreach ($properties_map as $propertyName=>$config){
+            if($config['Type']=='array'){
+
+            }
+            switch (strtolower(substr($config['Type']))){
+                case 'a':
+                    //数组
+                    $array[$k][$propertyName]=isset($properties[$propertyName][$k])?$properties[$propertyName][$k]:[];
+                    break;
+                case 'p':
+                    //属性合并
+                    if(isset($properties[$propertyName][$k]))
+                        $array[$k] = array_merge($v,$properties[$propertyName][$k]);
+                    break;
+            }
+        }
+    }
+}
