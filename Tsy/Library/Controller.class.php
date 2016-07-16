@@ -241,12 +241,12 @@ class Controller
             }
         }else{return FALSE;}
     }
-    function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[]){
+    function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[],$Properties=false){
         if($this->Object instanceof Object){
 //            $OBVN = $this->ObjectVarName;
 //            $obj=$this->$OBVN;
 //            if((is_string($Keyword)&&strlen($Keyword)>0)||(is_array($W)&&count($W)>0))
-                return $this->Object->search($Keyword,$W,$Sort,$P,$N);
+                return $this->Object->search($Keyword,$W,$Sort,$P,$N,$Properties);
 //            elseif($Keyword===''&&$W===[]){
 //                return
 //            }
