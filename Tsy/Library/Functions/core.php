@@ -7,6 +7,7 @@
  */
 function load_module_config($module){
     static $CurrentModel = '';
+    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,func_get_args());
     if($CurrentModel==$module){
         return ;
     }else{
@@ -27,7 +28,7 @@ function load_module_config($module){
             C('DB_PREFIX',session('DB_PREFIX').C('DB_PREFIX'));
         }
     }
-
+    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_AFTER,func_get_args());
 }
 
 /**
@@ -104,6 +105,7 @@ function load_config($file,$parse='php'){
 }
 
 function controller($i,$data,$mid='',$layer="Controller"){
+    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,func_get_args());
     static $LoginRequire=null;
     /**
      * SplQueue
@@ -231,6 +233,7 @@ function current_MCA($M='',$C='',$A='',$L=''){
     return isset($MCA[$M])?$MCA[$M]:'';
 }
 function invokeClass($Class,$A,$data){
+    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,$data);
     $result = '';
     //方法存在时
     $ReflectMethod = new ReflectionMethod($Class,$A);
