@@ -38,7 +38,7 @@ class Server
      */
     function onReceive(\swoole_server $server,$fd,$from_id,$data){
         //添加一个前切点
-        Aop::exec(__METHOD__,Aop::$AOP_BEFORE,func_get_args());
+//        Aop::exec(__METHOD__,Aop::$AOP_BEFORE,func_get_args());
         $_GET=[];$_POST=[];$_REQUEST=[];
         $callback = swoole_get_callback('RECEIVE');
         if(is_callable($callback)){

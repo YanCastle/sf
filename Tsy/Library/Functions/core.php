@@ -7,7 +7,7 @@
  */
 function load_module_config($module){
     static $CurrentModel = '';
-    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,func_get_args());
+//    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,func_get_args());
     if($CurrentModel==$module){
         return ;
     }else{
@@ -28,7 +28,7 @@ function load_module_config($module){
             C('DB_PREFIX',session('DB_PREFIX').C('DB_PREFIX'));
         }
     }
-    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_AFTER,func_get_args());
+//    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_AFTER,func_get_args());
 }
 
 /**
@@ -105,7 +105,7 @@ function load_config($file,$parse='php'){
 }
 
 function controller($i,$data,$mid='',$layer="Controller"){
-    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,func_get_args());
+//    \Tsy\Library\Aop::exec(__FUNCTION__,\Tsy\Library\Aop::$AOP_BEFORE,func_get_args());
     static $LoginRequire=null;
     /**
      * SplQueue
@@ -255,15 +255,17 @@ function invokeClass($Class,$A,$data){
 //                        L($ParamName.':参数为空',LOG_ERR);
 //                        return null;
 //                    }else{
-                        $args[]=$data[$ParamName];
+                        $args[$ParamName]=$data[$ParamName];
 //                    }
                 }elseif($Param->isDefaultValueAvailable()){
-                    $args[]=$Param->getDefaultValue();
+                    $args[$ParamName]=$Param->getDefaultValue();
                 }else{
                     L($ParamName.':必填参数未传入完整',LOG_TIP);
                     return false;
                 }
             }
+            \Tsy\Library\Aop::exec('dispatch',\Tsy\Library\Aop::$AOP_BEFORE,$args);
+            \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_BEFORE,$args);
             $result = $ReflectMethod->invokeArgs($Class,$args);
         }else{
             $result = $ReflectMethod->invoke($Class);
