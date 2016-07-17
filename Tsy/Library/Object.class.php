@@ -264,7 +264,7 @@ class Object
         $ObjectSearchConfig = [];
         $Where = [];
         if (is_string($Keyword) &&
-            strlen($Keyword) > 0
+            strlen($Keyword) > 0 &&$this->searchFields
         ) {
             foreach ($this->searchFields as $Filed) {
                 $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';', "\r\n"], '', $Keyword) . '%'];
