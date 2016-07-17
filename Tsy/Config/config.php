@@ -20,10 +20,10 @@ return [
     'DATA_CACHE_KEY'        =>  '',	// 缓存文件KEY (仅对File方式缓存有效)
     'DATA_CACHE_SUBDIR'     =>  true,    // 使用子目录缓存 (自动根据缓存标识的哈希创建子目录)
     'DATA_PATH_LEVEL'       =>  1,        // 子目录缓存级别
-    'LOGIN_REQUIRE'=>[],
-    'SESSION_EXPIRE'=>5600,
+//    'LOGIN_REQUIRE'=>[], //已废除
+    'SESSION_EXPIRE'=>5600,//session 过期时间
 
-    'SAAS_MODULE'=>[],
+    'SAAS_MODULE'=>[], //针对SaaS模式软件配置哪些模块属于SaaS模块，SaaS模块会加载session('DB_PREFIX')为数据库前缀
 
     /* 模板引擎设置 */
     'CACHE_PATH'=>TEMP_PATH.DIRECTORY_SEPARATOR.'View'.DIRECTORY_SEPARATOR,
