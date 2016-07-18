@@ -91,6 +91,17 @@ class Tsy
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
+        //开始加载aop配置文件
+        $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');
+        if(is_array($AopConfig)){
+            foreach ($AopConfig as $point=>$config){
+                foreach ($config as $where=>$items){
+                    foreach ($items as $item){
+                        Aop::add($point,$item,$where);
+                    }
+                }
+            }
+        }
     }
     function loadFunctions(){
         $FunctionPath = TSY_PATH.'/Library/Functions';

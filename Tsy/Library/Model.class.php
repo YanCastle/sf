@@ -1016,10 +1016,16 @@ class Model {
             if(!isset($options['limit'])){
                 $options['limit']   =   is_numeric($sepa)?$sepa:'';
             }
+            $_field         =   explode(',', preg_replace('/ [AaSs]{2} /',' ',$field));
+            foreach ($_field as $_map){
+                list($Origin,$Now) = explode(' ',$_map );
+                if($Now){
+                    $this->_map[$Now]=strtolower($Now);
+                }
+            }
             $resultSet          =   $this->db->select($options);
             $resultSet  =   array_map(array($this,'_read_data'),$resultSet);
             if(!empty($resultSet)) {
-                $_field         =   explode(',', $field);
                 $field          =   array_keys($resultSet[0]);
                 $key1           =   array_shift($field);
                 $key2           =   array_shift($field);
@@ -1845,6 +1851,14 @@ class Model {
             }
             $fields     =  $this->getDbFields();
             $field      =  $fields?array_diff($fields,$field):$field;
+        }
+        //
+        $_field         =   explode(',', preg_replace('/ [AaSs]{2} /',' ',$field));
+        foreach ($_field as $_map){
+            list($Origin,$Now) = explode(' ',$_map );
+            if($Now){
+                $this->_map[$Now]=strtolower($Now);
+            }
         }
         $this->options['field']   =   $field;
         return $this;
