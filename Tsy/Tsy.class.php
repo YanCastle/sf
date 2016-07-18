@@ -236,7 +236,16 @@ class Tsy
         $ConfigFiles=[
             [
                 CONF_PATH.DIRECTORY_SEPARATOR.'config.php',
-                []
+                [
+                    'DB_TYPE'               =>  'mysql',     // 数据库类型
+                    'DB_HOST'               =>  '', // 服务器地址
+                    'DB_NAME'               =>  '',          // 数据库名
+                    'DB_USER'               =>  '',      // 用户名
+                    'DB_PWD'                =>  '',          // 密码
+                    'DB_PORT'               =>  '3306',        // 端口
+                    'DATA_CACHE_TYPE'=>'Redis',
+                    'DATA_CACHE_TEMP_TYPE'=>'Redis',
+                ]
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'swoole.php',
                 [
@@ -272,7 +281,8 @@ class Tsy
             }
         }
         //创建模块目录，创建
-        foreach (explode(',',MODULES) as $Module){
+        if(defined('MODULES')&&MODULES)
+            foreach (explode(',',MODULES) as $Module){
             foreach (['Config','Model','Controller','Object'] as $dir){
                 $dir_path = APP_PATH.DIRECTORY_SEPARATOR.$Module.DIRECTORY_SEPARATOR.$dir;
                 if(!is_dir($dir_path)){
