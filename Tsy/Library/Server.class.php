@@ -144,10 +144,20 @@ class Server
      * @param $data
      */
     function onTask(\swoole_server $server,$task_id,$from_id,$data){
+        $AopData = [&$server,&$task_id,&$from_id,&$data];
+        Aop::exec(__METHOD__, Aop::$AOP_BEFORE,$AopData);
         $callback = swoole_get_callback('TASK');
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$task_id,$from_id,$data]);
         }
+        if($data instanceof Task){
+            //回调task任务，仅支持静态方法或者函数
+            session('[id]',$data->sid);
+            if(is_callable($data->cmd)){
+                call_user_func($data->cmd,$data->data);
+            }
+        }
+        Aop::exec(__METHOD__, Aop::$AOP_AFTER,$AopData);
     }
 
     /**
