@@ -21,9 +21,11 @@ class Task
 {
     public $cmd;
     public $data;
+    public $sid;
     function __construct($cmd,$data)
     {
         $this->cmd=$cmd;
         $this->data=$data;
+        $this->sid=session('[id]');
     }
 }
