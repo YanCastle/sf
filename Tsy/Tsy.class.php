@@ -96,8 +96,8 @@ class Tsy
         if(is_array($AopConfig)){
             foreach ($AopConfig as $point=>$config){
                 foreach ($config as $where=>$items){
-                    foreach ($items as $item){
-                        Aop::add($point,$item,$where);
+                    foreach ($items as $order=>$item){
+                        Aop::add($point,$item[0],$where,$item[1],$order);
                     }
                 }
             }
