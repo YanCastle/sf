@@ -30,7 +30,7 @@ class Aop
         if(!isset(self::$config[$name][$where][$order])){
             self::$config[$name][$where][$order]=[];
         }
-        self::$config[$name][$where][$order][]=$callback;
+        self::$config[$name][$where][$order][]=[$callback,$async];
         return true;
     }
     public static function remove(string $name,$where=-1){}
@@ -45,8 +45,11 @@ class Aop
         if(isset(self::$config[$name][$where])){
             foreach (self::$config[$name][$where] as $callbacks){
                     foreach ($callbacks as $callback){
-                        if(is_callable($callback))
-                            call_user_func_array($callback,[&$data]);
+                        if(is_callable($callback[0]))
+                            if(is_string($callback[0])&&$callback[1])
+                                task(new Task($callback[0], $data));
+                            else
+                                call_user_func_array($callback[0],[&$data]);
                     }
             }
         }
