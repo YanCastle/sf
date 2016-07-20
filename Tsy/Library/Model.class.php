@@ -1853,7 +1853,7 @@ class Model {
             $field      =  $fields?array_diff($fields,$field):$field;
         }
         //
-        $_field         =   explode(',', preg_replace('/ [AaSs]{2} /',' ',$field));
+        $_field         =   is_string($field)?explode(',', preg_replace('/ [AaSs]{2} /',' ',$field)):preg_replace('/ [AaSs]{2} /',' ',$field);
         foreach ($_field as $_map){
             list($Origin,$Now) = explode(' ',$_map );
             if($Now){
