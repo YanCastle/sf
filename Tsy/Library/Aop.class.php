@@ -19,31 +19,31 @@ class Aop
      * 添加aop拦截
      * @param string $name
      * @param callable $callback
-     * @param $where
+     * @param $when
      * @param int $order
      * @return bool
      */
-    public static function add(string $name,callable $callback,$where,$async=false,$order=0){
+    public static function add(string $name,callable $callback,$when,$async=false,$order=0){
         if(!isset(self::$config[$name])){
             self::$config[$name]=[[],[]];
         }
-        if(!isset(self::$config[$name][$where][$order])){
-            self::$config[$name][$where][$order]=[];
+        if(!isset(self::$config[$name][$when][$order])){
+            self::$config[$name][$when][$order]=[];
         }
-        self::$config[$name][$where][$order][]=[$callback,$async];
+        self::$config[$name][$when][$order][]=[$callback,$async];
         return true;
     }
-    public static function remove(string $name,$where=-1){}
+    public static function remove(string $name,$when=-1){}
 
     /**
      * aop执行
      * @param string $name
-     * @param $where
+     * @param $when
      * @param array $data
      */
-    public static function exec(string $name,$where,&$data=[],$async=null){
-        if(isset(self::$config[$name][$where])){
-            foreach (self::$config[$name][$where] as $callbacks){
+    public static function exec(string $name,$when,&$data=[],$async=null){
+        if(isset(self::$config[$name][$when])){
+            foreach (self::$config[$name][$when] as $callbacks){
                     foreach ($callbacks as $callback){
                         if(is_callable($callback[0]))
                             if(is_string($callback[0])&&$callback[1])
@@ -54,5 +54,5 @@ class Aop
             }
         }
     }
-    public static function regist(string $name,callable $callback,$where){}
+    public static function regist(string $name,callable $callback,$when){}
 }
