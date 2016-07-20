@@ -37,5 +37,11 @@ class AsyncAop implements Aop
      */
     public $when;
     public $order=0;
-    
+    function __construct($name,$cmd,$when,$order=0)
+    {
+        $this->name=$name;
+        $this->cmd=$cmd;
+        $this->when=$when;
+        $this->order=$order;
+    }
 }

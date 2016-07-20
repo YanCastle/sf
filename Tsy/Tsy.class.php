@@ -95,10 +95,8 @@ class Tsy
         $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');
         if(is_array($AopConfig)){
             foreach ($AopConfig as $point=>$config){
-                foreach ($config as $where=>$items){
-                    foreach ($items as $order=>$item){
-                        Aop::add($point,$item[0],$where,$item[1],$order);
-                    }
+                if($config instanceof \Tsy\Library\IFace\Aop){
+                    Aop::add($config->name,$config->cmd ,$config->when,$config->Async,$config->order );
                 }
             }
         }

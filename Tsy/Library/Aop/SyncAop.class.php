@@ -30,4 +30,11 @@ class SyncAop implements Aop
      * @var string $exec 可执行php代码，用于进行自定义处理。允许从此处获取环境变量信息
      */
     public $exec;
+    function __construct($name,$cmd,$when,$order=0)
+    {
+        $this->name=$name;
+        $this->cmd=$cmd;
+        $this->when=$when;
+        $this->order=$order;
+    }
 }
