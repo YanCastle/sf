@@ -40,6 +40,7 @@ class Controller
         if(class_exists($ObjectName)){
             list($this->ModuleName,$this->ControllerName)=explode('\\\\',str_replace('Controller','' ,$this->__CLASS__));
             $this->Object=new $ObjectName();
+//            $this-> = $this->Object;
             $this->PRIKey = $this->Object->pk;
 //            $this->ObjectVarName=$ObjectVarName;
         }
@@ -165,9 +166,8 @@ class Controller
         }
         if($ID){
             $ClassName=$this->ControllerName;
-            if(property_exists($this,$ClassName.'Object')){
-                $ObjectName=$ClassName.'Object';
-                $objs=$this->$ObjectName->get($ID);
+            if(property_exists($this,'Object')){
+                $objs=$this->Object->get($ID);
                 return $objs;
             }
         }
