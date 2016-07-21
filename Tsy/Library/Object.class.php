@@ -190,12 +190,12 @@ class Object
                 $data[$TableName]['PK'] = $map['P'] === true ? $column : '';
             }
             if (isset($_POST[$column])) {
-                if (!call_user_func($map['T'][0], $_POST[$column])) {
-                    return $column . '参数类型错误';
-                }
-                if (count($_POST[$column]) >= $map['T'][1]) {
-                    return $column . '参数过长';
-                }
+//                if (!call_user_func($map['T'][0], $_POST[$column])) {
+//                    return $column . '参数类型错误';
+//                }
+//                if (count($_POST[$column]) >= $map['T'][1]) {
+//                    return $column . '参数过长';
+//                }
                 $data[$TableName]['data'][$column] = $_POST[$column];
             } else {
                 if (true === $map['N'] &&
@@ -218,11 +218,25 @@ class Object
                 return $d . '未传入任何参数';
             }
         }
+        startTrans();
+        $RS=[];
+        $PKID=false;
         foreach ($data as $key => $Data) {
             $Model = M($key);
-            $$Data['PK'] = $Model->add($Data['data']);
+            if($this->main=$key){
+                $RS[] = $PKID = $Model->add($Data['data']);
+            }else{
+                $RS[] = $Model->add($Data['data']);
+            }
         }
-        return $$this->pk ? $this->get($$this->pk) : false;
+        foreach ($RS as $v){
+            if($v===false){
+                rollback();
+                return false;
+            }
+        }
+        commit();
+        return $this->get($PKID);
     }
 
     /**

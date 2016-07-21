@@ -322,6 +322,9 @@ class Controller
 //        }
     }
     function add(){
+        if($this->Object instanceof Object){
+            return $this->Object->add();
+        }
         $ID = D($this->ControllerName)->add($_POST);
         return $ID?array_values(D($this->ControllerName)->obj([$ID]))[0]:false;
     }
