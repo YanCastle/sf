@@ -230,8 +230,11 @@ function array_2d_merge(&$array,$properties,$properties_map){
                     break;
                 case 'p':
                     //属性合并
-                    if(isset($properties[$propertyName][$v[$config['Column']]]))
-                        $array[$k] = array_merge($v,$properties[$propertyName][$v[$config['Column']]]);
+                    if(isset($properties[$propertyName][0][$v[$config['Column']]]))
+                        $array[$k] = array_merge($v,$properties[$propertyName][0][$v[$config['Column']]]);
+                    elseif(isset($properties[$propertyName][1])){
+                        $array[$k]=array_merge($v,$properties[$propertyName][1]);
+                    }
                     break;
             }
         }
