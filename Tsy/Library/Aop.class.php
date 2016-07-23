@@ -33,6 +33,14 @@ class Aop
         self::$config[$name][$when][$order][]=[$callback,$async];
         return true;
     }
+
+    /**
+     * Aop方法
+     * @param IFace\Aop $Aop
+     */
+    public static function addAop(\Tsy\Library\IFace\Aop $Aop){
+        self::add($Aop->name,$Aop->cmd,$Aop->when,$Aop->Async,$Aop->order );
+    }
     public static function remove(string $name,$when=-1){}
 
     /**
