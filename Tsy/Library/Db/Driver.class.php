@@ -107,8 +107,9 @@ abstract class Driver {
                     $this->_linkIDTimeout[$linkNum]=is_array($timeout)&&isset($timeout['wait_timeout'])?$timeout['wait_timeout']:0;
 //                }
             }catch (\PDOException $e) {
+                trigger_error($e->getMessage(),E_USER_ERROR);
                 if($autoConnection){
-                    trace($e->getMessage(),'','ERR');
+//                    trace($e->getMessage(),'','ERR');
                     return $this->connect($autoConnection,$linkNum);
                 }elseif($config['debug']){
                     L($e->getMessage());
