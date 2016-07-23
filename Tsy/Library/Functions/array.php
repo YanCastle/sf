@@ -193,9 +193,11 @@ function array_set_key_value(&$array,$key,$value){
 
 /**
  * 二维数组的对象组合
- * @param $array
- * @param $properties
- * @param $properties_map
+ * @param array $array
+ * @param array $properties
+ * @param array $properties_map
+ * @example 
+ *
  */
 function array_2d_merge(&$array,$properties,$properties_map){
 //    $array = [
