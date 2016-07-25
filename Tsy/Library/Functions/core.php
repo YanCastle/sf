@@ -241,8 +241,8 @@ function invokeClass($Class,$A,$data){
     //获取方法参数
     if($ReflectMethod->isPublic()){
 //        是否需要参数绑定
+        $args = [];
         if($ReflectMethod->getNumberOfParameters()>0){
-            $args = [];
 //            $Parameters = $ReflectMethod->getParameters();
             foreach ($ReflectMethod->getParameters() as $Param){
                 $ParamName=$Param->getName();
@@ -269,7 +269,10 @@ function invokeClass($Class,$A,$data){
             $result = $ReflectMethod->invokeArgs($Class,$args);
             \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_AFTER,$result);
         }else{
+            \Tsy\Library\Aop::exec('dispatch',\Tsy\Library\Aop::$AOP_BEFORE,$args);
+            \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_BEFORE,$args);
             $result = $ReflectMethod->invoke($Class);
+            \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_AFTER,$result);
         }
 //        判断result内容
     }else{
