@@ -12,19 +12,19 @@ use Tsy\Plugs\Db\Db;
 
 class Object
 {
-    const PROPERTY_ONE = "00";
-    const PROPERTY_ARRAY = "01";
+    const PROPERTY_ONE = "00"; //一对一属性配置，
+    const PROPERTY_ARRAY = "01"; //一对多属性配置
 
 //    const PROPERTY_OBJECT = "02";
 
-    const RELATION_TABLE_NAME = "03";
-    const RELATION_TABLE_COLUMN = "04";
-    const RELATION_TABLE_PROPERTY = "05";
-    const RELATION_TABLE_LINK_HAS_PROPERTY = "06";
-    const RELATION_TABLE_LINK_TABLES = "07";
-    const RELATION_OBJECT = "08";
-    const RELATION_OBJECT_NAME = "09";
-    const RELATION_OBJECT_COLUMN = "10";
+    const RELATION_TABLE_NAME = "03"; //关系表名称
+    const RELATION_TABLE_COLUMN = "04"; //关系表字段
+    const RELATION_TABLE_PROPERTY = "05"; //关系类型， 上面的一对多或者一对一
+    const RELATION_TABLE_LINK_HAS_PROPERTY = "06"; // 多对多配置中是否具有属性
+    const RELATION_TABLE_LINK_TABLES = "07"; //多对多属性的连接表表名
+    const RELATION_OBJECT = "08"; //映射关系对象
+    const RELATION_OBJECT_NAME = "09"; //映射关系对象名称
+    const RELATION_OBJECT_COLUMN = "10"; //映射关系对象字段
 
     protected $main = '';//主表名称，默认为类名部分
     protected $pk = '';//表主键，默认自动获取
@@ -43,7 +43,7 @@ class Object
 //        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
     ];
     protected $searchWFieldsConf=[
-    
+
     ];
     
     public $is_dic=false;

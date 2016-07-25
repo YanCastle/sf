@@ -68,7 +68,7 @@ class Tsy
             die(APP_MODE.':模式不存在');
         }
 //        加载模式处理类，开始模式处理
-        Aop::exec(__METHOD__,Aop::$AOP_AFTER);
+//        Aop::exec(__METHOD__,Aop::$AOP_AFTER);
         $ModeClass->start();
     }
     function loadConfig(){
