@@ -259,7 +259,9 @@ function swoole_out_check($fd,$data){
     $Class = swoole_get_mode_class($Type);
     $OutData=is_callable($Out)?call_user_func($Out,$data):'';
     if(is_string($OutData)&&strlen($OutData)>0){
+        \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_BEFORE,$OutData);
         swoole_send($fd,$Class->code($OutData));
+        \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_AFTER,$OutData);
     }
 }
 
