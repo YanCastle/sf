@@ -188,6 +188,7 @@ function swoole_in_check($fd,$data){
     }
     $_GET['_str']=$data;
     if(false===$data||null===$data){return;}
+    \Tsy\Library\Aop::exec('swoole_in',\Tsy\Library\Aop::$AOP_BEFORE,$data );
     $Data=[
         'i'=>'Empty/_empty',
         'd'=>$data,
@@ -206,6 +207,7 @@ function swoole_in_check($fd,$data){
             $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
         }
     }
+    \Tsy\Library\Aop::exec('swoole_in',\Tsy\Library\Aop::$AOP_AFTER,$Data);
     return $Data;
 }
 
