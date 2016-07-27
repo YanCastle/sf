@@ -60,21 +60,21 @@ class Db {
             }
             $config =   array_change_key_case($config);
             $config = array (
-                'type'          =>  $config['DB_TYPE'],
-                'username'      =>  $config['DB_USER'],
-                'password'      =>  $config['DB_PWD'],
-                'hostname'      =>  $config['DB_HOST'],
-                'hostport'      =>  $config['DB_PORT'],
-                'database'      =>  $config['DB_NAME'],
-                'dsn'           =>  isset($config['DB_DSN'])?$config['DB_DSN']:null,
-                'params'        =>  isset($config['DB_PARAMS'])?$config['DB_PARAMS']:null,
-                'charset'       =>  isset($config['DB_CHARSET'])?$config['DB_CHARSET']:'utf8',
-                'deploy'        =>  isset($config['DB_DEPLOY_TYPE'])?$config['DB_DEPLOY_TYPE']:0,
-                'rw_separate'   =>  isset($config['DB_RW_SEPARATE'])?$config['DB_RW_SEPARATE']:false,
-                'master_num'    =>  isset($config['DB_MASTER_NUM'])?$config['DB_MASTER_NUM']:1,
-                'slave_no'      =>  isset($config['DB_SLAVE_NO'])?$config['DB_SLAVE_NO']:'',
-                'debug'         =>  isset($config['DB_DEBUG'])?$config['DB_DEBUG']:APP_DEBUG,
-                'lite'          =>  isset($config['DB_LITE'])?$config['DB_LITE']:false,
+                'type'          =>  $config['db_type'],
+                'username'      =>  $config['db_user'],
+                'password'      =>  $config['db_pwd'],
+                'hostname'      =>  $config['db_host'],
+                'hostport'      =>  $config['db_port'],
+                'database'      =>  $config['db_name'],
+                'dsn'           =>  isset($config['db_dsn'])?$config['db_dsn']:null,
+                'params'        =>  isset($config['db_params'])?$config['db_params']:null,
+                'charset'       =>  isset($config['db_charset'])?$config['db_charset']:'utf8',
+                'deploy'        =>  isset($config['db_deploy_type'])?$config['db_deploy_type']:0,
+                'rw_separate'   =>  isset($config['db_rw_separate'])?$config['db_rw_separate']:false,
+                'master_num'    =>  isset($config['db_master_num'])?$config['db_master_num']:1,
+                'slave_no'      =>  isset($config['db_slave_no'])?$config['db_slave_no']:'',
+                'debug'         =>  isset($config['db_debug'])?$config['db_debug']:APP_DEBUG,
+                'lite'          =>  isset($config['db_lite'])?$config['db_lite']:false,
             );
         }else {
             $config = array (
