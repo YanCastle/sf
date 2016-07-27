@@ -245,7 +245,7 @@ class Tsy
         $ConfigFiles=[
             [
                 CONF_PATH.DIRECTORY_SEPARATOR.'config.php',
-                [
+                "[
                     'DB_TYPE'               =>  'mysql',     // 数据库类型
                     'DB_HOST'               =>  '', // 服务器地址
                     'DB_NAME'               =>  '',          // 数据库名
@@ -254,10 +254,10 @@ class Tsy
                     'DB_PORT'               =>  '3306',        // 端口
                     'DATA_CACHE_TYPE'=>'Redis',
                     'DATA_CACHE_TEMP_TYPE'=>'Redis',
-                ]
+                ]"
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'swoole.php',
-                [
+                "[
                     'SWOOLE'=>[
                         'AUTO_RELOAD_TIME'=>3,
                         'CONF'=>[
@@ -271,22 +271,22 @@ class Tsy
                     ],
 //                    'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
 //                    'CACHE_FD_NAME_PUSH'=>'fd_name_push',//缓存不在线的push推送信息，禁止带上tmp_前缀
-                ]
+                ]"
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'http.php',
-                [
+                "[
                     'HTTP'=>[
                         'DISPATCH'=>'',
                         'OUT'=>''
                     ]
-                ]
+                ]"
             ],
         ];
         //创建配置文件
         foreach ($ConfigFiles as $conf_file){
             if(isset($conf_file[0])&&!file_exists($conf_file[0])){
                 if(isset($conf_file[1]))
-                    file_put_contents($conf_file[0],"<?php\r\n return ".var_export($conf_file[1]).';');
+                    file_put_contents($conf_file[0],"<?php\r\n return ".$conf_file[1].';');
             }
         }
         //创建模块目录，创建
