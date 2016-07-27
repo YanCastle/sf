@@ -119,6 +119,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
     }
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
+        $_REQUEST = array_merge($_REQUEST,$_GET,$_POST);
     }
 //    切换mid,如果当前环境下存在mid则
     $mid&&!isset($_POST['_mid']) or $mid=$_POST['_mid'];
