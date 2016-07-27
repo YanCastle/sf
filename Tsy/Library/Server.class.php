@@ -144,8 +144,8 @@ class Server
      * @param $data
      */
     function onTask(\swoole_server $server,$task_id,$from_id,$data){
-        var_dump($data);
-        $data = unserialize($data);
+//        var_dump($data);
+//        $data = unserialize($data);
         $AopData = [&$server,&$task_id,&$from_id,&$data];
         Aop::exec(__METHOD__, Aop::$AOP_BEFORE,$AopData);
         $callback = swoole_get_callback('TASK');
