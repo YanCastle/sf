@@ -188,6 +188,7 @@ function swoole_in_check($fd,$data){
     }
     $_GET['_str']=$data;
     if(false===$data||null===$data){return;}
+    \Tsy\Library\Aop::exec('swoole_in',\Tsy\Library\Aop::$AOP_BEFORE,$data );
     $Data=[
         'i'=>'Empty/_empty',
         'd'=>$data,
@@ -206,6 +207,7 @@ function swoole_in_check($fd,$data){
             $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
         }
     }
+    \Tsy\Library\Aop::exec('swoole_in',\Tsy\Library\Aop::$AOP_AFTER,$Data);
     return $Data;
 }
 
@@ -259,7 +261,9 @@ function swoole_out_check($fd,$data){
     $Class = swoole_get_mode_class($Type);
     $OutData=is_callable($Out)?call_user_func($Out,$data):'';
     if(is_string($OutData)&&strlen($OutData)>0){
+        \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_BEFORE,$OutData);
         swoole_send($fd,$Class->code($OutData));
+        \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_AFTER,$OutData);
     }
 }
 
