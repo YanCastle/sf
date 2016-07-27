@@ -1018,9 +1018,9 @@ class Model {
             }
             $_field         =   explode(',', preg_replace('/ [AaSs]{2} /',' ',$field));
             foreach ($_field as $_map){
-                list($Origin,$Now) = explode(' ',$_map );
-                if($Now){
-                    $this->_map[$Now]=strtolower($Now);
+                $array = explode(' ',$_map );
+                if(isset($array[1])){
+                    $this->_map[$array[1]]=strtolower($array[1]);
                 }
             }
             $resultSet          =   $this->db->select($options);
@@ -1855,9 +1855,9 @@ class Model {
         //
         $_field         =   is_string($field)?explode(',', preg_replace('/ [AaSs]{2} /',' ',$field)):preg_replace('/ [AaSs]{2} /',' ',$field);
         foreach ($_field as $_map){
-            list($Origin,$Now) = explode(' ',$_map );
-            if($Now){
-                $this->_map[$Now]=strtolower($Now);
+            $array = explode(' ',$_map );
+            if(isset($array[1])){
+                $this->_map[$array[1]]=strtolower($array[1]);
             }
         }
         $this->options['field']   =   $field;
