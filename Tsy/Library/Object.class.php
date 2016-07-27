@@ -185,29 +185,32 @@ class Object
         $data = [];
         foreach ($this->map as $key => $map) {
             $TableName = explode('.', $key)[0];
-            $column = explode('.', $key)[1];
-            if (!$data[$TableName]['PK']) {
-                $data[$TableName]['PK'] = $map['P'] === true ? $column : '';
-            }
-            if (isset($_POST[$column])) {
+//            TODO 检测外检并实现自动添加等逻辑
+            if($TableName==parse_name($this->main)){
+                $column = explode('.', $key)[1];
+                if (!$data[$TableName]['PK']) {
+                    $data[$TableName]['PK'] = $map['P'] === true ? $column : '';
+                }
+                if (isset($_POST[$column])) {
 //                if (!call_user_func($map['T'][0], $_POST[$column])) {
 //                    return $column . '参数类型错误';
 //                }
 //                if (count($_POST[$column]) >= $map['T'][1]) {
 //                    return $column . '参数过长';
 //                }
-                $data[$TableName]['data'][$column] = $_POST[$column];
-            } else {
-                if (true === $map['N'] &&
-                    $map['P'] === false
-                ) {
-                    //TODO 有外键时，数据初始化的问题
+                    $data[$TableName]['data'][$column] = $_POST[$column];
+                } else {
+                    if (true === $map['N'] &&
+                        $map['P'] === false
+                    ) {
+                        //TODO 有外键时，数据初始化的问题
 //                    return $column.'参数不完整';
+                    }
+                    if (true === $map['P']) {
+                        continue;
+                    }
+//                $data[$TableName]['data'][$column] = $_POST[$column];
                 }
-                if (true === $map['P']) {
-                    continue;
-                }
-                $data[$TableName]['data'][$column] = $_POST[$column];
             }
         }
         if (!$data) {
