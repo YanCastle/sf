@@ -67,7 +67,16 @@ class Report
         }
         //过滤字段表
         foreach ($Fields as $k=>$Field){
-            
+            if(is_numeric($k)){
+                //直接字段
+                if(!isset($this->Fields[$Field])||preg_match('/[A-Za-z]+ [A-Za-z]+/',$Field)){
+                    trigger_error('_ERROR_FIELD_PARAM_:'.$Field);
+                    return false;
+                }
+            }elseif(!is_numeric($k)){
+                //函数字段
+
+            }
         }
     }
 }
