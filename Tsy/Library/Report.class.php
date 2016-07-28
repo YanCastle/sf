@@ -38,16 +38,7 @@ trait Report
      * @var array
      */
     protected $Order=[];
-    /**
-     * 映射表
-     * @var array
-     */
-    protected $_map=[];
-    /**
-     * 主表名称
-     * @var string
-     */
-    protected $main='';
+    
     function report($Fields,$Where=false,$Group=false,$Order=false,$KeyField=false,$KeyOrder=0){
         if(!is_array($Fields)||!$Fields){
             trigger_error('_ERROR_FIELDS_PARAM_');

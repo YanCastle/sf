@@ -281,6 +281,7 @@ class Object
         $Tables = ['__' . strtoupper($this->main) . '__'];
         $ObjectSearchConfig = [];
         $Where = [];
+        $WObjectIDArray=[];
         if ((is_string($Keyword)||is_numeric($Keyword)) &&
             strlen($Keyword) > 0 &&$this->searchFields
         ) {
@@ -289,24 +290,12 @@ class Object
             }
             $Where['_logic']='OR';
             $Model->where($Where);
+            $WObjectIDArray[]=$Model->getField($this->pk,true);
         }
         if ($W) {
             $Data = param_group($this->searchWFieldsGroup,$W);
             unset($Data[0]);
-//            $Data=[
-//                'Order'=>[
-//                    'OrderID'=>1,
-//                    'Time'=>['between',[1,10]],
-//                    'TraderID'=>['eq',1]
-//                ]
-//            ];
-            $WObjectIDArray=[];
             foreach ($Data as $ObjectName => $Params){
-//                $Params=[
-//                    'OrderID'=>1,
-//                    'Time'=>['between',[1,10]],
-//                    'TraderID'=>['eq',1]
-//                ];
                 $a=isset($this->searchWFieldsConf[$ObjectName]);
                 if(isset($this->searchWFieldsConf[$ObjectName])){
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
@@ -384,8 +373,17 @@ class Object
         }
 //        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
         //交集组合方式
-        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
+//        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
         //TODO 需要支持并集组合
+        if(strlen($Keyword)&&count($W)==0){
+            $ObjectIDs = $Model->page($P,$N)->getField($this->pk,true);
+            return [
+                'L' => $this->gets($ObjectIDs),
+                'P' => $P,
+                'N' => $N,
+                'T' => $Model->field('COUNT('.$this->pk.') AS Count')->find()['Count'],
+            ];
+        }
         $T = count($ObjectIDs);
         rsort($ObjectIDs,SORT_NUMERIC);
         $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
