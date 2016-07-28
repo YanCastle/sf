@@ -9,7 +9,7 @@
 namespace Tsy\Library;
 
 
-class Report
+trait Report
 {
     /**
      * 限制那些字段允许被Fields包含
