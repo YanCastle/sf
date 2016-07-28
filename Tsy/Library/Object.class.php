@@ -309,7 +309,7 @@ class Object
                 $a=isset($this->searchWFieldsConf[$ObjectName]);
                 if(isset($this->searchWFieldsConf[$ObjectName])){
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
-                    if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_]+[a-z]$/',$this->searchWFieldsConf[$ObjectName])){
+                    if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_A-Z]+[a-zA-Z]$/',$this->searchWFieldsConf[$ObjectName])){
                         //直接值为表名
                         $WObjectIDArray[] =$this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
                     }elseif(is_callable($this->searchWFieldsConf[$ObjectName])){
