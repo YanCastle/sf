@@ -249,6 +249,7 @@ class Object
      */
     function get($ID=false)
     {
+        $ID = $ID?$ID:$_POST[$this->pk];
         if (!is_numeric($ID)) {
             return false;
         }
