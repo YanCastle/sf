@@ -105,13 +105,13 @@ abstract class Driver {
                 if(in_array(APP_MODE_LOW,['swoole','swoolehttp','websocket'])){
                     $timeout = $this->linkID[$linkNum]->query('show global variables like \'wait_timeout\';');
                     $this->_linkIDTimeout[$linkNum]=is_array($timeout)&&isset($timeout['wait_timeout'])?$timeout['wait_timeout']:0;
-                    if($timeout)
-                        swoole_timer_tick(($timeout-10)*1000,function()use($linkNum){
-                            if(isset($this->linkID[$linkNum])){
-                                unset($this->linkID[$linkNum]);
-                                unset($this->_linkIDTimeout[$linkNum]);
-                            }
-                        });
+//                    if($timeout)
+//                        swoole_timer_tick(($timeout-10)*1000,function()use($linkNum){
+//                            if(isset($this->linkID[$linkNum])){
+//                                unset($this->linkID[$linkNum]);
+//                                unset($this->_linkIDTimeout[$linkNum]);
+//                            }
+//                        });
                 }
             }catch (\PDOException $e) {
                 trigger_error($e->getMessage(),E_USER_ERROR);
