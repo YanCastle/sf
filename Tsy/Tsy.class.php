@@ -205,7 +205,7 @@ class Tsy
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
             case E_USER_ERROR:
-                ob_end_clean();
+//                ob_end_clean();
                 $errorStr = "$errstr ".$errfile." 第 $errline 行.";
                 break;
             default:
@@ -269,8 +269,6 @@ class Tsy
                         'TABLE'=>[],
                         'LISTEN'=>[]
                     ],
-//                    'CACHE_FD_NAME'=>'tmp_fd_name',//对来自Swoole的链接标识符fd进行命名的缓存键名称
-//                    'CACHE_FD_NAME_PUSH'=>'fd_name_push',//缓存不在线的push推送信息，禁止带上tmp_前缀
                 ]"
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'http.php',
