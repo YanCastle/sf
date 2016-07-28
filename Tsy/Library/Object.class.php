@@ -280,7 +280,7 @@ class Object
         $Tables = ['__' . strtoupper($this->main) . '__'];
         $ObjectSearchConfig = [];
         $Where = [];
-        if (is_string($Keyword) &&
+        if ((is_string($Keyword)||is_numeric($Keyword)) &&
             strlen($Keyword) > 0 &&$this->searchFields
         ) {
             foreach ($this->searchFields as $Filed) {
