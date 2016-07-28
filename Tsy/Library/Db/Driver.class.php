@@ -102,7 +102,7 @@ abstract class Driver {
 //                    $this->options[PDO::ATTR_EMULATE_PREPARES]  =   false;
 //                }
                 $this->linkID[$linkNum] = new PDO( $config['dsn'], $config['username'], $config['password'],$this->options);
-                if('swoole'==APP_MODE_LOW){
+                if(in_array(APP_MODE_LOW,['swoole','swoolehttp','websocket'])){
                     $timeout = $this->linkID[$linkNum]->query('show global variables like \'wait_timeout\';');
                     $this->_linkIDTimeout[$linkNum]=is_array($timeout)&&isset($timeout['wait_timeout'])?$timeout['wait_timeout']:0;
                     if($timeout)
