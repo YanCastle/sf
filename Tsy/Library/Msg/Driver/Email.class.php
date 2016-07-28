@@ -60,6 +60,12 @@ class Email implements MsgIFace
     {
         $Title = isset($Params['Title'])?$Params['Title']:$this->config['Title'];
         $From = isset($Params['From'])?$Params['From']:$this->config['From'];
+        if(is_string($From)){
+            $From=[$From,$From];
+        }
+        if(count($From)!=2){
+            return false;
+        }
 //        $To = isset($Params['To'])?$Params['To']:$this->config['To'];
         if(is_string($To)){
             $To=[$To,$To];

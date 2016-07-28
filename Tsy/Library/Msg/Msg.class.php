@@ -75,10 +75,11 @@ class Msg implements MsgIFace
     function LocalTemplateSend($To, $Params, $Content)
     {
         if(is_string($Content)){
+            $MSG_TEMPLATE_DIR=realpath(C('MSG_TEMPLATE_DIR')).DIRECTORY_SEPARATOR;
             if(is_file($Content)){
                 $Content = file_get_contents($Content);
-            }elseif(is_file(C('MSG_TEMPLATE_DIR').$Content)){
-                $Content = file_get_contents(C('MSG_TEMPLATE_DIR').$Content);
+            }elseif(is_file($MSG_TEMPLATE_DIR.$Content)){
+                $Content = file_get_contents($MSG_TEMPLATE_DIR.$Content);
             }else{
                 
             }
