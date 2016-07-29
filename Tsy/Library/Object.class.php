@@ -274,125 +274,79 @@ class Object
      */
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
-        $Model = new Model($this->searchTable?$this->searchTable:$this->main);
+        $Model = new Model($this->searchTable ? $this->searchTable : $this->main);
         $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = false;
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
         $Tables = ['__' . strtoupper($this->main) . '__'];
         $ObjectSearchConfig = [];
         $Where = [];
-        $WObjectIDArray=[];
-        if ((is_string($Keyword)||is_numeric($Keyword)) &&
-            strlen($Keyword) > 0 &&$this->searchFields
+        $WObjectIDArray = [];
+        if ((is_string($Keyword) || is_numeric($Keyword)) &&
+            strlen($Keyword) > 0 && $this->searchFields
         ) {
             foreach ($this->searchFields as $Filed) {
                 $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';', "\r\n"], '', $Keyword) . '%'];
             }
-            $Where['_logic']='OR';
+            $Where['_logic'] = 'OR';
             $Model->where($Where);
-            $WObjectIDArray[]=$Model->getField($this->pk,true);
+            $WObjectIDArray[] = $Model->getField($this->pk, true);
         }
         if ($W) {
-            $Data = param_group($this->searchWFieldsGroup,$W);
+            $Data = param_group($this->searchWFieldsGroup, $W);
             unset($Data[0]);
-            foreach ($Data as $ObjectName => $Params){
-                $a=isset($this->searchWFieldsConf[$ObjectName]);
-                if(isset($this->searchWFieldsConf[$ObjectName])){
+            foreach ($Data as $ObjectName => $Params) {
+                $a = isset($this->searchWFieldsConf[$ObjectName]);
+                if (isset($this->searchWFieldsConf[$ObjectName])) {
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
-                    if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_A-Z]+[a-zA-Z]$/',$this->searchWFieldsConf[$ObjectName])){
+                    if (is_string($this->searchWFieldsConf[$ObjectName]) && preg_match('/^[a-z_A-Z]+[a-zA-Z]$/', $this->searchWFieldsConf[$ObjectName])) {
                         //直接值为表名
-                        $WObjectIDArray[] =$this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
-                    }elseif(is_callable($this->searchWFieldsConf[$ObjectName])){
+                        $WObjectIDArray[] = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
+                    } elseif (is_callable($this->searchWFieldsConf[$ObjectName])) {
                         //回调
-                        $Result = call_user_func($this->searchWFieldsConf[$ObjectName],$Params);
-                        if(is_string($Result)&&preg_match('/^[a-z_]+[a-z]$/',$Result)){
+                        $Result = call_user_func($this->searchWFieldsConf[$ObjectName], $Params);
+                        if (is_string($Result) && preg_match('/^[a-z_]+[a-z]$/', $Result)) {
                             //吧这个当作表名，再参与上一个逻辑
-                        $WObjectIDArray[] = $this->searchW($Result,$Params,$this->pk);
-                        }elseif(is_array($Result)
-                            &&preg_match('/^\d+$/',implode('',$Result))
+                            $WObjectIDArray[] = $this->searchW($Result, $Params, $this->pk);
+                        } elseif (is_array($Result)
+                            && preg_match('/^\d+$/', implode('', $Result))
 //                            &&!in_array(false,array_map(function($d){return is_numeric($d);},$Result ) )
-                        ){
+                        ) {
                             //继续检测是否是以为数组且数组值全为数字且大于0
-                            $WObjectIDArray[]=$Result;
-                        }else{
+                            $WObjectIDArray[] = $Result;
+                        } else {
                             //回调函数的返回值错误
-                            L(E('_ERROR_SEARCH_CALLBACK_').json_encode($this->searchWFiledsConf[$ObjectName],JSON_UNESCAPED_UNICODE));
+                            L(E('_ERROR_SEARCH_CALLBACK_') . json_encode($this->searchWFiledsConf[$ObjectName], JSON_UNESCAPED_UNICODE));
                         }
-                    }else{
+                    } else {
 
                     }
-                }else{
+                } else {
                     L(E('_NO_SEARCH_TABLE_CONFIG_'));
                 }
             }
-            if($WObjectIDArray){
-                $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
-            }
-//            $Where = [];
-//            foreach ($W as $k => $v) {
-//                if (($TableColumn = explode('.', $k)) &&
-//                    $v
-//                ) {
-//                    switch (count($TableColumn)) {
-//                        case 1:
-////                            主表属性搜索条件
-//                            $Where[$TableColumn[0]] = $v;
-//                            break;
-//                        case 2:
-////TODO                             属性表中的搜索条件
-////                            读取属性映射列表，获取属性类型
-//                            $TableName = $TableColumn[0];
-//                            $ColumnName = $TableColumn[1];
-//                            if (!isset($ObjectSearchConfig[$TableName])) {
-//                                $ObjectSearchConfig[$TableName] = [];
-//                            }
-//                            $ObjectSearchConfig[$TableName][$ColumnName] = $v;
-//                            break;
-//                        default:
-//                            // 返回失败
-//                            L('ERROR_SEARCH_CONFIG', LOG_WARNING, [$k => $v]);
-//                            break;
-//                    }
-//                }
-//                //TODO 如果开启强制校验模式则返回错误
-//            }
-//            $MoreModel = new Model();
-//            foreach ($ObjectSearchConfig as $tableName => $item) {
-//                $Where = [];
-//                foreach ($item as $key => $value) {
-//                    if (is_array($value)) {
-//                        $Where['_complex'][$key] = $value;
-//                    } else {
-//                        $Where[$key] = $value;
-//                    }
-//                }
-//                if ($rs = $MoreModel->table($DB_PREFIX . strtolower($tableName))->where($Where)->getField(str_replace('_', '', parse_name($this->pk)), true)) {
-//                    $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $rs) : $rs;
-//                }
-//            }
         }
-//        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
-        //交集组合方式
-//        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
-        //TODO 需要支持并集组合
-        if(strlen($Keyword)===0&&count($W)===0){
-            $ObjectIDs = $Model->page($P,$N)->getField($this->pk,true);
+        if($WObjectIDArray){
+            $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
+        }
+        if (strlen($Keyword) === 0 && count($W) === 0) {
+            $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
             return [
                 'L' => array_values($this->gets($ObjectIDs)),
                 'P' => $P,
                 'N' => $N,
-                'T' => $Model->field('COUNT('.$this->pk.') AS Count')->find()['Count'],
+                'T' => $Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count'],
             ];
         }
-        if(!is_array($ObjectIDs)){
+        if (!is_array($ObjectIDs)) {
             return [
-                'L'=>[],'P'=>$P,'N'=>$N,'T'=>0
+                'L' => [], 'P' => $P, 'N' => $N, 'T' => 0
             ];
         }
         $T = count($ObjectIDs);
-        rsort($ObjectIDs,SORT_NUMERIC);
-        $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
-        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
+        rsort($ObjectIDs, SORT_NUMERIC);
+        $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
+        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1], $Properties) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
