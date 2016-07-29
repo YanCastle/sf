@@ -533,10 +533,11 @@ class Object
         return $Objects;
     }
 
-    function save($ID,$Params)
+    function save($ID=false,$Params)
     {
         if(!$this->allow_save)return false;
         $Where=[];
+        $ID = $ID?$ID:$_POST[$this->pk];
         if(is_array($ID)){
             foreach ($ID as $v){
                 if(!is_numeric($v)){
