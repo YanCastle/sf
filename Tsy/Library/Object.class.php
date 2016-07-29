@@ -378,7 +378,7 @@ class Object
         if(strlen($Keyword)&&count($W)==0){
             $ObjectIDs = $Model->page($P,$N)->getField($this->pk,true);
             return [
-                'L' => $this->gets($ObjectIDs),
+                'L' => array_values($this->gets($ObjectIDs)),
                 'P' => $P,
                 'N' => $N,
                 'T' => $Model->field('COUNT('.$this->pk.') AS Count')->find()['Count'],
