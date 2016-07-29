@@ -282,6 +282,7 @@ class Object
         $ObjectSearchConfig = [];
         $Where = [];
         $WObjectIDArray = [];
+        $KeywordObjectIDs=[];
         if ((is_string($Keyword) || is_numeric($Keyword)) &&
             strlen($Keyword) > 0 && $this->searchFields
         ) {
@@ -290,7 +291,7 @@ class Object
             }
             $Where['_logic'] = 'OR';
             $Model->where($Where);
-            $WObjectIDArray[] = $Model->getField($this->pk, true);
+            $KeywordObjectIDs = $Model->getField($this->pk, true);
         }
         if ($W) {
             $Data = param_group($this->searchWFieldsGroup, $W);
@@ -329,6 +330,9 @@ class Object
         if($WObjectIDArray){
             $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
         }
+        //取交集
+        if(strlen($Keyword))
+            $ObjectIDs = array_intersect($ObjectIDs,$KeywordObjectIDs);
         if (strlen($Keyword) === 0 && count($W) === 0) {
             $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
             return [
