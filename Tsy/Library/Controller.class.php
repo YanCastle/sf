@@ -26,6 +26,9 @@ class Controller
     protected $ControllerName;
     protected $MethodName;
     protected $ObjectVarName;
+    /**
+     * @var Object $Object
+     */
     public $Object;
     protected $MC;
     /**

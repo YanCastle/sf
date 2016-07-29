@@ -555,6 +555,7 @@ class Object
             return M($this->main)->where($Where)->save($Params)!==false;
         }else{
             L(E('_SAVE_DATA_'));
+            return false;
         }
     }
     function __call($name, $arguments)
