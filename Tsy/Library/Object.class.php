@@ -384,6 +384,11 @@ class Object
                 'T' => $Model->field('COUNT('.$this->pk.') AS Count')->find()['Count'],
             ];
         }
+        if(!is_array($ObjectIDs)){
+            return [
+                'L'=>[],'P'=>$P,'N'=>$N,'T'=>0
+            ];
+        }
         $T = count($ObjectIDs);
         rsort($ObjectIDs,SORT_NUMERIC);
         $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
