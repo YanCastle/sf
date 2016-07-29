@@ -331,8 +331,13 @@ class Object
             $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
         }
         //取交集
-        if(strlen($Keyword))
-            $ObjectIDs = array_intersect($ObjectIDs,$KeywordObjectIDs);
+        if($ObjectIDs){
+            if(strlen($Keyword)){
+                $ObjectIDs = array_intersect($ObjectIDs,$KeywordObjectIDs);
+            }
+        }else{
+            $ObjectIDs=$KeywordObjectIDs;
+        }
         if (strlen($Keyword) === 0 && count($W) === 0) {
             $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
             return [
