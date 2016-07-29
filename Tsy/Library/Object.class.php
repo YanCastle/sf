@@ -375,7 +375,7 @@ class Object
         //交集组合方式
 //        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
         //TODO 需要支持并集组合
-        if(strlen($Keyword)&&count($W)==0){
+        if(strlen($Keyword)===0&&count($W)===0){
             $ObjectIDs = $Model->page($P,$N)->getField($this->pk,true);
             return [
                 'L' => array_values($this->gets($ObjectIDs)),
