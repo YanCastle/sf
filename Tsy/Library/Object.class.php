@@ -495,7 +495,10 @@ class Object
                         L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);
                     }
                 }elseif(count($ModuleObject)==1){
-                    //TODO 当前模块下的。。
+                    // 当前模块下的。。
+                    $ClassName = $this->MC[0].'\\Object\\'.$ObjectName.'Object';
+                    $$ObjectName = new $ClassName();
+                    $PropertyObjectValues[$Key] = $$ObjectName->gets(array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN]));
                 }else{
                     L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);
                 }
