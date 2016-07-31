@@ -122,7 +122,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
         $_REQUEST = array_merge($_REQUEST,$_GET,$_POST);
     }
 //    切换mid,如果当前环境下存在mid则
-    $mid&&!isset($_POST['_mid']) or $mid=$_POST['_mid'];
+    $mid or $mid=isset($_POST['_mid'])?$_POST['_mid']:'';
 //    if(!$mid){$mid=$_POST['_mid'];}
     $ModuleClassAction=explode('/',$i);
     $MCACount = count($ModuleClassAction);
@@ -306,6 +306,8 @@ function L($msg = false,$Type=6,$trace=''){
         }
         //TODO 完善log函数
         if('swoole'==APP_MODE_LOW&&!ob_get_level()){
+            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
+        }elseif(APP_DEBUG){
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
         }
         return $msg;

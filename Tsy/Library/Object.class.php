@@ -188,7 +188,7 @@ class Object
 //            TODO 检测外检并实现自动添加等逻辑
             if($TableName==parse_name($this->main)){
                 $column = explode('.', $key)[1];
-                if (!$data[$TableName]['PK']) {
+                if (!isset($data[$TableName]['PK'])) {
                     $data[$TableName]['PK'] = $map['P'] === true ? $column : '';
                 }
                 if (isset($_POST[$column])) {
