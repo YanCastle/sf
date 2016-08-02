@@ -30,7 +30,7 @@ class Email implements MsgIFace
         $this->handler->SMTPAuth=true;
         $this->handler->Username=$config['USERNAME'];
         $this->handler->Password=$config['PASSWORD'];
-        $this->config = $config;
+        $this->config = array_merge($this->config,$config);
 //        $this->handler->setFrom($from[0],$from[1]);
 //        $this->handler->addAddress($to[0],$to[1]);
 //        $this->handler->Subject=$title;
@@ -61,10 +61,10 @@ class Email implements MsgIFace
         if(!$this->handler->Subject){
             $this->handler->Subject = $this->config['Subject'];
         }
-        if(!$this->handler->From){
+        if('root@localhost'==$this->handler->From){
             $this->handler->From = $this->config['From'];
         }
-        if(!$this->handler->FromName){
+        if('Root User'==$this->handler->FromName){
             $this->handler->FromName = $this->config['FromName'];
         }
         $this->handler->msgHTML($Content);
