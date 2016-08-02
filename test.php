@@ -25,6 +25,6 @@ $array = [
 ];
 $str  = '';
 foreach ($array as $item){
-    $str.=("SUM({$item}) AS $item,");
+    $str.=("SUM({$item}) AS $item");
 }
 echo $str;
