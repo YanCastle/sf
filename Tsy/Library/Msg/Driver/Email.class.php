@@ -17,6 +17,9 @@ class Email implements MsgIFace
     protected $handler;
     protected $config=[
         'Title'=>'Please Config The Email Title',
+        'Subject'=>'Please Config The Email Title',
+        'From'=>'castle@tansuyun.cn',
+        'FromName'=>'Castle'
     ];
     public function __construct($config=[])
     {
@@ -48,7 +51,29 @@ class Email implements MsgIFace
     function send($To, $Content)
     {
         // TODO: Implement send() method.
-        return false;
+        if(is_string($To)){
+            $To=[$To,$To];
+        }
+        if(count($To)!=2){
+            return false;
+        }
+        $this->handler->addAddress($To[0],$To[1]);
+        if(!$this->handler->Subject){
+            $this->handler->Subject = $this->config['Subject'];
+        }
+        if(!$this->handler->From){
+            $this->handler->From = $this->config['From'];
+        }
+        if(!$this->handler->FromName){
+            $this->handler->FromName = $this->config['FromName'];
+        }
+        $this->handler->msgHTML($Content);
+        if($this->handler->send()){
+            return true;
+        }else{
+            L($this->handler->ErrorInfo);
+            return false;
+        }
     }
 
     function RemoteTemplateSend($To, $Params, $TemplateID)
@@ -67,22 +92,11 @@ class Email implements MsgIFace
             return false;
         }
 //        $To = isset($Params['To'])?$Params['To']:$this->config['To'];
-        if(is_string($To)){
-            $To=[$To,$To];
-        }
-        if(count($To)!=2){
-            return false;
-        }
+
         $this->handler->setFrom($From[0],$From[1]);
-        $this->handler->addAddress($To[0],$To[1]);
         $this->handler->Subject=$Title;
-        $this->handler->msgHTML($Content);
-        if($this->handler->send()){
-            return true;
-        }else{
-            L($this->handler->ErrorInfo);
-            return false;
-        }
+//        $this->handler->msgHTML($Content);
+        return $this->send($To,$Content);
     }
 
     function receive()

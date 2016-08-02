@@ -30,6 +30,11 @@ class Msg implements MsgIFace
         if(!isset($this->handles[$Method])){
             $this->handles[$Method]=[];
         }
+        if($StaticConfit = C('MSG')){
+            if(isset($StaticConfit[strtoupper($Method)])){
+                $Config = array_merge($StaticConfit[strtoupper($Method)],$Config);
+            }
+        }
         $md5 = md5(serialize($Config));
         if(!isset($this->handles[$Method][$md5])){
             $Class = 'Tsy\\Library\\Msg\\Driver\\'.$Method;
@@ -51,6 +56,7 @@ class Msg implements MsgIFace
     function send($To, $Content)
     {
         // TODO: Implement send() method.
+        $this->current->send($To,$Content);
     }
 
     /**
