@@ -259,7 +259,7 @@ function swoole_out_check($fd,$data){
     $Out = swoole_get_port_property($Port,'OUT');
     //返回内容检测
     $Class = swoole_get_mode_class($Type);
-    $OutData=is_callable($Out)?call_user_func($Out,$data):'';
+    $OutData=is_callable($Out)?call_user_func($Out,$data):C('DEFAULT_OUT');
     if(is_string($OutData)&&strlen($OutData)>0){
         \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_BEFORE,$OutData);
         swoole_send($fd,$Class->code($OutData));
