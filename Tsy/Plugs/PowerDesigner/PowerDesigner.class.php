@@ -8,6 +8,8 @@
 
 namespace Tsy\Plugs\PowerDesigner;
 
+//use Tsy\Plugs\PowerDesigner\Pdm;
+
 class PowerDesigner
 {
     /**
@@ -87,5 +89,15 @@ class PowerDesigner
             $ControllerName[]=str_replace(' ','',ucwords($Name.' Controller')).'.class.php';
         }
         return ['Model'=>$ModelName,'Controller'=>$ControllerName];
+    }
+    static function analysis($File){
+        if(!is_file($File)){
+            return false;
+        }
+        $Pdm = new Pdm();
+        if($Pdm->load($File)){
+            return $Pdm->json;
+        }
+        return false;
     }
 }
