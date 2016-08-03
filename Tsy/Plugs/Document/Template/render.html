@@ -1,11 +1,38 @@
-#碳素云开发文档
+# 碳素云开发文档
 
 **目录**
 
 [TOCM]
 
 [TOC]
+# 数据库设计稿
+<if condition="$pdm">
+项目名称：{$pdm.Project.Name}
+项目介绍：
 
+> {$pdm.Project.Comment}
+
+字段定义字典：
+
+|名称 | 类型 | 备注|
+|---|---|---|
+<foreach name="pdm['Domain']" item="domain">
+|{$domain.Name} | {$domain.DataType} | {$domain.Comment}|
+</foreach>
+<foreach name="pdm['Tables']" item="table">
+# {$table.Name} ({$table.Code})
+> {$table.Comment}
+
+表字段：
+|名称 | 代码 | 数据类型 | 逻辑代码 | 默认值 | 备注|
+|---|---|---|---|---|---|
+<foreach name="table['Columns']" item="column">
+|{$column.Name} | {$column.Code} | {$column.DataType} | <?php if($column['I'])echo 'I';if($column['M'])echo 'M';if($column['i'])echo 'P'; ?> | {$column.DefaultValue} | {$column.Comment}|
+</foreach>
+
+</foreach>
+
+</if>
 #函数列表
 <foreach name="functions" item="func">
 ##{$func.zh}({$func.name})

@@ -14,6 +14,11 @@ class Document
     ];
     function loadPDM($File){
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
+        $Tables=[];
+        foreach ($JSON['Tables'] as $k=>$table){
+            $Tables[str_replace('{$PREFIX}','',$k)]=$table;
+        }
+        $JSON['Tables']=$Tables;
         self::$docs['pdm']=$JSON;
     }
     /**
@@ -103,36 +108,60 @@ class Document
             }else{
                 return false;
             }
+        }elseif(is_object($name)){
+            $this->parseClass($name,$MethodsAccess);
         }
         return false;
     }
     function parseClass($class,$MethodsAccess){
+//        判断类是否是Controller/Object/Model中的一种，如果是则调用对应类型的解析方法
         $RelClass = new ReflectionClass($class);
-        self::$docs['classes'][$RelClass->getName()]=array_merge([
-            'memo'=>'',
-            'zh'=>'',
-            'name'=>'',
-            'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
-            'properties'=>[],
-            'methods'=>[]
-        ],$this->parseDocComment($RelClass->getDocComment(),null,$RelClass));
+        $ClassType = '';
+        foreach (['Tsy\Library\Object','Tsy\Library\Model','Tsy\Library\Controller'] as $InsideClass){
+            if($RelClass->isSubclassOf($InsideClass)){
+                $ClassType = str_replace('Tsy\Library\\','',$InsideClass);
+            }
+        }
+        switch ($ClassType){
+            case 'Object':
+                $this->parseObject($RelClass,$MethodsAccess);
+                break;
+            case 'Controller':
+                $this->parseController($RelClass,$MethodsAccess);
+                break;
+            case 'Model':
+                $this->parseModel($RelClass,$MethodsAccess);
+                break;
+            default:
+                self::$docs['classes'][$RelClass->getName()]=array_merge([
+                    'memo'=>'',
+                    'zh'=>'',
+                    'name'=>'',
+                    'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
+                    'properties'=>[],
+                    'methods'=>[]
+                ],$this->parseDocComment($RelClass->getDocComment(),null,$RelClass));
 //        foreach ($RelClass->getProperties() as $property){
 //
 //        }
-        //开始解析方法注释
-        $methods = [];
-        foreach ($RelClass->getMethods() as $method){
+                //开始解析方法注释
+                $methods = [];
+                foreach ($RelClass->getMethods() as $method){
 //            $method->isPrivate() or $access =
-            $access = 'public';
-            if($method->isPrivate()){$access='private';}
-            if($method->isProtected()){$access='protected';}
-            if($method->isPublic()){$access='public';}
-            if(!in_array($access,$MethodsAccess)){continue;}
-            $methods[$method->getName()]=array_merge([
-                'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
-            ],$this->parseDocComment($method->getDocComment(),$method));
+                    $access = 'public';
+                    if($method->isPrivate()){$access='private';}
+                    if($method->isProtected()){$access='protected';}
+                    if($method->isPublic()){$access='public';}
+//            限定输出的方法范围
+                    if(!in_array($access,$MethodsAccess)){continue;}
+                    $methods[$method->getName()]=array_merge([
+                        'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
+                    ],$this->parseDocComment($method->getDocComment(),$method));
+                }
+                self::$docs['classes'][$RelClass->getName()]['methods']=$methods;
+                break;
         }
-        self::$docs['classes'][$RelClass->getName()]['methods']=$methods;
+
         return $this;
     }
     protected function parseDocComment($Comment,$Method=null,ReflectionClass $class=null){
@@ -268,8 +297,135 @@ class Document
         }
         return $data;
     }
-    function parseObject(){
 
+    /**
+     * 解析对象文档
+     * @param $RefClass
+     * @param $MethodsAccess
+     */
+    function parseObject(ReflectionClass $RefClass,array $MethodsAccess){
+        $ClassName = $RefClass->getName();
+        self::$docs['classes'][$ClassName]=array_merge([
+            'memo'=>'',
+            'zh'=>'',
+            'name'=>'',
+            'type'=>'Object',//这个类是什么类型，控制器？Model？Object？其他？
+            'properties'=>[],
+            'methods'=>[],
+            'object'=>[]
+        ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
+        $Class = $RefClass->newInstance();
+//        读取属性渲染对象化配置
+        $Properties = $RefClass->getProperties();
+        $Object=[];
+        $ObjectColumns=[];
+        foreach ($Properties as $Property){
+            switch ($Property->getName()){
+                case 'main':
+//                    主表
+//                    读取fields属性，检查是否有值
+                    $TableName=parse_name($Class->main,1);
+                    $Fields=[];
+                    $Values = $Class->fields;
+                    if(is_string($Values)&&$Values){
+                        $Fields=explode(',',$Fields);
+                    }elseif($Values&&is_array($Values)){
+                        if(true === ($LastValue = array_shift($Values))){
+//                            取差集
+
+                        }else{
+                            array_push($Values,$LastValue);
+                        }
+
+                    }else{
+                        //TODO DB Fields需要优化
+                        $Table = isset(self::$docs['pdm']['Tables'][parse_name($TableName)])?self::$docs['pdm']['Tables'][parse_name($TableName)]:[];
+                        $Fields = isset($Table['Columns'])?array_keys($Table['Columns']):M($TableName)->getDbFields();
+                    }
+                    //生成数据对象
+                    $Object=array_merge($Object,array_fill_keys($Fields,1));
+                    foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
+                        if(in_array($ColumnName,$Fields))
+                            $ObjectColumns[$ColumnName]=$column;
+                    }
+                    break;
+                case 'pk':
+//                    主键
+                    break;
+                case 'property':
+//                    一对一、一对多属性
+                    $ObjectProperties=$Class->property;
+                    foreach ($ObjectProperties as $PropertyName=>$ObjectProperty){
+                        if(isset($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_NAME])){
+                            //表映射
+                            $TableName=$ObjectProperty[Tsy\Library\Object::RELATION_TABLE_NAME];
+                            $Fields=[];
+                            $Values = isset($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_FIELDS])?$ObjectProperty[Tsy\Library\Object::RELATION_TABLE_FIELDS]:'';
+                            if(is_string($Values)&&$Values){
+                                $Fields=explode(',',$Fields);
+                            }elseif($Values&&is_array($Values)){
+                                if(true === ($LastValue = array_shift($Values))){
+//                            取差集
+
+                                }else{
+                                    array_push($Values,$LastValue);
+                                }
+
+                            }else{
+                                //TODO DB Fields需要优化
+                                $Fields = isset(self::$docs['pdm']['Tables'][parse_name($TableName)])?array_column(self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'],'Code'):M($TableName)->getDbFields();
+                            }
+                            //生成数据对象
+                            $ColumnPrifix='';
+                            if($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE)
+                                $Object=array_merge($Object,array_fill_keys($Fields,1));
+                            else{
+                                $ColumnPrifix=$PropertyName;
+                                $Object[$PropertyName]=array_fill_keys($Fields,1);
+                            }
+                            foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
+                                if(in_array($ColumnName,$Fields))
+                                    $ObjectColumns[$ColumnPrifix.$ColumnName]=$column;
+                            }
+                        }else
+                        if(isset($ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME])){
+                            //对象映射
+//                            $TableName=$ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME];
+                            self::$docs['Objects'][$ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME]] = $ObjectProperty;
+                        }
+                    }
+                    break;
+                case 'link':
+//                    多对多关联
+                    $Links = $Class->link;
+                    foreach ($Links as $PropertyName=>$PropertyConfig){
+                        
+                    }
+                    break;
+                case 'searchFields':
+//                    限定Keyword搜索的
+                    break;
+                case 'searchTable':
+//                    限定Keyword的搜索表
+                    break;
+                case 'searchWFieldsConf':
+//                    设定分组精确搜索的表配置
+                    break;
+                case 'searchWFieldsGroup':
+//                    设定分组精确搜索的字段配置
+                    break;
+                case 'allow_add':
+//                    是否允许添加
+                    break;
+                case 'allow_save':break;
+                case 'allow_del':break;
+                case 'is_dic':
+//                    是否字典表
+                    break;
+                case 'map':break;
+                default:break;
+            }
+        }
     }
     /**
      * @login true
