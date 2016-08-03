@@ -59,4 +59,14 @@ return [
 
 
     'DEFAULT_OUT'=>'json_encode',
+    'MSG'=>[
+        'YUNTONGXUN'=>[
+            'SERVER_IP'=>'sandboxapp.cloopen.com',
+            'SERVER_PORT'=>'8883',
+            'SOFT_VERSION'=>'2013-12-26',
+            'ACCOUNT_SID'=>'',
+            'ACCOUNT_TOKEN'=>'',
+            'APP_ID'=>''
+        ],
+    ]
 ];

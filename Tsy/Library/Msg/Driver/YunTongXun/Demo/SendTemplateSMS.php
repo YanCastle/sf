@@ -43,7 +43,7 @@ function sendTemplateSMS($to,$datas,$tempId)
 {
      // 初始化REST SDK
      global $accountSid,$accountToken,$appId,$serverIP,$serverPort,$softVersion;
-     $rest = new REST($serverIP,$serverPort,$softVersion);
+     $rest = new \Tsy\Library\Msg\Driver\YunTongXun\CCPRestSDK($serverIP,$serverPort,$softVersion);
      $rest->setAccount($accountSid,$accountToken);
      $rest->setAppId($appId);
     
@@ -52,7 +52,6 @@ function sendTemplateSMS($to,$datas,$tempId)
      $result = $rest->sendTemplateSMS($to,$datas,$tempId);
      if($result == NULL ) {
          echo "result error!";
-         break;
      }
      if($result->statusCode!=0) {
          echo "error code :" . $result->statusCode . "<br>";

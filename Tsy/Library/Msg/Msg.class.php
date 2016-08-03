@@ -69,6 +69,7 @@ class Msg implements MsgIFace
     function RemoteTemplateSend($To, $Params, $TemplateID)
     {
         // TODO: Implement RemoteTemplateSend() method.
+        $this->current->RemoteTemplateSend($To,$Params,$TemplateID);
     }
 
     /**
