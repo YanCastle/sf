@@ -12,7 +12,10 @@ class Document
         'classes'=>[],
         'functions'=>[],
     ];
-
+    function loadPDM($File){
+        $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
+        self::$docs['pdm']=$JSON;
+    }
     /**
      * 获取文档信息
      * 这儿是描述信息
@@ -23,7 +26,7 @@ class Document
      * @link http://www.baidu.com?
      *
      */
-    function getDoc($name=''){
+    function getDoc($name='',$MethodsAccess=['private','protected','public']){
 //        self::$docs=[
 //            'classes'=>[
 //                '完整类名'=>[
@@ -87,10 +90,10 @@ class Document
 //        ];
         if(is_string($name)){
             if(is_object($name)){
-                $this->parseClass($name);
+                $this->parseClass($name,$MethodsAccess);
             }elseif(class_exists($name)){
                 $class = \Tsy\Tsy::instance($name);
-                $this->parseClass($class);
+                $this->parseClass($class,$MethodsAccess);
             }elseif(function_exists($name)){
 
             }elseif(is_dir($name)){
@@ -103,7 +106,7 @@ class Document
         }
         return false;
     }
-    function parseClass($class){
+    function parseClass($class,$MethodsAccess){
         $RelClass = new ReflectionClass($class);
         self::$docs['classes'][$RelClass->getName()]=array_merge([
             'memo'=>'',
@@ -116,6 +119,7 @@ class Document
 //        foreach ($RelClass->getProperties() as $property){
 //
 //        }
+        //开始解析方法注释
         $methods = [];
         foreach ($RelClass->getMethods() as $method){
 //            $method->isPrivate() or $access =
@@ -123,12 +127,13 @@ class Document
             if($method->isPrivate()){$access='private';}
             if($method->isProtected()){$access='protected';}
             if($method->isPublic()){$access='public';}
-
+            if(!in_array($access,$MethodsAccess)){continue;}
             $methods[$method->getName()]=array_merge([
                 'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
             ],$this->parseDocComment($method->getDocComment(),$method));
         }
         self::$docs['classes'][$RelClass->getName()]['methods']=$methods;
+        return $this;
     }
     protected function parseDocComment($Comment,$Method=null,ReflectionClass $class=null){
         $Comment = str_replace(['/**','*/'," * "],'' ,$Comment);
@@ -263,14 +268,21 @@ class Document
         }
         return $data;
     }
+    function parseObject(){
+
+    }
     /**
      * @login true
      *
      */
-    function renderMD(){
+    function renderMD($templateFile='',$outputFile=''){
         $View = new \Tsy\Library\View();
         $View->assign(self::$docs);
-        return $View->fetch(__DIR__.DIRECTORY_SEPARATOR.'Template'.DIRECTORY_SEPARATOR.'render.html');
+        $content = $View->fetch(is_file($templateFile)?$templateFile:(__DIR__.DIRECTORY_SEPARATOR.'Template'.DIRECTORY_SEPARATOR.'render.html'));
+        if($outputFile){
+            file_put_contents($outputFile,$content);
+        }
+        return $content;
     }
     function renderHTML(){}
     function renderDOC(){}
