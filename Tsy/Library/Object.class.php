@@ -19,6 +19,7 @@ class Object
 
     const RELATION_TABLE_NAME = "03"; //关系表名称
     const RELATION_TABLE_COLUMN = "04"; //关系表字段
+    const RELATION_TABLE_FIELDS = "101"; //关系表字段接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
     const RELATION_TABLE_PROPERTY = "05"; //关系类型， 上面的一对多或者一对一
     const RELATION_TABLE_LINK_HAS_PROPERTY = "06"; // 多对多配置中是否具有属性
     const RELATION_TABLE_LINK_TABLES = "07"; //多对多属性的连接表表名
@@ -28,13 +29,13 @@ class Object
 
     protected $main = '';//主表名称，默认为类名部分
     protected $pk = '';//表主键，默认自动获取
+    protected $fields='';//自动化对象的字段过滤，接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
     protected $link = [];//多对多属性配置
     protected $property = [];//一对一或一对多属性配置
     protected $data = [];//添加、修改时的数据
     protected $searchFields = [];//参与Keywords搜索的字段列表
     protected $searchTable='';
     protected $propertyMap = [];//属性配置反向映射
-    protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
     protected $_read_filter = [];//输入读取过滤配置
     protected $_read_deny=[];//禁止读取字段
@@ -417,7 +418,7 @@ class Object
             ) {
                 if ($Config[self::RELATION_TABLE_PROPERTY] == self::PROPERTY_ONE) {
                     //一对一属性
-//                    TODO 字段映射
+//                    TODO 字段映射和字段过滤
                     $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                     $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
                     $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
@@ -432,6 +433,7 @@ class Object
                 isset($Config[self::RELATION_OBJECT_COLUMN]) &&
                 isset($Config[self::RELATION_OBJECT_NAME])
             ) {
+//                if(isset($Config[self::RE]))
                 $PropertyObjects[$PropertyName] = $Config;
             }
         }
