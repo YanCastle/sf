@@ -422,6 +422,7 @@ class Object
                     $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                     $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
                     $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                    
                 } else {
                     //一对多
                     $ArrayProperties[$PropertyName] = $Config;
@@ -477,29 +478,7 @@ class Object
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                     //拿到这张表的所有字段
-
-                    if(isset($Conf[self::RELATION_TABLE_FIELDS])){
-                        if(is_array($Conf[self::RELATION_TABLE_FIELDS])){
-                            if(true === array_pop($Conf[self::RELATION_TABLE_FIELDS])){
-                                //反向
-                                $TableFields=(new Model($OriginTableName))->getDbFields();
-                                foreach (array_diff($TableFields,$Conf[self::RELATION_TABLE_FIELDS]) as $Field){
-                                    $Fields[]="__{$TableName}__.{$Field}";
-                                }
-                            }else{
-                                //正向
-                                foreach ($Conf[self::RELATION_TABLE_FIELDS] as $Field){
-                                    $Fields[]="__{$TableName}__.{$Field}";
-                                }
-                            }
-                        }else{
-                            foreach (explode(',',$Conf[self::RELATION_TABLE_FIELDS]) as $Field){
-                                $Fields[]="__{$TableName}__.{$Field}";
-                            }
-                        }
-                    }else{
-
-                    }
+                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,$Conf[self::RELATION_TABLE_FIELDS]));
                 }
                 $LinkModel->field($Fields);
                 $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
@@ -612,5 +591,40 @@ class Object
             return $this->gets(M($this->main)->getField($this->pk,true));
         }
         return null;
+    }
+
+    /**
+     * 解析并生成fields字段信息
+     * @param $TableName
+     * @param $Config
+     */
+    protected function _parseFieldsConfig($TableName,$Config){
+        $TableFields=[];
+        $UpperTableName = strtoupper(parse_name($TableName));
+        if(is_array($Config)){
+            if(($LastField = array_pop($Config))===true){
+                //字段排除
+                $Fields = M($TableName)->getDbFields();
+                foreach (array_diff($Filds,$Config) as $Field){
+                    $TableFields="__{$UpperTableName}__.{$Field}";
+                }
+            }else{
+                array_push($Config,$LastField);
+                foreach ($Config as $Field){
+                    $TableFields="__{$UpperTableName}__.{$Field}";
+                }
+            }
+        }elseif(is_string($Config)&&$Config){
+            foreach (explode(',',$Config) as $Field){
+                $TableFields="__{$UpperTableName}__.{$Field}";
+            }
+        }elseif(is_string($Config)&&strlen($Config)===0){
+            foreach ($Fields = M($TableName)->getDbFields() as $Field){
+                $TableFields="__{$UpperTableName}__.{$Field}";
+            }
+        }else{
+            L('错误的字段配置信息');
+        }
+        return $TableFields;
     }
 }
