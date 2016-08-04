@@ -51,13 +51,18 @@ class Object
     
     public $is_dic=false;
     public $allow_add=true;//是否允许添加
+    public $addFields=[];//定义允许添加的字段，规则同字段限定,默认不限制
+    public $addFieldsConfig=[];
     public $allow_save=true;//是否允许修改
+    public $saveFields=[];//定义允许修改的字段，规则同字段限定
+    public $saveFieldsConfig=[];
     public $allow_del=true;//是否允许删除
     public $map = [
 //        自动生成
     ];//字段=》类型 表名 映射
     protected $__CLASS__;
     protected $MC=[];
+    protected $directProperties=[];
     function __construct()
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
@@ -79,6 +84,11 @@ class Object
             }
         }
         $this->setPropertyMap();
+        foreach ($this->property as $PropertyName=>$Config){
+            if($Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
+                $this->directProperties[$PropertyName]=$this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_NAME])?$Config[self::RELATION_TABLE_NAME]:'');
+            }
+        }
     }
 
     /**
@@ -185,6 +195,10 @@ class Object
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
+        //遍历添加过滤配置
+        foreach ($this->addFieldsConfig as $Field=>$Config){
+            
+        }
         $data = [];
         foreach ($this->map as $key => $map) {
             $TableName = explode('.', $key)[0];
@@ -214,6 +228,19 @@ class Object
                     }
 //                $data[$TableName]['data'][$column] = $_POST[$column];
                 }
+            }
+        }
+        $Fields = $this->addFields?$this->addFields:M($this->main)->getDbFields();
+        $Fields = $this->_parseFieldsConfig($this->main,$this->addFields);
+        foreach ($data as $K=>$V){
+            if(!in_array($K,$Fields)){
+                L(E('不允许添加字段:'.$K));
+                return false;
+            }
+            if(isset($this->addFieldsConfig[$K])&&!$this->_verifyData($V,$this->addFieldsConfig[$K])){
+                // 调用数据过滤配置
+                L(E('参数不符合规则:'.$K));
+                return false;
             }
         }
         if (!$data) {
@@ -583,7 +610,7 @@ class Object
         if(is_array($ID)){
             foreach ($ID as $v){
                 if(!is_numeric($v)){
-                    L(E('_SAVE_ID_'));
+                    L(E('错误的对象编号'));
                     return false;
                 }
             }
@@ -591,12 +618,24 @@ class Object
         }elseif (is_numeric($ID)){
             $Where[$this->pk]=$ID;
         }else{
-            L(E('_SAVE_ID_'));
+            L(E('错误的对象编号'));
+        }
+        $Fields = $this->saveFields?$this->saveFields:M($this->main)->getDbFields();
+        foreach ($Params as $K=>$V){
+            if(!in_array($K,$Fields)){
+                L(E('不允许更改字段:'.$K));
+                return false;
+            }
+            if(isset($this->saveFieldsConfig[$K])&&!$this->_verifyData($V,$this->saveFieldsConfig[$K])){
+                // 调用数据过滤配置
+                L(E('参数不符合规则:'.$K));
+                return false;
+            }
         }
         if($Params&&is_array($Params)){
             return M($this->main)->where($Where)->save($Params)!==false;
         }else{
-            L(E('_SAVE_DATA_'));
+            L(E('数据存储失败'));
             return false;
         }
     }
@@ -625,11 +664,11 @@ class Object
     }
 
     /**
-     * 解析并生成fields字段信息
+     * 解析并生成fields字段信息,不能用于add和save操作
      * @param $TableName
      * @param $Config
      */
-    protected function _parseFieldsConfig($TableName,$Config,$Column){
+    protected function _parseFieldsConfig($TableName,$Config,$Column=false){
         $TableFields=[];
         $UpperTableName = strtoupper(parse_name($TableName));
         $AllFields=[];
@@ -657,9 +696,13 @@ class Object
         }else{
             L('错误的字段配置信息');
         }
-        if(!in_array("__{$UpperTableName}__.{$Column}",$TableFields)){
+        if(!in_array("__{$UpperTableName}__.{$Column}",$TableFields)&&$Column){
             $TableFields[]="__{$UpperTableName}__.{$Column}";
         }
         return $TableFields;
+    }
+//    protected function _parseFieldsConfig(){}
+    protected function _verifyData(&$data,$rule){
+
     }
 }
