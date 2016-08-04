@@ -11,6 +11,7 @@ class Document
     static protected $docs=[
         'classes'=>[],
         'functions'=>[],
+        'Objects'=>[]
     ];
     function loadPDM($File){
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
@@ -319,12 +320,13 @@ class Document
         $Properties = $RefClass->getProperties();
         $Object=[];
         $ObjectColumns=[];
+        $ObjectSetting=[];
         foreach ($Properties as $Property){
             switch ($Property->getName()){
                 case 'main':
 //                    主表
 //                    读取fields属性，检查是否有值
-                    $TableName=parse_name($Class->main,1);
+                    $ObjectSetting['main']=$TableName=parse_name($Class->main,1);
                     $Fields=[];
                     $Values = $Class->fields;
                     if(is_string($Values)&&$Values){
@@ -350,11 +352,13 @@ class Document
                     }
                     break;
                 case 'pk':
+                    $ObjectSetting['pk']=$Class->pk;
 //                    主键
                     break;
                 case 'property':
 //                    一对一、一对多属性
-                    $ObjectProperties=$Class->property;
+                    $ObjectSetting['property']=$ObjectProperties=$Class->property;
+
                     foreach ($ObjectProperties as $PropertyName=>$ObjectProperty){
                         if(isset($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_NAME])){
                             //表映射
@@ -385,7 +389,7 @@ class Document
                             }
                             foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
                                 if(in_array($ColumnName,$Fields))
-                                    $ObjectColumns[$ColumnPrifix.$ColumnName]=$column;
+                                    $ObjectColumns[($ColumnPrifix?($ColumnPrifix.'.'):'').$ColumnName]=$column;
                             }
                         }else
                         if(isset($ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME])){
@@ -397,34 +401,66 @@ class Document
                     break;
                 case 'link':
 //                    多对多关联
-                    $Links = $Class->link;
+                    $ObjectSetting['link']=$Links = $Class->link;
                     foreach ($Links as $PropertyName=>$PropertyConfig){
-                        
+                        $Fields=[];
+                        if($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_LINK_HAS_PROPERTY]){
+                            //关联表带属性，需要把相关关联表字段带入到输出结果中
+                            foreach (self::$docs['pdm']['Tables'][parse_name($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_NAME])]['Columns'] as $ColumnName=>$column){
+                                $ObjectColumns[($PropertyName?($PropertyName.'.'):'').$ColumnName]=$column;
+                                $Fields[]=$ColumnName;
+                            }
+                        }else{
+
+                        }
+                        //循环处理
+                        foreach ($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_LINK_TABLES] as $TableName=>$Config){
+//                            读取字段
+                            foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
+                                $ObjectColumns[$PropertyName.'.'.$ColumnName]=$column;
+                                $Fields[]=$ColumnName;
+                            }
+                        }
+                        $Object[$PropertyName]=array_fill_keys($Fields,1);
                     }
                     break;
                 case 'searchFields':
 //                    限定Keyword搜索的
+                    $ObjectSetting['searchFields']=$Class->searchFields;
                     break;
                 case 'searchTable':
 //                    限定Keyword的搜索表
+                    $ObjectSetting['searchTable']=$Class->searchTable;
                     break;
                 case 'searchWFieldsConf':
 //                    设定分组精确搜索的表配置
+                    $ObjectSetting['searchWFieldsConf']=$Class->searchWFieldsConf;
                     break;
                 case 'searchWFieldsGroup':
 //                    设定分组精确搜索的字段配置
+                    $ObjectSetting['searchWFieldsGroup']=$Class->searchWFieldsGroup;
                     break;
                 case 'allow_add':
 //                    是否允许添加
+                    $ObjectSetting['allow_add']=$Class->allow_add;
                     break;
-                case 'allow_save':break;
-                case 'allow_del':break;
+                case 'allow_save':
+                    $ObjectSetting['allow_save']=$Class->allow_save;
+                    break;
+                case 'allow_del':
+                    $ObjectSetting['allow_del']=$Class->allow_del;
+                    break;
                 case 'is_dic':
 //                    是否字典表
+                    $ObjectSetting['is_dic']=$Class->is_dic;
                     break;
                 case 'map':break;
                 default:break;
             }
+        }
+        //TODO 循环处理对象映射关系
+        foreach (self::$docs['Objects'] as $object){
+
         }
     }
     /**
