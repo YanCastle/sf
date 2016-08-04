@@ -463,9 +463,10 @@ class Object
                 is_array($Config[self::RELATION_TABLE_LINK_TABLES]) &&
                 count($Config[self::RELATION_TABLE_LINK_TABLES]) > 0
             ) {
+                $UpperMainTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                 $LinkModel = M($Config[self::RELATION_TABLE_NAME])->where(
                     [
-                        $Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]
+                        "__{$UpperMainTable}__.".$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]
                     ]
                 );
                 $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
