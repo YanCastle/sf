@@ -385,7 +385,11 @@ class Document
                             $ColumnPrifix='';
                             if($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE)
                                 $Object=array_merge($Object,array_fill_keys($Fields,1));
-                            else{
+                            elseif($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE_OBJECT){
+//                                处理一对一对象化信息
+                                $Object[$PropertyName]=array_fill_keys($Fields,1);
+                                $ColumnPrifix=$PropertyName;
+                            }else{
                                 $ColumnPrifix=$PropertyName;
                                 $Object[$PropertyName]=array_fill_keys($Fields,1);
                             }
