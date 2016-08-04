@@ -502,9 +502,10 @@ class Document
                     break;
                 case 'del':
                     if($Class->allow_addel){
+                        $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                         $methods['del']=array_merge([
                             'name'=>'del','access'=>'public','static'=>false
-                        ],$this->parseDocComment($Comment));
+                        ],$this->parseDocComment("@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}"));
                     }
                     break;
                 case 'save':
