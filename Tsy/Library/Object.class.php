@@ -463,6 +463,7 @@ class Object
                 is_array($Config[self::RELATION_TABLE_LINK_TABLES]) &&
                 count($Config[self::RELATION_TABLE_LINK_TABLES]) > 0
             ) {
+                $Fields=[];
                 $UpperMainTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                 $LinkModel = M($Config[self::RELATION_TABLE_NAME])->where(
                     [
@@ -471,11 +472,36 @@ class Object
                 );
                 $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
 //                TODO Link表中的多对多关系先忽略不计
-                foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $TableName => $Conf) {
-                    $TableName = strtoupper(parse_name($TableName));
+                foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $OriginTableName => $Conf) {
+                    $TableName = strtoupper(parse_name($OriginTableName));
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                    //拿到这张表的所有字段
+
+                    if(isset($Conf[self::RELATION_TABLE_FIELDS])){
+                        if(is_array($Conf[self::RELATION_TABLE_FIELDS])){
+                            if(true === array_pop($Conf[self::RELATION_TABLE_FIELDS])){
+                                //反向
+                                $TableFields=(new Model($OriginTableName))->getDbFields();
+                                foreach (array_diff($TableFields,$Conf[self::RELATION_TABLE_FIELDS]) as $Field){
+                                    $Fields[]="__{$TableName}__.{$Field}";
+                                }
+                            }else{
+                                //正向
+                                foreach ($Conf[self::RELATION_TABLE_FIELDS] as $Field){
+                                    $Fields[]="__{$TableName}__.{$Field}";
+                                }
+                            }
+                        }else{
+                            foreach (explode(',',$Conf[self::RELATION_TABLE_FIELDS]) as $Field){
+                                $Fields[]="__{$TableName}__.{$Field}";
+                            }
+                        }
+                    }else{
+
+                    }
                 }
+                $LinkModel->field($Fields);
                 $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
             } else {
                 L('Obj配置有问题', LOG_ERR, $Config);
