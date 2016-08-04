@@ -118,38 +118,38 @@ class Document
     }
     function parseClass($class,$MethodsAccess){
 //        判断类是否是Controller/Object/Model中的一种，如果是则调用对应类型的解析方法
-        $RelClass = new ReflectionClass($class);
+        $RefClass = new ReflectionClass($class);
         $ClassType = '';
         foreach (['Tsy\Library\Object','Tsy\Library\Model','Tsy\Library\Controller'] as $InsideClass){
-            if($RelClass->isSubclassOf($InsideClass)){
+            if($RefClass->isSubclassOf($InsideClass)){
                 $ClassType = str_replace('Tsy\Library\\','',$InsideClass);
             }
         }
         switch ($ClassType){
             case 'Object':
-                $this->parseObject($RelClass,$MethodsAccess);
+                $this->parseObject($RefClass,$MethodsAccess);
                 break;
             case 'Controller':
-                $this->parseController($RelClass,$MethodsAccess);
+                $this->parseController($RefClass,$MethodsAccess);
                 break;
             case 'Model':
-                $this->parseModel($RelClass,$MethodsAccess);
+                $this->parseModel($RefClass,$MethodsAccess);
                 break;
             default:
-                self::$docs['Classes'][$RelClass->getName()]=array_merge([
+                self::$docs['Classes'][$RefClass->getName()]=array_merge([
                     'memo'=>'',
                     'zh'=>'',
                     'name'=>'',
                     'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
                     'properties'=>[],
                     'methods'=>[]
-                ],$this->parseDocComment($RelClass->getDocComment(),null,$RelClass));
-//        foreach ($RelClass->getProperties() as $property){
+                ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
+//        foreach ($RefClass->getProperties() as $property){
 //
 //        }
                 //开始解析方法注释
                 $methods = [];
-                foreach ($RelClass->getMethods() as $method){
+                foreach ($RefClass->getMethods() as $method){
 //            $method->isPrivate() or $access =
                     $access = 'public';
                     if($method->isPrivate()){$access='private';}
@@ -161,10 +161,9 @@ class Document
                         'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
                     ],$this->parseDocComment($method->getDocComment(),$method));
                 }
-                self::$docs['Classes'][$RelClass->getName()]['methods']=$methods;
+                self::$docs['Classes'][$RefClass->getName()]['methods']=$methods;
                 break;
         }
-
         return $this;
     }
     protected function parseDocComment($Comment,$Method=null,ReflectionClass $class=null){
@@ -370,9 +369,9 @@ class Document
                             if(is_string($Values)&&$Values){
                                 $Fields=explode(',',$Fields);
                             }elseif($Values&&is_array($Values)){
-                                if(true === ($LastValue = array_shift($Values))){
+                                if(true === ($LastValue = array_pop($Values))){
 //                            取差集
-
+                                    $Fields=array_diff(array_keys(self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns']),$Values);
                                 }else{
                                     array_push($Values,$LastValue);
                                 }
@@ -473,6 +472,97 @@ class Document
         ];
         self::$docs['Classes'][$ClassName]=array_merge(self::$docs['Classes'][$ClassName],$Result);
         self::$docs['Objects'][$ClassName]=$Result;
+//        开始处理对象操作方法
+        foreach ($RefClass->getMethods() as $reflectionMethod){
+            switch ($reflectionMethod->getName()){
+                case 'add':
+                    if($Class->allow_add){
+//                        当 文件名 为框架Object时表示没有本地编写的
+                        $file= $reflectionMethod->getFileName();
+                        if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
+                            //使用框架的add方法，补全文档参数信息
+                            $Comment = '';
+                            //Field字段名称，Design字段配置
+                            foreach (self::parseFieldsConfig($Class->main,$Class->addFields) as $Field=>$Design){
+                                $Comment .= "@param {$Design['DataType']} {$Design['Code']} {$Design['Name']} {$Design['Comment']}";
+                            }
+                            $Comment .= "@return bool|{$Class->main}";
+                        }else{
+                            //使用自定义的add方法，读取自定义的参数信息
+                            $Comment = $reflectionMethod->getDocComment();
+                        }
+                        $this->parseDocComment($Comment);
+                    }
+                    break;
+                case 'del':
+                    if($Class->allow_addel){
+
+                    }
+                    break;
+                case 'save':
+                    if($Class->allow_save){
+                        if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
+                            //使用框架的add方法，补全文档参数信息
+
+                        }else{
+                            //使用自定义的add方法，读取自定义的参数信息
+
+                        }
+                    }
+                    break;
+                case 'get':break;
+                case 'gets':break;
+                case 'search':break;
+                default:
+
+                    break;
+            }
+        }
+    }
+
+    /**
+     *
+     * @param ReflectionClass $RefClass
+     * @param array $MethodsAccess
+     */
+    function parseController(ReflectionClass $RefClass,array $MethodsAccess){
+        $ClassName = $RefClass->getName();
+        self::$docs['Classes'][$ClassName]=array_merge([
+            'memo'=>'',
+            'zh'=>'',
+            'name'=>'',
+            'type'=>'Object',//这个类是什么类型，控制器？Model？Object？其他？
+            'Properties'=>[],
+            'methods'=>[],
+            'Object'=>[]
+        ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
+//        $Class = $RefClass->newInstance();
+        self::$docs['Classes'][$RefClass->getName()]=array_merge([
+            'memo'=>'',
+            'zh'=>'',
+            'name'=>'',
+            'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
+            'properties'=>[],
+            'methods'=>[]
+        ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
+//        foreach ($RefClass->getProperties() as $property){
+//
+//        }
+        //开始解析方法注释
+        $methods = [];
+        foreach ($RefClass->getMethods() as $method){
+//            $method->isPrivate() or $access =
+            $access = 'public';
+            if($method->isPrivate()){$access='private';}
+            if($method->isProtected()){$access='protected';}
+            if($method->isPublic()){$access='public';}
+//            限定输出的方法范围
+            if(!in_array($access,$MethodsAccess)){continue;}
+            $methods[$method->getName()]=array_merge([
+                'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
+            ],$this->parseDocComment($method->getDocComment(),$method));
+        }
+        self::$docs['Classes'][$RefClass->getName()]['methods']=$methods;
     }
     /**
      * @login true
@@ -494,4 +584,30 @@ class Document
     function renderUML(){}
     function renderXLS(){}
     function renderCSV(){}
+    static function parseFieldsConfig($TableName,$Config){
+        $Columns=[];
+        if(isset(self::$docs['PDM']['Tables'][parse_name($TableName)])){
+            $Columns = self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns'];
+        }
+        $Fields=[];
+        if(is_string($Config)&&$Config){
+            $Fields=explode(',',$Config);
+        }elseif(is_array($Config)){
+            if(true === end($Config)){
+                array_pop($Config);
+                $Fields = array_diff(array_keys($Columns),$Config);
+            }elseif($Config){
+                $Fields=$Config;
+            }else{
+                $Fields=array_keys($Columns);
+            }
+        }else{
+            $Fields=array_keys($Columns);
+        }
+        $Result=[];
+        foreach ($Fields as $field){
+            $Result[$field]=$Columns[$field];
+        }
+        return $Result;
+    }
 }

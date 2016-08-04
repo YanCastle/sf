@@ -19,6 +19,7 @@
 |{$domain.Name} | {$domain.DataType} | {$domain.Comment}|{$line}
 </foreach>
 <foreach name="PDM['Tables']" item="table">
+{$line}
 ## {$table.Name} ({$table.Code})
 > {$table.Comment}
 {$line}{$line}
@@ -45,7 +46,7 @@
 |名称 | 代码 | 数据类型 | 逻辑代码 | 默认值 | 备注|
 |---|---|---|---|---|---|
 <foreach name="Object['ObjectColumns']" item="OC">
-|{$OC.Name} | {$OC.Code} | {$OC.DataType} | <?php if($OC['I'])echo 'I';if($OC['M'])echo 'M';if($OC['i'])echo 'P'; ?> | {$OC.DefaultValue} | {$OC.Comment}|{$line}
+|{$OC.Name} | {$key} | {$OC.DataType} | <?php if($OC['I'])echo 'I';if($OC['M'])echo 'M';if($OC['i'])echo 'P'; ?> | {$OC.DefaultValue} | {$OC.Comment}|{$line}
 </foreach>
 </foreach>
 {$line}{$line}
@@ -82,8 +83,9 @@
 </if>
 ### 方法
 <if condition="$cla['methods']">
-<foreach name="cla['methods']" item="method">
 
+<foreach name="cla['methods']" item="method">
+<?php if($method['access']=='public'&&substr($method['name'],0,1)!='_'){ ?>
 #### [{$method.access}] {$method.zh} ({$method.name})
 请求地址：<?php echo str_replace(["\\\\","\\"],['/','/'],str_replace(['Controller','Object'],'',$cla['name'])),'/',$method['name'],"\r\n"; ?>
 作者:{$method['author']}  链接:{$method['link']}
@@ -100,6 +102,7 @@
 返回值：
 {$method['return']}
 {$line}{$line}
+<?php }?>
 </foreach>
 
 </if>
