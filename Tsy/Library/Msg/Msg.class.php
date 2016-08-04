@@ -18,6 +18,7 @@ class Msg implements MsgIFace
      * @var MsgIFace $current
      */
     protected $current;
+    protected $current_method='';
     /**
      * @var View $view
      */
@@ -40,6 +41,7 @@ class Msg implements MsgIFace
             $Class = 'Tsy\\Library\\Msg\\Driver\\'.$Method;
             if(class_exists($Class)){
                 $this->current=new $Class($Config);
+                $this->current_method=$Method;
                 $this->handles[$Method][$md5]=$this->current;
                 return true;
             }
@@ -82,11 +84,11 @@ class Msg implements MsgIFace
     function LocalTemplateSend($To, $Params, $Content)
     {
         if(is_string($Content)){
-            $MSG_TEMPLATE_DIR=realpath(C('MSG_TEMPLATE_DIR')).DIRECTORY_SEPARATOR;
+            $MSG_TEMPLATE_DIR=C('MSG_TEMPLATE_DIR').DIRECTORY_SEPARATOR.$this->current_method.DIRECTORY_SEPARATOR.$Content.'.html';
             if(is_file($Content)){
                 $Content = file_get_contents($Content);
-            }elseif(is_file($MSG_TEMPLATE_DIR.$Content)){
-                $Content = file_get_contents($MSG_TEMPLATE_DIR.$Content);
+            }elseif($MSG_TEMPLATE_DIR){
+                $Content = file_get_contents($MSG_TEMPLATE_DIR);
             }else{
                 
             }

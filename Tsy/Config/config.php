@@ -68,5 +68,6 @@ return [
             'ACCOUNT_TOKEN'=>'',
             'APP_ID'=>''
         ],
-    ]
+    ],
+    'MSG_TEMPLATE_DIR'=>APP_PATH.DIRECTORY_SEPARATOR.'Common'.DIRECTORY_SEPARATOR.'MSG',//消息模板的存储地址
 ];
