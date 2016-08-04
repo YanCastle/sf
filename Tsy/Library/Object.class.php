@@ -14,10 +14,12 @@ class Object
 {
     const PROPERTY_ONE = "00"; //一对一属性配置，
     const PROPERTY_ARRAY = "01"; //一对多属性配置
+    const PROPERTY_ONE_OBJECT = "01"; //一对多属性配置
 
 //    const PROPERTY_OBJECT = "02";
 
     const RELATION_TABLE_NAME = "03"; //关系表名称
+    const RELATION_MAIN_COLUMN = "103"; //关系表名称
     const RELATION_TABLE_COLUMN = "04"; //关系表字段
     const RELATION_TABLE_FIELDS = "101"; //关系表字段接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
     const RELATION_TABLE_PROPERTY = "05"; //关系类型， 上面的一对多或者一对一
@@ -408,7 +410,7 @@ class Object
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
         $Model = M($this->main);
-        $ArrayProperties = [];
+        $Fields=$OneObjectProperties=$ArrayProperties=$OneObjectPropertyValues=[];
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
@@ -422,8 +424,17 @@ class Object
                     $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                     $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
                     $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
-                    
-                } else {
+
+                } else if($Config[self::RELATION_TABLE_PROPERTY] == self::PROPERTY_ONE_OBJECT){
+                    //一对一的对象式结构
+                    if(!isset($Conf[self::RELATION_MAIN_COLUMN])){
+                        $Conf[self::RELATION_MAIN_COLUMN]=$Conf[self::RELATION_TABLE_COLUMN];
+                    }
+                    if(!isset($Conf[self::RELATION_TABLE_FIELDS])){
+                        $Conf[self::RELATION_TABLE_FIELDS]='';
+                    }
+                    $OneObjectProperties[$PropertyName]=$Config;
+                }else{
                     //一对多
                     $ArrayProperties[$PropertyName] = $Config;
                 }
@@ -453,6 +464,22 @@ class Object
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
             $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN], true);
         }
+        //封装一对一的对象结构
+        foreach ($OneObjectProperties as $PropertyName=>$Config){
+            $OneObjectIDs=[];
+            $OneObjectModel = new Model($Config[self::RELATION_TABLE_NAME]);
+//                    特殊指定主表字段与子表字段相同
+            $OneObjectIDs = array_column($Objects,isset($Config[self::RELATION_MAIN_COLUMN])&&$Config[self::RELATION_MAIN_COLUMN]?$Config[self::RELATION_MAIN_COLUMN]:$Config[self::RELATION_TABLE_COLUMN]);
+//                    处理字段
+            $Fields = $this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:'',$Config[self::RELATION_TABLE_COLUMN]);
+            if($OneObjectIDs&&$Fields){
+                $OneObjectPropertyValues[$PropertyName] = array_key_set($OneObjectModel->where([
+                    $Config[self::RELATION_TABLE_COLUMN]=>['IN',$OneObjectIDs]
+                ])->field($Fields)->select(),$Config[self::RELATION_TABLE_COLUMN]);
+            }else{
+                $OneObjectPropertyValues[$PropertyName]=[];
+            }
+        }
         //处理多对多属性
         $LinkPropertyValues = [];
         foreach ($this->link as $PropertyName => $Config) {
@@ -478,7 +505,7 @@ class Object
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                     //拿到这张表的所有字段
-                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,$Conf[self::RELATION_TABLE_FIELDS]));
+                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,$Conf[self::RELATION_TABLE_FIELDS],$Conf[self::RELATION_TABLE_COLUMN]));
                 }
                 $LinkModel->field($Fields);
                 $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
@@ -530,6 +557,10 @@ class Object
 //            处理一对多关系
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig) {
                 $Objects[$ID][$PropertyName] = isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
+            }
+//            处理一对一对象化
+            foreach ($OneObjectProperties as $PropertyName=>$PropertyConfig){
+                $Objects[$ID][$PropertyName]=isset($OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
             }
 //            处理多对多关系
             foreach ($this->link as $PropertyName => $PropertyConfig) {
@@ -598,32 +629,36 @@ class Object
      * @param $TableName
      * @param $Config
      */
-    protected function _parseFieldsConfig($TableName,$Config){
+    protected function _parseFieldsConfig($TableName,$Config,$Column){
         $TableFields=[];
         $UpperTableName = strtoupper(parse_name($TableName));
+        $AllFields=[];
         if(is_array($Config)){
             if(($LastField = array_pop($Config))===true){
                 //字段排除
                 $Fields = M($TableName)->getDbFields();
-                foreach (array_diff($Filds,$Config) as $Field){
-                    $TableFields="__{$UpperTableName}__.{$Field}";
+                foreach (array_diff($Fields,$Config) as $Field){
+                    $TableFields[]="__{$UpperTableName}__.{$Field}";
                 }
             }else{
                 array_push($Config,$LastField);
                 foreach ($Config as $Field){
-                    $TableFields="__{$UpperTableName}__.{$Field}";
+                    $TableFields[]="__{$UpperTableName}__.{$Field}";
                 }
             }
         }elseif(is_string($Config)&&$Config){
             foreach (explode(',',$Config) as $Field){
-                $TableFields="__{$UpperTableName}__.{$Field}";
+                $TableFields[]="__{$UpperTableName}__.{$Field}";
             }
         }elseif(is_string($Config)&&strlen($Config)===0){
             foreach ($Fields = M($TableName)->getDbFields() as $Field){
-                $TableFields="__{$UpperTableName}__.{$Field}";
+                $TableFields[]="__{$UpperTableName}__.{$Field}";
             }
         }else{
             L('错误的字段配置信息');
+        }
+        if(!in_array("__{$UpperTableName}__.{$Column}",$TableFields)){
+            $TableFields[]="__{$UpperTableName}__.{$Column}";
         }
         return $TableFields;
     }
