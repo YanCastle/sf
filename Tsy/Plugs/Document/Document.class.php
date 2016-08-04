@@ -109,12 +109,12 @@ class Document
             }elseif(is_file($name)){
 
             }else{
-                return false;
+                return $this;
             }
         }elseif(is_object($name)){
             $this->parseClass($name,$MethodsAccess);
         }
-        return false;
+        return $this;
     }
     function parseClass($class,$MethodsAccess){
 //        判断类是否是Controller/Object/Model中的一种，如果是则调用对应类型的解析方法
