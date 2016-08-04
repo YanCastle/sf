@@ -96,6 +96,10 @@ class Tsy
         if(is_array($AopConfig)){
             foreach ($AopConfig as $point=>$config){
                 if($config instanceof \Tsy\Library\IFace\Aop){
+                    if(!is_callable($config->cmd)){
+                        L($config->cmd.':不是可回调函数或方法');
+                        break;
+                    }
                     Aop::add($config->name,$config->cmd ,$config->when,$config->Async,$config->order );
                 }
             }
