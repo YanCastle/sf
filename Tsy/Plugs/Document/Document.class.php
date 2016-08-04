@@ -33,7 +33,7 @@ class Document
      * @link http://www.baidu.com?
      *
      */
-    function getDoc($name='',$MethodsAccess=['private','protected','public']){
+    function getDoc($name='',$MethodsAccess=['public']){
 //        self::$docs=[
 //            'Classes'=>[
 //                '完整类名'=>[
@@ -473,51 +473,110 @@ class Document
         self::$docs['Classes'][$ClassName]=array_merge(self::$docs['Classes'][$ClassName],$Result);
         self::$docs['Objects'][$ClassName]=$Result;
 //        开始处理对象操作方法
+        $methods=[];
         foreach ($RefClass->getMethods() as $reflectionMethod){
-            switch ($reflectionMethod->getName()){
+            $MethodName = $reflectionMethod->getName();
+            switch ($MethodName){
                 case 'add':
                     if($Class->allow_add){
 //                        当 文件名 为框架Object时表示没有本地编写的
-                        $file= $reflectionMethod->getFileName();
+//                        $file= $reflectionMethod->getFileName();
                         if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
                             //使用框架的add方法，补全文档参数信息
                             $Comment = '';
                             //Field字段名称，Design字段配置
                             foreach (self::parseFieldsConfig($Class->main,$Class->addFields) as $Field=>$Design){
-                                $Comment .= "@param {$Design['DataType']} {$Design['Code']} {$Design['Name']} {$Design['Comment']}";
+                                if($Field==$Class->pk)continue;
+                                $Comment .= "@param {$Design['DataType']} {$Design['Code']} {$Design['Name']} {$Design['Comment']}\r\n";
                             }
-                            $Comment .= "@return bool|{$Class->main}";
+                            $Comment .= "@memo 无\r\n";
+                            $Comment .= "@return bool|{$Class->main}\r\n";
                         }else{
                             //使用自定义的add方法，读取自定义的参数信息
                             $Comment = $reflectionMethod->getDocComment();
                         }
-                        $this->parseDocComment($Comment);
+                        $methods['add']=array_merge([
+                            'name'=>'add','access'=>'public','static'=>false
+                        ],$this->parseDocComment($Comment));
                     }
                     break;
                 case 'del':
                     if($Class->allow_addel){
-
+                        $methods['del']=array_merge([
+                            'name'=>'del','access'=>'public','static'=>false
+                        ],$this->parseDocComment($Comment));
                     }
                     break;
                 case 'save':
                     if($Class->allow_save){
                         if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
                             //使用框架的add方法，补全文档参数信息
-
+                            $Comment = '';
+                            //Field字段名称，Design字段配置
+                            foreach (self::parseFieldsConfig($Class->main,$Class->saveFields) as $Field=>$Design){
+                                if($Field==$Class->pk)continue;
+                                $Comment .= "@param {$Design['DataType']} {$Design['Code']} {$Design['Name']} {$Design['Comment']}\r\n";
+                            }
+                            $Comment .= "@memo 无\r\n";
+                            $Comment .= "@return bool|{$Class->main}\r\n";
                         }else{
                             //使用自定义的add方法，读取自定义的参数信息
-
+                            $Comment = $reflectionMethod->getDocComment();
                         }
+                        $methods['save']=array_merge([
+                            'name'=>'save','access'=>'public','static'=>false
+                        ],$this->parseDocComment($Comment));
                     }
                     break;
-                case 'get':break;
-                case 'gets':break;
-                case 'search':break;
+                case 'get':
+                    $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
+                    $methods['get']=array_merge([
+                        'name'=>'get','access'=>'public','static'=>false
+                    ],$this->parseDocComment("@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
+                    break;
+                case 'gets':
+                    $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
+                    $methods['gets']=array_merge([
+                        'name'=>'gets','access'=>'public','static'=>false
+                    ],$this->parseDocComment("@param int \${$Class->pk}s {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
+                    break;
+                case 'search':
+                    $Comment = '';
+                    $Memo = '';
+                    if($Class->searchFields){
+                        $Fields = is_array($Class->searchFields)?implode(',',$Fields):$Class->searchFields;
+                        $Comment .= "@param string \$Keyword 模糊查询关键字 允许以下字段在{$Class->searchTable}中参与查询:{$Fields}\r\n";
+                    }
+                    //W参数注释生成
+                    if($Class->searchWFieldsConf&&$Class->searchWFieldsGroup){
+                        $Comment .= "@param array \$W 精确查找条件 允许备注中的字段参与精确查询\r\n";
+                        $Memo.="以下是W参数的限定描述：\r\n";
+                        foreach ($Class->searchWFieldsGroup as $GroupName=>$GroupFields){
+                            $Memo .= "允许{$Class->addFieldsConfig[$GroupName]}中的".implode(',',$GroupFields)."参与查询\r\n";
+                        }
+                    }
+                    $Comment.="@param int \$P 页码\r\n@param int \$N 每页数量\r\n @param string|array \$Sort 排序字段(暂不支持)\r\n{$Memo}";
+                    $methods['search']=array_merge([
+                        'name'=>'search','access'=>'public','static'=>false
+                    ],$this->parseDocComment($Comment));
+                    break;
                 default:
-
+                    $access = 'public';
+                    if($reflectionMethod->isPrivate()){$access='private';}
+                    if($reflectionMethod->isProtected()){$access='protected';}
+                    if($reflectionMethod->isPublic()){$access='public';}
+//            限定输出的方法范围
+                    if(!in_array($access,$MethodsAccess)){continue;}
+                    //过滤以下划线开头的操作方法
+                    if('_'==substr($MethodName,0,1)){continue;}
+                    if($MethodName=='getAll'&&$Class->is_dic===false){continue;}
+                    $methods[$MethodName]=array_merge([
+                        'name'=>$MethodName,'access'=>$access,'static'=>$reflectionMethod->isStatic()
+                    ],$this->parseDocComment($reflectionMethod->getDocComment(),$reflectionMethod));
                     break;
             }
         }
+        self::$docs['Classes'][$ClassName]['methods']=$methods;
     }
 
     /**

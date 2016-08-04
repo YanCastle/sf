@@ -70,7 +70,7 @@ class Object
         $this->__CLASS__ = get_class($this);
         $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         if (!$this->main) {
-            $this->main = $this->getObjectName();
+            $this->main = $this->_getObjectName();
         }
         if (APP_DEBUG) {
             $this->setMapByColumns();
@@ -150,7 +150,7 @@ class Object
      * @access public
      * @return string
      */
-    public function getObjectName()
+    protected function _getObjectName()
     {
         if (empty($this->name)) {
             $name = substr(get_class($this), 0, -strlen('Object'));
@@ -648,7 +648,7 @@ class Object
                 break;
         }
     }
-    function where($Where){
+    protected function where($Where){
         return M($this->main)->where($Where)->getField($this->pk,true);
     }
 
