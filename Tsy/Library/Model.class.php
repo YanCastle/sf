@@ -711,6 +711,11 @@ class Model {
                 }
             }
         }
+        if(isset($options['field'])&&is_array($options['field'])){
+            foreach ($options['field'] as $k=>$v){
+                $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, trim($v));
+            }
+        }
         // 查询过后清空sql表达式组装 避免影响下次查询
         $this->options  =   array();
         // 表达式过滤
