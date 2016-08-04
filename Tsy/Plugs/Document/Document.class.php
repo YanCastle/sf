@@ -9,9 +9,10 @@
 class Document
 {
     static protected $docs=[
-        'classes'=>[],
-        'functions'=>[],
-        'Objects'=>[]
+        'Classes'=>[],
+        'Functions'=>[],
+        'Objects'=>[],
+        'ObjectMap'=>[]
     ];
     function loadPDM($File){
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
@@ -20,7 +21,7 @@ class Document
             $Tables[str_replace('{$PREFIX}','',$k)]=$table;
         }
         $JSON['Tables']=$Tables;
-        self::$docs['pdm']=$JSON;
+        self::$docs['PDM']=$JSON;
     }
     /**
      * 获取文档信息
@@ -34,7 +35,7 @@ class Document
      */
     function getDoc($name='',$MethodsAccess=['private','protected','public']){
 //        self::$docs=[
-//            'classes'=>[
+//            'Classes'=>[
 //                '完整类名'=>[
 //                    'memo'=>'类说明',
 //                    'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
@@ -72,7 +73,7 @@ class Document
 //                    ]
 //                ]
 //            ],
-//            'functions'=>[
+//            'Functions'=>[
 //                '函数名称'=>[
 //                    'params'=>[ //参数列表
 //                        '参数名称'=>[
@@ -104,6 +105,7 @@ class Document
 
             }elseif(is_dir($name)){
 //                each_dir() 遍历循环
+
             }elseif(is_file($name)){
 
             }else{
@@ -134,7 +136,7 @@ class Document
                 $this->parseModel($RelClass,$MethodsAccess);
                 break;
             default:
-                self::$docs['classes'][$RelClass->getName()]=array_merge([
+                self::$docs['Classes'][$RelClass->getName()]=array_merge([
                     'memo'=>'',
                     'zh'=>'',
                     'name'=>'',
@@ -159,7 +161,7 @@ class Document
                         'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
                     ],$this->parseDocComment($method->getDocComment(),$method));
                 }
-                self::$docs['classes'][$RelClass->getName()]['methods']=$methods;
+                self::$docs['Classes'][$RelClass->getName()]['methods']=$methods;
                 break;
         }
 
@@ -306,14 +308,14 @@ class Document
      */
     function parseObject(ReflectionClass $RefClass,array $MethodsAccess){
         $ClassName = $RefClass->getName();
-        self::$docs['classes'][$ClassName]=array_merge([
+        self::$docs['Classes'][$ClassName]=array_merge([
             'memo'=>'',
             'zh'=>'',
             'name'=>'',
             'type'=>'Object',//这个类是什么类型，控制器？Model？Object？其他？
-            'properties'=>[],
+            'Properties'=>[],
             'methods'=>[],
-            'object'=>[]
+            'Object'=>[]
         ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
         $Class = $RefClass->newInstance();
 //        读取属性渲染对象化配置
@@ -341,12 +343,12 @@ class Document
 
                     }else{
                         //TODO DB Fields需要优化
-                        $Table = isset(self::$docs['pdm']['Tables'][parse_name($TableName)])?self::$docs['pdm']['Tables'][parse_name($TableName)]:[];
+                        $Table = isset(self::$docs['PDM']['Tables'][parse_name($TableName)])?self::$docs['PDM']['Tables'][parse_name($TableName)]:[];
                         $Fields = isset($Table['Columns'])?array_keys($Table['Columns']):M($TableName)->getDbFields();
                     }
                     //生成数据对象
                     $Object=array_merge($Object,array_fill_keys($Fields,1));
-                    foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
+                    foreach (self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
                         if(in_array($ColumnName,$Fields))
                             $ObjectColumns[$ColumnName]=$column;
                     }
@@ -377,7 +379,7 @@ class Document
 
                             }else{
                                 //TODO DB Fields需要优化
-                                $Fields = isset(self::$docs['pdm']['Tables'][parse_name($TableName)])?array_column(self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'],'Code'):M($TableName)->getDbFields();
+                                $Fields = isset(self::$docs['PDM']['Tables'][parse_name($TableName)])?array_column(self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns'],'Code'):M($TableName)->getDbFields();
                             }
                             //生成数据对象
                             $ColumnPrifix='';
@@ -387,7 +389,7 @@ class Document
                                 $ColumnPrifix=$PropertyName;
                                 $Object[$PropertyName]=array_fill_keys($Fields,1);
                             }
-                            foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
+                            foreach (self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
                                 if(in_array($ColumnName,$Fields))
                                     $ObjectColumns[($ColumnPrifix?($ColumnPrifix.'.'):'').$ColumnName]=$column;
                             }
@@ -395,7 +397,7 @@ class Document
                         if(isset($ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME])){
                             //对象映射
 //                            $TableName=$ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME];
-                            self::$docs['Objects'][$ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME]] = $ObjectProperty;
+                            self::$docs['ObjectMap'][$ObjectProperty[Tsy\Library\Object::RELATION_OBJECT_NAME]] = $ObjectProperty;
                         }
                     }
                     break;
@@ -406,7 +408,7 @@ class Document
                         $Fields=[];
                         if($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_LINK_HAS_PROPERTY]){
                             //关联表带属性，需要把相关关联表字段带入到输出结果中
-                            foreach (self::$docs['pdm']['Tables'][parse_name($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_NAME])]['Columns'] as $ColumnName=>$column){
+                            foreach (self::$docs['PDM']['Tables'][parse_name($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_NAME])]['Columns'] as $ColumnName=>$column){
                                 $ObjectColumns[($PropertyName?($PropertyName.'.'):'').$ColumnName]=$column;
                                 $Fields[]=$ColumnName;
                             }
@@ -416,7 +418,7 @@ class Document
                         //循环处理
                         foreach ($PropertyConfig[\Tsy\Library\Object::RELATION_TABLE_LINK_TABLES] as $TableName=>$Config){
 //                            读取字段
-                            foreach (self::$docs['pdm']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
+                            foreach (self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
                                 $ObjectColumns[$PropertyName.'.'.$ColumnName]=$column;
                                 $Fields[]=$ColumnName;
                             }
@@ -458,19 +460,26 @@ class Document
                 default:break;
             }
         }
-        //TODO 循环处理对象映射关系
-        foreach (self::$docs['Objects'] as $object){
-
-        }
+        $Result = [
+            'Object'=>$Object,
+            'ObjectName'=>self::$docs['PDM']['Tables'][parse_name($ObjectSetting['main'])]['Name'],
+            'ObjectJSON'=>json_format($Object),
+            'ObjectSetting'=>$ObjectSetting,
+            'ObjectColumns'=>$ObjectColumns
+        ];
+        self::$docs['Classes'][$ClassName]=array_merge(self::$docs['Classes'][$ClassName],$Result);
+        self::$docs['Objects'][$ClassName]=$Result;
     }
     /**
      * @login true
      *
      */
-    function renderMD($templateFile='',$outputFile=''){
+    function renderMD($outputFile='',$templateFile=''){
         $View = new \Tsy\Library\View();
         $View->assign(self::$docs);
+        $View->assign('line',"\r\n");
         $content = $View->fetch(is_file($templateFile)?$templateFile:(__DIR__.DIRECTORY_SEPARATOR.'Template'.DIRECTORY_SEPARATOR.'render.html'));
+        $content = str_replace('{$PREFIX}','',$content);
         if($outputFile){
             file_put_contents($outputFile,$content);
         }
