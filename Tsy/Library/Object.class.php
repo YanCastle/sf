@@ -198,15 +198,15 @@ class Object
         $data=$_POST;
         //遍历添加过滤配置
 //        foreach ($this->addFieldsConfig as $Field=>$Config){
-            
+            //在这里面生成各种参数并验证参数规则是否符合标准
 //        }
 
-        $Fields = $this->addFields?$this->addFields:M($this->main)->getDbFields();
-        $Fields = $this->_parseFieldsConfig($this->main,$this->addFields);
+//        $Fields = $this->addFields?$this->addFields:M($this->main)->getDbFields();
+        $Fields = $this->_parseChangeFieldsConfig('add',$data);
         foreach ($data as $K=>$V){
             if(!in_array($K,$Fields)){
                 L(E('不允许添加字段:'.$K));
-                return false;
+                unset($data[$K]);
             }
             if(isset($this->addFieldsConfig[$K])&&!$this->_verifyData($V,$this->addFieldsConfig[$K])){
                 // 调用数据过滤配置
@@ -214,33 +214,25 @@ class Object
                 return false;
             }
         }
-        if (!$data) {
-            return '没有传参数或参数错误';
-        }
-        foreach ($data as $d) {
-            if (array_filter($d) == []) {
-                return $d . '未传入任何参数';
-            }
+        if (count($Fields)!=count($data)) {
+            L('有参数未传入:'.implode(',',array_diff($Fields,array_keys($data))));
+            return false;
         }
         startTrans();
-        $RS=[];
         $PKID=false;
-        foreach ($data as $key => $Data) {
-            $Model = M($key);
-            if($this->main=$key){
-                $RS[] = $PKID = $Model->add($Data['data']);
-            }else{
-                $RS[] = $Model->add($Data['data']);
-            }
+//        foreach ($data as $key => $Data) {
+//            $Model = M($key);
+//            if($this->main=$key){
+//                $RS[] = $PKID = $Model->add($data);
+//            }else{
+//                $RS[] = $Model->add($data);
+//            }
+//        }
+        if($PKID = M($this->main)->add($data)){
+            commit();
         }
-        foreach ($RS as $v){
-            if($v===false){
-                rollback();
-                return false;
-            }
-        }
-        commit();
-        return $this->get($PKID);
+        rollback();
+        return $PKID?$this->get($PKID):false;
     }
 
     /**
@@ -642,6 +634,8 @@ class Object
      * 解析并生成fields字段信息,不能用于add和save操作
      * @param $TableName
      * @param $Config
+     * @param bool $Column
+     * @return array
      */
     protected function _parseFieldsConfig($TableName,$Config,$Column=false){
         $TableFields=[];
@@ -676,8 +670,43 @@ class Object
         }
         return $TableFields;
     }
-//    protected function _parseFieldsConfig(){}
-    protected function _verifyData(&$data,$rule){
+    protected function _parseChangeFieldsConfig($Method,&$Data){
+        //获取必填字段，并验证数据，再返回数据
+        switch ($Method){
+            case 'add':
+                $Rules=$this->addFieldsConfig;
+                $Fields=$this->addFields;
+                break;
+            case 'save':
+                $Rules=$this->saveFieldsConfig;
+                $Fields = $this->saveFields;
+                break;
+            default:
+                $Rules=[];
+                $Fields=[];
+                break;
+        }
+        //读取Rule并根据Rule生成数据
+//        foreach ($Rules as $Key=>$Config){
+//
+//        }
+        if(is_string($Fields)&&$Fields){
+            $Fields = explode(',',$Fields);
+        }elseif(is_array($Fields)){
+            if(true==end($Fields)){
+                array_pop($Fields);
+                $Fields = array_diff(M($this->main)->getDbFields(),$Fields);
+            }elseif(count($Fields)==0){
+                $Fields = M($this->main)->getDbFields();
+            }
+        }else{
+            $Fields = M($this->main)->getDbFields();
+        }
+        $Fields = array_diff($Fields,[$this->pk]);//去掉PK，在Add和save中不需要用到这个参数
+        return $Fields;
+        //暂时直接从POST中取有效数据返回
+    }
+    protected function _verifyData(&$Data,$Rule){
 
     }
 }

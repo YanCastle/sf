@@ -52,6 +52,7 @@ class FieldConfig
     function error($Msg){
         return $this->_option('ErrMsg',$Msg);
     }
+
     /**
      * 限定指定类型
      * @param string $Type
@@ -85,7 +86,8 @@ class FieldConfig
         if(is_callable($Rule)){
             return call_user_func($Rule);
         }elseif(is_string($Rule)){
-            return I($Rule);
+            //暂时只支持字符串直接返回做默认值
+            return $Rule;
         }elseif(is_array($Rule)){
 
         }else{
