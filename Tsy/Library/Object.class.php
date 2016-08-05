@@ -195,41 +195,12 @@ class Object
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
+        $data=$_POST;
         //遍历添加过滤配置
-        foreach ($this->addFieldsConfig as $Field=>$Config){
+//        foreach ($this->addFieldsConfig as $Field=>$Config){
             
-        }
-        $data = [];
-        foreach ($this->map as $key => $map) {
-            $TableName = explode('.', $key)[0];
-//            TODO 检测外检并实现自动添加等逻辑
-            if($TableName==parse_name($this->main)){
-                $column = explode('.', $key)[1];
-                if (!isset($data[$TableName]['PK'])) {
-                    $data[$TableName]['PK'] = $map['P'] === true ? $column : '';
-                }
-                if (isset($_POST[$column])) {
-//                if (!call_user_func($map['T'][0], $_POST[$column])) {
-//                    return $column . '参数类型错误';
-//                }
-//                if (count($_POST[$column]) >= $map['T'][1]) {
-//                    return $column . '参数过长';
-//                }
-                    $data[$TableName]['data'][$column] = $_POST[$column];
-                } else {
-                    if (true === $map['N'] &&
-                        $map['P'] === false
-                    ) {
-                        //TODO 有外键时，数据初始化的问题
-//                    return $column.'参数不完整';
-                    }
-                    if (true === $map['P']) {
-                        continue;
-                    }
-//                $data[$TableName]['data'][$column] = $_POST[$column];
-                }
-            }
-        }
+//        }
+
         $Fields = $this->addFields?$this->addFields:M($this->main)->getDbFields();
         $Fields = $this->_parseFieldsConfig($this->main,$this->addFields);
         foreach ($data as $K=>$V){
