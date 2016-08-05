@@ -14,7 +14,7 @@ class Object
 {
     const PROPERTY_ONE = "00"; //一对一属性配置，
     const PROPERTY_ARRAY = "01"; //一对多属性配置
-    const PROPERTY_ONE_OBJECT = "01"; //一对多属性配置
+    const PROPERTY_ONE_OBJECT = "02"; //一对多属性配置
 
 //    const PROPERTY_OBJECT = "02";
 
@@ -445,25 +445,29 @@ class Object
                 isset($Config[self::RELATION_TABLE_NAME]) &&
                 isset($Config[self::RELATION_TABLE_COLUMN])
             ) {
-                if ($Config[self::RELATION_TABLE_PROPERTY] == self::PROPERTY_ONE) {
-                    //一对一属性
-//                    TODO 字段映射和字段过滤
-                    $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
-                    $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
-                    $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
-
-                } else if($Config[self::RELATION_TABLE_PROPERTY] == self::PROPERTY_ONE_OBJECT){
-                    //一对一的对象式结构
-                    if(!isset($Conf[self::RELATION_MAIN_COLUMN])){
-                        $Conf[self::RELATION_MAIN_COLUMN]=$Conf[self::RELATION_TABLE_COLUMN];
-                    }
-                    if(!isset($Conf[self::RELATION_TABLE_FIELDS])){
-                        $Conf[self::RELATION_TABLE_FIELDS]='';
-                    }
-                    $OneObjectProperties[$PropertyName]=$Config;
-                }else{
-                    //一对多
-                    $ArrayProperties[$PropertyName] = $Config;
+                switch ($Config[self::RELATION_TABLE_PROPERTY]){
+                    case self::PROPERTY_ONE:
+                        //一对一属性
+                        $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
+                        $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
+                        $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                        break;
+                    case self::PROPERTY_ONE_OBJECT:
+                        //一对一的对象式结构
+                        if(!isset($Conf[self::RELATION_MAIN_COLUMN])){
+                            $Conf[self::RELATION_MAIN_COLUMN]=$Conf[self::RELATION_TABLE_COLUMN];
+                        }
+                        if(!isset($Conf[self::RELATION_TABLE_FIELDS])){
+                            $Conf[self::RELATION_TABLE_FIELDS]='';
+                        }
+                        $OneObjectProperties[$PropertyName]=$Config;
+                        break;
+                    case self::PROPERTY_ARRAY:
+                        $ArrayProperties[$PropertyName] = $Config;
+                        break;
+                    default:
+                        L('错误的Property配置');
+                        break;
                 }
             } elseif (
 //                isset($Config[self::RELATION_TABLE_PROPERTY]) &&
