@@ -29,6 +29,12 @@ class Object
     const RELATION_OBJECT_NAME = "09"; //映射关系对象名称
     const RELATION_OBJECT_COLUMN = "10"; //映射关系对象字段
 
+    //字段配置
+    const FIELD_CONFIG_DEFAULT='D';//当值不存在时会取默认值
+    const FIELD_CONFIG_DEFAULT_FUNCTION='DF';//当值不存在时会取默认值
+    const FIELD_CONFIG_VALUE='V';//不管值是否存在直接覆盖
+    const FIELD_CONFIG_VALUE_FUNCTION='VF';//不管值是否存在直接覆盖
+
     protected $main = '';//主表名称，默认为类名部分
     protected $pk = '';//表主键，默认自动获取
     protected $fields='';//自动化对象的字段过滤，接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
@@ -197,42 +203,18 @@ class Object
         if(!$this->allow_add)return false;
         $data=$_POST;
         //遍历添加过滤配置
-//        foreach ($this->addFieldsConfig as $Field=>$Config){
-            //在这里面生成各种参数并验证参数规则是否符合标准
-//        }
-
-//        $Fields = $this->addFields?$this->addFields:M($this->main)->getDbFields();
-        $Fields = $this->_parseChangeFieldsConfig('add',$data);
-        foreach ($data as $K=>$V){
-            if(!in_array($K,$Fields)){
-                L(E('不允许添加字段:'.$K));
-                unset($data[$K]);
+        $rs = $this->_parseChangeFieldsConfig('add',$data);
+        if(false!==$rs){
+            startTrans();
+            if($PKID = M($this->main)->add($data)){
+                commit();
+            }else{
+                rollback();
             }
-            if(isset($this->addFieldsConfig[$K])&&!$this->_verifyData($V,$this->addFieldsConfig[$K])){
-                // 调用数据过滤配置
-                L(E('参数不符合规则:'.$K));
-                return false;
-            }
-        }
-        if (count($Fields)!=count($data)) {
-            L('有参数未传入:'.implode(',',array_diff($Fields,array_keys($data))));
+            return $PKID?$this->get($PKID):false;
+        }else{
             return false;
         }
-        startTrans();
-        $PKID=false;
-//        foreach ($data as $key => $Data) {
-//            $Model = M($key);
-//            if($this->main=$key){
-//                $RS[] = $PKID = $Model->add($data);
-//            }else{
-//                $RS[] = $Model->add($data);
-//            }
-//        }
-        if($PKID = M($this->main)->add($data)){
-            commit();
-        }
-        rollback();
-        return $PKID?$this->get($PKID):false;
     }
 
     /**
@@ -587,22 +569,18 @@ class Object
         }else{
             L(E('错误的对象编号'));
         }
-        $Fields = $this->saveFields?$this->saveFields:M($this->main)->getDbFields();
-        foreach ($Params as $K=>$V){
-            if(!in_array($K,$Fields)){
-                L(E('不允许更改字段:'.$K));
+        $rs = $this->_parseChangeFieldsConfig('save',$Params);
+        if(false!==$rs){
+            startTrans();
+            if(false!==($rs=M($this->main)->where($Where)->save($Params))){
+                commit();
+                return is_array($ID)?$this->gets($ID):$this->get($ID);
+            }else{
+                rollback();
+                L('修改失败');
                 return false;
             }
-            if(isset($this->saveFieldsConfig[$K])&&!$this->_verifyData($V,$this->saveFieldsConfig[$K])){
-                // 调用数据过滤配置
-                L(E('参数不符合规则:'.$K));
-                return false;
-            }
-        }
-        if($Params&&is_array($Params)){
-            return M($this->main)->where($Where)->save($Params)!==false;
         }else{
-            L(E('数据存储失败'));
             return false;
         }
     }
@@ -670,6 +648,12 @@ class Object
         }
         return $TableFields;
     }
+
+    /**
+     * @param $Method
+     * @param $Data
+     * @return array|string
+     */
     protected function _parseChangeFieldsConfig($Method,&$Data){
         //获取必填字段，并验证数据，再返回数据
         switch ($Method){
@@ -703,10 +687,114 @@ class Object
             $Fields = M($this->main)->getDbFields();
         }
         $Fields = array_diff($Fields,[$this->pk]);//去掉PK，在Add和save中不需要用到这个参数
-        return $Fields;
+        //开始处理数据、填充及其它规则处理
+        foreach ($Rules as $Key=>$Rule){
+            foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_VALUE_FUNCTION,self::FIELD_CONFIG_DEFAULT,self::FIELD_CONFIG_DEFAULT_FUNCTION] as $RuleName){
+                if(isset($Rule[$RuleName])&&('add'==$Method||('save'==$Method&&isset($Data[$Key])))){
+                    //规则存在
+                    switch ($RuleName){
+                        case self::FIELD_CONFIG_DEFAULT:
+                            if(!isset($Data[$Key]))$Data[$Key]=$Rule[$RuleName];
+                            break;
+                        case self::FIELD_CONFIG_DEFAULT_FUNCTION:
+                            if(!isset($Data[$Key]))$this->_execFieldFunctionConfig($Data,$Key,$Rule[$RuleName]);
+                            break;
+                        case self::FIELD_CONFIG_VALUE:
+                            $Data[$Key]=$Rule[$RuleName];
+                            break;
+                        case self::FIELD_CONFIG_VALUE_FUNCTION:
+                            $this->_execFieldFunctionConfig($Data,$Key,$Rule[$RuleName]);
+                            break;
+                        default:
+                            L('无法识别的字段限定配置:'.$Rule);
+                            break;
+                    }
+                }
+            }
+        }
+        foreach (array_diff(array_keys($Data),$Fields) as $Field){
+            unset($Data[$Field]);
+        }
+        if('add'==$Method&&count($Data)!=count($Fields)){
+            L('如下字段不存在:'.implode(',',array_diff($Fields,$Data)));
+            return false;
+        }
+        return $Data;
         //暂时直接从POST中取有效数据返回
     }
     protected function _verifyData(&$Data,$Rule){
+
+    }
+
+    /**
+     * 执行Function的字段配置
+     * @param $Data
+     * @param $Key
+     * @param $Rule
+     */
+    protected function _execFieldFunctionConfig(&$Data,$Key,$Rule){
+        if(is_string($Rule)){
+            if(is_callable($Rule)){
+//                'time';
+                $Data[$key]=call_user_func($Rule);
+            }elseif('$'==substr($Rule,0,1)){
+//                取变量
+//                $_POST['UID'];
+                $Data[$Key]=eval($Rule);
+            }elseif(preg_match('/^[a-zA-Z\d]+\([\$a-zA-Z\d,\'"]+\)$/',$Rule)){
+                //session('UID')
+                $Rule = str_replace(['\'','"',')'],'',$Rule);
+                list($FunctionName,$Params)=explode('(',$Rule);
+                $Params = $Params?explode(',',$Params):[];
+                if(is_callable($FunctionName))
+                    $Data[$Key]=call_user_func_array($FunctionName,$Params);
+                else
+                    L('错误的字段值回调函数配置:'.$Key.':'.$FunctionName);
+            }else{
+                L('无法识别的字段限定配置:'.$Rule);
+            }
+        }elseif(is_callable($Rule)){
+            $Data[$Key]=call_user_func($Rule);
+        }else{
+            L('无法识别的字段限定配置:'.$Rule);
+        }
+    }
+    /**
+     *
+     * @param mixed $Data 数据
+     * @param string $Key 字段名称
+     * @param array $Rule 规则
+     */
+    protected function _verifyFieldsConfig(&$Data,$Method){
+        //按照规则优先级遍历
+        switch ($Method){
+            case 'add':$Rule=$this->addFieldsConfig;break;
+            case 'save':$Rule=$this->saveFieldsConfig;break;
+            default:$Rule=[];break;
+        }
+        foreach ($Data as $Key=>$Value){
+            foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_DEFAULT] as $RuleName){
+                if(isset($Rule[$RuleName])){
+                    //规则存在
+                    switch ($RuleName){
+                        case self::FIELD_CONFIG_DEFAULT:
+//                            if(!isset($Data[$Key]))$Data[$Key]=
+                                break;
+                        case self::FIELD_CONFIG_DEFAULT_FUNCTION:
+
+                            break;
+                        case self::FIELD_CONFIG_VALUE:
+
+                            break;
+                        case self::FIELD_CONFIG_VALUE_FUNCTION:
+
+                            break;
+                    }
+                }
+            }
+        }
+
+
 
     }
 }
