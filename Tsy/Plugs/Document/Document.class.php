@@ -29,7 +29,7 @@ class Document
      * @login true 需要登录
      * @param $Class
      * @author castle<castle@tansuyun.cn>
-     * @return bool
+     * @return $this
      * @link http://www.baidu.com?
      *
      */
@@ -109,7 +109,7 @@ class Document
             }elseif(is_file($name)){
 
             }else{
-                return $this;
+//                return $this;
             }
         }elseif(is_object($name)){
             $this->parseClass($name,$MethodsAccess);
@@ -299,7 +299,9 @@ class Document
         }
         return $data;
     }
+    function parseModel(ReflectionClass $RefClass,array $MethodsAccess){
 
+    }
     /**
      * 解析对象文档
      * @param $RefClass
