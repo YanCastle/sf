@@ -25,7 +25,7 @@ class Test
                     if($this->debug){
                         $GET['XDEBUG_SESSION_START']=rand(12000,15000);
                     }
-                    echo $i,":\r\nPOST:",$this->json_format(json_encode($POST,JSON_UNESCAPED_UNICODE)),"\r\n响应结果:\r\n",$this->json_format($this->curl($this->url,$GET,$POST,1)),"\r\n\r\n";
+                    echo $i,":\r\nPOST:",$this->json_format(json_encode($POST,JSON_UNESCAPED_UNICODE)),"\r\n响应结果:\r\n",$this->curl($this->url,$GET,$POST,1),"\r\n\r\n";
                 }
             }
         }
