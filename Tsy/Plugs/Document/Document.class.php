@@ -182,6 +182,12 @@ class Document
                 if(in_array($key,['package','link','author','version','access','login'] )){
                     $data[$key]=$fields[1];
                 }else{
+                    $tmpFields = array_diff($fields,['']);
+//                    $
+                    $fields=[];
+                    foreach ($tmpFields as $field){
+                        $fields[]=$field;
+                    }
                     switch ($key){
                         case 'param':
                             $count = count($fields);
@@ -476,6 +482,10 @@ class Document
         self::$docs['Objects'][$ClassName]=$Result;
 //        开始处理对象操作方法
         $methods=[];
+        $ObjectZhName=self::$docs['PDM']['Tables'][strtolower($Class->main)]['Name'];
+//        preg_replace('//','',$ObjectZhName);
+//        TODO 更换替换逻辑
+        $ObjectZhName=str_replace(['字典表'],'',$ObjectZhName);
         foreach ($RefClass->getMethods() as $reflectionMethod){
             $MethodName = $reflectionMethod->getName();
             switch ($MethodName){
@@ -485,7 +495,7 @@ class Document
 //                        $file= $reflectionMethod->getFileName();
                         if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
                             //使用框架的add方法，补全文档参数信息
-                            $Comment = '';
+                            $Comment = "{$ObjectZhName}  添加\r\n";
                             //Field字段名称，Design字段配置
                             foreach (self::parseFieldsConfig($Class->main,$Class->addFields) as $Field=>$Design){
                                 if($Field==$Class->pk)continue;
@@ -507,14 +517,14 @@ class Document
                         $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                         $methods['del']=array_merge([
                             'name'=>'del','access'=>'public','static'=>false
-                        ],$this->parseDocComment("@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}"));
+                        ],$this->parseDocComment("{$ObjectZhName}  删除\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}"));
                     }
                     break;
                 case 'save':
                     if($Class->allow_save){
                         if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
                             //使用框架的add方法，补全文档参数信息
-                            $Comment = '';
+                            $Comment = "{$ObjectZhName} 保存\r\n";
                             //Field字段名称，Design字段配置
                             foreach (self::parseFieldsConfig($Class->main,$Class->saveFields) as $Field=>$Design){
                                 if($Field==$Class->pk)continue;
@@ -535,16 +545,16 @@ class Document
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['get']=array_merge([
                         'name'=>'get','access'=>'public','static'=>false
-                    ],$this->parseDocComment("@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
+                    ],$this->parseDocComment("获取一个 {$ObjectZhName} 对象\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'gets':
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['gets']=array_merge([
                         'name'=>'gets','access'=>'public','static'=>false
-                    ],$this->parseDocComment("@param int \${$Class->pk}s {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
+                    ],$this->parseDocComment("获取 {$ObjectZhName} 对象列表\r\n@param int \${$Class->pk}s {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'search':
-                    $Comment = '';
+                    $Comment = "按条件搜索 {$ObjectZhName} 对象信息\r\n";
                     $Memo = '';
                     if($Class->searchFields){
                         $Fields = is_array($Class->searchFields)?implode(',',$Fields):$Class->searchFields;
