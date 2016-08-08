@@ -481,10 +481,10 @@ class Object
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                     //拿到这张表的所有字段
-                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,$Conf[self::RELATION_TABLE_FIELDS],$Conf[self::RELATION_TABLE_COLUMN]));
+                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,isset($Conf[self::RELATION_TABLE_FIELDS])?$Conf[self::RELATION_TABLE_FIELDS]:[],isset($Conf[self::RELATION_TABLE_COLUMN])?$Conf[self::RELATION_TABLE_COLUMN]:[]));
                 }
                 $LinkModel->field($Fields);
-                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
+                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Conf[self::RELATION_TABLE_COLUMN], true);
             } else {
                 L('Obj配置有问题', LOG_ERR, $Config);
             }
@@ -619,6 +619,7 @@ class Object
         $TableFields=[];
         $UpperTableName = strtoupper(parse_name($TableName));
         $AllFields=[];
+        if(is_array($Config)&&0==count($Config))$Config='';
         if(is_array($Config)){
             if(($LastField = array_pop($Config))===true){
                 //字段排除
@@ -716,7 +717,7 @@ class Object
             unset($Data[$Field]);
         }
         if('add'==$Method&&count($Data)!=count($Fields)){
-            L('如下字段不存在:'.implode(',',array_diff($Fields,$Data)));
+            L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
             return false;
         }
         return $Data;
@@ -736,7 +737,7 @@ class Object
         if(is_string($Rule)){
             if(is_callable($Rule)){
 //                'time';
-                $Data[$key]=call_user_func($Rule);
+                $Data[$Key]=call_user_func($Rule);
             }elseif('$'==substr($Rule,0,1)){
 //                取变量
 //                $_POST['UID'];
