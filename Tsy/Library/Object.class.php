@@ -484,7 +484,7 @@ class Object
                     $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,isset($Conf[self::RELATION_TABLE_FIELDS])?$Conf[self::RELATION_TABLE_FIELDS]:[],isset($Conf[self::RELATION_TABLE_COLUMN])?$Conf[self::RELATION_TABLE_COLUMN]:[]));
                 }
                 $LinkModel->field($Fields);
-                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Conf[self::RELATION_TABLE_COLUMN], true);
+                $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
             } else {
                 L('Obj配置有问题', LOG_ERR, $Config);
             }
