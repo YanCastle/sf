@@ -119,9 +119,10 @@ function controller($i,$data,$mid='',$layer="Controller"){
     }
     if(is_array($data)){
         $_POST=array_merge($_POST,$data);
+        $_REQUEST = array_merge($_REQUEST,$_GET,$_POST);
     }
 //    切换mid,如果当前环境下存在mid则
-    $mid&&!isset($_POST['_mid']) or $mid=$_POST['_mid'];
+    $mid or $mid=isset($_POST['_mid'])?$_POST['_mid']:'';
 //    if(!$mid){$mid=$_POST['_mid'];}
     $ModuleClassAction=explode('/',$i);
     $MCACount = count($ModuleClassAction);
@@ -241,8 +242,8 @@ function invokeClass($Class,$A,$data){
     //获取方法参数
     if($ReflectMethod->isPublic()){
 //        是否需要参数绑定
+        $args = [];
         if($ReflectMethod->getNumberOfParameters()>0){
-            $args = [];
 //            $Parameters = $ReflectMethod->getParameters();
             foreach ($ReflectMethod->getParameters() as $Param){
                 $ParamName=$Param->getName();
@@ -269,7 +270,10 @@ function invokeClass($Class,$A,$data){
             $result = $ReflectMethod->invokeArgs($Class,$args);
             \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_AFTER,$result);
         }else{
+            \Tsy\Library\Aop::exec('dispatch',\Tsy\Library\Aop::$AOP_BEFORE,$args);
+            \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_BEFORE,$args);
             $result = $ReflectMethod->invoke($Class);
+            \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_AFTER,$result);
         }
 //        判断result内容
     }else{
@@ -302,6 +306,8 @@ function L($msg = false,$Type=6,$trace=''){
         }
         //TODO 完善log函数
         if('swoole'==APP_MODE_LOW&&!ob_get_level()){
+            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
+        }elseif(APP_DEBUG){
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
         }
         return $msg;

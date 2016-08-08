@@ -1332,6 +1332,7 @@ class PHPMailer
         if (!$this->smtp->mail($smtp_from)) {
             $this->setError($this->lang('from_failed') . $smtp_from . ' : ' . implode(',', $this->smtp->getError()));
             L($this->ErrorInfo, self::STOP_CRITICAL);
+            return false;
         }
 
         // Attempt to send to all recipients

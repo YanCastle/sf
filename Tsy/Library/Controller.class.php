@@ -26,6 +26,9 @@ class Controller
     protected $ControllerName;
     protected $MethodName;
     protected $ObjectVarName;
+    /**
+     * @var Object $Object
+     */
     public $Object;
     protected $MC;
     /**
@@ -230,15 +233,11 @@ class Controller
             }elseif(is_numeric($_REQUEST[$this->PRIKey])){
                 $IDs=[$_REQUEST[$this->PRIKey]];
             }
-            if($IDs){
-                $Model = D($this->ControllerName);
-                $Deletes = $Model->obj($IDs);
-                if($Model->where([$this->PRIKey=>['in',$IDs]])->delete()){
-                    return array_values($Deletes);
-                }else{return FALSE;};
-            }else{
-                return FALSE;
+            if($this->Object->allow_del){
+                return !!$this->Object->del($IDs);
             }
+            trigger_error('_ERROR_DENY_DEL_');
+            return false;
         }else{return FALSE;}
     }
     function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[],$Properties=false){

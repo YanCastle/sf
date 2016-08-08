@@ -43,5 +43,8 @@ class AsyncAop implements Aop
         $this->cmd=$cmd;
         $this->when=$when;
         $this->order=$order;
+        if('http'==APP_MODE_LOW){
+            $this->Async=false;
+        }
     }
 }

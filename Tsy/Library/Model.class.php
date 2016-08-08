@@ -711,6 +711,11 @@ class Model {
                 }
             }
         }
+        if(isset($options['field'])&&is_array($options['field'])){
+            foreach ($options['field'] as $k=>$v){
+                $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, trim($v));
+            }
+        }
         // 查询过后清空sql表达式组装 避免影响下次查询
         $this->options  =   array();
         // 表达式过滤
@@ -1018,9 +1023,9 @@ class Model {
             }
             $_field         =   explode(',', preg_replace('/ [AaSs]{2} /',' ',$field));
             foreach ($_field as $_map){
-                list($Origin,$Now) = explode(' ',$_map );
-                if($Now){
-                    $this->_map[$Now]=strtolower($Now);
+                $array = explode(' ',$_map );
+                if(isset($array[1])){
+                    $this->_map[$array[1]]=strtolower($array[1]);
                 }
             }
             $resultSet          =   $this->db->select($options);
@@ -1855,9 +1860,9 @@ class Model {
         //
         $_field         =   is_string($field)?explode(',', preg_replace('/ [AaSs]{2} /',' ',$field)):preg_replace('/ [AaSs]{2} /',' ',$field);
         foreach ($_field as $_map){
-            list($Origin,$Now) = explode(' ',$_map );
-            if($Now){
-                $this->_map[$Now]=strtolower($Now);
+            $array = explode(' ',$_map );
+            if(isset($array[1])){
+                $this->_map[$array[1]]=strtolower($array[1]);
             }
         }
         $this->options['field']   =   $field;

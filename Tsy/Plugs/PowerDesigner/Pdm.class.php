@@ -34,83 +34,6 @@ class Pdm
     }
 
     /**
-     * 更新到数据库中
-     * @return bool
-     */
-    function update(){
-            $d = json_encode($this->json,JSON_UNESCAPED_UNICODE);
-            if($ProjectInfo&&$TableInfo){
-                //判断是否存在，如果存在则删除
-                $DomainModel = M('Domains');
-                $TablesModel = M('Tables');
-                $ColumnsModel = M('Columns');
-                $ProjectModel = M('Projects');
-                M()->startTrans();
-                $ExistProjectID = M('projects')->where(['Name'=>$ProjectInfo['Name']])->getField('ProjectID');
-                if($ExistProjectID){
-                    //TODO 删除
-                    $ColumnsModel->where(['ProjectID'=>$ExistProjectID])->delete();
-                    $TablesModel->where(['ProjectID'=>$ExistProjectID])->delete();
-                    $DomainModel->where(['ProjectID'=>$ExistProjectID])->delete();
-//                    $ProjectModel->where(['ProjectID'=>$ExistProjectID])->delete();
-                    $ProjectID=$ExistProjectID;
-                    $ProjectModel->where(['ProjectID'=>$ExistProjectID])->save($ProjectInfo);
-                }else{
-                    $ProjectID = $ProjectModel->add($ProjectInfo);
-                }
-                if($ProjectID){
-                    //Domain
-                    foreach($this->Domain as $k=>$v){
-                        $this->Domain[$k]['ProjectID']=$ProjectID;
-                    }
-                    $DomainIDMap=[];
-                    if($this->Domain){
-                        foreach($this->Domain as $k=>$v){
-                            $DomainID = $DomainModel->add($v);
-                            $DomainIDMap[$v['ID']]=$DomainID;
-                        }
-                    }else{
-                        M()->rollback();
-                        return false;
-                    }
-                    foreach($TableInfo as $Table){
-                        $Table['ProjectID']=$ProjectID;
-                        $TableID = $TablesModel->add($Table);
-                        if($TableID){
-//                            $DomainIDs = array_column($Table['Columns'],'ID');
-
-//                            if($DomainIDs){
-//                                $DomainIDMap=$DomainModel->where(['ID'=>['in',$DomainIDs]])->getField('ID,DomainID',true);
-//                            }
-                            foreach($Table['Columns'] as $k=>$v){
-                                $Table['Columns'][$k]['TableID']=$TableID;
-                                $Table['Columns'][$k]['ProjectID']=$ProjectID;
-                                $Table['Columns'][$k]['DomainID']=isset($DomainIDMap[$v['DomainID']])?$DomainIDMap[$v['DomainID']]:0;
-                            }
-                            if($ColumnsModel->addAll($Table['Columns'])){
-
-                            }else{
-                                M()->rollback();
-                                return false;
-                            }
-                        }else{
-                            M()->rollback();
-                            return false;
-                        }
-                    }
-                    M()->commit();
-                    return true;
-                }else{
-                    M()->rollback();
-                    return false;
-                }
-            }else{
-                M()->rollback();
-                return false;
-            }
-    }
-
-    /**
      * 获取项目信息
      * @return array|bool
      */
@@ -144,9 +67,10 @@ class Pdm
                     $html = pq($oColumn)->html();
                     continue;
                 }
+                $Code = pq($oColumn)->find('aCode')->html();
                 $Column=[
                     'Name'=>pq($oColumn)->find('aName')->html(),
-                    'Code'=>pq($oColumn)->find('aCode')->html(),
+                    'Code'=>$Code,
                     'Comment'=>pq($oColumn)->find('aComment')->html(),
                     'DataType'=>pq($oColumn)->find('aDataType')->html(),
                     'I'=>pq($oColumn)->find('aIdentity')->html()==1,
@@ -157,7 +81,7 @@ class Pdm
                     'DefaultValue'=>pq($oColumn)->find('aDefaultValue')->html(),
                 ];
                 $Column['DefaultValue']=$Column['DefaultValue']==false?"":$Column['DefaultValue'];
-                $Columns[]=$Column;
+                $Columns[$Code]=$Column;
             }
             $Table['Columns']=$Columns;
             $Tables[$Table['Code']]=$Table;
@@ -175,6 +99,7 @@ class Pdm
                 'Name'=>pq($oPhysicalDomain)->find('aName:first')->html(),
                 'Code'=>pq($oPhysicalDomain)->find('aCode:first')->html(),
                 'Comment'=>pq($oPhysicalDomain)->find('aComment:first')->html(),
+                'DataType'=>pq($oPhysicalDomain)->find('aDataType:first')->html(),
             ];
             $this->Domain[$Domain['ID']]=$Domain;
         }

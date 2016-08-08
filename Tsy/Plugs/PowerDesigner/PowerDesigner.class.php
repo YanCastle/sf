@@ -1,12 +1,14 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Castle
+ * User=> Castle
  * Date: 2016/05/16
  * Time: 11:56
  */
 
 namespace Tsy\Plugs\PowerDesigner;
+
+//use Tsy\Plugs\PowerDesigner\Pdm;
 
 class PowerDesigner
 {
@@ -87,5 +89,59 @@ class PowerDesigner
             $ControllerName[]=str_replace(' ','',ucwords($Name.' Controller')).'.class.php';
         }
         return ['Model'=>$ModelName,'Controller'=>$ControllerName];
+    }
+    static function analysis($File){
+        if(!is_file($File)){
+            return false;
+        }
+        $Pdm = new Pdm();
+        if($Pdm->load($File)){
+            return $Pdm->json;
+        }
+        return false;
+    }
+
+    /**
+     * 获取前端需要的JSON结构
+     * @param $File
+     * @return mixed
+     */
+    static function getObjectJson($File,$OutPut){
+        $JSON = self::analysis($File);
+        $Obj = [];
+        foreach ($JSON['Tables'] as $TableName=>$Table){
+            $Columns=[];
+            $I='';
+            foreach ($Table['Columns'] as $Column){
+                if($Column['I']){
+                    $I=$Column['Code'];
+                }
+                $Columns=[
+                        "Name"=> $Column['Name'],
+                        "Code"=> $Column['Code'],
+                        "Comment"=> $Column['Comment'],
+                        "DataType"=> $Column['DataType'],
+                        "Length"=> [
+                                "11"
+                            ],
+                        "Must"=> $Column['M'],
+                        "Default"=> $Column['DefaultValue']?'':$Column['DefaultValue'],
+                        "Editable"=> false,
+                        "Hidden"=> false,
+                        "GetBy"=> false,
+                        "SearchBy"=> false,
+                        "RegExp"=> ""
+                ];
+            }
+            $Obj[]=[
+                "Name"=> $Table['Name'],
+                "Code"=> $Table['Code'],
+                "Comment"=> $Table['Comment'],
+                "I"=> "",
+                "Columns"=>$Columns
+            ];
+        }
+//        $Obj['obj']=$Obj;
+        file_put_contents($OutPut,str_replace('{$PREFIX}','',json_encode(['obj'=>$Obj],JSON_UNESCAPED_UNICODE)));
     }
 }

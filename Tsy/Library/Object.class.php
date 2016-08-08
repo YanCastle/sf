@@ -12,29 +12,38 @@ use Tsy\Plugs\Db\Db;
 
 class Object
 {
-    const PROPERTY_ONE = "00";
-    const PROPERTY_ARRAY = "01";
+    const PROPERTY_ONE = "00"; //一对一属性配置，
+    const PROPERTY_ARRAY = "01"; //一对多属性配置
+    const PROPERTY_ONE_OBJECT = "02"; //一对多属性配置
 
 //    const PROPERTY_OBJECT = "02";
 
-    const RELATION_TABLE_NAME = "03";
-    const RELATION_TABLE_COLUMN = "04";
-    const RELATION_TABLE_PROPERTY = "05";
-    const RELATION_TABLE_LINK_HAS_PROPERTY = "06";
-    const RELATION_TABLE_LINK_TABLES = "07";
-    const RELATION_OBJECT = "08";
-    const RELATION_OBJECT_NAME = "09";
-    const RELATION_OBJECT_COLUMN = "10";
+    const RELATION_TABLE_NAME = "03"; //关系表名称
+    const RELATION_MAIN_COLUMN = "103"; //关系表名称
+    const RELATION_TABLE_COLUMN = "04"; //关系表字段
+    const RELATION_TABLE_FIELDS = "101"; //关系表字段接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
+    const RELATION_TABLE_PROPERTY = "05"; //关系类型， 上面的一对多或者一对一
+    const RELATION_TABLE_LINK_HAS_PROPERTY = "06"; // 多对多配置中是否具有属性
+    const RELATION_TABLE_LINK_TABLES = "07"; //多对多属性的连接表表名
+    const RELATION_OBJECT = "08"; //映射关系对象
+    const RELATION_OBJECT_NAME = "09"; //映射关系对象名称
+    const RELATION_OBJECT_COLUMN = "10"; //映射关系对象字段
+
+    //字段配置
+    const FIELD_CONFIG_DEFAULT='D';//当值不存在时会取默认值
+    const FIELD_CONFIG_DEFAULT_FUNCTION='DF';//当值不存在时会取默认值
+    const FIELD_CONFIG_VALUE='V';//不管值是否存在直接覆盖
+    const FIELD_CONFIG_VALUE_FUNCTION='VF';//不管值是否存在直接覆盖
 
     protected $main = '';//主表名称，默认为类名部分
     protected $pk = '';//表主键，默认自动获取
+    protected $fields='';//自动化对象的字段过滤，接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
     protected $link = [];//多对多属性配置
     protected $property = [];//一对一或一对多属性配置
     protected $data = [];//添加、修改时的数据
     protected $searchFields = [];//参与Keywords搜索的字段列表
     protected $searchTable='';
     protected $propertyMap = [];//属性配置反向映射
-    protected $object = [];//对象化属性配置，一个对象中嵌套另一个属性的配置情况
     protected $_write_filter = [];//输入写入过滤配置
     protected $_read_filter = [];//输入读取过滤配置
     protected $_read_deny=[];//禁止读取字段
@@ -43,18 +52,23 @@ class Object
 //        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
     ];
     protected $searchWFieldsConf=[
-    
+
     ];
     
     public $is_dic=false;
     public $allow_add=true;//是否允许添加
+    public $addFields=[];//定义允许添加的字段，规则同字段限定,默认不限制
+    public $addFieldsConfig=[];
     public $allow_save=true;//是否允许修改
+    public $saveFields=[];//定义允许修改的字段，规则同字段限定
+    public $saveFieldsConfig=[];
     public $allow_del=true;//是否允许删除
     public $map = [
 //        自动生成
     ];//字段=》类型 表名 映射
     protected $__CLASS__;
     protected $MC=[];
+    protected $directProperties=[];
     function __construct()
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
@@ -62,7 +76,7 @@ class Object
         $this->__CLASS__ = get_class($this);
         $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         if (!$this->main) {
-            $this->main = $this->getObjectName();
+            $this->main = $this->_getObjectName();
         }
         if (APP_DEBUG) {
             $this->setMapByColumns();
@@ -76,6 +90,11 @@ class Object
             }
         }
         $this->setPropertyMap();
+        foreach ($this->property as $PropertyName=>$Config){
+            if($Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
+                $this->directProperties[$PropertyName]=$this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_NAME])?$Config[self::RELATION_TABLE_NAME]:'');
+            }
+        }
     }
 
     /**
@@ -137,7 +156,7 @@ class Object
      * @access public
      * @return string
      */
-    public function getObjectName()
+    protected function _getObjectName()
     {
         if (empty($this->name)) {
             $name = substr(get_class($this), 0, -strlen('Object'));
@@ -182,61 +201,20 @@ class Object
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
-        $data = [];
-        foreach ($this->map as $key => $map) {
-            $TableName = explode('.', $key)[0];
-            $column = explode('.', $key)[1];
-            if (!$data[$TableName]['PK']) {
-                $data[$TableName]['PK'] = $map['P'] === true ? $column : '';
-            }
-            if (isset($_POST[$column])) {
-//                if (!call_user_func($map['T'][0], $_POST[$column])) {
-//                    return $column . '参数类型错误';
-//                }
-//                if (count($_POST[$column]) >= $map['T'][1]) {
-//                    return $column . '参数过长';
-//                }
-                $data[$TableName]['data'][$column] = $_POST[$column];
-            } else {
-                if (true === $map['N'] &&
-                    $map['P'] === false
-                ) {
-                    //TODO 有外键时，数据初始化的问题
-//                    return $column.'参数不完整';
-                }
-                if (true === $map['P']) {
-                    continue;
-                }
-                $data[$TableName]['data'][$column] = $_POST[$column];
-            }
-        }
-        if (!$data) {
-            return '没有传参数或参数错误';
-        }
-        foreach ($data as $d) {
-            if (array_filter($d) == []) {
-                return $d . '未传入任何参数';
-            }
-        }
-        startTrans();
-        $RS=[];
-        $PKID=false;
-        foreach ($data as $key => $Data) {
-            $Model = M($key);
-            if($this->main=$key){
-                $RS[] = $PKID = $Model->add($Data['data']);
+        $data=$_POST;
+        //遍历添加过滤配置
+        $rs = $this->_parseChangeFieldsConfig('add',$data);
+        if(false!==$rs){
+            startTrans();
+            if($PKID = M($this->main)->add($data)){
+                commit();
             }else{
-                $RS[] = $Model->add($Data['data']);
-            }
-        }
-        foreach ($RS as $v){
-            if($v===false){
                 rollback();
-                return false;
             }
+            return $PKID?$this->get($PKID):false;
+        }else{
+            return false;
         }
-        commit();
-        return $this->get($PKID);
     }
 
     /**
@@ -246,6 +224,7 @@ class Object
      */
     function get($ID=false)
     {
+        $ID = $ID?$ID:$_POST[$this->pk];
         if (!is_numeric($ID)) {
             return false;
         }
@@ -270,122 +249,88 @@ class Object
      */
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
-        $Model = new Model($this->searchTable?$this->searchTable:$this->main);
+        $Model = new Model($this->searchTable ? $this->searchTable : $this->main);
         $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = false;
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
         $Tables = ['__' . strtoupper($this->main) . '__'];
         $ObjectSearchConfig = [];
         $Where = [];
-        if (is_string($Keyword) &&
-            strlen($Keyword) > 0 &&$this->searchFields
+        $WObjectIDArray = [];
+        $KeywordObjectIDs=[];
+        if ((is_string($Keyword) || is_numeric($Keyword)) &&
+            strlen($Keyword) > 0 && $this->searchFields
         ) {
             foreach ($this->searchFields as $Filed) {
                 $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';', "\r\n"], '', $Keyword) . '%'];
             }
-            $Where['_logic']='OR';
+            $Where['_logic'] = 'OR';
             $Model->where($Where);
+            $KeywordObjectIDs = $Model->getField($this->pk, true);
         }
         if ($W) {
-            $Data = param_group($this->searchWFieldsGroup,$W);
+            $Data = param_group($this->searchWFieldsGroup, $W);
             unset($Data[0]);
-//            $Data=[
-//                'Order'=>[
-//                    'OrderID'=>1,
-//                    'Time'=>['between',[1,10]],
-//                    'TraderID'=>['eq',1]
-//                ]
-//            ];
-            $WObjectIDArray=[];
-            foreach ($Data as $ObjectName => $Params){
-//                $Params=[
-//                    'OrderID'=>1,
-//                    'Time'=>['between',[1,10]],
-//                    'TraderID'=>['eq',1]
-//                ];
-                $a=isset($this->searchWFieldsConf[$ObjectName]);
-                if(isset($this->searchWFieldsConf[$ObjectName])){
+            foreach ($Data as $ObjectName => $Params) {
+                $a = isset($this->searchWFieldsConf[$ObjectName]);
+                if (isset($this->searchWFieldsConf[$ObjectName])) {
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
-                    if (is_string($this->searchWFieldsConf[$ObjectName])&&preg_match('/^[a-z_]+[a-z]$/',$this->searchWFieldsConf[$ObjectName])){
+                    if (is_string($this->searchWFieldsConf[$ObjectName]) && preg_match('/^[a-z_A-Z]+[a-zA-Z]$/', $this->searchWFieldsConf[$ObjectName])) {
                         //直接值为表名
-                        $WObjectIDArray[] =$this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
-                    }elseif(is_callable($this->searchWFieldsConf[$ObjectName])){
+                        $WObjectIDArray[] = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
+                    } elseif (is_callable($this->searchWFieldsConf[$ObjectName])) {
                         //回调
-                        $Result = call_user_func($this->searchWFieldsConf[$ObjectName],$Params);
-                        if(is_string($Result)&&preg_match('/^[a-z_]+[a-z]$/',$Result)){
+                        $Result = call_user_func($this->searchWFieldsConf[$ObjectName], $Params);
+                        if (is_string($Result) && preg_match('/^[a-z_]+[a-z]$/', $Result)) {
                             //吧这个当作表名，再参与上一个逻辑
-                        $WObjectIDArray[] = $this->searchW($Result,$Params,$this->pk);
-                        }elseif(is_array($Result)
-                            &&preg_match('/^\d+$/',implode('',$Result))
+                            $WObjectIDArray[] = $this->searchW($Result, $Params, $this->pk);
+                        } elseif (is_array($Result)
+                            && preg_match('/^\d+$/', implode('', $Result))
 //                            &&!in_array(false,array_map(function($d){return is_numeric($d);},$Result ) )
-                        ){
+                        ) {
                             //继续检测是否是以为数组且数组值全为数字且大于0
-                            $WObjectIDArray[]=$Result;
-                        }else{
+                            $WObjectIDArray[] = $Result;
+                        } else {
                             //回调函数的返回值错误
-                            L(E('_ERROR_SEARCH_CALLBACK_').json_encode($this->searchWFiledsConf[$ObjectName],JSON_UNESCAPED_UNICODE));
+                            L(E('_ERROR_SEARCH_CALLBACK_') . json_encode($this->searchWFiledsConf[$ObjectName], JSON_UNESCAPED_UNICODE));
                         }
-                    }else{
+                    } else {
 
                     }
-                }else{
+                } else {
                     L(E('_NO_SEARCH_TABLE_CONFIG_'));
                 }
             }
-            if($WObjectIDArray){
-                $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
-            }
-//            $Where = [];
-//            foreach ($W as $k => $v) {
-//                if (($TableColumn = explode('.', $k)) &&
-//                    $v
-//                ) {
-//                    switch (count($TableColumn)) {
-//                        case 1:
-////                            主表属性搜索条件
-//                            $Where[$TableColumn[0]] = $v;
-//                            break;
-//                        case 2:
-////TODO                             属性表中的搜索条件
-////                            读取属性映射列表，获取属性类型
-//                            $TableName = $TableColumn[0];
-//                            $ColumnName = $TableColumn[1];
-//                            if (!isset($ObjectSearchConfig[$TableName])) {
-//                                $ObjectSearchConfig[$TableName] = [];
-//                            }
-//                            $ObjectSearchConfig[$TableName][$ColumnName] = $v;
-//                            break;
-//                        default:
-//                            // 返回失败
-//                            L('ERROR_SEARCH_CONFIG', LOG_WARNING, [$k => $v]);
-//                            break;
-//                    }
-//                }
-//                //TODO 如果开启强制校验模式则返回错误
-//            }
-//            $MoreModel = new Model();
-//            foreach ($ObjectSearchConfig as $tableName => $item) {
-//                $Where = [];
-//                foreach ($item as $key => $value) {
-//                    if (is_array($value)) {
-//                        $Where['_complex'][$key] = $value;
-//                    } else {
-//                        $Where[$key] = $value;
-//                    }
-//                }
-//                if ($rs = $MoreModel->table($DB_PREFIX . strtolower($tableName))->where($Where)->getField(str_replace('_', '', parse_name($this->pk)), true)) {
-//                    $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $rs) : $rs;
-//                }
-//            }
         }
-//        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
-        //交集组合方式
-        $ObjectIDs = $ObjectIDs ? array_intersect($ObjectIDs, $Model->getField($this->pk, true)) : $Model->getField($this->pk, true);
-        //TODO 需要支持并集组合
+        if($WObjectIDArray){
+            $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
+        }
+        //取交集
+        if($ObjectIDs){
+            if(strlen($Keyword)){
+                $ObjectIDs = array_intersect($ObjectIDs,$KeywordObjectIDs);
+            }
+        }else{
+            $ObjectIDs=$KeywordObjectIDs;
+        }
+        if (strlen($Keyword) === 0 && count($W) === 0) {
+            $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
+            return [
+                'L' => array_values($this->gets($ObjectIDs)),
+                'P' => $P,
+                'N' => $N,
+                'T' => $Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count'],
+            ];
+        }
+        if (!is_array($ObjectIDs)) {
+            return [
+                'L' => [], 'P' => $P, 'N' => $N, 'T' => 0
+            ];
+        }
         $T = count($ObjectIDs);
-        rsort($ObjectIDs,SORT_NUMERIC);
-        $PageIDs = is_array($ObjectIDs)?array_chunk($ObjectIDs, $N):[];
-        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1],$Properties) : [];
+        rsort($ObjectIDs, SORT_NUMERIC);
+        $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
+        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1], $Properties) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
@@ -437,7 +382,7 @@ class Object
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
         $Model = M($this->main);
-        $ArrayProperties = [];
+        $Fields=$OneObjectProperties=$ArrayProperties=$OneObjectPropertyValues=[];
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
@@ -445,15 +390,29 @@ class Object
                 isset($Config[self::RELATION_TABLE_NAME]) &&
                 isset($Config[self::RELATION_TABLE_COLUMN])
             ) {
-                if ($Config[self::RELATION_TABLE_PROPERTY] == self::PROPERTY_ONE) {
-                    //一对一属性
-//                    TODO 字段映射
-                    $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
-                    $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
-                    $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
-                } else {
-                    //一对多
-                    $ArrayProperties[$PropertyName] = $Config;
+                switch ($Config[self::RELATION_TABLE_PROPERTY]){
+                    case self::PROPERTY_ONE:
+                        //一对一属性
+                        $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
+                        $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
+                        $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                        break;
+                    case self::PROPERTY_ONE_OBJECT:
+                        //一对一的对象式结构
+                        if(!isset($Conf[self::RELATION_MAIN_COLUMN])){
+                            $Conf[self::RELATION_MAIN_COLUMN]=$Conf[self::RELATION_TABLE_COLUMN];
+                        }
+                        if(!isset($Conf[self::RELATION_TABLE_FIELDS])){
+                            $Conf[self::RELATION_TABLE_FIELDS]='';
+                        }
+                        $OneObjectProperties[$PropertyName]=$Config;
+                        break;
+                    case self::PROPERTY_ARRAY:
+                        $ArrayProperties[$PropertyName] = $Config;
+                        break;
+                    default:
+                        L('错误的Property配置');
+                        break;
                 }
             } elseif (
 //                isset($Config[self::RELATION_TABLE_PROPERTY]) &&
@@ -462,6 +421,7 @@ class Object
                 isset($Config[self::RELATION_OBJECT_COLUMN]) &&
                 isset($Config[self::RELATION_OBJECT_NAME])
             ) {
+//                if(isset($Config[self::RE]))
                 $PropertyObjects[$PropertyName] = $Config;
             }
         }
@@ -480,6 +440,22 @@ class Object
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
             $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN], true);
         }
+        //封装一对一的对象结构
+        foreach ($OneObjectProperties as $PropertyName=>$Config){
+            $OneObjectIDs=[];
+            $OneObjectModel = new Model($Config[self::RELATION_TABLE_NAME]);
+//                    特殊指定主表字段与子表字段相同
+            $OneObjectIDs = array_column($Objects,isset($Config[self::RELATION_MAIN_COLUMN])&&$Config[self::RELATION_MAIN_COLUMN]?$Config[self::RELATION_MAIN_COLUMN]:$Config[self::RELATION_TABLE_COLUMN]);
+//                    处理字段
+            $Fields = $this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:'',$Config[self::RELATION_TABLE_COLUMN]);
+            if($OneObjectIDs&&$Fields){
+                $OneObjectPropertyValues[$PropertyName] = array_key_set($OneObjectModel->where([
+                    $Config[self::RELATION_TABLE_COLUMN]=>['IN',$OneObjectIDs]
+                ])->field($Fields)->select(),$Config[self::RELATION_TABLE_COLUMN]);
+            }else{
+                $OneObjectPropertyValues[$PropertyName]=[];
+            }
+        }
         //处理多对多属性
         $LinkPropertyValues = [];
         foreach ($this->link as $PropertyName => $Config) {
@@ -491,18 +467,23 @@ class Object
                 is_array($Config[self::RELATION_TABLE_LINK_TABLES]) &&
                 count($Config[self::RELATION_TABLE_LINK_TABLES]) > 0
             ) {
+                $Fields=[];
+                $UpperMainTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                 $LinkModel = M($Config[self::RELATION_TABLE_NAME])->where(
                     [
-                        $Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]
+                        "__{$UpperMainTable}__.".$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]
                     ]
                 );
                 $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
 //                TODO Link表中的多对多关系先忽略不计
-                foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $TableName => $Conf) {
-                    $TableName = strtoupper(parse_name($TableName));
+                foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $OriginTableName => $Conf) {
+                    $TableName = strtoupper(parse_name($OriginTableName));
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                    //拿到这张表的所有字段
+                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,isset($Conf[self::RELATION_TABLE_FIELDS])?$Conf[self::RELATION_TABLE_FIELDS]:[],isset($Conf[self::RELATION_TABLE_COLUMN])?$Conf[self::RELATION_TABLE_COLUMN]:[]));
                 }
+                $LinkModel->field($Fields);
                 $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
             } else {
                 L('Obj配置有问题', LOG_ERR, $Config);
@@ -525,7 +506,10 @@ class Object
                         L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);
                     }
                 }elseif(count($ModuleObject)==1){
-                    //TODO 当前模块下的。。
+                    // 当前模块下的。。
+                    $ClassName = $this->MC[0].'\\Object\\'.$ObjectName.'Object';
+                    $$ObjectName = new $ClassName();
+                    $PropertyObjectValues[$Key] = $$ObjectName->gets(array_column($Objects,$Config[self::RELATION_OBJECT_COLUMN]));
                 }else{
                     L(E('_OBJECT_PROPERTY_OBJECT_ERROR_').':'.$Key);
                 }
@@ -550,6 +534,10 @@ class Object
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig) {
                 $Objects[$ID][$PropertyName] = isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
             }
+//            处理一对一对象化
+            foreach ($OneObjectProperties as $PropertyName=>$PropertyConfig){
+                $Objects[$ID][$PropertyName]=isset($OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
+            }
 //            处理多对多关系
             foreach ($this->link as $PropertyName => $PropertyConfig) {
                 $Objects[$ID][$PropertyName] = isset($LinkPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $LinkPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
@@ -563,14 +551,15 @@ class Object
         return $Objects;
     }
 
-    function save($ID,$Params)
+    function save($ID=false,$Params)
     {
         if(!$this->allow_save)return false;
         $Where=[];
+        $ID = $ID?$ID:$_POST[$this->pk];
         if(is_array($ID)){
             foreach ($ID as $v){
                 if(!is_numeric($v)){
-                    L(E('_SAVE_ID_'));
+                    L(E('错误的对象编号'));
                     return false;
                 }
             }
@@ -578,12 +567,21 @@ class Object
         }elseif (is_numeric($ID)){
             $Where[$this->pk]=$ID;
         }else{
-            L(E('_SAVE_ID_'));
+            L(E('错误的对象编号'));
         }
-        if($Params&&is_array($Params)){
-            return M($this->main)->where($Where)->save($Params)!==false;
+        $rs = $this->_parseChangeFieldsConfig('save',$Params);
+        if(false!==$rs){
+            startTrans();
+            if(false!==($rs=M($this->main)->where($Where)->save($Params))){
+                commit();
+                return is_array($ID)?$this->gets($ID):$this->get($ID);
+            }else{
+                rollback();
+                L('修改失败');
+                return false;
+            }
         }else{
-            L(E('_SAVE_DATA_'));
+            return false;
         }
     }
     function __call($name, $arguments)
@@ -595,7 +593,7 @@ class Object
                 break;
         }
     }
-    function where($Where){
+    protected function where($Where){
         return M($this->main)->where($Where)->getField($this->pk,true);
     }
 
@@ -608,5 +606,196 @@ class Object
             return $this->gets(M($this->main)->getField($this->pk,true));
         }
         return null;
+    }
+
+    /**
+     * 解析并生成fields字段信息,不能用于add和save操作
+     * @param $TableName
+     * @param $Config
+     * @param bool $Column
+     * @return array
+     */
+    protected function _parseFieldsConfig($TableName,$Config,$Column=false){
+        $TableFields=[];
+        $UpperTableName = strtoupper(parse_name($TableName));
+        $AllFields=[];
+        if(is_array($Config)&&0==count($Config))$Config='';
+        if(is_array($Config)){
+            if(($LastField = array_pop($Config))===true){
+                //字段排除
+                $Fields = M($TableName)->getDbFields();
+                foreach (array_diff($Fields,$Config) as $Field){
+                    $TableFields[]="__{$UpperTableName}__.{$Field}";
+                }
+            }else{
+                array_push($Config,$LastField);
+                foreach ($Config as $Field){
+                    $TableFields[]="__{$UpperTableName}__.{$Field}";
+                }
+            }
+        }elseif(is_string($Config)&&$Config){
+            foreach (explode(',',$Config) as $Field){
+                $TableFields[]="__{$UpperTableName}__.{$Field}";
+            }
+        }elseif(is_string($Config)&&strlen($Config)===0){
+            foreach ($Fields = M($TableName)->getDbFields() as $Field){
+                $TableFields[]="__{$UpperTableName}__.{$Field}";
+            }
+        }else{
+            L('错误的字段配置信息');
+        }
+        if(!in_array("__{$UpperTableName}__.{$Column}",$TableFields)&&$Column){
+            $TableFields[]="__{$UpperTableName}__.{$Column}";
+        }
+        return $TableFields;
+    }
+
+    /**
+     * @param $Method
+     * @param $Data
+     * @return array|string
+     */
+    protected function _parseChangeFieldsConfig($Method,&$Data){
+        //获取必填字段，并验证数据，再返回数据
+        switch ($Method){
+            case 'add':
+                $Rules=$this->addFieldsConfig;
+                $Fields=$this->addFields;
+                break;
+            case 'save':
+                $Rules=$this->saveFieldsConfig;
+                $Fields = $this->saveFields;
+                break;
+            default:
+                $Rules=[];
+                $Fields=[];
+                break;
+        }
+        //读取Rule并根据Rule生成数据
+//        foreach ($Rules as $Key=>$Config){
+//
+//        }
+        if(is_string($Fields)&&$Fields){
+            $Fields = explode(',',$Fields);
+        }elseif(is_array($Fields)){
+            if(true==end($Fields)){
+                array_pop($Fields);
+                $Fields = array_diff(M($this->main)->getDbFields(),$Fields);
+            }elseif(count($Fields)==0){
+                $Fields = M($this->main)->getDbFields();
+            }
+        }else{
+            $Fields = M($this->main)->getDbFields();
+        }
+        $Fields = array_diff($Fields,[$this->pk]);//去掉PK，在Add和save中不需要用到这个参数
+        //开始处理数据、填充及其它规则处理
+        foreach ($Rules as $Key=>$Rule){
+            foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_VALUE_FUNCTION,self::FIELD_CONFIG_DEFAULT,self::FIELD_CONFIG_DEFAULT_FUNCTION] as $RuleName){
+                if(isset($Rule[$RuleName])&&('add'==$Method||('save'==$Method&&isset($Data[$Key])))){
+                    //规则存在
+                    switch ($RuleName){
+                        case self::FIELD_CONFIG_DEFAULT:
+                            if(!isset($Data[$Key]))$Data[$Key]=$Rule[$RuleName];
+                            break;
+                        case self::FIELD_CONFIG_DEFAULT_FUNCTION:
+                            if(!isset($Data[$Key]))$this->_execFieldFunctionConfig($Data,$Key,$Rule[$RuleName]);
+                            break;
+                        case self::FIELD_CONFIG_VALUE:
+                            $Data[$Key]=$Rule[$RuleName];
+                            break;
+                        case self::FIELD_CONFIG_VALUE_FUNCTION:
+                            $this->_execFieldFunctionConfig($Data,$Key,$Rule[$RuleName]);
+                            break;
+                        default:
+                            L('无法识别的字段限定配置:'.$Rule);
+                            break;
+                    }
+                }
+            }
+        }
+        foreach (array_diff(array_keys($Data),$Fields) as $Field){
+            unset($Data[$Field]);
+        }
+        if('add'==$Method&&count($Data)!=count($Fields)){
+            L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
+            return false;
+        }
+        return $Data;
+        //暂时直接从POST中取有效数据返回
+    }
+    protected function _verifyData(&$Data,$Rule){
+
+    }
+
+    /**
+     * 执行Function的字段配置
+     * @param $Data
+     * @param $Key
+     * @param $Rule
+     */
+    protected function _execFieldFunctionConfig(&$Data,$Key,$Rule){
+        if(is_string($Rule)){
+            if(is_callable($Rule)){
+//                'time';
+                $Data[$Key]=call_user_func($Rule);
+            }elseif('$'==substr($Rule,0,1)){
+//                取变量
+//                $_POST['UID'];
+                $Data[$Key]=eval($Rule);
+            }elseif(preg_match('/^[a-zA-Z\d]+\([\$a-zA-Z\d,\'"]+\)$/',$Rule)){
+                //session('UID')
+                $Rule = str_replace(['\'','"',')'],'',$Rule);
+                list($FunctionName,$Params)=explode('(',$Rule);
+                $Params = $Params?explode(',',$Params):[];
+                if(is_callable($FunctionName))
+                    $Data[$Key]=call_user_func_array($FunctionName,$Params);
+                else
+                    L('错误的字段值回调函数配置:'.$Key.':'.$FunctionName);
+            }else{
+                L('无法识别的字段限定配置:'.$Rule);
+            }
+        }elseif(is_callable($Rule)){
+            $Data[$Key]=call_user_func($Rule);
+        }else{
+            L('无法识别的字段限定配置:'.$Rule);
+        }
+    }
+    /**
+     *
+     * @param mixed $Data 数据
+     * @param string $Key 字段名称
+     * @param array $Rule 规则
+     */
+    protected function _verifyFieldsConfig(&$Data,$Method){
+        //按照规则优先级遍历
+        switch ($Method){
+            case 'add':$Rule=$this->addFieldsConfig;break;
+            case 'save':$Rule=$this->saveFieldsConfig;break;
+            default:$Rule=[];break;
+        }
+        foreach ($Data as $Key=>$Value){
+            foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_DEFAULT] as $RuleName){
+                if(isset($Rule[$RuleName])){
+                    //规则存在
+                    switch ($RuleName){
+                        case self::FIELD_CONFIG_DEFAULT:
+//                            if(!isset($Data[$Key]))$Data[$Key]=
+                                break;
+                        case self::FIELD_CONFIG_DEFAULT_FUNCTION:
+
+                            break;
+                        case self::FIELD_CONFIG_VALUE:
+
+                            break;
+                        case self::FIELD_CONFIG_VALUE_FUNCTION:
+
+                            break;
+                    }
+                }
+            }
+        }
+
+
+
     }
 }

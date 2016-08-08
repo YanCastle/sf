@@ -37,7 +37,7 @@ class Swoole implements Mode
     function start(){
 //        读取配置文件、启动服务器
 //        清楚缓存
-        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
+//        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
         cache('[cleartmp]');
         if($SwooleConfig = swoole_load_config()){
             $Server=null;
