@@ -96,6 +96,7 @@ class Server
      * @param $from_id
      */
     function onClose(\swoole_server $server,$fd,$from_id){
+        Aop::exec(__METHOD__,Aop::$AOP_BEFORE,$fd);
         $callback = swoole_get_callback('CLOSE');
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$fd,$from_id]);
@@ -110,6 +111,7 @@ class Server
         port_group($info['server_port'],null);
         http_header(null);
         cache('[-]tmp_HTTP_COMMENT',$fd);
+        Aop::exec(__METHOD__,Aop::$AOP_AFTER,$fd);
     }
 
     /**
