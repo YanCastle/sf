@@ -48,9 +48,23 @@ class Http implements Mode
         exit();
     }
     function out($Data=null){
-
+        $Out = C('HTTP.OUT');
+        $OutData=is_callable($Out)?call_user_func($Out,$Data):C('DEFAULT_OUT');
+        if(is_string($OutData)&&strlen($OutData)>0){
+            echo $OutData;
+        }
     }
     function in($Data=null){
-        
+        //    调用HTTP模式的DISPATCH，然后调用Controller
+        $Data=[
+            'i'=>isset($_GET['i'])?'Empty/_empty':$_GET['i'],
+            'd'=>$_POST?$_POST:[],
+        ];
+        $Dispatch = C('HTTP.DISPATCH');
+        if(is_callable($Dispatch)){
+            $tmpData = call_user_func($Dispatch);
+            $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
+        }
+        return $Data;
     }
 }
