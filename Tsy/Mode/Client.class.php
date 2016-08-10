@@ -37,4 +37,8 @@ class Client implements Mode
 //        读取配置文件、启动服务器
         $ClientConfig = C('CLIENT');
     }
+    function stop()
+    {
+        // TODO: Implement stop() method.
+    }
 }

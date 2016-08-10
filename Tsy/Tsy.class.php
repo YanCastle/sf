@@ -18,7 +18,7 @@ class Tsy
 {
     protected static $class_map = [];
     /**
-     * @var Swoole $Mode
+     * @var Mode $Mode
      */
     public static $Mode;
     function __construct()

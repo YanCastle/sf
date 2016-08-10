@@ -19,7 +19,7 @@ namespace Tsy\Mode;
 
 class Swoolehttp
 {
-    static public $server;
+    public static $Swoole;
     /**
      * 执行体
      * @return mixed
@@ -225,7 +225,7 @@ class Swoolehttp
                 $GLOBALS['_SWOOLE']=&$Server;
                 L('启动Swoole');
                 fd_name([]);
-                self::$server = &$Server;
+                self::$Swoole = &$Server;
                 $Server->start();
             }else{
                 die('SWOOLE创建失败');
@@ -248,5 +248,9 @@ class Swoolehttp
             }
             static_keep('domain',$domains);
         }
+    }
+    function stop()
+    {
+        self::$Swoole->stop();
     }
 }

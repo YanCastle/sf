@@ -32,4 +32,10 @@ interface Mode
      * @return mixed
      */
     function start();
+
+    /**
+     * 停止继续执行
+     * @return mixed
+     */
+    function stop();
 }

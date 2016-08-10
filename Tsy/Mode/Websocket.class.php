@@ -25,7 +25,7 @@ use Tsy\Mode;
  */
 class Websocket implements Mode
 {
-    static public $server;
+    public static $Swoole;
     /**
      * 执行体
      * @return mixed
@@ -134,7 +134,7 @@ class Websocket implements Mode
                 $GLOBALS['_SWOOLE']=&$Server;
                 L('启动Swoole');
                 fd_name([]);
-                self::$server = &$Server;
+                self::$Swoole = &$Server;
                 $Server->start();
             }else{
                 die('SWOOLE创建失败');
@@ -145,5 +145,9 @@ class Websocket implements Mode
     }
     static function send($fd,$data){
         self::$server->push($fd,$data);
+    }
+    function stop()
+    {
+        self::$Swoole->stop();
     }
 }

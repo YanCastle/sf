@@ -18,6 +18,7 @@ use Tsy\Mode;
  */
 class Swoole implements Mode
 {
+    public static $Swoole;
     /**
      * 执行体
      * @return mixed
@@ -123,6 +124,7 @@ class Swoole implements Mode
                     }
                 }
                 $GLOBALS['_SWOOLE']=&$Server;
+                self::$Swoole=$Server;
                 L('启动Swoole');
                 fd_name([]);
                 $Server->start();
@@ -132,5 +134,9 @@ class Swoole implements Mode
         }else{
             die('SWOOLE配置不存在或不正确，请正确配置SWOOLE下面的信息');
         }
+    }
+    function stop()
+    {
+        self::$Swoole->stop();
     }
 }
