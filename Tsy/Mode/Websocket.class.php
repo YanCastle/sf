@@ -146,8 +146,14 @@ class Websocket implements Mode
     static function send($fd,$data){
         self::$server->push($fd,$data);
     }
-    function stop()
+    function stop($Code=0)
     {
         self::$Swoole->stop();
+    }
+    function out($Data=null){
+
+    }
+    function in($Data=null){
+
     }
 }

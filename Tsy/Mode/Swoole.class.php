@@ -135,8 +135,14 @@ class Swoole implements Mode
             die('SWOOLE配置不存在或不正确，请正确配置SWOOLE下面的信息');
         }
     }
-    function stop()
+    function stop($Code=0)
     {
         self::$Swoole->stop();
+    }
+    function out($Data=null){
+
+    }
+    function in($Data=null){
+
     }
 }

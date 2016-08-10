@@ -59,6 +59,7 @@ class Aop
                             $rs = call_user_func_array($callback[0],[&$data]);
                             if($rs===self::STOP_EXEC){
                                 //调用对应mode的stop方法
+                                Tsy::$Mode->out();
                                 Tsy::$Mode->stop();
                             }
                         }

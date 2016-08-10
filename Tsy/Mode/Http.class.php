@@ -43,8 +43,14 @@ class Http implements Mode
         $HttpDispatch = http_in_check();
         http_out_check(controller($HttpDispatch['i'],$HttpDispatch['d']));
     }
-    function stop()
+    function stop($Code=0)
     {
         exit();
+    }
+    function out($Data=null){
+
+    }
+    function in($Data=null){
+        
     }
 }

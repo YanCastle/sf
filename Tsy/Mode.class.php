@@ -37,5 +37,7 @@ interface Mode
      * 停止继续执行
      * @return mixed
      */
-    function stop();
+    function stop($Code="0");
+    function out($Data=null);
+    function in($Data=null);
 }
