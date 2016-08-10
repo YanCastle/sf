@@ -12,10 +12,15 @@ namespace Tsy;
 use Tsy\Library\Aop;
 use Tsy\Library\Msg;
 use Tsy\Library\Storage;
+use Tsy\Mode\Swoole;
 
 class Tsy
 {
     protected static $class_map = [];
+    /**
+     * @var Swoole $Mode
+     */
+    public static $Mode;
     function __construct()
     {
 //        加载框架function函数库
@@ -62,14 +67,14 @@ class Tsy
 //        开始实例化Mode类，进行初始化操作
         $ModeClassName = 'Tsy\\Mode\\'.ucfirst(strtolower(APP_MODE));
         if(class_exists($ModeClassName)){
-            $ModeClass = new $ModeClassName();
+            self::$Mode = new $ModeClassName();
         }else{
             die(APP_MODE.':模式不存在');
         }
 //        加载模式处理类，开始模式处理
 //        Aop::exec(__METHOD__,Aop::$AOP_AFTER);
         Msg::$handler =  new Msg\Msg();
-        $ModeClass->start();
+        self::$Mode->start();
     }
     function loadConfig(){
         //因为涉及到多线程竞争同步的问题，所以C函数的内容必须是共享式的，
