@@ -678,7 +678,7 @@ class Object
         if(is_string($Fields)&&$Fields){
             $Fields = explode(',',$Fields);
         }elseif(is_array($Fields)){
-            if(true==end($Fields)){
+            if(true===end($Fields)){
                 array_pop($Fields);
                 $Fields = array_diff(M($this->main)->getDbFields(),$Fields);
             }elseif(count($Fields)==0){
