@@ -91,7 +91,7 @@ class Object
         }
         $this->setPropertyMap();
         foreach ($this->property as $PropertyName=>$Config){
-            if($Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
+            if(isset($Config[self::RELATION_TABLE_PROPERTY])&&$Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
                 $this->directProperties[$PropertyName]=$this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_NAME])?$Config[self::RELATION_TABLE_NAME]:'');
             }
         }
@@ -688,6 +688,14 @@ class Object
             $Fields = M($this->main)->getDbFields();
         }
         $Fields = array_diff($Fields,[$this->pk]);//去掉PK，在Add和save中不需要用到这个参数
+        //释放不必要的参数
+        foreach (array_diff(array_keys($Data),$Fields) as $Field){
+            unset($Data[$Field]);
+        }
+        if('add'==$Method&&count($Data)!=count($Fields)){
+            L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
+            return false;
+        }
         //开始处理数据、填充及其它规则处理
         foreach ($Rules as $Key=>$Rule){
             foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_VALUE_FUNCTION,self::FIELD_CONFIG_DEFAULT,self::FIELD_CONFIG_DEFAULT_FUNCTION] as $RuleName){
@@ -712,13 +720,6 @@ class Object
                     }
                 }
             }
-        }
-        foreach (array_diff(array_keys($Data),$Fields) as $Field){
-            unset($Data[$Field]);
-        }
-        if('add'==$Method&&count($Data)!=count($Fields)){
-            L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
-            return false;
         }
         return $Data;
         //暂时直接从POST中取有效数据返回
