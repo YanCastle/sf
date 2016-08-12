@@ -6,7 +6,7 @@
  * @author   duanzhenxing(duanzhenxing@baidu.com)
  * @version  2.1.0
  */
-require_once dirname ( __FILE__ ) . '/' . 'RequestCore.class.php';
+require_once __DIR__ . '/' . 'RequestCore.class.php';
 
 /**
  * @desc BaiduPCS类
