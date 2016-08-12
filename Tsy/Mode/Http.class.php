@@ -31,7 +31,9 @@ class Http implements Mode
      */
     function start(){
         if($_SERVER['HTTP_ORIGIN']){
-            header("Access-Control-Allow-Origin: " . isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'*');
+            $URI = parse_url($_SERVER['HTTP_ORIGIN']);
+            $URL = $URI['host'];if($URI['port']!=80){$URL.=":{$URI['port']}";}
+            header("Access-Control-Allow-Origin: " .$URL);
 //            header("Access-Control-Allow-Origin: *");
             header("Access-Control-Allow-Credentials: true");
             header('Access-Control-Request-Method: GET,POST,PUT,DELETE');
