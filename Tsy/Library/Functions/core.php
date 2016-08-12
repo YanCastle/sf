@@ -298,7 +298,7 @@ function E($Code){
 
 function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
-    if($msg&&is_numeric($Type)){
+    if($msg){
         if(isset($_log[$Type])){
             $_log[$Type]=$msg;
         }else{
