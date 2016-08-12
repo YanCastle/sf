@@ -5,6 +5,7 @@ namespace Tsy\Plugs\BaiDuYunWangPan;
  * User: castle
  * Date: 2016/08/12
  * Time: 20:17
+ * @link https://github.com/houtianze/bypy
  */
 class BaiDuYunWangPan
 {
