@@ -30,13 +30,13 @@ class Http implements Mode
      * @return mixed
      */
     function start(){
-//        if($_SERVER['HTTP_ORIGIN']){
-//            header("Access-Control-Allow-Origin: " . isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'*');
-            header("Access-Control-Allow-Origin: *");
+        if($_SERVER['HTTP_ORIGIN']){
+            header("Access-Control-Allow-Origin: " . isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'*');
+//            header("Access-Control-Allow-Origin: *");
             header("Access-Control-Allow-Credentials: false");
             header('Access-Control-Request-Method: GET,POST,PUT,DELETE');
             header('Access-Control-Allow-Headers: X-Requested-With,Cookie,Content-Type');
-//        }
+        }
         if(isset($_SERVER['REQUEST_METHOD'])&&$_SERVER['REQUEST_METHOD']=='OPTIONS'){
             exit();
         }
