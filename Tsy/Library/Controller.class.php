@@ -320,9 +320,10 @@ class Controller
 //            return FALSE;
 //        }
     }
-    function add(){
+    function add($data=false){
+        if(!$data)$data=$_POST;
         if($this->Object instanceof Object){
-            return $this->Object->add();
+            return invokeClass($this->Object,'add',$data);
         }
         $ID = D($this->ControllerName)->add($_POST);
         return $ID?array_values(D($this->ControllerName)->obj([$ID]))[0]:false;

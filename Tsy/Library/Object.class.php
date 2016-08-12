@@ -197,11 +197,12 @@ class Object
         }
     }
 
-    function add()
+    function add($data=false)
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
-        $data=$_POST;
+        if(!$data)
+            $data=$_POST;
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(false!==$rs){
