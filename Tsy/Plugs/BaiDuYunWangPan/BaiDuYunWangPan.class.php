@@ -14,12 +14,29 @@ class BaiDuYunWangPan
     const OpenShiftUrl = 'https://bypy-tianze.rhcloud.com';
     const HerokuUrl = 'https://bypyoauth.herokuapp.com';
 
+    const GaeRedirectUrl = self::GaeUrl.'/auth';
+    const GaeRefreshUrl = self::GaeUrl.'/refresh';
+
+    const OpenShiftRedirectUrl = self::OpenShiftUrl.'/auth';
+    const OpenShiftRefreshUrl = self::OpenShiftUrl.'/refresh';
+    const HerokuRedirectUrl = self::HerokuUrl.'/auto';
+    const HerokuRefreshUrl = self::HerokuUrl.'/refresh';
+
+    static $AuthServerList=[
+        [self::OpenShiftRedirectUrl,false,'正在刷新认证信息...'],
+        [self::HerokuRedirectUrl,true,'正在刷新认证信息...'],
+        [self::GaeRedirectUrl,false,'正在刷新认证信息...'],
+    ];
+
     function __construct()
     {
         //引入PHP文件
         include __DIR__.DIRECTORY_SEPARATOR.'libs/BaiduPCS.class.php';
     }
     function getAccessToken($AuthorizationCode){
+        foreach (self::$AuthServerList as $row){
 
+        }
     }
+    private function _get(){}
 }
