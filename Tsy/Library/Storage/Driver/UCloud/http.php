@@ -64,7 +64,7 @@ class HTTP_Response
 //@results: $val
 function UCloud_Header_Get($header, $key)
 {
-    $val = @$header[$key];
+    $val = isset($header[$key])?$header[$key]:'';
     if (isset($val)) {
         if (is_array($val)) {
             return $val[0];
