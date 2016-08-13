@@ -1,7 +1,7 @@
 <?php
 
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/utils.php");
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/conf.php");
+
 
 define("NO_AUTH_CHECK", 0);
 define("HEAD_FIELD_CHECK", 1);

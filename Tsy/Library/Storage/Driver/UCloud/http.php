@@ -1,6 +1,6 @@
 <?php
 
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/conf.php");
+
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/utils.php");
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/digest.php");
 
