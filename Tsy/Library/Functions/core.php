@@ -67,7 +67,7 @@ function C($name=null, $value=null,$default=null) {
     }
     // 批量设置
     if (is_array($name)){
-        $_config = array_merge($_config, array_change_key_case($name,CASE_UPPER));
+        $_config = array_merge_recursive($_config, array_change_key_case($name,CASE_UPPER));
         return null;
     }
     return null; // 避免非法参数
