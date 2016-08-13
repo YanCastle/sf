@@ -9,11 +9,8 @@ return [
     'HTTP'=>[
         'DISPATCH'=>function(){
             return [
-                'i'=>'View/view',
-                'd'=>[
-                    'UN'=>1,
-                    'PWD'=>1
-                ],
+                'i'=>$_GET['i'],
+                'd'=>$_POST,
             ];
         },
         'OUT'=>function($data){

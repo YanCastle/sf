@@ -468,13 +468,16 @@ class Object
                 is_array($Config[self::RELATION_TABLE_LINK_TABLES]) &&
                 count($Config[self::RELATION_TABLE_LINK_TABLES]) > 0
             ) {
-                $Fields=[];
+//                $Fields=[];
                 $UpperMainTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                 $LinkModel = M($Config[self::RELATION_TABLE_NAME])->where(
                     [
                         "__{$UpperMainTable}__.".$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]
                     ]
                 );
+                $Fields=[
+                    "__{$UpperMainTable}__.{$Config[self::RELATION_TABLE_COLUMN]}"
+                ];
                 $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
 //                TODO Link表中的多对多关系先忽略不计
                 foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $OriginTableName => $Conf) {
