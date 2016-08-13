@@ -36,7 +36,25 @@ function UCloud_PutFile($bucket, $key, $file)
     fclose($f);
     return array($data, $err);
 }
+function UCloud_PutFileContent($bucket, $key, $content)
+{
+    $action_type = ActionType::PUTFILE;
+    $err = CheckConfig(ActionType::PUTFILE);
+    if ($err != null) {
+        return array(null, $err);
+    }
 
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
+    $path = $key;
+    list($mimetype, $err) = GetFileMimeType($key);
+    $req = new HTTP_Request('PUT', array('host'=>$host, 'path'=>$path), $content, $bucket, $key, $action_type);
+    $req->Header['Expect'] = '';
+    $req->Header['Content-Type'] = $mimetype;
+
+    $client = new UCloud_AuthHttpClient(null, $mimetype);
+    list($data, $err) = UCloud_Client_Call($client, $req);
+    return array($data, $err);
+}
 //------------------------------表单上传------------------------------
 function UCloud_MultipartForm($bucket, $key, $file)
 {

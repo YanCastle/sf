@@ -49,7 +49,12 @@ class UCloud extends Storage{
      * @return boolean
      */
     public function put($filename,$content,$type=''){
-
+        list($data,$err) = UCloud_PutFileContent(C('UCLOUD_BUKKET'),$filename,$content);
+        if($err){
+            L($err);
+            return false;
+        }
+        return true;
     }
 
     /**
