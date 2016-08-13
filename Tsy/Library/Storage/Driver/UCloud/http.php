@@ -323,8 +323,7 @@ function UCloud_Build_MultipartForm($fields, $files)
 }
 
 function UCloud_UserAgent() {
-    global $SDK_VER;
-    $sdkInfo = "UCloudPHP/$SDK_VER";
+    $sdkInfo = "UCloudPHP/".C('SDK_VER');
 
     $systemInfo = php_uname("s");
     $machineInfo = php_uname("m");

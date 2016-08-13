@@ -81,10 +81,10 @@ function UCloud_MakeAuth($auth)
         return $auth;
     }
 
-    global $UCLOUD_PUBLIC_KEY;
-    global $UCLOUD_PRIVATE_KEY;
+    
+    
 
-    return new UCloud_Auth($UCLOUD_PUBLIC_KEY, $UCLOUD_PRIVATE_KEY);
+    return new UCloud_Auth(C('UCLOUD_PUBLIC_KEY'), C('UCLOUD_PRIVATE_KEY'));
 }
 
 //@results: token

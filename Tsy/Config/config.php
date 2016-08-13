@@ -70,4 +70,8 @@ return [
         ],
     ],
     'MSG_TEMPLATE_DIR'=>APP_PATH.DIRECTORY_SEPARATOR.'Common'.DIRECTORY_SEPARATOR.'MSG',//消息模板的存储地址
+
+    //UCloud相关配置
+    'UCLOUD_PUBLIC_KEY'=>'',
+    'UCLOUD_PRIVATE_KEY'=>''
 ];

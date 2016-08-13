@@ -111,9 +111,9 @@ function GetFileMimeType($filename)
 
 function CheckConfig($action) {
 
-    global $UCLOUD_PUBLIC_KEY;
-    global $UCLOUD_PRIVATE_KEY;
-    global $UCLOUD_PROXY_SUFFIX;
+    
+    
+    
 
     switch ($action) {
         case ActionType::PUTFILE:
@@ -124,16 +124,16 @@ function CheckConfig($action) {
         case ActionType::MFINISH:
         case ActionType::DELETE:
         case ActionType::UPLOADHIT:
-            if ($UCLOUD_PROXY_SUFFIX == "") {
+            if (C('UCLOUD_PROXY_SUFFIX') == "") {
                     return new UCloud_Error(400, -1, "no proxy suffix found in config");
-            } else if ($UCLOUD_PUBLIC_KEY == "" || strstr($UCLOUD_PUBLIC_KEY, " ") != FALSE) {
+            } else if (C('UCLOUD_PUBLIC_KEY') == "" || strstr(C('UCLOUD_PUBLIC_KEY'), " ") != FALSE) {
                     return new UCloud_Error(400, -1, "invalid public key found in config");
-            } else if ($UCLOUD_PRIVATE_KEY == "" || strstr($UCLOUD_PRIVATE_KEY, " ") != FALSE) {
+            } else if (C('UCLOUD_PRIVATE_KEY') == "" || strstr(C('UCLOUD_PRIVATE_KEY'), " ") != FALSE) {
                     return new UCloud_Error(400, -1, "invalid private key found in config");
             }
             break;
         case ActionType::GETFILE:
-            if ($UCLOUD_PROXY_SUFFIX == "") {
+            if (C('UCLOUD_PROXY_SUFFIX') == "") {
                     return new UCloud_Error(400, -1, "no proxy suffix found in config");
             }
             break;
