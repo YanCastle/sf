@@ -27,7 +27,7 @@ class Client implements Mode
      * 调度
      * @return mixed
      */
-    function dispatch(){}
+    function dispatch($data=null){}
 
     /**
      * 启动函数

@@ -23,7 +23,13 @@ class Http implements Mode
      * 调度
      * @return mixed
      */
-    function dispatch(){}
+    function dispatch($data=[]){
+        $i = I(C('HTTP.I'));
+        return [
+            'i'=>$i?$i:'Empty/_empty',
+            'd'=>I(C('HTTP.D'))
+        ];
+    }
 
     /**
      * 启动函数

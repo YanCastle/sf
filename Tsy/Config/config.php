@@ -73,5 +73,14 @@ return [
 
     //UCloud相关配置
     'UCLOUD_PUBLIC_KEY'=>'',
-    'UCLOUD_PRIVATE_KEY'=>''
+    'UCLOUD_PRIVATE_KEY'=>'',
+
+
+    //配置各种模式下获取i参数和数据的格式
+    'HTTP'=>[
+        'I'=>'get.i',
+        'D'=>'post',
+        'DISPATCH'=>[\Tsy\Tsy::$Mode,'dispatch'],
+        'OUT'=>[\Tsy\Tsy::$Mode,'out'],
+    ]
 ];

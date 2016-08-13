@@ -117,7 +117,7 @@ function http_body_parse($data){
 function http_in_check(){
 //    调用HTTP模式的DISPATCH，然后调用Controller
     $Data=[
-        'i'=>isset($_GET['i'])?'Empty/_empty':$_GET['i'],
+        'i'=>isset($_GET['i'])?$_GET['i']:'Empty/_empty',
         'd'=>$_POST?$_POST:[],
     ];
     $Dispatch = C('HTTP.DISPATCH');
