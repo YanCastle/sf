@@ -36,7 +36,7 @@ class Http implements Mode
      * @return mixed
      */
     function start(){
-        if($_SERVER['HTTP_ORIGIN']){
+        if(isset($_SERVER['HTTP_ORIGIN'])){
 //            $URI = parse_url($_SERVER['HTTP_ORIGIN']);
 //            $URL = $URI['host'];if($URI['port']!=80){$URL.=":{$URI['port']}";}
             header("Access-Control-Allow-Origin: " .$_SERVER['HTTP_ORIGIN']);
