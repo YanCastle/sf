@@ -130,7 +130,7 @@ function http_in_check(){
 
 function http_out_check($data){
     $Out = C('HTTP.OUT');
-    $OutData=is_callable($Out)?call_user_func($Out,$data):C('DEFAULT_OUT');
+    $OutData=is_callable($Out)?call_user_func($Out,$data):call_user_func([\Tsy\Tsy::$Mode,'output'],$data);
     if(is_string($OutData)&&strlen($OutData)>0){
         echo $OutData;
     }

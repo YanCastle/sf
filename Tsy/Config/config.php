@@ -80,7 +80,7 @@ return [
     'HTTP'=>[
         'I'=>'get.i',
         'D'=>'post',
-        'DISPATCH'=>[\Tsy\Tsy::$Mode,'dispatch'],
-        'OUT'=>[\Tsy\Tsy::$Mode,'out'],
+        'DISPATCH'=>["\\Tsy\\Tsy::\$Mode",'dispatch'],
+        'OUT'=>["\\Tsy\\Tsy::\$Mode",'output'],
     ]
 ];

@@ -34,7 +34,7 @@ class Tsy
     function start(){
 //        加载配置文件
 //        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
-        Storage::connect();
+//        Storage::connect();
         $this->loadFunctions();//加载框架function和项目function
         
         $this->loadConfig();
@@ -80,9 +80,10 @@ class Tsy
         //因为涉及到多线程竞争同步的问题，所以C函数的内容必须是共享式的，
 //        加载框架配置文件
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config.php'));
-        C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config'.CONFIG_SUFFIX.'.php'));
+
+        !CONFIG_SUFFIX  or  C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config'.CONFIG_SUFFIX.'.php'));
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).'.php'));
-        C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
+        !CONFIG_SUFFIX  or  C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
         E(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/error.php'));
 //        加载调试配置
         !APP_DEBUG or C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/debug.php'));
@@ -90,11 +91,11 @@ class Tsy
         C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'config.php'));
         !CONFIG_SUFFIX  or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'config'.CONFIG_SUFFIX.'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug.php'));
-        !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug'.CONFIG_SUFFIX.'.php'));
+        !APP_DEBUG && !CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug'.CONFIG_SUFFIX.'.php'));
         !APP_MODE or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'.php'));
-        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
+        !CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
-        !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
+        !APP_DEBUG&&!CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
         //开始加载aop配置文件
         $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');

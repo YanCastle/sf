@@ -30,7 +30,9 @@ class Http implements Mode
             'd'=>I(C('HTTP.D'))
         ];
     }
-
+    function output($data){
+        return json_encode($data,JSON_UNESCAPED_UNICODE);
+    }
     /**
      * 启动函数
      * @return mixed

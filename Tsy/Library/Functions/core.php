@@ -42,12 +42,14 @@ function C($name=null, $value=null,$default=null) {
     static $_config=[];
     // 无参数时获取所有
 //    if(!isset($_config)){$_config=[];}
-    if (empty($name)) {
-        return $_config;
-    }
     if(false===$name&&$value===false){
         $_config=[];
     }
+
+    if (empty($name)) {
+        return $_config;
+    }
+
     // 优先执行设置获取或赋值
     if (is_string($name)) {
         if (!strpos($name, '.')) {
@@ -67,7 +69,7 @@ function C($name=null, $value=null,$default=null) {
     }
     // 批量设置
     if (is_array($name)){
-        $_config = array_merge_recursive($_config, array_change_key_case($name,CASE_UPPER));
+        $_config = array_merge($_config, array_change_key_case($name,CASE_UPPER));
         return null;
     }
     return null; // 避免非法参数
@@ -361,13 +363,15 @@ function each_dir(string $dir,callable $dir_callback=null,callable $file_callbac
             if(!in_array($path, ['.','..'])){
                 $path = $dir.DIRECTORY_SEPARATOR.$path;
                 if(is_dir($path)){
-                    if(is_callable($dir_callback)){
-                        call_user_func($dir_callback,$path);
+                    if(is_callable($dir_callback)&&false===call_user_func($dir_callback,$path)){
+//                        call_user_func($dir_callback,$path);
+                        return false;
                     }
                     each_dir($path, $dir_callback, $file_callback);
                 }else{
-                    if(is_callable($file_callback)){
-                        call_user_func($file_callback,$path);
+                    if(is_callable($file_callback)&&false===call_user_func($file_callback,$path)){
+//                        call_user_func($file_callback,$path);
+                        return false;
                     }
                 }
             }

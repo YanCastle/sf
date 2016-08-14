@@ -35,16 +35,19 @@ function I($name,$default='',$filter=null,$datas=null) {
         case 'post'    :   $input =& $_POST;break;
         case 'put'     :   parse_str(file_get_contents('php://input'), $input);break;
         case 'param'   :
-            switch($_SERVER['REQUEST_METHOD']) {
-                case 'POST':
-                    $input  =  $_POST;
-                    break;
-                case 'PUT':
-                    parse_str(file_get_contents('php://input'), $input);
-                    break;
-                default:
-                    $input  =  $_GET;
-            }
+            if(isset($_SERVER['REQUEST_METHOD']))
+                switch($_SERVER['REQUEST_METHOD']) {
+                    case 'POST':
+                        $input  =  $_POST;
+                        break;
+                    case 'PUT':
+                        parse_str(file_get_contents('php://input'), $input);
+                        break;
+                    default:
+                        $input  =  $_GET;
+                }
+            else
+                $input = $_GET;
             break;
         case 'path'    :
             $input  =   array();
