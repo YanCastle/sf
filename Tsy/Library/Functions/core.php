@@ -315,7 +315,7 @@ function L($msg = false,$Type=6,$trace=''){
         return $msg;
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg){
-        return $Type==0?$_log:$_log[$Type];
+        return $Type===0?$_log:$_log[$Type];
     }elseif(null===$msg&&$Type===null){
         $_log=[];
     }
