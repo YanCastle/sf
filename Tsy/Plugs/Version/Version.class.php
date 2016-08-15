@@ -26,12 +26,12 @@ class Version
      * @param $TargetVersion
      */
     function check($VersionMap,$TargetVersion){
-        $VersionMap=[
-            [
-                1,
-                'DB_CONF'=>[]
-            ]
-        ];
+//        $VersionMap=[
+//            [
+//                1,
+//                'DB_CONF'=>[]
+//            ]
+//        ];
 //        先获取最高版本号
         foreach ($VersionMap as $Config){
             if(is_array($Config)&&is_numeric($Config[0])&&$Config[0]<$TargetVersion){//需要升级的情况下
