@@ -197,15 +197,15 @@ class Object
         }
     }
 
-    function add($data=false)
+    function add($data=[])
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
-        if(!$data)
+        if(!$data&&$_POST)
             $data=$_POST;
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
-        if(false!==$rs){
+        if(is_array($rs)&&$rs){
             startTrans();
             if($PKID = M($this->main)->add($data)){
                 commit();
@@ -214,7 +214,7 @@ class Object
             }
             return $PKID?$this->get($PKID):false;
         }else{
-            return false;
+            return $rs;
         }
     }
 
@@ -697,8 +697,7 @@ class Object
             unset($Data[$Field]);
         }
         if('add'==$Method&&count($Data)!=count($Fields)){
-            L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
-            return false;
+            return L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
         }
         //开始处理数据、填充及其它规则处理
         foreach ($Rules as $Key=>$Rule){
