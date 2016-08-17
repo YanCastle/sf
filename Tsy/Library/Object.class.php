@@ -696,9 +696,6 @@ class Object
         foreach (array_diff(array_keys($Data),$Fields) as $Field){
             unset($Data[$Field]);
         }
-        if('add'==$Method&&count($Data)!=count($Fields)){
-            return L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
-        }
         //开始处理数据、填充及其它规则处理
         foreach ($Rules as $Key=>$Rule){
             foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_VALUE_FUNCTION,self::FIELD_CONFIG_DEFAULT,self::FIELD_CONFIG_DEFAULT_FUNCTION] as $RuleName){
@@ -723,6 +720,9 @@ class Object
                     }
                 }
             }
+        }
+        if('add'==$Method&&count($Data)!=count($Fields)){
+            return L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
         }
         return $Data;
         //暂时直接从POST中取有效数据返回
