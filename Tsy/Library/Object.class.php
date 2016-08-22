@@ -240,7 +240,8 @@ class Object
      * @return mixed
      */
     protected function searchW(string $TableName,array $Where,string $Field){
-        return M($TableName)->where($Where)->getField($Field,true);
+        $Model = new Model($TableName);
+        return $Model->where($Where)->getField($Field,true);
     }
 
     /**
@@ -475,9 +476,10 @@ class Object
                         "__{$UpperMainTable}__.".$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]
                     ]
                 );
-                $Fields=[
-                    "__{$UpperMainTable}__.{$Config[self::RELATION_TABLE_COLUMN]}"
-                ];
+//                $Fields=[
+//                    "__{$UpperMainTable}__.{$Config[self::RELATION_TABLE_COLUMN]}"
+//                ];
+                $Fields = $this->_parseFieldsConfig(parse_name($Config[self::RELATION_TABLE_NAME]),isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:($Config[self::RELATION_TABLE_LINK_HAS_PROPERTY]?[]:[true]),$Config[self::RELATION_TABLE_COLUMN]);
                 $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
 //                TODO Link表中的多对多关系先忽略不计
                 foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $OriginTableName => $Conf) {

@@ -38,12 +38,9 @@ class Tsy
         $this->loadFunctions();//加载框架function和项目function
         
         $this->loadConfig();
-        if(APP_DEBUG){
-            $this->build();
-        }
+
         $GLOBALS['Config']=C();
-        if(defined('APP_BUILD')&&APP_BUILD)
-            build_cache();
+
 //        分析配置，决定是http模式还是swoole模式
 ////        如果是http模式则实例化http类，如果是swoole模式则实例化swoole类
         if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.ucfirst(strtolower(APP_MODE)).'.class.php')){
@@ -61,7 +58,11 @@ class Tsy
             }
             define('MODULES',implode(',',$Modules ));
         }
-
+        if(defined('APP_BUILD')&&APP_BUILD)
+            build_cache();
+        if(APP_DEBUG){
+            $this->build();
+        }
 //        $Session = new Session();
 //        session_set_save_handler($Session,true);
 //        开始实例化Mode类，进行初始化操作
