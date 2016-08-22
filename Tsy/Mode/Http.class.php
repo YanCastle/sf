@@ -13,6 +13,7 @@ use Tsy\Mode;
 
 class Http implements Mode
 {
+    static $Out=false;
     /**
      * 执行体
      * @return mixed
@@ -51,7 +52,7 @@ class Http implements Mode
             exit();
         }
         $HttpDispatch = http_in_check();
-        http_out_check(controller($HttpDispatch['i'],$HttpDispatch['d']));
+        $this->out(controller($HttpDispatch['i'],$HttpDispatch['d']));
     }
     function stop($Code=0)
     {
@@ -61,6 +62,7 @@ class Http implements Mode
         $Out = C('HTTP.OUT');
         $OutData=is_callable($Out)?call_user_func($Out,$Data):C('DEFAULT_OUT');
         if(is_string($OutData)&&strlen($OutData)>0){
+            self::$Out=true;
             echo $OutData;
         }
     }
@@ -76,5 +78,11 @@ class Http implements Mode
             $Data = is_array($tmpData)?array_merge($Data,$tmpData):$Data;
         }
         return $Data;
+    }
+    function __destruct()
+    {
+        if(!self::$Out){
+            $this->out();
+        }
     }
 }
