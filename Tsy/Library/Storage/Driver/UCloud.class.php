@@ -51,7 +51,7 @@ class UCloud extends Storage{
     public function put($filename,$content,$type=''){
         list($data,$err) = UCloud_PutFileContent(C('UCLOUD_BUKKET'),$filename,$content);
         if($err->ErrMsg){
-            L($err->ErrMsg);
+            L($err->ErrMsg,LOG_TIP);
             return false;
         }
         return true;

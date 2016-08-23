@@ -34,7 +34,7 @@ class Tsy
     function start(){
 //        加载配置文件
 //        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
-//        Storage::connect();
+        Storage::connect();
         $this->loadFunctions();//加载框架function和项目function
         
         $this->loadConfig();
