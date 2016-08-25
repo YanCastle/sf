@@ -11,9 +11,14 @@ namespace Tsy\Mode;
 
 use Tsy\Mode;
 
+/**
+ * 分布式调度程序，接受协议处理
+ * Class DistributedRedisServer
+ * @package Tsy\Mode
+ */
 class DistributedRedisServer implements Mode
 {
-
+    static $Redis;
     /**
      * 执行体
      * @return mixed
@@ -29,7 +34,8 @@ class DistributedRedisServer implements Mode
      */
     function dispatch($data = null)
     {
-        // TODO: Implement dispatch() method.
+        
+//        解析从Redis订阅接受到的数据，并执行
     }
 
     /**
@@ -38,7 +44,10 @@ class DistributedRedisServer implements Mode
      */
     function start()
     {
-        // TODO: Implement start() method.
+//        1、连接到Redis服务器，
+//
+//        2、订阅指定频道，将消息接受绑定到dispatch函数中
+//        3、检测Swoole配置，启动Swoole服务
     }
 
     /**

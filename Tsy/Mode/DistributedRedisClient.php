@@ -11,6 +11,11 @@ namespace Tsy\Mode;
 
 use Tsy\Mode;
 
+/**
+ * 分布式调度客户端
+ * Class DistributedRedisClient
+ * @package Tsy\Mode
+ */
 class DistributedRedisClient implements Mode
 {
 
@@ -38,7 +43,10 @@ class DistributedRedisClient implements Mode
      */
     function start()
     {
-        // TODO: Implement start() method.
+        // : Implement start() method.
+//        连接到Redis服务，
+//        订阅频道到dispatch函数中
+//        启动Swoole的多线程服务，调度进程进行处理，可以走内部UnixSock
     }
 
     /**
