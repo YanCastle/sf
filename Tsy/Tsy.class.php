@@ -263,8 +263,8 @@ class Tsy
                     'DB_USER'               =>  '',      // 用户名
                     'DB_PWD'                =>  '',          // 密码
                     'DB_PORT'               =>  '3306',        // 端口
-                    'DATA_CACHE_TYPE'=>'Redis',
-                    'DATA_CACHE_TEMP_TYPE'=>'Redis',
+                    'DATA_CACHE_TYPE'=>'File',
+                    'DATA_CACHE_TEMP_TYPE'=>'File',
                 ]"
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'swoole.php',
