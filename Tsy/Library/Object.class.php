@@ -34,6 +34,7 @@ class Object
     const FIELD_CONFIG_DEFAULT_FUNCTION='DF';//当值不存在时会取默认值
     const FIELD_CONFIG_VALUE='V';//不管值是否存在直接覆盖
     const FIELD_CONFIG_VALUE_FUNCTION='VF';//不管值是否存在直接覆盖
+    const FIELD_CONFIG_CALLBACK_REPLACE_STR='###';
 
     protected $main = '';//主表名称，默认为类名部分
     protected $pk = '';//表主键，默认自动获取
@@ -740,6 +741,27 @@ class Object
      * @param $Rule
      */
     protected function _execFieldFunctionConfig(&$Data,$Key,$Rule){
+        if(is_callable($Rule)){
+            $Data[$Key]=call_user_func($Rule);
+        }else
+//        if(is_array($Rule)){
+//            //如果是数组，
+//            //有可能是[$this,'callback']的。。。不好说。。。所以先把is_callable放在前面
+//            if(!is_callable($Rule[0])){
+//                L("{$Rule[0]} 不是可调用函数");
+//            }
+//            switch (count($Rule)){
+//                case 2:
+//                    if(is_string($Rule[1])){
+//                        $Rule[1] = explode(',',$Rule[1]);
+//                    }
+//                    if(is_array($Rule[1])){
+//                        //参数部分是数组，寻找值为   的变量并替换成当前值
+//                        str_replace(self::FIELD_CONFIG_CALLBACK_REPLACE_STR,)
+//                    }
+//                    break;
+//            }
+//        }else
         if(is_string($Rule)){
             if(is_callable($Rule)){
 //                'time';
@@ -760,8 +782,6 @@ class Object
             }else{
                 L('无法识别的字段限定配置:'.$Rule);
             }
-        }elseif(is_callable($Rule)){
-            $Data[$Key]=call_user_func($Rule);
         }else{
             L('无法识别的字段限定配置:'.$Rule);
         }

@@ -36,7 +36,7 @@ class CCPRestSDK {
 		$this->ServerIP = $ServerIP;
 		$this->ServerPort = $ServerPort;
 		$this->SoftVersion = $SoftVersion;
-        $this->Handle = fopen($this->Filename, 'a');
+//        $this->Handle = fopen($this->Filename, 'a');
 	}
 
    /**
@@ -81,7 +81,7 @@ class CCPRestSDK {
     */
     function showlog($log){
       if($this->enabeLog){
-         fwrite($this->Handle,$log."\n");  
+//         fwrite($this->Handle,$log."\n");
       }
     }
     
