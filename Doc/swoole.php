@@ -1149,3 +1149,13 @@ class swoole_http_client{
 }
 
 function swoole_mysql_query(mysqli $mysqli,string $sql,callable $callback){}
+
+class swoole_redis{
+    function on(string $event_name,callable $callback){}
+    function connect(string $host, int $port, callable $callback){}
+    function close(){}
+    function __call($name, $arguments)
+    {
+        // TODO: Implement __call() method.
+    }
+}

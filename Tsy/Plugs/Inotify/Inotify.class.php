@@ -100,7 +100,7 @@ class Inotify
                         $this->watch($path);
                     }
                     call_user_func_array($function, [$path,$event['mask']]);
-                    echo var_export($event);
+                    //echo var_export($event);
                 }
             }
         });

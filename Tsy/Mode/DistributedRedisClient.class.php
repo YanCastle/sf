@@ -19,6 +19,14 @@ use Tsy\Mode;
 class DistributedRedisClient implements Mode
 {
 
+    static $Redis;
+
+    function __construct()
+    {
+        self::$Redis = new \swoole_redis();
+        self::$Redis->on('message',[$this,'onMessage']);
+    }
+
     /**
      * 执行体
      * @return mixed
@@ -47,6 +55,7 @@ class DistributedRedisClient implements Mode
 //        连接到Redis服务，
 //        订阅频道到dispatch函数中
 //        启动Swoole的多线程服务，调度进程进行处理，可以走内部UnixSock
+        self::$Redis->connect('127.0.0.1',6379,[$this,'onConnect']);
     }
 
     /**
@@ -66,5 +75,15 @@ class DistributedRedisClient implements Mode
     function in($Data = null)
     {
         // TODO: Implement in() method.
+    }
+
+    function onMessage(\swoole_redis $redis,$message){
+        $data = json_decode($message,true);
+        $rs = controller($data['i'],$data['d']);
+        $redis->publish('Distribute.Receive',json_encode($rs));
+    }
+    function onConnect(\swoole_redis $redis,bool $result){
+//        $redis->subscribe('Distribute.Client1');
+        $rs = $redis->publish('Distribute.Manage',json_encode(['Channel'=>'Distribute.Client1']));
     }
 }
