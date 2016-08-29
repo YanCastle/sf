@@ -24,11 +24,15 @@ class DistributedRedisServer implements Mode
     const NODE_SUBSCRIBE_CHANNEL='NSC';//While Node On Line
 
     static $Redis;
+    static $SwooleRedis;
     static $Clients=[];//All the Redis channels can publish
+
+    static $Config=[];
     function __construct()
     {
-        self::$Redis = new \swoole_redis();
-        self::$Redis->on('message',[$this,'onMessage']);
+        self::$SwooleRedis = new \swoole_redis();
+        self::$SwooleRedis->on('message',[$this,'onMessage']);
+        self::$Config = C('DRS');
     }
 
     /**
@@ -60,9 +64,11 @@ class DistributedRedisServer implements Mode
 //
 //        2、订阅指定频道，将消息接受绑定到dispatch函数中
 //        3、检测Swoole配置，启动Swoole服务
-
-        self::$Redis->connect('127.0.0.1',6379,[$this,'onConnect']);
-
+        $host='127.0.0.1';
+        $port=6379;
+        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
+        self::$Redis = new \Redis();
+        self::$Redis->connect($host,$port);
     }
 
     /**
@@ -113,13 +119,13 @@ class DistributedRedisServer implements Mode
         //subscribe 2 channels
         $redis->subscribe('Distribute.Manage');
         $redis->subscribe('Distribute.Receive');
-        $redis=new \Redis();
-        $redis->connect('127.0.0.1',6379);
+//        $redis=new \Redis();
+//        $redis->connect('127.0.0.1',6379);
         $Inotify = new \Inotify();
         $Inotify->watch('d');
         $Inotify->start(function($path,$msk)use($redis){
             foreach (self::$Clients as $Channel){
-                $redis->publish('ss',json_encode(['i'=>'Application/Index/check','d'=>['path'=>$path]]));
+                self::$Redis->publish('ss',json_encode(['i'=>'Application/Index/check','d'=>['path'=>$path]]));
             }
         });
     }
