@@ -240,9 +240,9 @@ class Object
      * @param string $Field
      * @return mixed
      */
-    protected function searchW(string $TableName,array $Where,string $Field){
+    protected function searchW(string $TableName,array $Where,string $Field,$Sort=''){
         $Model = new Model($TableName);
-        return $Model->where($Where)->getField($Field,true);
+        return $Model->where($Where)->order($Sort)->getField($Field,true);
     }
 
     /**
@@ -269,7 +269,7 @@ class Object
             }
             $Where['_logic'] = 'OR';
             $Model->where($Where);
-            $KeywordObjectIDs = $Model->getField($this->pk, true);
+            $KeywordObjectIDs = $Model->order($Sort)->getField($this->pk, true);
         }
         if ($W) {
             $Data = param_group($this->searchWFieldsGroup, $W);
@@ -286,7 +286,7 @@ class Object
                         $Result = call_user_func($this->searchWFieldsConf[$ObjectName], $Params);
                         if (is_string($Result) && preg_match('/^[a-z_]+[a-z]$/', $Result)) {
                             //吧这个当作表名，再参与上一个逻辑
-                            $WObjectIDArray[] = $this->searchW($Result, $Params, $this->pk);
+                            $WObjectIDArray[] = $this->searchW($Result, $Params, $this->pk,$Sort);
                         } elseif (is_array($Result)
                             && preg_match('/^\d+$/', implode('', $Result))
 //                            &&!in_array(false,array_map(function($d){return is_numeric($d);},$Result ) )
@@ -317,7 +317,7 @@ class Object
             $ObjectIDs=$KeywordObjectIDs;
         }
         if (strlen($Keyword) === 0 && count($W) === 0) {
-            $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
+            $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
             return [
                 'L' => array_values($this->gets($ObjectIDs)),
                 'P' => $P,
@@ -333,7 +333,7 @@ class Object
         $T = count($ObjectIDs);
         rsort($ObjectIDs, SORT_NUMERIC);
         $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
-        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1], $Properties) : [];
+        $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1], $Properties,$Sort) : [];
         return [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => $P,
@@ -367,7 +367,7 @@ class Object
      * @param array|int $IDs 主键字段编号值
      * @return array|bool
      */
-    function gets($IDs=[],$Properties=false)
+    function gets($IDs=[],$Properties=false,$Sort='')
     {
         !(false===$Properties&&isset($_POST['Properties'])) or $Properties=$_POST['Properties'];
 //        ID检测
@@ -432,7 +432,7 @@ class Object
             $Model->field($this->_read_deny, true);
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
-        $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->select();
+        $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
         if (!$Objects) {
             return [];
         }
