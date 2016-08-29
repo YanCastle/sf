@@ -19,8 +19,14 @@ class Distribute implements Mode
     const NODE_SUBSCRIBE_CHANNEL='NSC';//While Node On Line
     const LOGIC_SUBSCRIBE_CHANNEL='LSC';//While Node On Line
 
-    static $Redis;
-    static $SwooleRedis;
+    /**
+     * @var \Redis
+     */
+    static $RedisPublish;
+    /**
+     * @var \Redis
+     */
+    static $RedisSubscribe;
     static $Clients=[];//All the Redis channels can publish
 
     static $Config=[];
@@ -140,7 +146,8 @@ class Distribute implements Mode
 //        self::$SwooleRedis = new \swoole_redis();
 //        self::$SwooleRedis->on('message',[$this,'onMessage']);
         self::$Config = C('DRS');
-        self::$Redis = new \Redis();
+        self::$RedisPublish = new \Redis();
+        self::$RedisSubscribe = new \Redis();
         self::$SwooleMode=new Mode\Swoole();
     }
 
@@ -194,7 +201,7 @@ class Distribute implements Mode
         $host=self::$Config['REDIS']['HOST'];
         $port=self::$Config['REDIS']['PORT'];
 //        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
-        self::$Redis->pconnect($host,$port);
+        self::$RedisPublish->pconnect($host,$port);
 //        $this->inotify('d');
         $this->startSwoole();
     }
@@ -215,6 +222,11 @@ class Distribute implements Mode
             //已接收管道数据
 //            做管理处理
         });
+
+        $host=self::$Config['REDIS']['HOST'];
+        $port=self::$Config['REDIS']['PORT'];
+        self::$RedisSubscribe->connect($host,$port);
+        self::$RedisPublish->connect($host,$port);
 
     }
 

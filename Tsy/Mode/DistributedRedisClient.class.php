@@ -37,7 +37,8 @@ class DistributedRedisClient extends \Tsy\Library\Fathers\Distribute
 //        task(new Task());
         session('[id]',$data['sid']);
         $result = controller($data['i'],$data['d'],$data['t']);
-        self::$Redis->publish(self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],json_encode([
+//        $result=['s'=>1];
+        $str = json_encode([
             'i'=>$data['i'],//请求地址
             'd'=>$result,//相应数据
             't'=>$data['t'],//消息编号，做全局存储
@@ -45,20 +46,22 @@ class DistributedRedisClient extends \Tsy\Library\Fathers\Distribute
             'm'=>'',//广播？单播
 //            'uid'=>,//标识用户编号
             'sid'=>session('[id]')//session编号
-        ]));
+        ]);
+        self::$RedisPublish->publish(self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],$str);
+
     }
 
     function subscribeProcess(\swoole_process $process)
     {
         parent::subscribeProcess($process);
-        self::$Redis->publish(self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL],json_encode([
+        self::$RedisPublish->publish(self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL],json_encode([
             'i'=>'Online',
-            'd'=>['Chanel'=>self::$Config['SUBSCRIBE'][self::LOGIC_SUBSCRIBE_CHANNEL]],
+            'd'=>['Channel'=>self::$Config['SUBSCRIBE'][self::LOGIC_SUBSCRIBE_CHANNEL]],
             't'=>'',
             'e'=>'',
             'sid'=>''
         ]));
-        self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::LOGIC_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
+        self::$RedisSubscribe->subscribe([self::$Config['SUBSCRIBE'][self::LOGIC_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
     }
 //    function
 }

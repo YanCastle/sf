@@ -88,7 +88,7 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
 //                $host=self::$Config['REDIS']['HOST'];
 //                $port=self::$Config['REDIS']['PORT'];
 //                self::$Redis->connect($host,$port);
-                self::$Redis->publish($channel,json_encode([
+                self::$RedisPublish->publish($channel,json_encode([
                     'i'=>$Data['i'],
                     'd'=>$Data['d'],
                     't'=>$Data['t'],
@@ -134,10 +134,8 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
     function subscribeProcess(\swoole_process $process)
     {
 //        self::$Redis=new \Redis();
-        $host=self::$Config['REDIS']['HOST'];
-        $port=self::$Config['REDIS']['PORT'];
-        self::$Redis->connect($host,$port);
+        
         parent::subscribeProcess($process);
-        self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
+        self::$RedisSubscribe->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
     }
 }
