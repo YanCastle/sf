@@ -68,7 +68,7 @@ class DistributedRedisServer implements Mode
         foreach (self::$Config as $Key=>$Value){
             switch ($Key){
                 case 'REDIS':
-                    if(!(isset($Value['HOST'])&&ip2long($Value)&&isset($Value['PORT'])&&is_numeric($Value['PORT']))){
+                    if(!(isset($Value['HOST'])&&ip2long($Value['HOST'])&&isset($Value['PORT'])&&is_numeric($Value['PORT']))){
                         exit('错误的Redis配置');
                     }
 //                    $Value['Auth'] = isset($Value['Auth'])
@@ -86,8 +86,10 @@ class DistributedRedisServer implements Mode
         $host=self::$Config['REDIS']['HOST'];
         $port=self::$Config['REDIS']['PORT'];
 //        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
-        self::$Redis->connect($host,$port);
+        self::$Redis->pconnect($host,$port);
+        $this->inotify('d');
         self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
+
     }
 
     /**
@@ -109,7 +111,15 @@ class DistributedRedisServer implements Mode
         // TODO: Implement in() method.
     }
     function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
-
+        $data = json_decode($msg,true);
+        switch ($channel){
+            case self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]:
+                self::$Clients[]=$data['Channel'];
+                break;
+            case self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL]:
+                var_dump($data);
+                break;
+        }
     }
     /**
      * Message Received
@@ -149,6 +159,16 @@ class DistributedRedisServer implements Mode
         $Inotify->start(function($path,$msk)use($redis){
             foreach (self::$Clients as $Channel){
                 self::$Redis->publish('ss',json_encode(['i'=>'Application/Index/check','d'=>['path'=>$path]]));
+            }
+        });
+    }
+
+    function inotify($file){
+        $Inotify = new \Inotify();
+        $Inotify->watch($file);
+        $Inotify->start(function($path,$msk){
+            foreach (self::$Clients as $Channel){
+                self::$Redis->publish($Channel,json_encode(['i'=>'Application/Index/check','d'=>['path'=>$path]]));
             }
         });
     }
