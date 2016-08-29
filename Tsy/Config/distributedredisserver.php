@@ -14,11 +14,12 @@ return [
         ],
         'SUBSCRIBE'=>[
             //All Subscribe Channel Config,This is Server
-            \Tsy\Mode\DistributedRedisServer::NODE_SUBSCRIBE_CHANNEL=>'Distribute.Manage',
-            \Tsy\Mode\DistributedRedisServer::RETURN_SUBSCRIBE_CHANNEL=>'Distribute.Receive'
+            \Tsy\Library\Fathers\Distribute::NODE_SUBSCRIBE_CHANNEL=>'Distribute.Manage',
+            \Tsy\Library\Fathers\Distribute::RETURN_SUBSCRIBE_CHANNEL=>'Distribute.Receive',
+            \Tsy\Library\Fathers\Distribute::LOGIC_SUBSCRIBE_CHANNEL=>'Distribute.Logic1',
         ],
         'PUBLISH'=>[
             // Send The Notice To DistributeRedisClient
         ]
-    ]
+    ],
 ];
