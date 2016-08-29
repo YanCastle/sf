@@ -10,6 +10,8 @@ namespace Tsy\Mode;
 
 
 use Tsy\Library\Cache\Driver\Redis;
+use Tsy\Library\Task;
+use Tsy\Library\Traits\Distribute;
 use Tsy\Mode;
 
 /**
@@ -17,159 +19,101 @@ use Tsy\Mode;
  * Class DistributedRedisServer
  * @package Tsy\Mode
  */
-class DistributedRedisServer implements Mode
+class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
 {
-
-    const RETURN_SUBSCRIBE_CHANNEL='RSC';//One Node Want to send some message to Client
-    const NODE_SUBSCRIBE_CHANNEL='NSC';//While Node On Line
-
-    static $Redis;
-    static $SwooleRedis;
-    static $Clients=[];//All the Redis channels can publish
-
-    static $Config=[];
-    function __construct()
-    {
-//        self::$SwooleRedis = new \swoole_redis();
-//        self::$SwooleRedis->on('message',[$this,'onMessage']);
-        self::$Config = C('DRS');
-        self::$Redis = new \Redis();
-    }
-
     /**
-     * 执行体
-     * @return mixed
+     * Redis扩展的订阅回调
+     * @param \Redis $redis
+     * @param string $channel
+     * @param string $msg
      */
-    function exec()
-    {
-        // TODO: Implement exec() method.
-    }
-
-    /**
-     * 调度
-     * @return mixed
-     */
-    function dispatch($data = null)
-    {
-        
-//        解析从Redis订阅接受到的数据，并执行
-    }
-
-    /**
-     * 启动函数
-     * @return mixed
-     */
-    function start()
-    {
-//        1、连接到Redis服务器，
-//
-//        2、订阅指定频道，将消息接受绑定到dispatch函数中
-//        3、检测Swoole配置，启动Swoole服务
-        foreach (self::$Config as $Key=>$Value){
-            switch ($Key){
-                case 'REDIS':
-                    if(!(isset($Value['HOST'])&&ip2long($Value['HOST'])&&isset($Value['PORT'])&&is_numeric($Value['PORT']))){
-                        exit('错误的Redis配置');
-                    }
-//                    $Value['Auth'] = isset($Value['Auth'])
-                    break;
-                case 'SUBSCRIBE':
-                    if(!(isset($Value[self::NODE_SUBSCRIBE_CHANNEL])&&isset($Value[self::RETURN_SUBSCRIBE_CHANNEL]))){
-                        exit('错误的订阅配置');
-                    }
-                    break;
-                case 'PUBLISH':
-
-                    break;
-            }
-        }
-        $host=self::$Config['REDIS']['HOST'];
-        $port=self::$Config['REDIS']['PORT'];
-//        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
-        self::$Redis->pconnect($host,$port);
-        $this->inotify('d');
-        self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
-
-    }
-
-    /**
-     * 停止继续执行
-     * @return mixed
-     */
-    function stop($Code = "0")
-    {
-        // TODO: Implement stop() method.
-    }
-
-    function out($Data = null)
-    {
-        // TODO: Implement out() method.
-    }
-
-    function in($Data = null)
-    {
-        // TODO: Implement in() method.
-    }
     function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
         $data = json_decode($msg,true);
         switch ($channel){
             case self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]:
-                self::$Clients[]=$data['Channel'];
+//                $data=[
+//                    'i'=>'',
+//                    'd'=>'',
+//                    't'=>'',
+//                    'e'=>'',
+//                    'sid'=>''
+//                ];
+                switch ($data['i']){
+                    case 'Online':
+                        //上线
+                        self::$Clients[$data['d']['Chanel']]=array_merge($data['d'],['LastTime'=>time()]);
+                        break;
+                    case 'Offline':
+//                        下线
+                        unset(self::$Clients[$data['d']['Chanel']]);
+                        break;
+                    case 'Keep':
+//                        心跳计划
+
+                        break;
+                }
                 break;
             case self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL]:
-                var_dump($data);
+//                $data=[
+//                    'i'=>'',//请求地址
+//                    'd'=>'',//相应数据
+//                    't'=>'',//消息编号，做全局存储
+//                    'e'=>'',//错误提示信息
+//                    'm'=>'',//广播？单播
+//                    'uid'=>1,//标识用户编号
+//                    'sid'=>''//session编号
+//                ];
+
+                //切换session
+                session('[id]',$data['sid']);
+//                swoole模式下怎么回复，http模式下怎么回复
+//                task(new Task());
+                swoole_out_check(cache('fd_'.$data['t']),['i'=>$data['i'],'d'=>$data['d'],'t'=>$data['t'],'e'=>$data['e']]);
                 break;
         }
     }
-    /**
-     * Message Received
-     * @param \swoole_redis $redis
-     * @param $result
-     */
-    function onMessage(\swoole_redis $redis,$result){
-        if(strlen($result)>0){
-            $data = json_decode($result[2],true);
-            switch ($result[1]){
-                case self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]:
-                    self::$Clients[]=$data['Channel'];
-                    break;
-                case self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL]:
-                    var_dump($data);
-                    break;
+    function onReceive(\swoole_server $server, $fd, $from_id, $data)
+    {
+        $_GET=$_POST=$_REQUEST=[];
+        $Data = swoole_in_check($fd,$data);
+        if(is_array($Data)&&$Data){
+            swoole_bridge_check($fd,$Data);
+//            $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
+            $channel = $this->distribute();
+            if($channel){
+                cache('fd_'.$data['t'],$fd);
+                self::$Redis->publish($channel,json_encode([
+                    'i'=>$Data['i'],
+                    'd'=>$Data['d'],
+                    't'=>$Data['t'],
+                    'sid'=>session('[id]')
+                ]));
+            }else{
+                swoole_out_check($fd,array_merge($Data,['e'=>'当前无逻辑服务器在线','d'=>[]]));
             }
+        }elseif (is_string($Data)){
+            swoole_out_check($fd,$Data);
+        }else{
+            swoole_out_check($fd,'');
         }
-
     }
 
     /**
-     * Success
-     * @param \swoole_redis $redis
-     * @param bool $result
+     * 负载算法
+     * @return string
      */
-    function onConnect(\swoole_redis $redis,bool $result){
-        //Read subscribe Config ,and subscribe the channel
-//        $redis->subscribe('castle');
-        //subscribe 2 channels
-        $redis->subscribe(self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL]);
-        $redis->subscribe(self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]);
-//        $redis=new \Redis();
-//        $redis->connect('127.0.0.1',6379);
-        $Inotify = new \Inotify();
-        $Inotify->watch('d');
-        $Inotify->start(function($path,$msk)use($redis){
-            foreach (self::$Clients as $Channel){
-                self::$Redis->publish('ss',json_encode(['i'=>'Application/Index/check','d'=>['path'=>$path]]));
-            }
-        });
+    function distribute():string{
+        if(self::$Clients){
+            //返回一个频道
+            return array_rand(self::$Clients);
+        }else{
+            return '';
+        }
     }
 
-    function inotify($file){
-        $Inotify = new \Inotify();
-        $Inotify->watch($file);
-        $Inotify->start(function($path,$msk){
-            foreach (self::$Clients as $Channel){
-                self::$Redis->publish($Channel,json_encode(['i'=>'Application/Index/check','d'=>['path'=>$path]]));
-            }
-        });
+    function subscribeProcess(\swoole_process $process)
+    {
+        parent::subscribeProcess($process);
+        self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
     }
 }

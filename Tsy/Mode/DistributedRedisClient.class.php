@@ -9,6 +9,8 @@
 namespace Tsy\Mode;
 
 
+use Tsy\Library\Task;
+use Tsy\Library\Traits\Distribute;
 use Tsy\Mode;
 
 /**
@@ -16,74 +18,47 @@ use Tsy\Mode;
  * Class DistributedRedisClient
  * @package Tsy\Mode
  */
-class DistributedRedisClient implements Mode
+class DistributedRedisClient extends \Tsy\Library\Fathers\Distribute
 {
-
-    static $Redis;
-
-    function __construct()
-    {
-        self::$Redis = new \swoole_redis();
-        self::$Redis->on('message',[$this,'onMessage']);
-    }
-
     /**
-     * 执行体
-     * @return mixed
+     * Redis扩展的订阅回调
+     * @param \Redis $redis
+     * @param string $channel
+     * @param string $msg
      */
-    function exec()
-    {
-        // TODO: Implement exec() method.
+    function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
+//        $data=[
+//            'i'=>'',
+//            'd'=>'',
+//            't'=>'',
+//            'sid'=>''
+//        ];
+        $data = json_decode($msg,true);
+//        task(new Task());
+        session('[id]',$data['sid']);
+        $result = controller($data['i'],$data['d'],$data['t']);
+        self::$Redis->publish(self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],json_encode([
+            'i'=>$data['i'],//请求地址
+            'd'=>$result,//相应数据
+            't'=>$data['t'],//消息编号，做全局存储
+            'e'=>is_string($result)?$result:L(LOG_TIP),//错误提示信息
+            'm'=>'',//广播？单播
+//            'uid'=>,//标识用户编号
+            'sid'=>session('[id]')//session编号
+        ]));
     }
 
-    /**
-     * 调度
-     * @return mixed
-     */
-    function dispatch($data = null)
+    function subscribeProcess(\swoole_process $process)
     {
-        // TODO: Implement dispatch() method.
+        parent::subscribeProcess($process);
+        self::$Redis->publish(self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL],json_encode([
+            'i'=>'Online',
+            'd'=>['Chanel'=>self::$Config['SUBSCRIBE'][self::LOGIC_SUBSCRIBE_CHANNEL]],
+            't'=>'',
+            'e'=>'',
+            'sid'=>''
+        ]));
+        self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::LOGIC_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
     }
-
-    /**
-     * 启动函数
-     * @return mixed
-     */
-    function start()
-    {
-        // : Implement start() method.
-//        连接到Redis服务，
-//        订阅频道到dispatch函数中
-//        启动Swoole的多线程服务，调度进程进行处理，可以走内部UnixSock
-        self::$Redis->connect('127.0.0.1',6379,[$this,'onConnect']);
-    }
-
-    /**
-     * 停止继续执行
-     * @return mixed
-     */
-    function stop($Code = "0")
-    {
-        // TODO: Implement stop() method.
-    }
-
-    function out($Data = null)
-    {
-        // TODO: Implement out() method.
-    }
-
-    function in($Data = null)
-    {
-        // TODO: Implement in() method.
-    }
-
-    function onMessage(\swoole_redis $redis,$message){
-        $data = json_decode($message,true);
-        $rs = controller($data['i'],$data['d']);
-        $redis->publish('Distribute.Receive',json_encode($rs));
-    }
-    function onConnect(\swoole_redis $redis,bool $result){
-//        $redis->subscribe('Distribute.Client1');
-        $rs = $redis->publish('Distribute.Manage',json_encode(['Channel'=>'Distribute.Client1']));
-    }
+//    function
 }
