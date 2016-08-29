@@ -30,9 +30,10 @@ class DistributedRedisServer implements Mode
     static $Config=[];
     function __construct()
     {
-        self::$SwooleRedis = new \swoole_redis();
-        self::$SwooleRedis->on('message',[$this,'onMessage']);
+//        self::$SwooleRedis = new \swoole_redis();
+//        self::$SwooleRedis->on('message',[$this,'onMessage']);
         self::$Config = C('DRS');
+        self::$Redis = new \Redis();
     }
 
     /**
@@ -64,11 +65,29 @@ class DistributedRedisServer implements Mode
 //
 //        2、订阅指定频道，将消息接受绑定到dispatch函数中
 //        3、检测Swoole配置，启动Swoole服务
-        $host='127.0.0.1';
-        $port=6379;
-        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
-        self::$Redis = new \Redis();
+        foreach (self::$Config as $Key=>$Value){
+            switch ($Key){
+                case 'REDIS':
+                    if(!(isset($Value['HOST'])&&ip2long($Value)&&isset($Value['PORT'])&&is_numeric($Value['PORT']))){
+                        exit('错误的Redis配置');
+                    }
+//                    $Value['Auth'] = isset($Value['Auth'])
+                    break;
+                case 'SUBSCRIBE':
+                    if(!(isset($Value[self::NODE_SUBSCRIBE_CHANNEL])&&isset($Value[self::RETURN_SUBSCRIBE_CHANNEL]))){
+                        exit('错误的订阅配置');
+                    }
+                    break;
+                case 'PUBLISH':
+
+                    break;
+            }
+        }
+        $host=self::$Config['REDIS']['HOST'];
+        $port=self::$Config['REDIS']['PORT'];
+//        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
         self::$Redis->connect($host,$port);
+        self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
     }
 
     /**
@@ -89,23 +108,27 @@ class DistributedRedisServer implements Mode
     {
         // TODO: Implement in() method.
     }
+    function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
 
+    }
     /**
      * Message Received
      * @param \swoole_redis $redis
      * @param $result
      */
     function onMessage(\swoole_redis $redis,$result){
-//        var_dump($result);
-        $data = json_decode($result[2],true);
-        switch ($result[1]){
-            case 'Distribute.Manage':
-                self::$Clients[]=$data['Channel'];
-                break;
-            case 'Distribute.Receive':
-                var_dump($data);
-                break;
+        if(strlen($result)>0){
+            $data = json_decode($result[2],true);
+            switch ($result[1]){
+                case self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]:
+                    self::$Clients[]=$data['Channel'];
+                    break;
+                case self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL]:
+                    var_dump($data);
+                    break;
+            }
         }
+
     }
 
     /**
@@ -117,8 +140,8 @@ class DistributedRedisServer implements Mode
         //Read subscribe Config ,and subscribe the channel
 //        $redis->subscribe('castle');
         //subscribe 2 channels
-        $redis->subscribe('Distribute.Manage');
-        $redis->subscribe('Distribute.Receive');
+        $redis->subscribe(self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL]);
+        $redis->subscribe(self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]);
 //        $redis=new \Redis();
 //        $redis->connect('127.0.0.1',6379);
         $Inotify = new \Inotify();
