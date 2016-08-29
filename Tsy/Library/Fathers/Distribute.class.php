@@ -35,7 +35,7 @@ class Distribute implements Mode
     function startSwoole(){
         cache('[cleartmp]');
         if($SwooleConfig = swoole_load_config()){
-            self::$SwooleServer=null;
+//            self::$SwooleServer=null;
             $Processes=[];
             $ProcessesConf=[];
             foreach ($SwooleConfig['LISTEN'] as $Listen){
@@ -53,8 +53,9 @@ class Distribute implements Mode
 
             }
             swoole_get_callback(C('SWOOLE.CALLBACK'));
-            if(isset(self::$SwooleServer)&&self::$SwooleServer){
-                self::$SwooleServer->set($SwooleConfig['CONF']);
+            if(self::$SwooleServer instanceof \swoole_server){
+                if($SwooleConfig['CONF'])
+                    self::$SwooleServer->set($SwooleConfig['CONF']);
                 $GLOBALS['_TASK_WORKER_SUM']=self::$SwooleServer->setting['worker_num']+self::$SwooleServer->setting['task_worker_num'];
 //                $Swoole = new \Tsy\Library\Server($SwooleConfig['PortModeMap']);
                 $GLOBALS['_PortModeMap']=$SwooleConfig['PortModeMap'];
@@ -78,7 +79,7 @@ class Distribute implements Mode
 //                $SwooleConfig = swoole_load_config();
 
                 //启动Redis订阅线程，用于管理Redis相关信息
-                $ProcessObject = new \swoole_process([$this,'subscribeProcess'],true,true);
+                $Processes[] = [new \swoole_process([$this,'subscribeProcess'],true,true)];
 
                 if($SwooleConfig['PROCESS']){
                     foreach ($SwooleConfig['PROCESS'] as $k=>$Process){
@@ -140,7 +141,7 @@ class Distribute implements Mode
 //        self::$SwooleRedis->on('message',[$this,'onMessage']);
         self::$Config = C('DRS');
         self::$Redis = new \Redis();
-        self::$SwooleMode=new Swoole();
+        self::$SwooleMode=new Mode\Swoole();
     }
 
     /**
@@ -194,7 +195,8 @@ class Distribute implements Mode
         $port=self::$Config['REDIS']['PORT'];
 //        self::$SwooleRedis->connect($host,$port,[$this,'onConnect']);
         self::$Redis->pconnect($host,$port);
-        $this->inotify('d');
+//        $this->inotify('d');
+        $this->startSwoole();
     }
 
 

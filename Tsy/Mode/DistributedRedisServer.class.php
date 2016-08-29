@@ -21,6 +21,7 @@ use Tsy\Mode;
  */
 class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
 {
+
     /**
      * Redis扩展的订阅回调
      * @param \Redis $redis
@@ -28,6 +29,7 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
      * @param string $msg
      */
     function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
+        file_put_contents('dd',$msg);
         $data = json_decode($msg,true);
         switch ($channel){
             case self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]:
@@ -42,6 +44,7 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
                     case 'Online':
                         //上线
                         self::$Clients[$data['d']['Chanel']]=array_merge($data['d'],['LastTime'=>time()]);
+                        cache('DistributeClients',self::$Clients);
                         break;
                     case 'Offline':
 //                        下线
@@ -81,13 +84,29 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
 //            $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
             $channel = $this->distribute();
             if($channel){
-                cache('fd_'.$data['t'],$fd);
+                cache('fd_'.$Data['t'],$fd);
+//                $host=self::$Config['REDIS']['HOST'];
+//                $port=self::$Config['REDIS']['PORT'];
+//                self::$Redis->connect($host,$port);
                 self::$Redis->publish($channel,json_encode([
                     'i'=>$Data['i'],
                     'd'=>$Data['d'],
                     't'=>$Data['t'],
                     'sid'=>session('[id]')
                 ]));
+//                try{
+//                    self::$Redis->publish($channel,json_encode([
+//                        'i'=>$Data['i'],
+//                        'd'=>$Data['d'],
+//                        't'=>$Data['t'],
+//                        'sid'=>session('[id]')
+//                    ]));
+//                }catch (\Exception $e){
+//                    $host=self::$Config['REDIS']['HOST'];
+//                    $port=self::$Config['REDIS']['PORT'];
+//                    self::$Redis->pconnect($host,$port);
+//                }
+
             }else{
                 swoole_out_check($fd,array_merge($Data,['e'=>'当前无逻辑服务器在线','d'=>[]]));
             }
@@ -103,9 +122,10 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
      * @return string
      */
     function distribute():string{
+        self::$Clients = cache('DistributeClients');
         if(self::$Clients){
             //返回一个频道
-            return array_rand(self::$Clients);
+            return end(self::$Clients)['Channel'];
         }else{
             return '';
         }
@@ -113,6 +133,10 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
 
     function subscribeProcess(\swoole_process $process)
     {
+//        self::$Redis=new \Redis();
+        $host=self::$Config['REDIS']['HOST'];
+        $port=self::$Config['REDIS']['PORT'];
+        self::$Redis->connect($host,$port);
         parent::subscribeProcess($process);
         self::$Redis->subscribe([self::$Config['SUBSCRIBE'][self::RETURN_SUBSCRIBE_CHANNEL],self::$Config['SUBSCRIBE'][self::NODE_SUBSCRIBE_CHANNEL]],[$this,'onRedisSubscribe']);
     }
