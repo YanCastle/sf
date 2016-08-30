@@ -148,6 +148,8 @@ class Controller
             if(method_exists($ObjectClass,$name)){
                 return call_user_func_array($ObjectClass,$arguments);
             }
+        }else{
+            return '不存在的方法:'.$name;
         }
     }
     protected function getControllerName(){
