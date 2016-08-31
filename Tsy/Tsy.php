@@ -41,7 +41,7 @@ define('TSY_PATH',__DIR__);
 define('CONF_PATH',APP_PATH.DIRECTORY_SEPARATOR.'Common/Config');
 //检测是否存在swoole组件，如果存在且未定义APP_MODE为swoole则自动定义成为SWOOLE
 if(extension_loaded('swoole')&&!defined('APP_MODE')){
-    define('APP_MODE','SWOOLE');
+    define('APP_MODE','Swoole');
 }
 //结束Define检测
 if(version_compare(PHP_VERSION,'5.5.0','<')) {
