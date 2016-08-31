@@ -66,7 +66,7 @@ class Tsy
 //        $Session = new Session();
 //        session_set_save_handler($Session,true);
 //        开始实例化Mode类，进行初始化操作
-        $ModeClassName = 'Tsy\\Mode\\'.ucfirst(strtolower(APP_MODE));
+        $ModeClassName = 'Tsy\\Mode\\'.parse_name(APP_MODE,1);
         if(class_exists($ModeClassName)){
             self::$Mode = new $ModeClassName();
         }else{
