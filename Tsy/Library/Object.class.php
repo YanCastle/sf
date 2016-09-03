@@ -384,7 +384,7 @@ class Object
         $Objects = [];
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
-        $Model = M($this->main);
+        $Model = new Model($this->main);
         $Fields=$OneObjectProperties=$ArrayProperties=$OneObjectPropertyValues=[];
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
