@@ -758,7 +758,7 @@ class Model {
         if(!empty($this->_map) ) {
             $map = array_flip($this->_map);
 //            需要解决join带来的字段名称没法恢复的问题
-            if(preg_match_all('/'.$this->tablePrefix.'[a-zA-Z0-9_]+/',$this->db->queryStr,$match)>1){
+            if(preg_match_all('/'.$this->tablePrefix.'/[Ff][Rr][Oo][Mm] [A-Za-z0-9,`]+ [Aa][Ss] [A-Za-z0-9,`]+/',$this->db->queryStr,$match)>1){
                 $tables = array_unique($match[0]);
 //                if(count($tables)>1){
                     foreach(array_diff($tables,[$this->trueTableName]) as $table){
