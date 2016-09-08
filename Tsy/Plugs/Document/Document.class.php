@@ -30,13 +30,18 @@ class Document
         $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Object']);
         foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
             $ObjectName = parse_name($TableName,1);
-            $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
             $ColumnComments=[];
-            $AddFieldsConfigs=[];
+            $AddFieldsConfigs=$SaveFieldsConfigs=[];
+            $PKColumns=[];
             foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                if($ColumnProperties['P']){
+                    //主键
+                    $PKColumns[$ColumnName]=$ColumnProperties;
+                }
                 $ColumnCommentOneLine = str_replace(["\n","\r\n"],'；',$ColumnProperties['Comment']);
                 $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
                 if(!$ColumnProperties['I']){
+                    //开始处理addFieldsConfig
                     $Config=[
                         'FIELD_CONFIG_DEFAULT'=>'null',
                         'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
@@ -53,6 +58,9 @@ class Document
                         case 'CUID':
                             $Config['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
                             break;
+                        case 'UUID':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
+                            break;
                     }
                     $ConfigString=[];
                     foreach ($Config as $Title=>$Value){
@@ -60,9 +68,41 @@ class Document
                     }
                     $ConfigString=implode(",\r\n",$ConfigString);
                     $AddFieldsConfigs[]="\r\n".(count(array_unique(array_values($Config)))>1?"  ":"//")."      '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$ConfigString}\r\n".(count(array_unique(array_values($Config)))>1?"  ":"//")."      ]";
+                    //开始处理saveFieldsConfig
+                    $SaveConfig=[
+                        'FIELD_CONFIG_DEFAULT'=>'null',
+                        'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
+                        'FIELD_CONFIG_VALUE'=>'null',
+                        'FIELD_CONFIG_VALUE_FUNCTION'=>'null',
+                    ];
+                    switch ($ColumnName){
+                        case 'CTime':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
+                            break;
+                        case 'UTime':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            break;
+                        case 'CUID':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
+                            break;
+                        case 'UUID':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
+                            break;
+                        case $PKColumns[0]:
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
+                            break;
+                    }
+                    $SaveConfigString=[];
+                    foreach ($SaveConfig as $Title=>$Value){
+                        $SaveConfigString[]=($Value=='null'?'//':'  ')."            self::{$Title}=>'{$SaveConfig[$Title]}',//".(strpos($Title,'DEFAULT')>0?"当 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值不存在时，取该值或该函数的值":"不管 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值是否存在，取该值或该函数的值");
+                    }
+                    $SaveConfigString=implode(",\r\n",$SaveConfigString);
+                    $SaveFieldsConfigs[]="\r\n".(count(array_unique(array_values($SaveConfig)))>1?"  ":"//")."      '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$SaveConfigString}\r\n".(count(array_unique(array_values($SaveConfig)))>1?"  ":"//")."      ]";
                 }
             }
+            $AllFields='\''.implode('\',\'',array_diff(array_keys($TableProperties['Columns'])),array_keys($PKColumns)).'\'';
             $AddFieldsConfigsString = implode(",\r\n",$AddFieldsConfigs);
+            $SaveFieldsConfigsString = implode(",\r\n",$SaveFieldsConfigs);
             $ColumnCommentsString='
      * '.implode('
      * ',$ColumnComments);
@@ -89,6 +129,9 @@ class {$ObjectName}Object extends Object
     public \$saveFields=[{$AllFields}];//允许修改的字段，如果数组最后一个元素值为true则表示排除
     public \$addFieldsConfig=[
     {$AddFieldsConfigsString}
+    ];
+    public \$saveFieldsConfig=[
+    {$SaveFieldsConfigsString}
     ];
 }";
             file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
