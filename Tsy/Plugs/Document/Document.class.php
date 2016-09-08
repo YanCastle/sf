@@ -37,7 +37,6 @@ class Document
                 $ColumnCommentOneLine = str_replace(["\n","\r\n"],'；',$ColumnProperties['Comment']);
                 $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
                 if(!$ColumnProperties['I']){
-
                     $Config=[
                         'FIELD_CONFIG_DEFAULT'=>'null',
                         'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
@@ -60,9 +59,7 @@ class Document
                         $ConfigString[]=($Value=='null'?'//':'  ')."            self::{$Title}=>'{$Config[$Title]}',//".(strpos($Title,'DEFAULT')>0?"当 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值不存在时，取该值或该函数的值":"不管 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值是否存在，取该值或该函数的值");
                     }
                     $ConfigString=implode(",\r\n",$ConfigString);
-                    $AddFieldsConfigs[]="
-        '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$ConfigString}
-        ]";
+                    $AddFieldsConfigs[]="\r\n".(count(array_unique(array_values($Config)))>1?"  ":"//")."      '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$ConfigString}\r\n".(count(array_unique(array_values($Config)))>1?"  ":"//")."      ]";
                 }
             }
             $AddFieldsConfigsString = implode(",\r\n",$AddFieldsConfigs);
