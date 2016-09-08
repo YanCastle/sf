@@ -763,6 +763,9 @@ class Object
 //            }
 //        }else
         if(is_string($Rule)){
+            if('unset'==$Rule){
+                unset($Data[$Key]);
+            }else
             if(is_callable($Rule)){
 //                'time';
                 $Data[$Key]=call_user_func($Rule);
