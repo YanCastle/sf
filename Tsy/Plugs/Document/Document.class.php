@@ -106,6 +106,60 @@ class Document
             $ColumnCommentsString='
      * '.implode('
      * ',$ColumnComments);
+            //自动生成一对一或一对多或多对多映射配置关系
+            $PropertyAndLinkConfig=[
+                'Property'=>[],'Link'=>[]
+            ];
+            foreach (array_merge($TableProperties['FKs']['Parent'],$TableProperties['FKs']['Child']) as $FKConfig){
+//                $FKCommentArray=explode('\n',str_replace(["\n","\r\n"],"\n",$FKConfig['Properties']['Comment']));
+                if(preg_match_all('/[PC]{2}\=[1NOP]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$FKConfig['Properties']['Comment'],$Matchs)){
+                    foreach ($Matchs[0] as $Row){
+                        list($Key,$Relation,$PropertyName)=explode('=',$Row);
+                        $Properties=['PROPERTY'];
+                        switch (substr($Relation,0,2)){
+                            case '1N':
+                                $Properties[]='ARRAY';
+                                break;
+                            case '11':
+                                $Properties[]='ONE';
+                                break;
+                            case 'NN':
+                                $Properties[]='ARRAY';
+                                break;
+                            case 'N1':
+                                $Properties[]='ONE';
+                                break;
+                        }
+                        if(strlen($Relation)==3){
+                            if(substr($Relation,2,1)=='O')
+                                $Properties[]='OBJECT';//对象化映射
+                            if(substr($Relation,2,1)=='P'&&$Properties[1]=='ONE')
+                                $Properties[]='PROPERTY';//支持一个属性的非对象化映射情况下的子属性
+                        }
+                        $Relationship = implode('_',$Properties);
+                        $ChildTableName=parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
+                        if(substr($Key,0,1)=='P'&&$FKConfig['Type']=='Parent'){
+                            $PropertyName=$PropertyName?$PropertyName:parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
+                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ParentTable']['Columns'][parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ParentTableColumnCode']),1)]['Name']}  {$FKConfig['ChildTable']['Name']}  属性
+            self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
+            self::RELATION_TABLE_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//关联表中的关联字段
+            self::RELATION_MAIN_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//主笔中的关联字段
+            self::RELATION_TABLE_PROPERTY=>self::{$Relationship},            
+        ],";
+                        }
+                        if(substr($Key,0,1)=='C'&&$FKConfig['Type']=='Child'){
+                            $PropertyName=$PropertyName?$PropertyName:parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ParentTableCode']),1);
+                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ChildTable']['Columns'][parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableColumnCode']),1)]['Name']}  {$FKConfig['ParentTable']['Name']}  属性
+            self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
+            self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//关联表中的关联字段
+            self::RELATION_MAIN_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//主笔中的关联字段
+            self::RELATION_TABLE_PROPERTY=>self::{$Relationship},            
+        ],";
+                        }
+                    }
+                }
+            }
+            $PropertiesConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Property']);
             $FileContent="<?php
 namespace {$ModuleName}\\Object;
 
@@ -132,6 +186,9 @@ class {$ObjectName}Object extends Object
     ];
     public \$saveFieldsConfig=[
     {$SaveFieldsConfigsString}
+    ];
+    protected \$property=[
+        {$PropertiesConfigString}
     ];
 }";
             file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
