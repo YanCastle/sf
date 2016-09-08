@@ -872,4 +872,26 @@ class {$ObjectName}Controller extends Controller
         }
         return $Result;
     }
+
+    /**
+     * 发布代码，压缩代码并删除注释。
+     * @param null $dir
+     */
+    function publish($dir=null){
+//        $RootPath =
+//        if(null==$dir){
+//            $dir=dirname(APP_PATH).DIRECTORY_SEPARATOR.'Publish';
+//        }
+//        each_dir(dirname(APP_PATH),function($path)use($dir){
+//            if(preg_match('/\\'.DIRECTORY_SEPARATOR.'\./',$path)){
+//                return ;
+//            }
+//            $a=$path;
+//        },function($path)use($dir){
+//            if(preg_match('/\\'.DIRECTORY_SEPARATOR.'\./',$path)){
+//                return ;
+//            }
+//            $a=$path;
+//        });
+    }
 }
