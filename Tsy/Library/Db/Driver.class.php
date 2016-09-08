@@ -268,7 +268,7 @@ abstract class Driver {
                     $count++;
                     if($count>5){return false;}
                 };
-                return $this->query($str,$fetchSql);
+                return $this->execute($str,$fetchSql);
             }
             $this->error();
             return false;
