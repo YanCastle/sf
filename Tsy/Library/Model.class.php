@@ -57,6 +57,7 @@ class Model {
     protected $methods          =   array('strict','order','alias','having','group','lock','distinct','auto','filter','validate','result','token','index','force');
 
     protected $serialize        =   [];
+//    protected $tables=[];//该数据库中所有存在的表
 	/**
      * 架构函数
      * 取得DB类的实例对象 字段检查
@@ -91,6 +92,7 @@ class Model {
         // 获取数据库操作对象
         // 当前模型有独立的数据库连接信息
         $this->db(0,$this->connection,true);
+        
     }
     protected function getDbConfig($connection){
         $Config = [];
@@ -758,7 +760,8 @@ class Model {
         if(!empty($this->_map) ) {
             $map = array_flip($this->_map);
 //            需要解决join带来的字段名称没法恢复的问题
-            if(preg_match_all('/'.$this->tablePrefix.'/[Ff][Rr][Oo][Mm] [A-Za-z0-9,`]+ [Aa][Ss] [A-Za-z0-9,`]+/',$this->db->queryStr,$match)>1){
+//            只支持带表前缀的方式识别
+            if($this->tablePrefix&&preg_match_all("/{$this->tablePrefix}[A-Za-z0-9`]+/",$this->db->queryStr,$match)>1){
                 $tables = array_unique($match[0]);
 //                if(count($tables)>1){
                     foreach(array_diff($tables,[$this->trueTableName]) as $table){
@@ -782,7 +785,6 @@ class Model {
         }
         return $data;
     }
-
     protected function _write_data($data){
         // 检查字段映射
         if(!empty($this->_map) ) {
