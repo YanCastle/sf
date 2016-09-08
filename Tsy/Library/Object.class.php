@@ -13,8 +13,10 @@ use Tsy\Plugs\Db\Db;
 class Object
 {
     const PROPERTY_ONE = "00"; //一对一属性配置，
+    const PROPERTY_ONE_PROPERTY = "04"; //一对一额外属性配置，
     const PROPERTY_ARRAY = "01"; //一对多属性配置
-    const PROPERTY_ONE_OBJECT = "02"; //一对多属性配置
+    const PROPERTY_ONE_OBJECT = "02"; //一对一属性配置
+    const PROPERTY_ARRAY_OBJECT = "03"; //一对多属性配置
 
 //    const PROPERTY_OBJECT = "02";
 
@@ -385,7 +387,7 @@ class Object
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
         $Model = new Model($this->main);
-        $Fields=$OneObjectProperties=$ArrayProperties=$OneObjectPropertyValues=[];
+        $Fields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
@@ -413,6 +415,14 @@ class Object
                     case self::PROPERTY_ARRAY:
                         $ArrayProperties[$PropertyName] = $Config;
                         break;
+                    case self::PROPERTY_ONE_PROPERTY:
+                        //单一表格属性映射
+                        $OneProperties[$PropertyName]=$Config;
+                        break;
+                    case self::PROPERTY_ARRAY_OBJECT:
+                        //多个对象化映射
+                        $ArrayObjectProperties[$PropertyName]=$Config;
+                        break;
                     default:
                         L('错误的Property配置');
                         break;
@@ -437,12 +447,17 @@ class Object
             return [];
         }
         //处理一对多的情况
-        $ArrayPropertyValues = [];
+        $ArrayPropertyValues = $OnePropertyValues = $ArrayObjectPropertyValues =[];
         foreach ($ArrayProperties as $PropertyName => $Config) {
             //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
             $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN], true);
         }
+        //处理一对一的属性结构
+        foreach ($OneProperties as $PropertyName=>$Config){
+            $OnePropertyValues[$PropertyName]=array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects, $Config[self::RELATION_TABLE_COLUMN])]])->select(),$Config[self::RELATION_TABLE_COLUMN]);
+        }
+
         //封装一对一的对象结构
         foreach ($OneObjectProperties as $PropertyName=>$Config){
             $OneObjectIDs=[];
@@ -455,6 +470,22 @@ class Object
                 $OneObjectPropertyValues[$PropertyName] = array_key_set($OneObjectModel->where([
                     $Config[self::RELATION_TABLE_COLUMN]=>['IN',$OneObjectIDs]
                 ])->field($Fields)->select(),$Config[self::RELATION_TABLE_COLUMN]);
+            }else{
+                $OneObjectPropertyValues[$PropertyName]=[];
+            }
+        }
+        //TODO 处理一对多的对象化结构
+        foreach ($ArrayObjectProperties as $PropertyName=>$Config){
+            $OneObjectIDs=[];
+            $OneObjectModel = new Model($Config[self::RELATION_TABLE_NAME]);
+//                    特殊指定主表字段与子表字段相同
+            $OneObjectIDs = array_column($Objects,isset($Config[self::RELATION_MAIN_COLUMN])&&$Config[self::RELATION_MAIN_COLUMN]?$Config[self::RELATION_MAIN_COLUMN]:$Config[self::RELATION_TABLE_COLUMN]);
+//                    处理字段
+            $Fields = $this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:'',$Config[self::RELATION_TABLE_COLUMN]);
+            if($OneObjectIDs&&$Fields){
+                $OneObjectPropertyValues[$PropertyName] = array_key_set($OneObjectModel->where([
+                    $Config[self::RELATION_TABLE_COLUMN]=>['IN',$OneObjectIDs]
+                ])->field($Fields)->select(),$Config[self::RELATION_TABLE_COLUMN],true);
             }else{
                 $OneObjectPropertyValues[$PropertyName]=[];
             }
@@ -540,6 +571,14 @@ class Object
 //            处理一对多关系
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig) {
                 $Objects[$ID][$PropertyName] = isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
+            }
+            //处理一对一的属性问题
+            foreach ($OneProperties as $PropertyName=>$Config){
+                $Object[$ID][$PropertyName]=isset($OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
+            }
+            //处理一对多的对象化关系组合
+            foreach ($ArrayObjectProperties as $PropertyName=>$Config){
+                $Objects[$ID][$PropertyName] = isset($ArrayObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
             }
 //            处理一对一对象化
             foreach ($OneObjectProperties as $PropertyName=>$PropertyConfig){
