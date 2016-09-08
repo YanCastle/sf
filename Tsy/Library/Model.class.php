@@ -765,7 +765,7 @@ class Model {
                 $tables = array_unique($match[0]);
 //                if(count($tables)>1){
                     foreach(array_diff($tables,[$this->trueTableName]) as $table){
-                        $fields = $this->getDbFields($table);
+                        $fields = $this->getDbFields(str_replace('`','',$table));
                         foreach ($fields as $field){
                             $map[strtolower($field)]=$field;
                         }

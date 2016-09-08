@@ -319,7 +319,7 @@ class Object
         if (strlen($Keyword) === 0 && count($W) === 0) {
             $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
             return [
-                'L' => array_values($this->gets($ObjectIDs)),
+                'L' => $ObjectIDs?array_values($this->gets($ObjectIDs)):[],
                 'P' => $P,
                 'N' => $N,
                 'T' => $Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count'],
