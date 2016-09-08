@@ -100,7 +100,7 @@ class Document
                     $SaveFieldsConfigs[]="\r\n".(count(array_unique(array_values($SaveConfig)))>1?"  ":"//")."      '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$SaveConfigString}\r\n".(count(array_unique(array_values($SaveConfig)))>1?"  ":"//")."      ]";
                 }
             }
-            $AllFields='\''.implode('\',\'',array_diff(array_keys($TableProperties['Columns'])),array_keys($PKColumns)).'\'';
+            $AllFields='\''.implode('\',\'',array_diff(array_keys($TableProperties['Columns']),array_keys($PKColumns))).'\'';
             $AddFieldsConfigsString = implode(",\r\n",$AddFieldsConfigs);
             $SaveFieldsConfigsString = implode(",\r\n",$SaveFieldsConfigs);
             $ColumnCommentsString='
