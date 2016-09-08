@@ -32,9 +32,40 @@ class Document
             $ObjectName = parse_name($TableName,1);
             $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
             $ColumnComments=[];
+            $AddFieldsConfigs=[];
             foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                $ColumnCommentOneLine = str_replace(["\n","\r\n"],'；',$ColumnProperties['Comment']);
                 $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+                if(!$ColumnProperties['I']){
+
+                    $Config=[
+                        'FIELD_CONFIG_DEFAULT'=>'null',
+                        'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
+                        'FIELD_CONFIG_VALUE'=>'null',
+                        'FIELD_CONFIG_VALUE_FUNCTION'=>'null',
+                    ];
+                    switch ($ColumnName){
+                        case 'CTime':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            break;
+                        case 'UTime':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            break;
+                        case 'CUID':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
+                            break;
+                    }
+                    $ConfigString=[];
+                    foreach ($Config as $Title=>$Value){
+                        $ConfigString[]=($Value=='null'?'//':'  ')."            self::{$Title}=>'{$Config[$Title]}',//".(strpos($Title,'DEFAULT')>0?"当 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值不存在时，取该值或该函数的值":"不管 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值是否存在，取该值或该函数的值");
+                    }
+                    $ConfigString=implode(",\r\n",$ConfigString);
+                    $AddFieldsConfigs[]="
+        '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$ConfigString}
+        ]";
+                }
             }
+            $AddFieldsConfigsString = implode(",\r\n",$AddFieldsConfigs);
             $ColumnCommentsString='
      * '.implode('
      * ',$ColumnComments);
@@ -57,8 +88,11 @@ class {$ObjectName}Object extends Object
      */
     protected \$main='{$ObjectName}';
     protected \$pk='{$TableProperties['PK']}';
-    public \$addFields=[{$AllFields}];
-    public \$saveFields=[{$AllFields}];
+    public \$addFields=[{$AllFields}];//允许添加的字段，如果数组最后一个元素值为true则表示排除
+    public \$saveFields=[{$AllFields}];//允许修改的字段，如果数组最后一个元素值为true则表示排除
+    public \$addFieldsConfig=[
+    {$AddFieldsConfigsString}
+    ];
 }";
             file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
         }
@@ -71,12 +105,16 @@ class {$ObjectName}Object extends Object
             $ObjectName = parse_name($TableName,1);
             $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
             $ColumnComments=[];
+            $ModelMap=[];
             foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
                 $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+                $ModelMap[]='\''.strtolower($ColumnProperties['Code']).'\'=>\''.$ColumnProperties['Code'].'\'';
             }
+            $ModelMapString = implode(',',$ModelMap);
             $ColumnCommentsString='
      * '.implode('
      * ',$ColumnComments);
+
             $FileContent="<?php
 namespace {$ModuleName}\\Model;
 
@@ -94,6 +132,7 @@ class {$ObjectName}Model extends Model
     /**
      * @var string
      */
+     protected \$_map=[{$ModelMapString}];
 }";
             file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Model.class.php',$FileContent);
         }
