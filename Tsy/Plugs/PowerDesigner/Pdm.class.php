@@ -61,6 +61,7 @@ class Pdm
             $Columns=[];
             $PK = pq($oTable)->find('cPrimaryKey oKey')->attr('Ref');
             $PK = pq($oTable)->find("[Id={$PK}]")->find('oColumn')->attr('Ref');
+            $PKColumn='';
             foreach(pq($oTable)->find('oColumn') as $oColumn){
                 $ColumnID=pq($oColumn)->attr('Id');
                 if(null===$ColumnID){
@@ -82,8 +83,12 @@ class Pdm
                 ];
                 $Column['DefaultValue']=$Column['DefaultValue']==false?"":$Column['DefaultValue'];
                 $Columns[$Code]=$Column;
+                if($PK&&$PK==$ColumnID){
+                    $PKColumn=$Code;
+                }
             }
             $Table['Columns']=$Columns;
+            $Table['PK']=$PKColumn;
             $Tables[$Table['Code']]=$Table;
         }
         return $Tables;

@@ -22,6 +22,117 @@ class Document
         }
         $JSON['Tables']=$Tables;
         self::$docs['PDM']=$JSON;
+        return $this;
+    }
+    function generateObjects($ModuleName=''){
+        //得到Object的目录
+        $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
+        $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Object']);
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            $ObjectName = parse_name($TableName,1);
+            $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
+            $ColumnComments=[];
+            foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+            }
+            $ColumnCommentsString='
+     * '.implode('
+     * ',$ColumnComments);
+            $FileContent="<?php
+namespace {$ModuleName}\\Object;
+
+use Tsy\\Library\\Object;
+/**
+ * {$TableProperties['Name']}
+ * {$TableProperties['Comment']}
+ * @package {$ModuleName}\\Object
+ */
+class {$ObjectName}Object extends Object
+{
+    /**
+{$ColumnCommentsString}
+     */
+    /**
+     * @var string
+     */
+    protected \$main='{$ObjectName}';
+    protected \$pk='{$TableProperties['PK']}';
+    public \$addFields=[{$AllFields}];
+    public \$saveFields=[{$AllFields}];
+}";
+            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
+        }
+        return $this;
+    }
+    function generateModels($ModuleName=''){
+        $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
+        $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Model']);
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            $ObjectName = parse_name($TableName,1);
+            $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
+            $ColumnComments=[];
+            foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+            }
+            $ColumnCommentsString='
+     * '.implode('
+     * ',$ColumnComments);
+            $FileContent="<?php
+namespace {$ModuleName}\\Model;
+
+use Tsy\\Library\\Model;
+/**
+ * {$TableProperties['Name']}
+ * {$TableProperties['Comment']}
+ * @package {$ModuleName}\\Object
+ */
+class {$ObjectName}Model extends Model
+{
+    /**
+{$ColumnCommentsString}
+     */
+    /**
+     * @var string
+     */
+}";
+            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Model.class.php',$FileContent);
+        }
+        return $this;
+    }
+    function generateControllers($ModuleName=''){
+        $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
+        $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Controller']);
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            $ObjectName = parse_name($TableName,1);
+            $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
+            $ColumnComments=[];
+            foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+            }
+            $ColumnCommentsString='
+     * '.implode('
+     * ',$ColumnComments);
+            $FileContent="<?php
+namespace {$ModuleName}\\Controller;
+
+use Tsy\\Library\\Controller;
+/**
+ * {$TableProperties['Name']}
+ * {$TableProperties['Comment']}
+ * @package {$ModuleName}\\Object
+ */
+class {$ObjectName}Controller extends Controller
+{
+    /**
+{$ColumnCommentsString}
+     */
+    /**
+     * @var string
+     */
+}";
+            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Controller.class.php',$FileContent);
+        }
+        return $this;
     }
     /**
      * 获取文档信息
