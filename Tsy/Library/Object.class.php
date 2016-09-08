@@ -474,7 +474,7 @@ class Object
                 $OneObjectPropertyValues[$PropertyName]=[];
             }
         }
-        //TODO 处理一对多的对象化结构
+        // 处理一对多的对象化结构
         foreach ($ArrayObjectProperties as $PropertyName=>$Config){
             $OneObjectIDs=[];
             $OneObjectModel = new Model($Config[self::RELATION_TABLE_NAME]);
