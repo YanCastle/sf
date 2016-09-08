@@ -11,9 +11,14 @@ namespace Tsy\Plugs\PowerDesigner;
 
 class Pdm
 {
+    const FK='FK';
+    const TABLE='TABLE';
+    const COLUMN='COLUMN';
+    const DOMAIN='DOMAIN';
     private $pq;
     private $Domain;
     public $json=[];
+    private $IDMap=[];
     function load($file){
         if(file_exists($file)) {
             $xml = file_get_contents($file);
@@ -27,6 +32,24 @@ class Pdm
             $json['Project'] = $ProjectInfo;
             $json['Tables'] = $TableInfo;
             $json['Domains'] = $this->Domain;
+            $json['ForeignKeys']=$this->getForeignKeys();
+            foreach ($json['ForeignKeys'] as $ID=>$FK){
+                $ParentTableCode=$this->IDMap[$FK['ParentTableID']]['Code'];
+                $ChildTableCode=$this->IDMap[$FK['ChildTableID']]['Code'];
+                $ParentColumnCode=$this->IDMap[$FK['ParentColumnID']]['Code'];
+                $ChildColumnCode=$this->IDMap[$FK['ChildColumnID']]['Code'];
+                $FKProperty=[
+                    'ParentTable'=>$json['Tables'][$ParentTableCode],
+                    'ParentTableCode'=>$ParentTableCode,
+                    'ParentTableColumnCode'=>$ParentColumnCode,
+                    'ChildTable'=>$json['Tables'][$ChildTableCode],
+                    'ChildTableCode'=>$ChildTableCode,
+                    'ChildTableColumnCode'=>$ChildColumnCode,
+                    'Properties'=>$FK
+                ];
+                $json['Tables'][$ParentTableCode]['FKs']['Parent'][]=array_merge($FKProperty,['Type'=>'Parent']);
+                $json['Tables'][$ChildTableCode]['FKs']['Child'][]=array_merge($FKProperty,['Type'=>'Child']);
+            }
             $this->json=$json;
             return true;
         }
@@ -57,6 +80,10 @@ class Pdm
                 'Name'=>pq($oTable)->find('aName:first')->html(),
                 'Code'=>pq($oTable)->find('aCode:first')->html(),
                 'Comment'=>pq($oTable)->find('aComment:first')->html(),
+                'FKs'=>[
+                    'Parent'=>[],//此表为父表时
+                    'Child'=>[]//此表为子表时
+                ]
             ];
             $Columns=[];
             $PK = pq($oTable)->find('cPrimaryKey oKey')->attr('Ref');
@@ -86,10 +113,12 @@ class Pdm
                 if($PK&&$PK==$ColumnID){
                     $PKColumn=$Code;
                 }
+                $this->IDMap[$ColumnID]=array_merge($Column,['Type'=>self::COLUMN]);
             }
             $Table['Columns']=$Columns;
             $Table['PK']=$PKColumn;
             $Tables[$Table['Code']]=$Table;
+            $this->IDMap[$Table['ID']]=array_merge($Table,['Type'=>self::TABLE]);
         }
         return $Tables;
     }
@@ -107,6 +136,28 @@ class Pdm
                 'DataType'=>pq($oPhysicalDomain)->find('aDataType:first')->html(),
             ];
             $this->Domain[$Domain['ID']]=$Domain;
+            $this->IDMap[$Domain['ID']]=array_merge($Domain,['Type'=>self::DOMAIN]);
         }
+    }
+    public function getForeignKeys(){
+        $References=[];
+        foreach(pq('cReferences oReference') as $oReference){
+            $ID=pq($oReference)->attr('Id');
+            $Reference = [
+                'ID'=>$ID,
+                'Name'=>pq($oReference)->find('aName:first')->html(),
+                'Code'=>pq($oReference)->find('aCode:first')->html(),
+                'Comment'=>pq($oReference)->find('aComment:first')->html(),
+                'ParentTableID'=>pq($oReference)->find('cParentTable oTable')->attr('Ref'),
+                'ChildTableID'=>pq($oReference)->find('cChildTable oTable')->attr('Ref'),
+                'ParentColumnID'=>pq($oReference)->find('cJoins oReferenceJoin cObject1 oColumn')->attr('Ref'),
+                'ChildColumnID'=>pq($oReference)->find('cJoins oReferenceJoin cObject2 oColumn')->attr('Ref'),
+            ];
+            $References[]=$Reference;
+            $this->IDMap[$ID]=array_merge($Reference,['Type'=>self::FK]);
+//            $this->Reference[$Domain['ID']]=$Domain;
+        }
+        return $References;
+//        $a=1;
     }
 }
