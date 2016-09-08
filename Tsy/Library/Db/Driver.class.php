@@ -66,7 +66,7 @@ abstract class Driver {
     // PDO连接参数
     protected $options = array(
         PDO::ATTR_CASE              =>  PDO::CASE_LOWER,
-        PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_WARNING,
+        PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_ORACLE_NULLS      =>  PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES =>  false,
     );
@@ -192,8 +192,8 @@ abstract class Driver {
                 return $this->getResult();
             }
         }catch (\PDOException $e) {
-            if($e->errorInfo[0] == 70100 || $e->errorInfo[0] == 2006){
-                $count = 0;
+            if($e->errorInfo[1] == 2013 || $e->errorInfo[1] == 2006){
+                $count = 0;$this->linkID[0]=null;$this->_linkID=null;
                 while(!$this->connect()){
 //                    sleep(1);
                     echo "数据库重新连接失败(try:{$count})\n";
@@ -260,8 +260,8 @@ abstract class Driver {
                 return $this->numRows;
             }
         }catch (\PDOException $e) {
-            if($e->errorInfo[0] == 70100 || $e->errorInfo[0] == 2006){
-                $count = 0;
+            if($e->errorInfo[1] == 2013 || $e->errorInfo[1] == 2006){
+                $count = 0;$this->linkID[0]=null;$this->_linkID=null;
                 while(!$this->connect()){
 //                    sleep(1);
                     echo "数据库重新连接失败(try:{$count})\n";
