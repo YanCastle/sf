@@ -29,10 +29,13 @@ class Document
         $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
         $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Object']);
         foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            if('_link'==substr($TableName,-5)){continue;}
             $ObjectName = parse_name($TableName,1);
             $ColumnComments=[];
             $AddFieldsConfigs=$SaveFieldsConfigs=[];
             $PKColumns=[];
+            $SearchColumns=array_column($TableProperties['Columns'],'Code');
+            $SearchColumnsString = $SearchColumns?('\''.implode('\',\'',$SearchColumns).'\''):'';
             foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
                 if($ColumnProperties['P']){
                     //主键
@@ -43,7 +46,7 @@ class Document
                 if(!$ColumnProperties['I']){
                     //开始处理addFieldsConfig
                     $Config=[
-                        'FIELD_CONFIG_DEFAULT'=>'null',
+                        'FIELD_CONFIG_DEFAULT'=>$ColumnProperties['DefaultValue']?$ColumnProperties['DefaultValue']:'null',
                         'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
                         'FIELD_CONFIG_VALUE'=>'null',
                         'FIELD_CONFIG_VALUE_FUNCTION'=>'null',
@@ -111,8 +114,7 @@ class Document
                 'Property'=>[],'Link'=>[]
             ];
             foreach (array_merge($TableProperties['FKs']['Parent'],$TableProperties['FKs']['Child']) as $FKConfig){
-//                $FKCommentArray=explode('\n',str_replace(["\n","\r\n"],"\n",$FKConfig['Properties']['Comment']));
-                if(preg_match_all('/[PC]{2}\=[1NOP]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$FKConfig['Properties']['Comment'],$Matchs)){
+                if(preg_match_all('/[PC]{2}\=[1NOPL]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$FKConfig['Properties']['Comment'],$Matchs)){
                     foreach ($Matchs[0] as $Row){
                         list($Key,$Relation,$PropertyName)=explode('=',$Row);
                         $Properties=['PROPERTY'];
@@ -135,6 +137,34 @@ class Document
                                 $Properties[]='OBJECT';//对象化映射
                             if(substr($Relation,2,1)=='P'&&$Properties[1]=='ONE')
                                 $Properties[]='PROPERTY';//支持一个属性的非对象化映射情况下的子属性
+                            if(substr($Relation,2,1)=='L'){
+                                //Link属性，
+                                //读取Link表的外键
+                                $LinkTables=[];
+                                $ChildTableCode=self::delPrefix($FKConfig['ChildTableCode'],1);
+                                $ChildTable = self::$docs['PDM']['Tables'][parse_name($ChildTableCode)];
+                                foreach ($ChildTable['FKs']['Child'] as $ChildFKConfig){
+                                    if(preg_match('/[PC]{2}\=[1NOPL]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$ChildFKConfig['Properties']['Comment'])){continue;}
+                                    $LinkTablePropertyName=self::delPrefix($ChildFKConfig['ParentTableCode'],1);
+                                    $LinkTableColumns=array_keys($ChildFKConfig['ParentTable']['Columns']);
+                                    $LinkTableColumns='\''.implode('\',\'',$LinkTableColumns).'\'';
+                                    $LinkTables[]="'{$LinkTablePropertyName}'=>[
+                    self::RELATION_TABLE_COLUMN=>'{$ChildFKConfig['ParentTableColumnCode']}',
+                    self::RELATION_TABLE_FIELDS=>[{$LinkTableColumns}],
+                ],";
+                                }
+                                $LinkTableString=implode("\r\n",$LinkTables);
+                                $PropertyAndLinkConfig['Link'][]="'{$PropertyName}'=>[
+            self::RELATION_TABLE_NAME=>'{$ChildTableCode}',
+            self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',
+            self::RELATION_TABLE_LINK_HAS_PROPERTY=>false,
+//          self::RELATION_TABLE_FIELDS=>['Type'],
+            self::RELATION_TABLE_LINK_TABLES=>[
+                 {$LinkTableString}
+            ]
+        ]";
+                                continue;
+                            }
                         }
                         $Relationship = implode('_',$Properties);
                         $ChildTableName=parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
@@ -160,6 +190,7 @@ class Document
                 }
             }
             $PropertiesConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Property']);
+            $LinksConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Link']);
             $FileContent="<?php
 namespace {$ModuleName}\\Object;
 
@@ -189,6 +220,17 @@ class {$ObjectName}Object extends Object
     ];
     protected \$property=[
         {$PropertiesConfigString}
+    ];
+    protected \$link=[
+       {$LinksConfigString}
+    ];
+    protected \$searchFields=[{$SearchColumnsString}];
+    protected \$searchTable='{$ObjectName}';
+    protected \$searchWFieldsConf=[
+        '{$ObjectName}'=>'{$ObjectName}',        
+    ];
+    protected \$searchWFieldsGroup=[
+        '{$ObjectName}'=>[{$SearchColumnsString}],
     ];
 }";
             file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
@@ -950,5 +992,8 @@ class {$ObjectName}Controller extends Controller
 //            }
 //            $a=$path;
 //        });
+    }
+    static function delPrefix($tableName,$Type=0){
+        return parse_name(str_replace(['{$PREFIX}','prefix_'],'',$tableName),$Type);
     }
 }
