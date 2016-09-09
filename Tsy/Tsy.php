@@ -14,6 +14,7 @@ define('LOG_TIP','TIP');
 defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
 defined('APP_DEBUG') or define('APP_DEBUG',false);
 defined('DB_DEBUG') or define('DB_DEBUG',APP_DEBUG);
+
 //defined('PACKAGE_EOF') or define('PACKAGE_EOF',"\r\n\r\n");
 isset($APP_PATH) or $APP_PATH='.';
 if(isset($APP_PATH)&&!is_dir($APP_PATH)){
@@ -22,7 +23,7 @@ if(isset($APP_PATH)&&!is_dir($APP_PATH)){
 define('APP_PATH',isset($APP_PATH)?realpath($APP_PATH):realpath('.'));
 define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
-
+defined('UPLOAD_PATH') or define('UPLOAD_PATH',APP_PATH.DIRECTORY_SEPARATOR.'Upload');
 //定义配置文件后缀
 defined('CONFIG_SUFFIX') or define('CONFIG_SUFFIX','');
 
