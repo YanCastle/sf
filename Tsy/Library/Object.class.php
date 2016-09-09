@@ -258,7 +258,7 @@ class Object
         $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = false;
         $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
-        $Tables = ['__' . strtoupper($this->main) . '__'];
+        $Tables = ['__' . strtoupper(parse_name($this->main)) . '__'];
         $ObjectSearchConfig = [];
         $Where = [];
         $WObjectIDArray = [];
