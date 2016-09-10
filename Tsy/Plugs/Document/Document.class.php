@@ -154,11 +154,21 @@ class Document
                 ],";
                                 }
                                 $LinkTableString=implode("\r\n",$LinkTables);
+                                $RelationTableFields=array_keys($ChildTable['Columns']);//关联表的字段
+                                $RelationTableLinkHasProperty=count($RelationTableFields)>3?'true':'false';//是否关联表中具有属性
+                                $RelationTableFieldsString = '\''.implode('\',\'',$RelationTableFields).'\'';
+                                if(count($RelationTableFields)>3){
+                                    $RelationTableLinkHasProperty='true';
+                                    $RelationTableLinkHasPropertyMemo='  ';
+                                }else{
+                                    $RelationTableLinkHasProperty='false';
+                                    $RelationTableLinkHasPropertyMemo='//';
+                                }
                                 $PropertyAndLinkConfig['Link'][]="'{$PropertyName}'=>[
             self::RELATION_TABLE_NAME=>'{$ChildTableCode}',
             self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',
-            self::RELATION_TABLE_LINK_HAS_PROPERTY=>false,
-//          self::RELATION_TABLE_FIELDS=>['Type'],
+            self::RELATION_TABLE_LINK_HAS_PROPERTY=>{$RelationTableLinkHasProperty},
+            self::RELATION_TABLE_FIELDS=>[{$RelationTableFieldsString}],
             self::RELATION_TABLE_LINK_TABLES=>[
                  {$LinkTableString}
             ]
