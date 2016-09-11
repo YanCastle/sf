@@ -17,6 +17,7 @@ class User extends Object
 {
 //    protected $
     public $allowReg=true;
+    public $LoginView='';
     function __construct()
     {
         parent::__construct();
@@ -46,7 +47,7 @@ class User extends Object
      * @return UserObject
      */
     function login(string $Account,string $PWD){
-        $User = M('UserView')->where(['Account'=>$Account])->field('UID,PWD')->find();
+        $User = M($this->LoginView)->where(['Account'=>$Account])->field('UID,PWD')->find();
         if(false!==$User){
             return $this->loginSuccess($User);
         }else{
