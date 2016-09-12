@@ -66,8 +66,7 @@ function C($name=null, $value=null,$default=null) {
             $value=isset($_config[$name[0]])?$_config[$name[0]]:$default;
             if(is_array($value)){
                 for($i=1;$i<count($name);$i++){
-                    if(isset($value[$name[$i]]))
-                        $value=$value[$name[$i]];
+                    $value=isset($value[$name[$i]])?$value[$name[$i]]:$default;
                 }
             }
             return $value;
