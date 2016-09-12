@@ -33,7 +33,7 @@ class Msg implements MsgIFace
         }
         if($StaticConfit = C('MSG')){
             if(isset($StaticConfit[strtoupper($Method)])){
-                $Config = array_merge($StaticConfit[strtoupper($Method)],$Config);
+                $Config = array_merge($StaticConfit[$Method],$Config);
             }
         }
         $md5 = md5(serialize($Config));
