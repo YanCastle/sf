@@ -27,7 +27,8 @@ class YunTongXun implements \Tsy\Library\Msg\MsgIFace
     ];
     function __construct($config=[])
     {
-        $this->config = array_merge($this->config,$config);
+        if($config)
+            $this->config = array_merge($this->config,$config);
         foreach ($this->config as $K=>$V){
             if(!$V){
                 $this->config[$K]=C('MSG.YUNTONGXUN.'.$K);
