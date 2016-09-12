@@ -45,7 +45,7 @@ class Msg implements MsgIFace
                 $this->handles[$Method][$md5]=$this->current;
                 return true;
             }
-            return false;
+            return '找不到:'.$Method.'类';
         }
         return true;
     }
