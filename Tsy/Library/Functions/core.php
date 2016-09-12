@@ -62,8 +62,16 @@ function C($name=null, $value=null,$default=null) {
         // 二维数组设置和获取支持
         $name = explode('.', $name);
         $name[0]   =  strtoupper($name[0]);
-        if (is_null($value))
-            return isset($_config[$name[0]][$name[1]]) ? $_config[$name[0]][$name[1]] : $default;
+        if (is_null($value)){
+            $value=isset($_config[$name[0]])?$_config[$name[0]]:$default;
+            if(is_array($value)){
+                for($i=1;$i<count($name);$i++){
+                    $value=$value[$name[$i]];
+                }
+            }
+            return $value;
+//            return isset($_config[$name[0]][$name[1]]) ? $_config[$name[0]][$name[1]] : $default;
+        }
         $_config[$name[0]][$name[1]] = $value;
         return null;
     }
