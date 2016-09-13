@@ -12,9 +12,13 @@ namespace Tsy\Library\Pay;
 class Pay
 {
     public $error='';
+    private $handle=null;
     function __construct($Type,$Config=[])
     {
-        
+        $class = 'Tsy\Library\Pay\Driver\\'.$Type;
+        if(class_exists($class)){
+            $this->handle=new $class($Config);
+        }
     }
 
     function notify(){
@@ -31,5 +35,7 @@ class Pay
      * @param $Money
      * @param string $Memo
      */
-    function pay($OrderID,$Name,$Money,$Memo=''){}
+    function pay($OrderID,$Name,$Money,$Memo=''){
+        
+    }
 }

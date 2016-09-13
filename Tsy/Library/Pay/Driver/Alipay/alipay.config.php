@@ -24,7 +24,7 @@ $alipay_config['seller_id']	= $alipay_config['partner'];
 $alipay_config['key']			= '7so4xpj0mp1852xrfjznzql8sfenlymw';
 
 // 服务器异步通知页面路径  需http://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问
-$alipay_config['notify_url'] = "http://chest.tansuyun.cn/notify_url.php";
+$alipay_config['notify_url'] = "http://chest.tansuyun.cn/pay_notify.php";
 
 // 页面跳转同步通知页面路径 需http://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问
 $alipay_config['return_url'] = "http://chest.tansuyun.cn/return_url.php";
