@@ -91,7 +91,18 @@ function C($name=null, $value=null,$default=null) {
  */
 function load_config($file,$parse='php'){
     if(!file_exists($file)){
-        return [];
+        //从模块内的配置文件开始查找，如果文件存在则替换，否则return[]
+        $info = pathinfo($file);
+        if($info['dirname']==='.'&&$file!=($info['dirname'].DIRECTORY_SEPARATOR.$info['basename'])){
+            foreach ([APP_PATH.DIRECTORY_SEPARATOR.'Common/Config'] as $dir){
+                if(file_exists($dir.DIRECTORY_SEPARATOR.$info['basename'])){
+                    $file=$dir.DIRECTORY_SEPARATOR.$info['basename'];
+                }
+            }
+        }
+        if(!file_exists($file)){
+            return [];
+        }
     }
     $ext  = pathinfo($file,PATHINFO_EXTENSION);
     switch($ext){
