@@ -67,7 +67,7 @@ class Alipay
     function __construct(array $Config=[])
     {
 
-        $config=load_config('alipay');
+        $config=load_config('alipay.php');
         $this->config=array_merge($this->config,$config,$Config);
         foreach (['partner','seller_id','key','notify_url','return_url'] as $key){
             if(!$this->config[$key]){
@@ -86,10 +86,10 @@ class Alipay
      * @param string $Memo
      */
     function pay($OrderID,$Title,$Money,$Memo=''){
-        return $this->buildRequestForm(array_merge($this->config,["out_trade_no"	=> $OrderID,
+        return !$this->error?$this->buildRequestForm(array_merge($this->config,["out_trade_no"	=> $OrderID,
             "subject"	=> $Title,
             "total_fee"	=> $Money,
-            "body"	=> $Memo,]),"get", "确认");
+            "body"	=> $Memo,]),"get", "确认"):false;
     }
 
 

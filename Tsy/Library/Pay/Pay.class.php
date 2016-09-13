@@ -36,6 +36,15 @@ class Pay
      * @param string $Memo
      */
     function pay($OrderID,$Name,$Money,$Memo=''){
-        
+        if($this->handle){
+            $rs = $this->handle->pay($OrderID,$Name,$Money,$Memo);
+            if($rs){
+                return $rs;
+            }else{
+                $this->error=$this->handle->error;
+                return false;
+            }
+        }
+        return false;
     }
 }
