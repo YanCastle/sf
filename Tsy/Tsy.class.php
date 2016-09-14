@@ -140,9 +140,9 @@ class Tsy
                 if(!file_exists($file_path)){
 //                    TODO 需要检测文件是否存在，如果不存在的情况下要遍历Vendor目录检查是否有这个类的名称存在
 //                    foreach ([TSY_PATH.DIR])
-                    $ClassPath = explode('/',$class);
-                    $ClassName = $ClassPath[count($ClassPath)-1];
-                    $PlugsPath = TSY_PATH.'/Plugs/'.$ClassName;
+                    $ClassPath = explode("\\",$class);
+                    $ClassName = array_pop($ClassPath);
+                    $PlugsPath = implode(DIRECTORY_SEPARATOR,array_merge([TSY_PATH,'Plugs'],$ClassPath));
                     if(is_dir($PlugsPath)){
                         foreach ([
                                      $PlugsPath.'/'.$ClassName.'.class.php',
