@@ -18,7 +18,7 @@ class Document
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
         $Tables=[];
         foreach ($JSON['Tables'] as $k=>$table){
-            $Tables[str_replace('{$PREFIX}','',$k)]=$table;
+            $Tables[sql_prefix($k,'')]=$table;
         }
         $JSON['Tables']=$Tables;
         self::$docs['PDM']=$JSON;
@@ -177,10 +177,11 @@ class Document
                             }
                         }
                         $Relationship = implode('_',$Properties);
-                        $ChildTableName=parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
+//                        $ChildTableName=parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
+                        $ChildTableName=parse_name(sql_prefix($FKConfig['ChildTableCode'],''),1);
                         if(substr($Key,0,1)=='P'&&$FKConfig['Type']=='Parent'){
-                            $PropertyName=$PropertyName?$PropertyName:parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
-                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ParentTable']['Columns'][parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ParentTableColumnCode']),1)]['Name']}  {$FKConfig['ChildTable']['Name']}  属性
+                            $PropertyName=$PropertyName?$PropertyName:parse_name(sql_prefix($FKConfig['ChildTableCode'],''),1);
+                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ParentTable']['Columns'][parse_name(sql_prefix($FKConfig['ParentTableColumnCode'],''),1)]['Name']}  {$FKConfig['ChildTable']['Name']}  属性
             self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
             self::RELATION_TABLE_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//关联表中的关联字段
             self::RELATION_MAIN_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//主笔中的关联字段
@@ -188,8 +189,8 @@ class Document
         ],";
                         }
                         if(substr($Key,0,1)=='C'&&$FKConfig['Type']=='Child'){
-                            $PropertyName=$PropertyName?$PropertyName:parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ParentTableCode']),1);
-                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ChildTable']['Columns'][parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableColumnCode']),1)]['Name']}  {$FKConfig['ParentTable']['Name']}  属性
+                            $PropertyName=$PropertyName?$PropertyName:parse_name(sql_prefix($FKConfig['ParentTableCode'],''),1);
+                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ChildTable']['Columns'][parse_name(sql_prefix($FKConfig['ChildTableColumnCode'],''),1)]['Name']}  {$FKConfig['ParentTable']['Name']}  属性
             self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
             self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//关联表中的关联字段
             self::RELATION_MAIN_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//主笔中的关联字段
@@ -944,7 +945,7 @@ class {$ObjectName}Controller extends Controller
         $View->assign(self::$docs);
         $View->assign('line',"\r\n");
         $content = $View->fetch(is_file($templateFile)?$templateFile:(__DIR__.DIRECTORY_SEPARATOR.'Template'.DIRECTORY_SEPARATOR.'render.html'));
-        $content = str_replace('{$PREFIX}','',$content);
+        $content = sql_prefix($content,'');
         if($outputFile){
             file_put_contents($outputFile,$content);
         }
@@ -1004,6 +1005,6 @@ class {$ObjectName}Controller extends Controller
 //        });
     }
     static function delPrefix($tableName,$Type=0){
-        return parse_name(str_replace(['{$PREFIX}','prefix_'],'',$tableName),$Type);
+        return parse_name(sql_prefix($tableName,''),$Type);
     }
 }

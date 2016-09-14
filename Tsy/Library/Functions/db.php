@@ -24,3 +24,15 @@ function rollback($ID=null){
 function commit($ID=null){
     M()->commit();
 }
+
+/**
+ * sql的前缀替换
+ * @param string $sql
+ * @param string $prefix
+ * @param null|string $replace
+ * @return string
+ */
+function sql_prefix($sql,$prefix,$replace=null){
+    $replace = $replace?$replace:C('SQL_PREFIX');
+    return str_replace($replace,$prefix,$sql);
+}

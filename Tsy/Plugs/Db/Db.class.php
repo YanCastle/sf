@@ -85,7 +85,7 @@ class Db{
         }
         if($content){
             $content = preg_replace('/\/\*.+\*\/\r\n/','',$content);
-            $content = str_replace('{$PREFIX}',$db_prefix,$content);
+            $content = sql_prefix($content,$db_prefix);
             $Sqls = explode(";",$content);
             if(is_array($Sqls)&&count($Sqls)>0){
                 $Model->startTrans();

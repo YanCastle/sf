@@ -40,7 +40,7 @@ class Controller
         $this->__CLASS__ = get_class($this);
         $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         $ObjectName = str_replace('Controller','Object',$this->__CLASS__);
-        if(class_exists($ObjectName)){
+        if(class_exists($ObjectName)&&$ObjectName!=$this->__CLASS__){
             list($this->ModuleName,$this->ControllerName)=explode('\\\\',str_replace('Controller','' ,$this->__CLASS__));
             $this->Object=new $ObjectName();
 //            $this-> = $this->Object;
