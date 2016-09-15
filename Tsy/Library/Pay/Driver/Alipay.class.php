@@ -357,18 +357,20 @@ class Alipay
     private function buildRequestForm($para_temp, $method, $button_name) {
         //待请求参数数组
         $para = $this->buildRequestPara($para_temp);
-
-        $sHtml = "<form id='alipaysubmit' name='alipaysubmit' action='".$this->alipay_gateway_new."_input_charset=".trim(strtolower($this->config['input_charset']))."' method='".$method."'>";
-        while (list ($key, $val) = each ($para)) {
-            $sHtml.= "<input type='hidden' name='".$key."' value='".$val."'/>";
-        }
-
-        //submit按钮控件请不要含有name属性
-        $sHtml = $sHtml."<input type='submit'  value='".$button_name."' style='display:none;'></form>";
-
-        $sHtml = $sHtml."<script>document.forms['alipaysubmit'].submit();</script>";
-
-        return $sHtml;
+        return $this->alipay_gateway_new.http_build_query(array_merge($para,[
+            '_input_charset'=>trim(strtolower($this->config['input_charset']))
+        ]));
+//        $sHtml = "<form id='alipaysubmit' name='alipaysubmit' action='".$this->alipay_gateway_new."_input_charset=".trim(strtolower($this->config['input_charset']))."' method='".$method."'>";
+//        while (list ($key, $val) = each ($para)) {
+//            $sHtml.= "<input type='hidden' name='".$key."' value='".$val."'/>";
+//        }
+//
+//        //submit按钮控件请不要含有name属性
+//        $sHtml = $sHtml."<input type='submit'  value='".$button_name."' style='display:none;'></form>";
+//
+//        $sHtml = $sHtml."<script>document.forms['alipaysubmit'].submit();</script>";
+//
+//        return $sHtml;
     }
 
 
