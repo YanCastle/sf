@@ -11,6 +11,10 @@ namespace Tsy\Library\Pay;
 
 class Pay
 {
+    const TRADE_SUCCESS='SUCCESS';//成功
+    const TRADE_FINISH='FINISH';//完成
+    const TRADE_FAILD='FAILD';//失败
+
     public $error='';
     private $handle=null;
     function __construct($Type,$Config=[])
@@ -21,7 +25,14 @@ class Pay
         }
     }
 
-    function notify(){
+    /**
+     * 验证失败
+     * @param callable $success
+     * @param callable $finish
+     * @param callable $fail
+     */
+    function notify(callable $success,callable $finish,callable $fail=null){
+        $verifyResult=$this->handle->notify();
 
     }
     function redirect(){

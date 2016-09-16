@@ -143,6 +143,11 @@ class Controller
     function __call($name, $arguments)
     {
         $Object = $this->className.'Object';
+        if($this->Object){
+            if(method_exists($ObjectClass,$name)){
+                return call_user_func_array($ObjectClass,$arguments);
+            }
+        }else
         if(class_exists($Object)){
             $ObjectClass = new $Object();
             if(method_exists($ObjectClass,$name)){
