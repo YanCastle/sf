@@ -1,19 +1,19 @@
 <?php
 
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/utils.php");
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/conf.php");
+
 
 define("NO_AUTH_CHECK", 0);
 define("HEAD_FIELD_CHECK", 1);
 define("QUERY_STRING_CHECK", 2);
 
 // ----------------------------------------------------------
-function CanonicalizedResource($bucket, $key)
+function CannibalizedResource($bucket, $key)
 {
     return "/" . $bucket . "/" . $key;
 }
 
-function CanonicalizedUCloudHeaders($headers)
+function CannibalizedUCloudHeaders($headers)
 {
 
     $keys = array();
@@ -23,7 +23,7 @@ function CanonicalizedUCloudHeaders($headers)
         if (count($arr) < 2) continue;
         list($k, $v) = $arr;
         $k = strtolower($k);
-        if (strncasecmp($k, "x-ucloud") === 0) {
+        if (strncasecmp($k, "x-ucloud",8) === 0) {
             $keys[] = $k;
         }
     }
@@ -69,8 +69,8 @@ class UCloud_Auth {
             $data .= UCloud_Header_Get($req->Header, 'Date') . "\n";
         else
             $data .= UCloud_Header_Get($req->Header, 'Expires') . "\n";
-        $data .= CanonicalizedUCloudHeaders($req->Header);
-        $data .= CanonicalizedResource($req->Bucket, $req->Key);
+        $data .= CannibalizedUCloudHeaders($req->Header);
+        $data .= CannibalizedResource($req->Bucket, $req->Key);
         return $this->Sign($data);
     }
 }
@@ -81,10 +81,10 @@ function UCloud_MakeAuth($auth)
         return $auth;
     }
 
-    global $UCLOUD_PUBLIC_KEY;
-    global $UCLOUD_PRIVATE_KEY;
+    
+    
 
-    return new UCloud_Auth($UCLOUD_PUBLIC_KEY, $UCLOUD_PRIVATE_KEY);
+    return new UCloud_Auth(C('UCLOUD_PUBLIC_KEY'), C('UCLOUD_PRIVATE_KEY'));
 }
 
 //@results: token

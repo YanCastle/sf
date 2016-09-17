@@ -12,10 +12,15 @@ namespace Tsy;
 use Tsy\Library\Aop;
 use Tsy\Library\Msg;
 use Tsy\Library\Storage;
+use Tsy\Mode\Swoole;
 
 class Tsy
 {
     protected static $class_map = [];
+    /**
+     * @var Mode $Mode
+     */
+    public static $Mode;
     function __construct()
     {
 //        加载框架function函数库
@@ -33,16 +38,13 @@ class Tsy
         $this->loadFunctions();//加载框架function和项目function
         
         $this->loadConfig();
-        if(APP_DEBUG){
-            $this->build();
-        }
+
         $GLOBALS['Config']=C();
-        if(defined('APP_BUILD')&&APP_BUILD)
-            build_cache();
+
 //        分析配置，决定是http模式还是swoole模式
 ////        如果是http模式则实例化http类，如果是swoole模式则实例化swoole类
-        if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.ucfirst(strtolower(APP_MODE)).'.class.php')){
-            include_once TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.ucfirst(strtolower(APP_MODE)).'.class.php';
+        if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php')){
+            include_once TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php';
         }else{
             die('MODE:'.APP_MODE.'不存在');
         }
@@ -56,28 +58,33 @@ class Tsy
             }
             define('MODULES',implode(',',$Modules ));
         }
-
+        if(defined('APP_BUILD')&&APP_BUILD)
+            build_cache();
+        if(APP_DEBUG){
+            $this->build();
+        }
 //        $Session = new Session();
 //        session_set_save_handler($Session,true);
 //        开始实例化Mode类，进行初始化操作
-        $ModeClassName = 'Tsy\\Mode\\'.ucfirst(strtolower(APP_MODE));
+        $ModeClassName = 'Tsy\\Mode\\'.parse_name(APP_MODE,1);
         if(class_exists($ModeClassName)){
-            $ModeClass = new $ModeClassName();
+            self::$Mode = new $ModeClassName();
         }else{
             die(APP_MODE.':模式不存在');
         }
 //        加载模式处理类，开始模式处理
 //        Aop::exec(__METHOD__,Aop::$AOP_AFTER);
         Msg::$handler =  new Msg\Msg();
-        $ModeClass->start();
+        self::$Mode->start();
     }
     function loadConfig(){
         //因为涉及到多线程竞争同步的问题，所以C函数的内容必须是共享式的，
 //        加载框架配置文件
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config.php'));
-        C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config'.CONFIG_SUFFIX.'.php'));
+
+        !CONFIG_SUFFIX  or  C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/config'.CONFIG_SUFFIX.'.php'));
         C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).'.php'));
-        C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
+        !CONFIG_SUFFIX  or  C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/'.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
         E(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/error.php'));
 //        加载调试配置
         !APP_DEBUG or C(load_config(TSY_PATH.DIRECTORY_SEPARATOR.'Config/debug.php'));
@@ -85,11 +92,11 @@ class Tsy
         C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'config.php'));
         !CONFIG_SUFFIX  or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'config'.CONFIG_SUFFIX.'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug.php'));
-        !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug'.CONFIG_SUFFIX.'.php'));
+        !APP_DEBUG && !CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.'debug'.CONFIG_SUFFIX.'.php'));
         !APP_MODE or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'.php'));
-        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
+        !CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'.php'));
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
-        !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
+        !APP_DEBUG&&!CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
         //开始加载aop配置文件
         $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');
@@ -133,9 +140,9 @@ class Tsy
                 if(!file_exists($file_path)){
 //                    TODO 需要检测文件是否存在，如果不存在的情况下要遍历Vendor目录检查是否有这个类的名称存在
 //                    foreach ([TSY_PATH.DIR])
-                    $ClassPath = explode('/',$class);
-                    $ClassName = $ClassPath[count($ClassPath)-1];
-                    $PlugsPath = TSY_PATH.'/Plugs/'.$ClassName;
+                    $ClassPath = explode("\\",$class);
+                    $ClassName = array_pop($ClassPath);
+                    $PlugsPath = implode(DIRECTORY_SEPARATOR,array_merge([TSY_PATH,'Plugs'],$ClassPath));
                     if(is_dir($PlugsPath)){
                         foreach ([
                                      $PlugsPath.'/'.$ClassName.'.class.php',
@@ -256,8 +263,8 @@ class Tsy
                     'DB_USER'               =>  '',      // 用户名
                     'DB_PWD'                =>  '',          // 密码
                     'DB_PORT'               =>  '3306',        // 端口
-                    'DATA_CACHE_TYPE'=>'Redis',
-                    'DATA_CACHE_TEMP_TYPE'=>'Redis',
+                    'DATA_CACHE_TYPE'=>'File',
+                    'DATA_CACHE_TEMP_TYPE'=>'File',
                 ]"
             ],[
                 CONF_PATH.DIRECTORY_SEPARATOR.'swoole.php',

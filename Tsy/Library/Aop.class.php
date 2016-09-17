@@ -9,8 +9,15 @@
 namespace Tsy\Library;
 
 
+use Tsy\Tsy;
+
 class Aop
 {
+    /**
+     * 停止继续执行的信号量，该信号量不支持异步Aop
+     */
+    const STOP_EXEC='_AOP_STOP_EXEC_';
+
     protected static $config=[];
     public static $AOP_BEFORE=0;
     public static $AOP_AFTER=1;
@@ -52,13 +59,20 @@ class Aop
     public static function exec(string $name,$when,&$data=[],$async=null){
         if(isset(self::$config[$name][$when])){
             foreach (self::$config[$name][$when] as $callbacks){
-                    foreach ($callbacks as $callback){
-                        if(is_callable($callback[0]))
-                            if(is_string($callback[0])&&$callback[1])
-                                task(new Task($callback[0], $data));
-                            else
-                                call_user_func_array($callback[0],[&$data]);
+                foreach ($callbacks as $callback){
+                    if(is_callable($callback[0])){
+                        if(is_string($callback[0])&&$callback[1])
+                            task(new Task($callback[0], $data));
+                        else{
+                            $rs = call_user_func_array($callback[0],[&$data]);
+                            if($rs===self::STOP_EXEC){
+                                //调用对应mode的stop方法
+                                Tsy::$Mode->out();
+                                Tsy::$Mode->stop();
+                            }
+                        }
                     }
+                }
             }
         }
     }

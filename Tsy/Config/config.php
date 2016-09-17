@@ -70,4 +70,19 @@ return [
         ],
     ],
     'MSG_TEMPLATE_DIR'=>APP_PATH.DIRECTORY_SEPARATOR.'Common'.DIRECTORY_SEPARATOR.'MSG',//消息模板的存储地址
+
+    //UCloud相关配置
+    'UCLOUD_PUBLIC_KEY'=>'',
+    'UCLOUD_PRIVATE_KEY'=>'',
+
+    'FILE_UPLOAD_TYPE'      =>  'Local',    // 文件上传方式
+    
+    //配置各种模式下获取i参数和数据的格式
+    'HTTP'=>[
+        'I'=>'get.i',
+        'D'=>'post',
+        'DISPATCH'=>["\\Tsy\\Tsy::\$Mode",'dispatch'],
+        'OUT'=>["\\Tsy\\Tsy::\$Mode",'output'],
+    ],
+    'SQL_PREFIX'=>['{$PREFIX}','prefix_']
 ];

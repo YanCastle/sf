@@ -17,9 +17,11 @@
 namespace Tsy\Mode;
 
 
-class Swoolehttp
+use Tsy\Mode;
+
+class Swoolehttp implements Mode
 {
-    static public $server;
+    public static $Swoole;
     /**
      * 执行体
      * @return mixed
@@ -30,7 +32,7 @@ class Swoolehttp
      * 调度
      * @return mixed
      */
-    function dispatch(){}
+    function dispatch($data=null){}
 
     /**
      * 启动函数
@@ -225,7 +227,7 @@ class Swoolehttp
                 $GLOBALS['_SWOOLE']=&$Server;
                 L('启动Swoole');
                 fd_name([]);
-                self::$server = &$Server;
+                self::$Swoole = &$Server;
                 $Server->start();
             }else{
                 die('SWOOLE创建失败');
@@ -248,5 +250,15 @@ class Swoolehttp
             }
             static_keep('domain',$domains);
         }
+    }
+    function stop($Code=0)
+    {
+        self::$Swoole->stop();
+    }
+    function out($Data=null){
+
+    }
+    function in($Data=null){
+
     }
 }

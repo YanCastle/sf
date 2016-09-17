@@ -117,7 +117,7 @@ function http_body_parse($data){
 function http_in_check(){
 //    调用HTTP模式的DISPATCH，然后调用Controller
     $Data=[
-        'i'=>isset($_GET['i'])?'Empty/_empty':$_GET['i'],
+        'i'=>isset($_GET['i'])?$_GET['i']:'Empty/_empty',
         'd'=>$_POST?$_POST:[],
     ];
     $Dispatch = C('HTTP.DISPATCH');
@@ -130,7 +130,7 @@ function http_in_check(){
 
 function http_out_check($data){
     $Out = C('HTTP.OUT');
-    $OutData=is_callable($Out)?call_user_func($Out,$data):C('DEFAULT_OUT');
+    $OutData=is_callable($Out)?call_user_func($Out,$data):call_user_func([\Tsy\Tsy::$Mode,'output'],$data);
     if(is_string($OutData)&&strlen($OutData)>0){
         echo $OutData;
     }

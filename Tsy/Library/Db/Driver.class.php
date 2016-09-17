@@ -66,7 +66,7 @@ abstract class Driver {
     // PDO连接参数
     protected $options = array(
         PDO::ATTR_CASE              =>  PDO::CASE_LOWER,
-        PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_WARNING,
+        PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_ORACLE_NULLS      =>  PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES =>  false,
     );
@@ -102,9 +102,10 @@ abstract class Driver {
 //                    $this->options[PDO::ATTR_EMULATE_PREPARES]  =   false;
 //                }
                 $this->linkID[$linkNum] = new PDO( $config['dsn'], $config['username'], $config['password'],$this->options);
-                if(in_array(APP_MODE_LOW,['swoole','swoolehttp','websocket'])){
-                    $timeout = $this->linkID[$linkNum]->query('show global variables like \'wait_timeout\';');
-                    $this->_linkIDTimeout[$linkNum]=is_array($timeout)&&isset($timeout['wait_timeout'])?$timeout['wait_timeout']:0;
+//                $PDO = new PDO( $config['dsn'], $config['username'], $config['password'],$this->options);
+//                if(in_array(APP_MODE_LOW,['swoole','swoolehttp','websocket'])){
+//                    $timeout = $this->linkID[$linkNum]->query('show global variables like \'wait_timeout\';');
+//                    $this->_linkIDTimeout[$linkNum]=is_array($timeout)&&isset($timeout['wait_timeout'])?$timeout['wait_timeout']:0;
 //                    if($timeout)
 //                        swoole_timer_tick(($timeout-10)*1000,function()use($linkNum){
 //                            if(isset($this->linkID[$linkNum])){
@@ -112,11 +113,11 @@ abstract class Driver {
 //                                unset($this->_linkIDTimeout[$linkNum]);
 //                            }
 //                        });
-                }
+//                }
+//                $PDO->
             }catch (\PDOException $e) {
                 trigger_error($e->getMessage(),E_USER_ERROR);
                 if($autoConnection){
-//                    trace($e->getMessage(),'','ERR');
                     return $this->connect($autoConnection,$linkNum);
                 }elseif($config['debug']){
                     L($e->getMessage());
@@ -191,8 +192,8 @@ abstract class Driver {
                 return $this->getResult();
             }
         }catch (\PDOException $e) {
-            if($e->errorInfo[0] == 70100 || $e->errorInfo[0] == 2006){
-                $count = 0;
+            if($e->errorInfo[1] == 2013 || $e->errorInfo[1] == 2006){
+                $count = 0;$this->linkID[0]=null;$this->_linkID=null;
                 while(!$this->connect()){
 //                    sleep(1);
                     echo "数据库重新连接失败(try:{$count})\n";
@@ -230,6 +231,7 @@ abstract class Driver {
         N('db_write',1); // 兼容代码
         // 记录开始执行时间
         $this->debug(true);
+        
         $this->PDOStatement =   $this->_linkID->prepare($str);
         if(false === $this->PDOStatement) {
             $this->error();
@@ -258,15 +260,15 @@ abstract class Driver {
                 return $this->numRows;
             }
         }catch (\PDOException $e) {
-            if($e->errorInfo[0] == 70100 || $e->errorInfo[0] == 2006){
-                $count = 0;
+            if($e->errorInfo[1] == 2013 || $e->errorInfo[1] == 2006){
+                $count = 0;$this->linkID[0]=null;$this->_linkID=null;
                 while(!$this->connect()){
 //                    sleep(1);
                     echo "数据库重新连接失败(try:{$count})\n";
                     $count++;
                     if($count>5){return false;}
                 };
-                return $this->query($str,$fetchSql);
+                return $this->execute($str,$fetchSql);
             }
             $this->error();
             return false;
@@ -1109,15 +1111,15 @@ abstract class Driver {
             // 默认单数据库
             if ( !$this->_linkID ) $this->_linkID = $this->connect();
 //        TODO 记录最后执行时间，写入到缓存中
-        $LinkID = array_search($this->_linkID,$this->linkID);
+//        $LinkID = array_search($this->_linkID,$this->linkID);
 //        如果是Swoole模式下则需要区分是哪个进程的链接
-        if($LinkID){
-            if('swoole'==APP_MODE_LOW){
-                cache('[=]tmp_DB_LINK_TIME_OUT',time());
-            }else{
-
-            }
-        }
+//        if($LinkID){
+//            if('swoole'==APP_MODE_LOW){
+//                cache('[=]tmp_DB_LINK_TIME_OUT',time());
+//            }else{
+//
+//            }
+//        }
     }
 
     /**

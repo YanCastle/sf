@@ -10,6 +10,7 @@ namespace Application\Controller;
 
 use Application\Object\ClientObject;
 use Tsy\Library\Controller;
+use Tsy\Library\Storage;
 use Tsy\Plugs\WebQQ\WebQQ;
 
 class IndexController extends Controller
@@ -41,7 +42,13 @@ class IndexController extends Controller
 //            'Client.PrinterClientID'=>4,
 //            'Client.SN'=>['LIKE',"%B9C6%"]
 //        ]);
-        
+//        Storage::connect('UCloud');
+//        each_dir('I:\UCloud\MDEditor',null,function($path){
+//            Storage::put(str_replace(['I:\UCloud\MDEditor\\','\\'],['','/'],$path),file_get_contents($path));
+//            echo $path;
+//        });
+        M('user')->find();
+//        Storage::put('index.html','haha');
     }
     /**
      * 空操作

@@ -349,7 +349,12 @@ class swoole_server{
 
     public function sendmessage(){}
 
-    public function addprocess(){}
+    /**
+     * @return bool
+     */
+    public function addProcess(swoole_process $process){
+        return true;
+    }
 
     public function stats(){}
 
@@ -533,6 +538,7 @@ class swoole_client{
  *@since 1.8.2-beta
  */
 class swoole_process{
+    public $pipe;
     public function __construct(){}
 
     public function __destruct(){}
@@ -555,7 +561,12 @@ class swoole_process{
 
     public function close(){}
 
-    public function read(){}
+    /**
+     * @return string
+     */
+    public function read(){
+        return '';
+    }
 
     public function push(){}
 
@@ -1149,3 +1160,13 @@ class swoole_http_client{
 }
 
 function swoole_mysql_query(mysqli $mysqli,string $sql,callable $callback){}
+
+class swoole_redis{
+    function on(string $event_name,callable $callback){}
+    function connect(string $host, int $port, callable $callback){}
+    function close(){}
+    function __call($name, $arguments)
+    {
+        // TODO: Implement __call() method.
+    }
+}

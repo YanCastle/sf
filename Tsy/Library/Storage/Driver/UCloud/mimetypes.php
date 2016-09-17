@@ -356,6 +356,7 @@ $mimetype_complete_map = array(
     ".tsv" => "text/tab-separated-values",
     ".turbot" => "image/florian",
     ".txt" => "text/plain",
+    ".md" => "text/plain",
     ".uil" => "text/x-uil",
     ".uni" => "text/uri-list",
     ".unis" => "text/uri-list",

@@ -106,7 +106,7 @@ class PowerDesigner
      * @param $File
      * @return mixed
      */
-    static function getObjectJson($File,$OutPut){
+    static function getObjectJson($File,$OutPut,$ModuleName){
         $JSON = self::analysis($File);
         $Obj = [];
         foreach ($JSON['Tables'] as $TableName=>$Table){
@@ -116,7 +116,7 @@ class PowerDesigner
                 if($Column['I']){
                     $I=$Column['Code'];
                 }
-                $Columns=[
+                $Columns[]=[
                         "Name"=> $Column['Name'],
                         "Code"=> $Column['Code'],
                         "Comment"=> $Column['Comment'],
@@ -137,11 +137,12 @@ class PowerDesigner
                 "Name"=> $Table['Name'],
                 "Code"=> $Table['Code'],
                 "Comment"=> $Table['Comment'],
-                "I"=> "",
-                "Columns"=>$Columns
+                "I"=> $I,
+                'ModuleName'=>$ModuleName,
+                "Columns"=>$Columns,
             ];
         }
 //        $Obj['obj']=$Obj;
-        file_put_contents($OutPut,str_replace('{$PREFIX}','',json_encode(['obj'=>$Obj],JSON_UNESCAPED_UNICODE)));
+        file_put_contents($OutPut,str_replace(['{$PREFIX}','prefix_'],'',json_encode(['obj'=>$Obj],JSON_UNESCAPED_UNICODE)));
     }
 }

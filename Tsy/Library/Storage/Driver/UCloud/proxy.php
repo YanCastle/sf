@@ -1,6 +1,6 @@
 <?php
 
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/conf.php");
+
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/http.php");
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/utils.php");
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/digest.php");
@@ -18,8 +18,8 @@ function UCloud_PutFile($bucket, $key, $file)
 	$f = @fopen($file, "r");
 	if (!$f) return array(null, new UCloud_Error(-1, -1, "open $file error"));
 
-    global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
     $path = $key;
     $content  = @fread($f, filesize($file));
     list($mimetype, $err) = GetFileMimeType($file);
@@ -36,7 +36,25 @@ function UCloud_PutFile($bucket, $key, $file)
     fclose($f);
     return array($data, $err);
 }
+function UCloud_PutFileContent($bucket, $key, $content)
+{
+    $action_type = ActionType::PUTFILE;
+    $err = CheckConfig(ActionType::PUTFILE);
+    if ($err != null) {
+        return array(null, $err);
+    }
 
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
+    $path = $key;
+    list($mimetype, $err) = GetFileMimeType($key);
+    $req = new HTTP_Request('PUT', array('host'=>$host, 'path'=>$path), $content, $bucket, $key, $action_type);
+    $req->Header['Expect'] = '';
+    $req->Header['Content-Type'] = $mimetype;
+
+    $client = new UCloud_AuthHttpClient(null, $mimetype);
+    list($data, $err) = UCloud_Client_Call($client, $req);
+    return array($data, $err);
+}
 //------------------------------表单上传------------------------------
 function UCloud_MultipartForm($bucket, $key, $file)
 {
@@ -49,8 +67,8 @@ function UCloud_MultipartForm($bucket, $key, $file)
 	$f = @fopen($file, "r");
 	if (!$f) return array(null, new UCloud_Error(-1, -1, "open $file error"));
 
-    global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
     $path = "";
     $fsize = filesize($file);
     $content = "";
@@ -89,8 +107,8 @@ function UCloud_MInit($bucket, $key)
         return array(null, $err);
     }
 
-	global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
     $path = $key."?uploads";
 
     $req = new HTTP_Request('POST', array('host'=>$host, 'path'=>$path), null, $bucket, $key);
@@ -112,7 +130,7 @@ function UCloud_MUpload($bucket, $key, $file, $uploadId, $blkSize, $partNumber=0
 	$f = @fopen($file, "r");
 	if (!$f) return array(null, new UCloud_Error(-1, -1, "open $file error"));
 
-    global $UCLOUD_PROXY_SUFFIX;
+
 
     $etagList = array();
     list($mimetype, $err) = GetFileMimeType($file);
@@ -122,7 +140,7 @@ function UCloud_MUpload($bucket, $key, $file, $uploadId, $blkSize, $partNumber=0
     }
     $client   = new UCloud_AuthHttpClient(null);
     for(;;) {
-        $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+        $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
         $path = $key . "?uploadId=$uploadId&partNumber=$partNumber";
         if (@fseek($f, $blkSize*$partNumber, SEEK_SET) < 0) {
             fclose($f);
@@ -163,8 +181,8 @@ function UCloud_MFinish($bucket, $key, $uploadId, $etagList, $newKey = '')
         return array(null, $err);
     }
 
-	global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
 	$path = $key . "?uploadId=$uploadId";
 	if ($newKey != '') $path .= "&newKey=$newKey";
 
@@ -184,8 +202,8 @@ function UCloud_MCancel($bucket, $key, $uploadId)
         return array(null, $err);
     }
 
-	global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
 	$path = $key . "?uploadId=$uploadId";
 
     $req = new HTTP_Request('DELETE', array('host'=>$host, 'path'=>$path), null, $bucket, $key);
@@ -223,8 +241,8 @@ function UCloud_UploadHit($bucket, $key, $file)
     }
     fclose($f);
 
-    global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
     $path = "uploadhit?Hash=$fileHash&FileName=$key&FileSize=$fileSize";
 
     $req = new HTTP_Request('POST', array('host'=>$host, 'path'=>$path), null, $bucket, $key);
@@ -243,8 +261,8 @@ function UCloud_Delete($bucket, $key)
         return array(null, $err);
     }
 
-    global $UCLOUD_PROXY_SUFFIX;
-    $host = $bucket . $UCLOUD_PROXY_SUFFIX;
+
+    $host = $bucket . C('UCLOUD_PROXY_SUFFIX');
     $path = "$key";
 
     $req = new HTTP_Request('DELETE', array('host'=>$host, 'path'=>$path), null, $bucket, $key);
@@ -258,8 +276,8 @@ function UCloud_Delete($bucket, $key)
 // @results: $url
 function UCloud_MakePublicUrl($bucket, $key)
 {
-    global $UCLOUD_PROXY_SUFFIX;
-    $url = $bucket . $UCLOUD_PROXY_SUFFIX . "/" . rawurlencode($key);
+
+    $url = $bucket . C('UCLOUD_PROXY_SUFFIX') . "/" . rawurlencode($key);
 
     return $url;
 }
@@ -273,7 +291,7 @@ function UCloud_MakePrivateUrl($bucket, $key, $expires = 0)
         return array(null, $err);
     }
 
-    global $UCLOUD_PUBLIC_KEY;
+    
 
     $public_url = UCloud_MakePublicUrl($bucket, $key);
     $req = new HTTP_Request('GET', array('path'=>$public_url), null, $bucket, $key);
@@ -284,7 +302,7 @@ function UCloud_MakePrivateUrl($bucket, $key, $expires = 0)
     $client = new UCloud_AuthHttpClient(null);
     $temp = $client->Auth->SignRequest($req, null, QUERY_STRING_CHECK);
     $signature = substr($temp, -28, 28);
-    $url = $public_url . "?UCloudPublicKey=" . $UCLOUD_PUBLIC_KEY . "&Signature=" . $signature;
+    $url = $public_url . "?UCloudPublicKey=" . C('UCLOUD_PUBLIC_KEY') . "&Signature=" . $signature;
     if ('' != $expires) {
         $url .= "&Expires=" . $expires;
     }

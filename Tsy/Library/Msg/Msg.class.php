@@ -33,7 +33,7 @@ class Msg implements MsgIFace
         }
         if($StaticConfit = C('MSG')){
             if(isset($StaticConfit[strtoupper($Method)])){
-                $Config = array_merge($StaticConfit[strtoupper($Method)],$Config);
+                $Config = array_merge($StaticConfit[$Method],$Config);
             }
         }
         $md5 = md5(serialize($Config));
@@ -45,7 +45,7 @@ class Msg implements MsgIFace
                 $this->handles[$Method][$md5]=$this->current;
                 return true;
             }
-            return false;
+            return '找不到:'.$Method.'类';
         }
         return true;
     }
@@ -71,7 +71,7 @@ class Msg implements MsgIFace
     function RemoteTemplateSend($To, $Params, $TemplateID)
     {
         // TODO: Implement RemoteTemplateSend() method.
-        $this->current->RemoteTemplateSend($To,$Params,$TemplateID);
+        return $this->current->RemoteTemplateSend($To,$Params,$TemplateID);
     }
 
     /**

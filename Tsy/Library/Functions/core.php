@@ -42,12 +42,14 @@ function C($name=null, $value=null,$default=null) {
     static $_config=[];
     // 无参数时获取所有
 //    if(!isset($_config)){$_config=[];}
-    if (empty($name)) {
-        return $_config;
-    }
     if(false===$name&&$value===false){
         $_config=[];
     }
+
+    if (empty($name)) {
+        return $_config;
+    }
+
     // 优先执行设置获取或赋值
     if (is_string($name)) {
         if (!strpos($name, '.')) {
@@ -60,8 +62,16 @@ function C($name=null, $value=null,$default=null) {
         // 二维数组设置和获取支持
         $name = explode('.', $name);
         $name[0]   =  strtoupper($name[0]);
-        if (is_null($value))
-            return isset($_config[$name[0]][$name[1]]) ? $_config[$name[0]][$name[1]] : $default;
+        if (is_null($value)){
+            $value=isset($_config[$name[0]])?$_config[$name[0]]:$default;
+            if(is_array($value)){
+                for($i=1;$i<count($name);$i++){
+                    $value=isset($value[$name[$i]])?$value[$name[$i]]:$default;
+                }
+            }
+            return $value;
+//            return isset($_config[$name[0]][$name[1]]) ? $_config[$name[0]][$name[1]] : $default;
+        }
         $_config[$name[0]][$name[1]] = $value;
         return null;
     }
@@ -81,7 +91,18 @@ function C($name=null, $value=null,$default=null) {
  */
 function load_config($file,$parse='php'){
     if(!file_exists($file)){
-        return [];
+        //从模块内的配置文件开始查找，如果文件存在则替换，否则return[]
+        $info = pathinfo($file);
+        if($info['dirname']==='.'&&$file!=($info['dirname'].DIRECTORY_SEPARATOR.$info['basename'])){
+            foreach ([APP_PATH.DIRECTORY_SEPARATOR.'Common/Config'] as $dir){
+                if(file_exists($dir.DIRECTORY_SEPARATOR.$info['basename'])){
+                    $file=$dir.DIRECTORY_SEPARATOR.$info['basename'];
+                }
+            }
+        }
+        if(!file_exists($file)){
+            return [];
+        }
     }
     $ext  = pathinfo($file,PATHINFO_EXTENSION);
     switch($ext){
@@ -238,7 +259,7 @@ function invokeClass($Class,$A,$data){
     $result = '';
     //方法存在时
     $ReflectMethod = new ReflectionMethod($Class,$A);
-//    TODO 获取函数的注释，查找是否有标注需要调用前置函数、后置函数，如果有且函数存在则调用
+//     获取函数的注释，查找是否有标注需要调用前置函数、后置函数，如果有且函数存在则调用
     //获取方法参数
     if($ReflectMethod->isPublic()){
 //        是否需要参数绑定
@@ -298,7 +319,7 @@ function E($Code){
 
 function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
-    if($msg&&is_numeric($Type)){
+    if($msg){
         if(isset($_log[$Type])){
             $_log[$Type]=$msg;
         }else{
@@ -313,7 +334,7 @@ function L($msg = false,$Type=6,$trace=''){
         return $msg;
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg){
-        return $Type==0?$_log:$_log[$Type];
+        return $Type===0?$_log:$_log[$Type];
     }elseif(null===$msg&&$Type===null){
         $_log=[];
     }
@@ -361,13 +382,15 @@ function each_dir(string $dir,callable $dir_callback=null,callable $file_callbac
             if(!in_array($path, ['.','..'])){
                 $path = $dir.DIRECTORY_SEPARATOR.$path;
                 if(is_dir($path)){
-                    if(is_callable($dir_callback)){
-                        call_user_func($dir_callback,$path);
+                    if(is_callable($dir_callback)&&false===call_user_func($dir_callback,$path)){
+//                        call_user_func($dir_callback,$path);
+                        return false;
                     }
                     each_dir($path, $dir_callback, $file_callback);
                 }else{
-                    if(is_callable($file_callback)){
-                        call_user_func($file_callback,$path);
+                    if(is_callable($file_callback)&&false===call_user_func($file_callback,$path)){
+//                        call_user_func($file_callback,$path);
+                        return false;
                     }
                 }
             }

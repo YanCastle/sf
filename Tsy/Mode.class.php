@@ -25,11 +25,19 @@ interface Mode
      * 调度
      * @return mixed
      */
-    function dispatch();
+    function dispatch($data=null);
 
     /**
      * 启动函数
      * @return mixed
      */
     function start();
+
+    /**
+     * 停止继续执行
+     * @return mixed
+     */
+    function stop($Code="0");
+    function out($Data=null);
+    function in($Data=null);
 }

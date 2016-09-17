@@ -27,7 +27,7 @@ class Client implements Mode
      * 调度
      * @return mixed
      */
-    function dispatch(){}
+    function dispatch($data=null){}
 
     /**
      * 启动函数
@@ -36,5 +36,15 @@ class Client implements Mode
     function start(){
 //        读取配置文件、启动服务器
         $ClientConfig = C('CLIENT');
+    }
+    function stop($Code=0)
+    {
+        // TODO: Implement stop() method.
+    }
+    function out($Data=null){
+
+    }
+    function in($Data=null){
+
     }
 }

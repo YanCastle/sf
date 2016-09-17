@@ -18,10 +18,310 @@ class Document
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
         $Tables=[];
         foreach ($JSON['Tables'] as $k=>$table){
-            $Tables[str_replace('{$PREFIX}','',$k)]=$table;
+            $Tables[sql_prefix($k,'')]=$table;
         }
         $JSON['Tables']=$Tables;
         self::$docs['PDM']=$JSON;
+        return $this;
+    }
+    function generateObjects($ModuleName=''){
+        //得到Object的目录
+        $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
+        $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Object']);
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            if('_link'==substr($TableName,-5)){continue;}
+            $ObjectName = parse_name($TableName,1);
+            $ColumnComments=[];
+            $AddFieldsConfigs=$SaveFieldsConfigs=[];
+            $PKColumns=[];
+            $SearchColumns=array_column($TableProperties['Columns'],'Code');
+            $SearchColumnsString = $SearchColumns?('\''.implode('\',\'',$SearchColumns).'\''):'';
+            foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                if($ColumnProperties['P']){
+                    //主键
+                    $PKColumns[$ColumnName]=$ColumnProperties;
+                }
+                $ColumnCommentOneLine = str_replace(["\n","\r\n"],'；',$ColumnProperties['Comment']);
+                $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+                if(!$ColumnProperties['I']){
+                    //开始处理addFieldsConfig
+                    $Config=[
+                        'FIELD_CONFIG_DEFAULT'=>$ColumnProperties['DefaultValue']?$ColumnProperties['DefaultValue']:'null',
+                        'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
+                        'FIELD_CONFIG_VALUE'=>'null',
+                        'FIELD_CONFIG_VALUE_FUNCTION'=>'null',
+                    ];
+                    switch ($ColumnName){
+                        case 'CTime':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            break;
+                        case 'UTime':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            break;
+                        case 'CUID':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
+                            break;
+                        case 'UUID':
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
+                            break;
+                    }
+                    $ConfigString=[];
+                    foreach ($Config as $Title=>$Value){
+                        $ConfigString[]=($Value=='null'?'//':'  ')."            self::{$Title}=>'{$Config[$Title]}',//".(strpos($Title,'DEFAULT')>0?"当 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值不存在时，取该值或该函数的值":"不管 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值是否存在，取该值或该函数的值");
+                    }
+                    $ConfigString=implode(",\r\n",$ConfigString);
+                    $AddFieldsConfigs[]="\r\n".(count(array_unique(array_values($Config)))>1?"  ":"//")."      '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$ConfigString}\r\n".(count(array_unique(array_values($Config)))>1?"  ":"//")."      ]";
+                    //开始处理saveFieldsConfig
+                    $SaveConfig=[
+                        'FIELD_CONFIG_DEFAULT'=>'null',
+                        'FIELD_CONFIG_DEFAULT_FUNCTION'=>'null',
+                        'FIELD_CONFIG_VALUE'=>'null',
+                        'FIELD_CONFIG_VALUE_FUNCTION'=>'null',
+                    ];
+                    switch ($ColumnName){
+                        case 'CTime':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
+                            break;
+                        case 'UTime':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            break;
+                        case 'CUID':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
+                            break;
+                        case 'UUID':
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
+                            break;
+                        case $PKColumns[0]:
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
+                            break;
+                    }
+                    $SaveConfigString=[];
+                    foreach ($SaveConfig as $Title=>$Value){
+                        $SaveConfigString[]=($Value=='null'?'//':'  ')."            self::{$Title}=>'{$SaveConfig[$Title]}',//".(strpos($Title,'DEFAULT')>0?"当 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值不存在时，取该值或该函数的值":"不管 {$ColumnProperties['Name']}({$ColumnProperties['Code']}) 的值是否存在，取该值或该函数的值");
+                    }
+                    $SaveConfigString=implode(",\r\n",$SaveConfigString);
+                    $SaveFieldsConfigs[]="\r\n".(count(array_unique(array_values($SaveConfig)))>1?"  ":"//")."      '{$ColumnProperties['Code']}'=>[//字段名称:{$ColumnProperties['Name']},数据类型:{$ColumnProperties['DataType']},注释:{$ColumnCommentOneLine}\r\n{$SaveConfigString}\r\n".(count(array_unique(array_values($SaveConfig)))>1?"  ":"//")."      ]";
+                }
+            }
+            $AllFields='\''.implode('\',\'',array_diff(array_keys($TableProperties['Columns']),array_keys($PKColumns))).'\'';
+            $AddFieldsConfigsString = implode(",\r\n",$AddFieldsConfigs);
+            $SaveFieldsConfigsString = implode(",\r\n",$SaveFieldsConfigs);
+            $ColumnCommentsString='
+     * '.implode('
+     * ',$ColumnComments);
+            //自动生成一对一或一对多或多对多映射配置关系
+            $PropertyAndLinkConfig=[
+                'Property'=>[],'Link'=>[]
+            ];
+            foreach (array_merge($TableProperties['FKs']['Parent'],$TableProperties['FKs']['Child']) as $FKConfig){
+                if(preg_match_all('/[PC]{2}\=[1NOPL]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$FKConfig['Properties']['Comment'],$Matchs)){
+                    foreach ($Matchs[0] as $Row){
+                        list($Key,$Relation,$PropertyName)=explode('=',$Row);
+                        $Properties=['PROPERTY'];
+                        switch (substr($Relation,0,2)){
+                            case '1N':
+                                $Properties[]='ARRAY';
+                                break;
+                            case '11':
+                                $Properties[]='ONE';
+                                break;
+                            case 'NN':
+                                $Properties[]='ARRAY';
+                                break;
+                            case 'N1':
+                                $Properties[]='ONE';
+                                break;
+                        }
+                        if(strlen($Relation)==3){
+                            if(substr($Relation,2,1)=='O')
+                                $Properties[]='OBJECT';//对象化映射
+                            if(substr($Relation,2,1)=='P'&&$Properties[1]=='ONE')
+                                $Properties[]='PROPERTY';//支持一个属性的非对象化映射情况下的子属性
+                            if(substr($Relation,2,1)=='L'){
+                                //Link属性，
+                                //读取Link表的外键
+                                $LinkTables=[];
+                                $ChildTableCode=self::delPrefix($FKConfig['ChildTableCode'],1);
+                                $ChildTable = self::$docs['PDM']['Tables'][parse_name($ChildTableCode)];
+                                foreach ($ChildTable['FKs']['Child'] as $ChildFKConfig){
+                                    if(preg_match('/[PC]{2}\=[1NOPL]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$ChildFKConfig['Properties']['Comment'])){continue;}
+                                    $LinkTablePropertyName=self::delPrefix($ChildFKConfig['ParentTableCode'],1);
+                                    $LinkTableColumns=array_keys($ChildFKConfig['ParentTable']['Columns']);
+                                    $LinkTableColumns='\''.implode('\',\'',$LinkTableColumns).'\'';
+                                    $LinkTables[]="'{$LinkTablePropertyName}'=>[
+                    self::RELATION_TABLE_COLUMN=>'{$ChildFKConfig['ParentTableColumnCode']}',
+                    self::RELATION_TABLE_FIELDS=>[{$LinkTableColumns}],
+                ],";
+                                }
+                                $LinkTableString=implode("\r\n",$LinkTables);
+                                $RelationTableFields=array_keys($ChildTable['Columns']);//关联表的字段
+                                $RelationTableLinkHasProperty=count($RelationTableFields)>3?'true':'false';//是否关联表中具有属性
+                                $RelationTableFieldsString = '\''.implode('\',\'',$RelationTableFields).'\'';
+                                if(count($RelationTableFields)>3){
+                                    $RelationTableLinkHasProperty='true';
+                                    $RelationTableLinkHasPropertyMemo='  ';
+                                }else{
+                                    $RelationTableLinkHasProperty='false';
+                                    $RelationTableLinkHasPropertyMemo='//';
+                                }
+                                $PropertyAndLinkConfig['Link'][]="'{$PropertyName}'=>[
+            self::RELATION_TABLE_NAME=>'{$ChildTableCode}',
+            self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',
+            self::RELATION_TABLE_LINK_HAS_PROPERTY=>{$RelationTableLinkHasProperty},
+            self::RELATION_TABLE_FIELDS=>[{$RelationTableFieldsString}],
+            self::RELATION_TABLE_LINK_TABLES=>[
+                 {$LinkTableString}
+            ]
+        ]";
+                                continue;
+                            }
+                        }
+                        $Relationship = implode('_',$Properties);
+//                        $ChildTableName=parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
+                        $ChildTableName=parse_name(sql_prefix($FKConfig['ChildTableCode'],''),1);
+                        if(substr($Key,0,1)=='P'&&$FKConfig['Type']=='Parent'){
+                            $PropertyName=$PropertyName?$PropertyName:parse_name(sql_prefix($FKConfig['ChildTableCode'],''),1);
+                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ParentTable']['Columns'][parse_name(sql_prefix($FKConfig['ParentTableColumnCode'],''),1)]['Name']}  {$FKConfig['ChildTable']['Name']}  属性
+            self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
+            self::RELATION_TABLE_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//关联表中的关联字段
+            self::RELATION_MAIN_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//主笔中的关联字段
+            self::RELATION_TABLE_PROPERTY=>self::{$Relationship},            
+        ],";
+                        }
+                        if(substr($Key,0,1)=='C'&&$FKConfig['Type']=='Child'){
+                            $PropertyName=$PropertyName?$PropertyName:parse_name(sql_prefix($FKConfig['ParentTableCode'],''),1);
+                            $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ChildTable']['Columns'][parse_name(sql_prefix($FKConfig['ChildTableColumnCode'],''),1)]['Name']}  {$FKConfig['ParentTable']['Name']}  属性
+            self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
+            self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//关联表中的关联字段
+            self::RELATION_MAIN_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//主笔中的关联字段
+            self::RELATION_TABLE_PROPERTY=>self::{$Relationship},            
+        ],";
+                        }
+                    }
+                }
+            }
+            $PropertiesConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Property']);
+            $LinksConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Link']);
+            $FileContent="<?php
+namespace {$ModuleName}\\Object;
+
+use Tsy\\Library\\Object;
+/**
+ * {$TableProperties['Name']}
+ * {$TableProperties['Comment']}
+ * @package {$ModuleName}\\Object
+ */
+class {$ObjectName}Object extends Object
+{
+    /**
+{$ColumnCommentsString}
+     */
+    /**
+     * @var string
+     */
+    protected \$main='{$ObjectName}';
+    protected \$pk='{$TableProperties['PK']}';
+    public \$addFields=[{$AllFields}];//允许添加的字段，如果数组最后一个元素值为true则表示排除
+    public \$saveFields=[{$AllFields}];//允许修改的字段，如果数组最后一个元素值为true则表示排除
+    public \$addFieldsConfig=[
+    {$AddFieldsConfigsString}
+    ];
+    public \$saveFieldsConfig=[
+    {$SaveFieldsConfigsString}
+    ];
+    protected \$property=[
+        {$PropertiesConfigString}
+    ];
+    protected \$link=[
+       {$LinksConfigString}
+    ];
+    protected \$searchFields=[{$SearchColumnsString}];
+    protected \$searchTable='{$ObjectName}';
+    protected \$searchWFieldsConf=[
+        '{$ObjectName}'=>'{$ObjectName}',        
+    ];
+    protected \$searchWFieldsGroup=[
+        '{$ObjectName}'=>[{$SearchColumnsString}],
+    ];
+}";
+            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
+        }
+        return $this;
+    }
+    function generateModels($ModuleName=''){
+        $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
+        $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Model']);
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            $ObjectName = parse_name($TableName,1);
+            $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
+            $ColumnComments=[];
+            $ModelMap=[];
+            foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+                $ModelMap[]='\''.strtolower($ColumnProperties['Code']).'\'=>\''.$ColumnProperties['Code'].'\'';
+            }
+            $ModelMapString = implode(',',$ModelMap);
+            $ColumnCommentsString='
+     * '.implode('
+     * ',$ColumnComments);
+
+            $FileContent="<?php
+namespace {$ModuleName}\\Model;
+
+use Tsy\\Library\\Model;
+/**
+ * {$TableProperties['Name']}
+ * {$TableProperties['Comment']}
+ * @package {$ModuleName}\\Object
+ */
+class {$ObjectName}Model extends Model
+{
+    /**
+{$ColumnCommentsString}
+     */
+    /**
+     * @var string
+     */
+     protected \$_map=[{$ModelMapString}];
+}";
+            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Model.class.php',$FileContent);
+        }
+        return $this;
+    }
+    function generateControllers($ModuleName=''){
+        $ModuleName=$ModuleName?$ModuleName:DEFAULT_MODULE;
+        $Path=implode(DIRECTORY_SEPARATOR,[APP_PATH,$ModuleName,'Controller']);
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$TableProperties){
+            $ObjectName = parse_name($TableName,1);
+            $AllFields='\''.implode('\',\'',array_keys($TableProperties['Columns'])).'\'';
+            $ColumnComments=[];
+            foreach ($TableProperties['Columns'] as $ColumnName=>$ColumnProperties){
+                $ColumnComments[] = implode(' ',[$ColumnProperties['Name'],$ColumnProperties['Code'],$ColumnProperties['DataType'],$ColumnProperties['I']?'自增':'',$ColumnProperties['P']?'主键':'',$ColumnProperties['M']?'必填':'',$ColumnProperties['DefaultValue'],str_replace(["\n","\r\n"],';  ',$ColumnProperties['Comment'])]);
+            }
+            $ColumnCommentsString='
+     * '.implode('
+     * ',$ColumnComments);
+            $FileContent="<?php
+namespace {$ModuleName}\\Controller;
+
+use Tsy\\Library\\Controller;
+/**
+ * {$TableProperties['Name']}
+ * {$TableProperties['Comment']}
+ * @package {$ModuleName}\\Object
+ */
+class {$ObjectName}Controller extends Controller
+{
+    /**
+{$ColumnCommentsString}
+     */
+    /**
+     * @var string
+     */
+}";
+            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Controller.class.php',$FileContent);
+        }
+        return $this;
     }
     /**
      * 获取文档信息
@@ -182,6 +482,12 @@ class Document
                 if(in_array($key,['package','link','author','version','access','login'] )){
                     $data[$key]=$fields[1];
                 }else{
+                    $tmpFields = array_diff($fields,['']);
+//                    $
+                    $fields=[];
+                    foreach ($tmpFields as $field){
+                        $fields[]=$field;
+                    }
                     switch ($key){
                         case 'param':
                             $count = count($fields);
@@ -476,6 +782,10 @@ class Document
         self::$docs['Objects'][$ClassName]=$Result;
 //        开始处理对象操作方法
         $methods=[];
+        $ObjectZhName=self::$docs['PDM']['Tables'][strtolower($Class->main)]['Name'];
+//        preg_replace('//','',$ObjectZhName);
+//        TODO 更换替换逻辑
+        $ObjectZhName=str_replace(['字典表'],'',$ObjectZhName);
         foreach ($RefClass->getMethods() as $reflectionMethod){
             $MethodName = $reflectionMethod->getName();
             switch ($MethodName){
@@ -485,7 +795,7 @@ class Document
 //                        $file= $reflectionMethod->getFileName();
                         if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
                             //使用框架的add方法，补全文档参数信息
-                            $Comment = '';
+                            $Comment = "{$ObjectZhName}  添加\r\n";
                             //Field字段名称，Design字段配置
                             foreach (self::parseFieldsConfig($Class->main,$Class->addFields) as $Field=>$Design){
                                 if($Field==$Class->pk)continue;
@@ -507,14 +817,14 @@ class Document
                         $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                         $methods['del']=array_merge([
                             'name'=>'del','access'=>'public','static'=>false
-                        ],$this->parseDocComment("@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}"));
+                        ],$this->parseDocComment("{$ObjectZhName}  删除\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}"));
                     }
                     break;
                 case 'save':
                     if($Class->allow_save){
                         if('Object.class.php'==array_pop(explode('\\',$reflectionMethod->getFileName()))){
                             //使用框架的add方法，补全文档参数信息
-                            $Comment = '';
+                            $Comment = "{$ObjectZhName} 保存\r\n";
                             //Field字段名称，Design字段配置
                             foreach (self::parseFieldsConfig($Class->main,$Class->saveFields) as $Field=>$Design){
                                 if($Field==$Class->pk)continue;
@@ -535,16 +845,16 @@ class Document
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['get']=array_merge([
                         'name'=>'get','access'=>'public','static'=>false
-                    ],$this->parseDocComment("@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
+                    ],$this->parseDocComment("获取一个 {$ObjectZhName} 对象\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'gets':
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['gets']=array_merge([
                         'name'=>'gets','access'=>'public','static'=>false
-                    ],$this->parseDocComment("@param int \${$Class->pk}s {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
+                    ],$this->parseDocComment("获取 {$ObjectZhName} 对象列表\r\n@param int \${$Class->pk}s {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'search':
-                    $Comment = '';
+                    $Comment = "按条件搜索 {$ObjectZhName} 对象信息\r\n";
                     $Memo = '';
                     if($Class->searchFields){
                         $Fields = is_array($Class->searchFields)?implode(',',$Fields):$Class->searchFields;
@@ -635,7 +945,7 @@ class Document
         $View->assign(self::$docs);
         $View->assign('line',"\r\n");
         $content = $View->fetch(is_file($templateFile)?$templateFile:(__DIR__.DIRECTORY_SEPARATOR.'Template'.DIRECTORY_SEPARATOR.'render.html'));
-        $content = str_replace('{$PREFIX}','',$content);
+        $content = sql_prefix($content,'');
         if($outputFile){
             file_put_contents($outputFile,$content);
         }
@@ -671,5 +981,30 @@ class Document
             $Result[$field]=$Columns[$field];
         }
         return $Result;
+    }
+
+    /**
+     * 发布代码，压缩代码并删除注释。
+     * @param null $dir
+     */
+    function publish($dir=null){
+//        $RootPath =
+//        if(null==$dir){
+//            $dir=dirname(APP_PATH).DIRECTORY_SEPARATOR.'Publish';
+//        }
+//        each_dir(dirname(APP_PATH),function($path)use($dir){
+//            if(preg_match('/\\'.DIRECTORY_SEPARATOR.'\./',$path)){
+//                return ;
+//            }
+//            $a=$path;
+//        },function($path)use($dir){
+//            if(preg_match('/\\'.DIRECTORY_SEPARATOR.'\./',$path)){
+//                return ;
+//            }
+//            $a=$path;
+//        });
+    }
+    static function delPrefix($tableName,$Type=0){
+        return parse_name(sql_prefix($tableName,''),$Type);
     }
 }

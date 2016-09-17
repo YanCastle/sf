@@ -40,7 +40,7 @@ class Controller
         $this->__CLASS__ = get_class($this);
         $this->MC = explode('\\\\',str_replace(['Controller','Object','Model'],'' ,$this->__CLASS__ ) );
         $ObjectName = str_replace('Controller','Object',$this->__CLASS__);
-        if(class_exists($ObjectName)){
+        if(class_exists($ObjectName)&&$ObjectName!=$this->__CLASS__){
             list($this->ModuleName,$this->ControllerName)=explode('\\\\',str_replace('Controller','' ,$this->__CLASS__));
             $this->Object=new $ObjectName();
 //            $this-> = $this->Object;
@@ -143,11 +143,18 @@ class Controller
     function __call($name, $arguments)
     {
         $Object = $this->className.'Object';
+        if($this->Object){
+            if(method_exists($ObjectClass,$name)){
+                return call_user_func_array($ObjectClass,$arguments);
+            }
+        }else
         if(class_exists($Object)){
             $ObjectClass = new $Object();
             if(method_exists($ObjectClass,$name)){
                 return call_user_func_array($ObjectClass,$arguments);
             }
+        }else{
+            return '不存在的方法:'.$name;
         }
     }
     protected function getControllerName(){
@@ -320,9 +327,10 @@ class Controller
 //            return FALSE;
 //        }
     }
-    function add(){
+    function add($data=false){
+        if(!$data)$data=$_POST;
         if($this->Object instanceof Object){
-            return $this->Object->add();
+            return invokeClass($this->Object,'add',$data);
         }
         $ID = D($this->ControllerName)->add($_POST);
         return $ID?array_values(D($this->ControllerName)->obj([$ID]))[0]:false;

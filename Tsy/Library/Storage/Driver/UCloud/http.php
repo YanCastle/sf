@@ -1,6 +1,6 @@
 <?php
 
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/conf.php");
+
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/utils.php");
 require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/digest.php");
 
@@ -64,7 +64,7 @@ class HTTP_Response
 //@results: $val
 function UCloud_Header_Get($header, $key)
 {
-    $val = @$header[$key];
+    $val = isset($header[$key])?$header[$key]:'';
     if (isset($val)) {
         if (is_array($val)) {
             return $val[0];
@@ -323,8 +323,7 @@ function UCloud_Build_MultipartForm($fields, $files)
 }
 
 function UCloud_UserAgent() {
-    global $SDK_VER;
-    $sdkInfo = "UCloudPHP/$SDK_VER";
+    $sdkInfo = "UCloudPHP/".C('SDK_VER');
 
     $systemInfo = php_uname("s");
     $machineInfo = php_uname("m");

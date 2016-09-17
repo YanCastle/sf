@@ -26,16 +26,8 @@ class UCloud extends Storage{
      * @access public
      */
     public function __construct() {
-        global $SDK_VER;
-        global $UCLOUD_PROXY_SUFFIX;
-        global $UCLOUD_PUBLIC_KEY;
-        global $UCLOUD_PRIVATE_KEY;
-        $SDK_VER = "1.0.6";
-        $UCLOUD_PROXY_SUFFIX = '.ufile.ucloud.cn';
-//        $UCLOUD_PUBLIC_KEY = 'ucloudadmin@tansuyun.cn142716205800096890167';
-        $UCLOUD_PUBLIC_KEY = C('UCLOUD_PUBLIC_KEY');
-//        $UCLOUD_PRIVATE_KEY = '62a462d42168aa597f5fd42893ffcd1953b331d6';
-        $UCLOUD_PRIVATE_KEY = C('UCLOUD_PRIVATE_KEY');
+        C('SDK_VER','1.0.6');
+        C('UCLOUD_PROXY_SUFFIX','.ufile.ucloud.cn');
         require_once self::$UCloudSDKPath.DIRECTORY_SEPARATOR.'proxy.php';
     }
 
@@ -57,7 +49,12 @@ class UCloud extends Storage{
      * @return boolean
      */
     public function put($filename,$content,$type=''){
-
+        list($data,$err) = UCloud_PutFileContent(C('UCLOUD_BUKKET'),$filename,$content);
+        if($err->ErrMsg){
+            L($err->ErrMsg,LOG_TIP);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -117,6 +114,7 @@ class UCloud extends Storage{
      * @return boolean
      */
     public function get($filename,$name,$type=''){
+        
         if(!isset($this->contents[$filename])){
             if(!is_file($filename)) return false;
            $this->contents[$filename]=file_get_contents($filename);

@@ -247,11 +247,11 @@ class Server
     function onTimer($interval){
         $callback = swoole_get_callback('TIMER');
         if(is_callable($callback)){
-            call_user_func_array($callback,[$server,$interval]);
+            call_user_func_array($callback,[$this,$interval]);
         }
         $Timer = C('SWOOLE.TIMER');
         if(isset($Timer[$interval])&&is_callable($Timer[$interval])){
-            call_user_func_array($Timer[$interval],[$server,$interval]);
+            call_user_func_array($Timer[$interval],[$this,$interval]);
         }
 //       开始检测系统定时器设定。如检测fdName缓存是否失效，fdGroup是否失效等
         //自动重启检测
