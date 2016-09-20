@@ -27,7 +27,7 @@ class UCloud extends Storage{
      */
     public function __construct() {
         C('SDK_VER','1.0.6');
-        C('UCLOUD_PROXY_SUFFIX','.ufile.ucloud.cn');
+//        C('UCLOUD_PROXY_SUFFIX','.ufile.ucloud.cn');
         require_once self::$UCloudSDKPath.DIRECTORY_SEPARATOR.'proxy.php';
     }
 

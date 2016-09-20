@@ -70,6 +70,11 @@ class TsyWechat extends Controller{
         }
     }
     function wechat(){
+        if(isset($_GET['signature'])&&isset($_GET['echostr'])
+            &&isset($_GET['timestamp'])&&isset($_GET['nonce'])){
+            echo $_GET['echostr'];
+            return ;
+        }
         try{
             $appid = C('WECHAT_APPID'); //AppID(应用ID)
             $token = C('WECHAT_TOKEN'); //微信后台填写的TOKEN
