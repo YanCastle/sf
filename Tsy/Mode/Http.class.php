@@ -62,7 +62,7 @@ class Http implements Mode
         $Out = C('HTTP.OUT');
         $Out = is_callable($Out)?$Out:C('DEFAULT_OUT');
         $OutData=call_user_func($Out,$Data);
-        if(is_string($OutData)&&strlen($OutData)>0){
+        if(is_string($OutData)&&strlen($OutData)>0&&!($Data===null&&$OutData==='null')){
             self::$Out=true;
             echo $OutData;
         }

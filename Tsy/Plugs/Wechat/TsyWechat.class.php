@@ -34,8 +34,6 @@ class TsyWechat extends Controller{
 //    public $wechat = new Wechat();
     function __construct($appid='',$token='',$secret='',$crypt=''){
         parent::__construct();
-        $SessionStatus=session_status();
-
         $this->appid = $appid?$appid:C('WECHAT_APPID');
         $this->token = $token?$token:C('WECHAT_TOKEN');
         $this->crypt = $crypt?$crypt:C('WECHAT_CRYPT');
@@ -69,7 +67,16 @@ class TsyWechat extends Controller{
             return false;
         }
     }
+
+    /**
+     * 微信调用方法
+     */
     function wechat(){
+        if(isset($_GET['signature'])&&isset($_GET['echostr'])
+            &&isset($_GET['timestamp'])&&isset($_GET['nonce'])){
+            echo $_GET['echostr'];
+            return ;
+        }
         try{
             $appid = C('WECHAT_APPID'); //AppID(应用ID)
             $token = C('WECHAT_TOKEN'); //微信后台填写的TOKEN
