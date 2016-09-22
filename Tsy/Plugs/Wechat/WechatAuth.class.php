@@ -54,6 +54,7 @@ class WechatAuth {
     private $apiURL = 'https://api.weixin.qq.com/cgi-bin';
     private $kfURL = 'https://api.weixin.qq.com/customservice';
     private $PicURL=  'http://file.api.weixin.qq.com/cgi-bin';
+    private $TemplateURL = 'https://api.weixin.qq.com/cgi-bin/message/template';
     /**
      * 微信二维码根路径
      * @var string
@@ -550,7 +551,34 @@ class WechatAuth {
 
         return json_decode($data, true);
     }
+    /**
+     * 调用微信模板接口获取响应数据
+     * @param  string $name   API名称
+     * @param  string $data   POST请求数据
+     * @param  string $method 请求方式
+     * @param  string $param  GET请求参数
+     * @return array          api返回结果
+     */
+    protected function template($name, $data = '', $method = 'POST', $param = '', $json = true){
+        $params = array('access_token' => $this->accessToken);
 
+        if(!empty($param) && is_array($param)){
+            $params = array_merge($params, $param);
+        }
+
+        $url  = "{$this->TemplateURL}/{$name}";
+        if($json && !empty($data)){
+            //保护中文，微信api不支持中文转义的json结构
+            array_walk_recursive($data, function(&$value){
+                $value = urlencode($value);
+            });
+            $data = urldecode(json_encode($data));
+        }
+
+        $data = self::http($url, $params, $data, $method);
+
+        return json_decode($data, true);
+    }
     /**
      * 发送HTTP请求方法，目前只支持CURL发送请求
      * @param  string $url    请求URL
@@ -777,5 +805,30 @@ class WechatAuth {
             'openid'=>$OpenID,
             'lang'=>'zh_CN'
         ]),true);
+    }
+    function templateSend(string $OpenID,string $TemplateID,string $URL,array $Data){
+        $data=[
+            'touser'=>$OpenID,
+            'template_id'=>$TemplateID,
+            'url'=>$URL,
+            'data'=>[]
+        ];
+        foreach ($Data as $Kcy=>$Value){
+            $value = '';
+            $color = '#173177';
+            if(is_array($Value)){
+                $value=isset($Value['value'])?$Value['value']:array_shift($Value);
+                $color=isset($Value['color'])?$Value['color']:($Value?array_shift($Value):$color);
+            }
+            $data['data'][$Kcy]=[
+                'value'=>$value,
+                'color'=>$color
+            ];
+        }
+        $rs = self::template('send',$data);
+        if($rs['errcode']==0&&$rs['errmsg']=='ok'){
+            return $rs['msgid'];
+        }
+        return false;
     }
 }
