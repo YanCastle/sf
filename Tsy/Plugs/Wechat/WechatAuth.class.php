@@ -560,6 +560,7 @@ class WechatAuth {
      * @return array          api返回结果
      */
     protected function template($name, $data = '', $method = 'POST', $param = '', $json = true){
+        if(!$this->accessToken)$this->getAccessToken();
         $params = array('access_token' => $this->accessToken);
 
         if(!empty($param) && is_array($param)){
@@ -819,6 +820,8 @@ class WechatAuth {
             if(is_array($Value)){
                 $value=isset($Value['value'])?$Value['value']:array_shift($Value);
                 $color=isset($Value['color'])?$Value['color']:($Value?array_shift($Value):$color);
+            }else{
+                $value=$Value;
             }
             $data['data'][$Kcy]=[
                 'value'=>$value,
