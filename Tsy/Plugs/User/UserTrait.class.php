@@ -2,42 +2,38 @@
 /**
  * Created by PhpStorm.
  * User: Castle
- * Date: 2016/9/11
- * Time: 14:42
+ * Date: 2016/9/22
+ * Time: 17:41
  */
 
 namespace Tsy\Plugs\User;
 
 
-use Tsy\Library\Controller;
-use Tsy\Library\Model;
-use Tsy\Library\Object;
-
-class User extends Object
+trait UserTrait
 {
 //    protected $
     public $allowReg=true;
     public $LoginView='';
-    function __construct()
-    {
-        parent::__construct();
-
-    }
-
+    protected $_map=[];
     /**
      * 用户注册
      * @param string $Account 注册帐号
      * @param string $PWD 注册密码
-     * @param array $Property 其他属性
+     * @param array $Properties 其他属性
      * @return UserObject
      */
-    function reg(string $Account,string $PWD,array $Property=[]){
+    function reg(string $Account,string $PWD,array $Properties=[]){
         if(!$this->allowReg){
             return '禁止注册';
         }
 
         $PWD = password_hash($PWD,PASSWORD_DEFAULT);
-        return $this->add(array_merge(['Account'=>$Account,'PWD'=>$PWD],$Property));
+        $data=array_merge([
+            'Account'=>$Account,
+            'PWD'=>$PWD
+        ],$Properties);
+        $data['data']=$data;
+        return invokeClass($this,'add',$data);
     }
 
     /**
@@ -54,7 +50,7 @@ class User extends Object
             return '账户名或密码错误';
         }
     }
-    function loginSuccess($User){
+    private function loginSuccess($User){
         session('UID',$User['UID']);
 //        session('GIDs',)
         return $this->get($User['UID']);
