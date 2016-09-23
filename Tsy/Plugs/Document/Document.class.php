@@ -420,6 +420,9 @@ class {$ObjectName}Controller extends Controller
 //        判断类是否是Controller/Object/Model中的一种，如果是则调用对应类型的解析方法
         $RefClass = new ReflectionClass($class);
         $ClassType = '';
+        if(isset(self::$docs['Classes'][$RefClass->getName()])){
+            return $this;
+        }
         foreach (['Tsy\Library\Object','Tsy\Library\Model','Tsy\Library\Controller'] as $InsideClass){
             if($RefClass->isSubclassOf($InsideClass)){
                 $ClassType = str_replace('Tsy\Library\\','',$InsideClass);
@@ -622,7 +625,8 @@ class {$ObjectName}Controller extends Controller
             'type'=>'Object',//这个类是什么类型，控制器？Model？Object？其他？
             'Properties'=>[],
             'methods'=>[],
-            'Object'=>[]
+            'Object'=>[],
+            'Comment'=>$RefClass->getDocComment()
         ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
         $Class = $RefClass->newInstance();
 //        读取属性渲染对象化配置
@@ -808,7 +812,7 @@ class {$ObjectName}Controller extends Controller
                             $Comment = $reflectionMethod->getDocComment();
                         }
                         $methods['add']=array_merge([
-                            'name'=>'add','access'=>'public','static'=>false
+                            'name'=>'add','access'=>'public','static'=>false,'Comment'=>$Comment
                         ],$this->parseDocComment($Comment));
                     }
                     break;
@@ -816,7 +820,7 @@ class {$ObjectName}Controller extends Controller
                     if($Class->allow_addel){
                         $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                         $methods['del']=array_merge([
-                            'name'=>'del','access'=>'public','static'=>false
+                            'name'=>'del','access'=>'public','static'=>false,'Comment'=>$Comment
                         ],$this->parseDocComment("{$ObjectZhName}  删除\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}"));
                     }
                     break;
@@ -837,20 +841,20 @@ class {$ObjectName}Controller extends Controller
                             $Comment = $reflectionMethod->getDocComment();
                         }
                         $methods['save']=array_merge([
-                            'name'=>'save','access'=>'public','static'=>false
+                            'name'=>'save','access'=>'public','static'=>false,'Comment'=>$Comment
                         ],$this->parseDocComment($Comment));
                     }
                     break;
                 case 'get':
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['get']=array_merge([
-                        'name'=>'get','access'=>'public','static'=>false
+                        'name'=>'get','access'=>'public','static'=>false,'Comment'=>$Comment
                     ],$this->parseDocComment("获取一个 {$ObjectZhName} 对象\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'gets':
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['gets']=array_merge([
-                        'name'=>'gets','access'=>'public','static'=>false
+                        'name'=>'gets','access'=>'public','static'=>false,'Comment'=>$Comment
                     ],$this->parseDocComment("获取 {$ObjectZhName} 对象列表\r\n@param int \${$Class->pk}s {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'search':
@@ -870,7 +874,7 @@ class {$ObjectName}Controller extends Controller
                     }
                     $Comment.="@param int \$P 页码\r\n@param int \$N 每页数量\r\n @param string|array \$Sort 排序字段(暂不支持)\r\n{$Memo}";
                     $methods['search']=array_merge([
-                        'name'=>'search','access'=>'public','static'=>false
+                        'name'=>'search','access'=>'public','static'=>false,'Comment'=>$Comment
                     ],$this->parseDocComment($Comment));
                     break;
                 default:
@@ -884,7 +888,7 @@ class {$ObjectName}Controller extends Controller
                     if('_'==substr($MethodName,0,1)){continue;}
                     if($MethodName=='getAll'&&$Class->is_dic===false){continue;}
                     $methods[$MethodName]=array_merge([
-                        'name'=>$MethodName,'access'=>$access,'static'=>$reflectionMethod->isStatic()
+                        'name'=>$MethodName,'access'=>$access,'static'=>$reflectionMethod->isStatic(),'Comment'=>$reflectionMethod->getDocComment()
                     ],$this->parseDocComment($reflectionMethod->getDocComment(),$reflectionMethod));
                     break;
             }
@@ -1006,5 +1010,58 @@ class {$ObjectName}Controller extends Controller
     }
     static function delPrefix($tableName,$Type=0){
         return parse_name(sql_prefix($tableName,''),$Type);
+    }
+
+    /**
+     * 自动根据Object中的方法填充到Controller中去
+     */
+    function autoFinishControllerByObject($Objects=[]){
+        if(!is_array($Objects)){
+            $Objects=[$Objects];
+        }
+        //循环遍历
+        foreach ($Objects as $object){
+            $this->getDoc($object);
+        }
+        foreach (self::$docs['Classes'] as $Class=>$Info){
+            if($Info['type']=='Object'){
+                $ControllerName = str_replace('Object','Controller',$Info['name']);
+                if(!isset(self::$docs['Classes'][$ControllerName])){
+                    $this->getDoc($ControllerName);
+                }
+                $Controller = self::$docs['Classes'][$ControllerName];
+                $str=[];
+                foreach (array_diff(array_keys($Info['methods']),array_keys($Controller['methods'])) as $function){
+//                    生成字符串
+                    $ParamStr=$VerStr=[];
+
+                    foreach ($Info['methods'][$function]['params'] as $ParamName=>$Param){
+                        $ParamStr[]="{$Param['name']}".($Param['must']?'':"='{$Param['default']}'");
+                        $VerStr[]="{$Param['name']}";
+                    }
+                    $ParamStr = implode(',',$ParamStr);
+                    $VerStr = implode(',',$VerStr);
+                    $str[]="    {$Info['methods'][$function]['Comment']}
+    function {$function}({$ParamStr}){
+        return \$this->Object->{$function}({$VerStr});
+    }";
+                }
+                $str = implode("\r\n",$str);
+                //寻找文件路径
+                $ControllerPath = APP_PATH.DIRECTORY_SEPARATOR.str_replace("\\",DIRECTORY_SEPARATOR,$ControllerName).'.class.php';
+                if(file_exists($ControllerPath)){
+                    $content = file_get_contents($ControllerPath);
+                    $ControllerClass = new $ControllerName();
+                    $Reflection = new ReflectionClass($ControllerClass);
+                    $line = $Reflection->getEndLine();
+//                    $content = explode("\r\n",$content);
+                    $content = preg_replace('/}$/',"{$str}\r\n}",$content);
+                    file_put_contents($ControllerPath,$content);
+                    //把line行后的全部单独保存，然后删除掉，拆分成两个数组
+//                    list($before,$after) = array_chunk($content,$line);
+//                    $content = implode("\r\n",array_merge($before,$str,$after));
+                }
+            }
+        }
     }
 }
