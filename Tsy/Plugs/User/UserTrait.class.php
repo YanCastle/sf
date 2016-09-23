@@ -9,12 +9,22 @@
 namespace Tsy\Plugs\User;
 
 
+use Tsy\Library\Msg;
+
 trait UserTrait
 {
 //    protected $
     public $allowReg=true;
-    public $LoginView='';
-    protected $_map=[];
+    public $LoginView='User';
+    protected $_map=[
+        'Account'=>'Account',
+        'PWD'=>'PWD',
+    ];
+    /**
+     * 登录时允许使用哪些字段作为账户名登录
+     * @var array
+     */
+    protected $LoginAccountFields=['Account'];
     /**
      * 用户注册
      * @param string $Account 注册帐号
@@ -26,11 +36,13 @@ trait UserTrait
         if(!$this->allowReg){
             return '禁止注册';
         }
-
-        $PWD = password_hash($PWD,PASSWORD_DEFAULT);
+//        检测允许被用作登录账户的账户名是否重复
+        if($this->checkAccount($Account)){
+            return '账号已使用';
+        }
         $data=array_merge([
             'Account'=>$Account,
-            'PWD'=>$PWD
+            'PWD'=>$this->password($PWD)
         ],$Properties);
         $data['data']=$data;
         return invokeClass($this,'add',$data);
@@ -43,14 +55,25 @@ trait UserTrait
      * @return UserObject
      */
     function login(string $Account,string $PWD){
-        $User = M($this->LoginView)->where(['Account'=>$Account])->field('UID,PWD')->find();
+        $User = M($this->LoginView)->where(['Account'=>$Account])->getField('UID,PWD',true);
         if(false!==$User){
-            return $this->loginSuccess($User);
-        }else{
-            return '账户名或密码错误';
+            foreach ($User as $UID=>$Hash){
+                if($this->password($PWD,$Hash)){
+                    return $this->loginSuccess($User);
+                }
+            }
         }
+        return '账户名或密码错误';
     }
-    private function loginSuccess($User){
+    protected function password($PWD,$Hash=''){
+        return $Hash?password_verify($PWD,$Hash):password_hash($PWD,PASSWORD_DEFAULT);
+    }
+    /**
+     * 登录成功的处理逻辑
+     * @param $User
+     * @return mixed
+     */
+    protected function loginSuccess($User){
         session('UID',$User['UID']);
 //        session('GIDs',)
         return $this->get($User['UID']);
@@ -68,7 +91,9 @@ trait UserTrait
      * @param string $Account 账户名称
      * @return array {'Email':"","Phone":"",'Account':"","UID":1}
      */
-    function findAccount(string $Account){}
+    function findAccount(string $Account){
+        return M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->getField('UID');
+    }
 
     /**
      * 重置密码
@@ -76,21 +101,44 @@ trait UserTrait
      * @param string $PWD 新密码
      * @param string $Code 验证码或旧密码 当用户权限为管理员时不需要Code参数，如果不是则需要提供Code验证码或者旧密码做验证
      */
-    function resetPWD(int $UID,string $PWD,string $Code=''){}
+    function resetPWD(string $Account,string $PWD,int $UID,string $Code=''){
+        if(!$PWD||!$UID||!$Account){return '错误的账号密码';}
+        if(session('UID')==$UID){
+//            修改自己的密码
+        }else
+        if(session('UserAdmin')){
+//            通过
+        }else
+        if(!$this->checkVerifyCode($Code,$UID)){
+            return '验证码错误';
+        }
+        if($this->findAccount($Account)==$UID){
+            $data[$this->_map['PWD']]=$this->password($PWD);
+            return $this->save($UID,$data);
+        }
+        return '账号信息验证失败';
+    }
 
     /**
      * 检查账户是否存在
      * @param string $Account 账户名称
      * @return bool 存在true,不存在false
      */
-    function checkAccount(string $Account){}
+    function checkAccount(string $Account){
+        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
+    }
 
     /**
      * 自动登录
      * @param string $SID 自动登录的验证字符
      * @return UserObject|bool 成功返回用户对象，否则返回false
      */
-    function reLogin(string $SID=''){}
+    function reLogin(string $SID=''){
+        if($UID = session('UID')){
+            return $this->get($UID);
+        }
+        return false;
+    }
 
     /**
      * 发送验证码
@@ -98,20 +146,22 @@ trait UserTrait
      * @param int $Type 发送方式，默认为邮件，暂时支持邮件方式
      * @return bool true/false
      */
-    function sendVerify(int $UID,int $Type=0){}
+    function sendVerify(int $UID,string $Address,string $Type='Email'){
+        return Msg::send('Email',$Address,$this->createVerifyCode($UID));
+    }
 
     /**
-     * 生成验证码
-     * @param int $UID
+     * @param int $UID UID
+     * @param int $Expire 默认半个小时
      * @return string
      */
-    private function createVerifyCode(int $UID){
-        //TODO 添加过期时间控制
+    private function createVerifyCode(int $UID,int $Expire=1800){
+        // 添加过期时间控制
         $Code = '';
         for($i=0;$i<rand(5,10);$i++){
             $Code.=chr(rand(65,90));
         }
-        cache('VerifyCode'.$UID,$Code);
+        cache('VerifyCode'.$UID,$Code,$Expire);
         return $Code;
     }
 
