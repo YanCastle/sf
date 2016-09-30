@@ -74,9 +74,10 @@ trait UserTrait
      * @return mixed
      */
     protected function loginSuccess($User){
-        session('UID',$User['UID']);
+        foreach ($User as $UID=>$PWD){}
+        session('UID',$UID);
 //        session('GIDs',)
-        return $this->get($User['UID']);
+        return $this->get($UID);
     }
     /**
      * 退出登录
@@ -143,7 +144,8 @@ trait UserTrait
     /**
      * 发送验证码
      * @param int $UID 用户名
-     * @param int $Type 发送方式，默认为邮件，暂时支持邮件方式
+     * @param int $Address 地址
+     * @param string $Type 发送方式，默认为邮件，暂时支持邮件方式
      * @return bool true/false
      */
     function sendVerify(int $UID,string $Address,string $Type='Email'){

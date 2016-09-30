@@ -404,8 +404,13 @@ class {$ObjectName}Controller extends Controller
             }elseif(function_exists($name)){
 
             }elseif(is_dir($name)){
-//                each_dir() 遍历循环
-
+                each_dir($name,//遍历循环
+                    null,
+                    function($path){
+                        if(preg_match('/[A-Za-z]+\.class\.php$/',$path,$match)){
+                            $this->getDoc(str_replace([APP_PATH,'.class.php'],'',$path));
+                        }
+                }); //遍历循环
             }elseif(is_file($name)){
 
             }else{
@@ -485,12 +490,12 @@ class {$ObjectName}Controller extends Controller
                 if(in_array($key,['package','link','author','version','access','login'] )){
                     $data[$key]=$fields[1];
                 }else{
-                    $tmpFields = array_diff($fields,['']);
+                    $fields = array_diff($fields,['']);
 //                    $
-                    $fields=[];
-                    foreach ($tmpFields as $field){
-                        $fields[]=$field;
-                    }
+//                    $fields=[];
+//                    foreach ($tmpFields as $field){
+//                        $fields[]=$field;
+//                    }
                     switch ($key){
                         case 'param':
                             $count = count($fields);
@@ -534,8 +539,14 @@ class {$ObjectName}Controller extends Controller
                                     'memo'=>''
                                 ];
                             }else{
-                                $param=[];
+                                $param=[
+                                    'type'=>'',
+                                    'name'=>'',
+                                    'zh'=>'',
+                                    'memo'=>''
+                                ];
                             }
+                            $param['name']=str_replace('$','',$param['name']);
                             $data['params'][]=$param;
                             break;
                         case 'example':
@@ -567,7 +578,7 @@ class {$ObjectName}Controller extends Controller
         if($Method instanceof ReflectionMethod){
             $data['name']=$Method->getName();
             foreach ($Method->getParameters() as $parameter){
-                $name = '$'.$parameter->getName();
+                $name = $parameter->getName();
                 $param=[
                     'name'=>$name,
                     'must'=>!$parameter->isOptional(),
@@ -626,7 +637,8 @@ class {$ObjectName}Controller extends Controller
             'Properties'=>[],
             'methods'=>[],
             'Object'=>[],
-            'Comment'=>$RefClass->getDocComment()
+            'Comment'=>$RefClass->getDocComment(),
+            'OriginName'=>str_replace('Object','',$RefClass->getShortName())
         ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
         $Class = $RefClass->newInstance();
 //        读取属性渲染对象化配置
@@ -817,7 +829,7 @@ class {$ObjectName}Controller extends Controller
                     }
                     break;
                 case 'del':
-                    if($Class->allow_addel){
+                    if($Class->allow_del){
                         $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                         $methods['del']=array_merge([
                             'name'=>'del','access'=>'public','static'=>false,'Comment'=>$Comment
@@ -849,7 +861,7 @@ class {$ObjectName}Controller extends Controller
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
                     $methods['get']=array_merge([
                         'name'=>'get','access'=>'public','static'=>false,'Comment'=>$Comment
-                    ],$this->parseDocComment("获取一个 {$ObjectZhName} 对象\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array $Properties 限定取哪些属性 \r\n@return Object"));
+                    ],$this->parseDocComment("获取一个 {$ObjectZhName} 对象\r\n@param int \${$Class->pk} {$PKConfig['Name']} {$PKConfig['Comment']}\r\n@param array \$Properties 限定取哪些属性 \r\n@return Object"));
                     break;
                 case 'gets':
                     $PKConfig = self::parseFieldsConfig($Class->main,$Class->pk)[$Class->pk];
@@ -907,20 +919,21 @@ class {$ObjectName}Controller extends Controller
             'memo'=>'',
             'zh'=>'',
             'name'=>'',
-            'type'=>'Object',//这个类是什么类型，控制器？Model？Object？其他？
+            'type'=>'Controller',//这个类是什么类型，控制器？Model？Object？其他？
             'Properties'=>[],
             'methods'=>[],
-            'Object'=>[]
+            'Object'=>[],
+            'path'=>$RefClass->getFileName()
         ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
 //        $Class = $RefClass->newInstance();
-        self::$docs['Classes'][$RefClass->getName()]=array_merge([
-            'memo'=>'',
-            'zh'=>'',
-            'name'=>'',
-            'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
-            'properties'=>[],
-            'methods'=>[]
-        ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
+//        self::$docs['Classes'][$RefClass->getName()]=array_merge([
+//            'memo'=>'',
+//            'zh'=>'',
+//            'name'=>'',
+//            'type'=>'',//这个类是什么类型，控制器？Model？Object？其他？
+//            'properties'=>[],
+//            'methods'=>[]
+//        ],$this->parseDocComment($RefClass->getDocComment(),null,$RefClass));
 //        foreach ($RefClass->getProperties() as $property){
 //
 //        }
@@ -1063,5 +1076,279 @@ class {$ObjectName}Controller extends Controller
                 }
             }
         }
+    }
+
+    /**
+     *
+     */
+    function generateObjectJS($Path='./obj'){
+        if(!is_dir($Path)){
+            mkdir($Path,0777,true);
+        }
+        $nav=[];
+        foreach (self::$docs['Classes'] as $ObjectName=>$Object){
+            if($Object['type']=='Object'){
+                $Title = str_replace(['\\Object\\','Object'],[DIRECTORY_SEPARATOR,''],$ObjectName);
+                $I = str_replace(DIRECTORY_SEPARATOR,'/',$Title);
+                $dir = implode(DIRECTORY_SEPARATOR,[$Path,$Title]).'.js';
+                if(!is_dir(dirname($dir))){
+                    mkdir(dirname($dir),0777,true);
+                }
+                $JsContent = [];
+                $PK=$Object['ObjectSetting']['pk'];
+                foreach ($Object['methods'] as $methodName=>$method){
+                    $ParamStr=$DataStr=[];
+                    foreach ($method['params'] as $ParamName=>$Config){
+                        $ParamStr[]=$ParamName;
+                        $DataStr[]="{$ParamName}:{$ParamName}";
+                    }
+                    $ParamStr[]='callback';
+                    $ParamStr=implode(',',$ParamStr);
+                    $DataStr=implode(",\r\n",$DataStr);
+                    switch ($methodName){
+                        case 'add':
+                            $JsContent[]="add: function (data,callback) {
+                var configFn={
+                    success: function () {},
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:'{$I}/add',
+                    data:data,
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                        case 'save':
+                            $JsContent[]="save: function (ID,Params,callback) {
+                var configFn={
+                    success: function () {},
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:'{$I}/save',
+                    data:{
+                        {$Object['ObjectSetting']['pk']}:{$Object['ObjectSetting']['pk']},
+                        Params:Params
+                    },
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                        case 'del':
+                            $JsContent[]="del: function (ID,callback) {
+                var configFn={
+                    success: function () {},
+                    
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:\"{$I}/del\",
+                    data:{
+                        \"{$PK}\":ID
+                    },
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                        case 'get':
+                            $JsContent[]="get: function ({$PK},callback) {
+                var configFn={
+                    success: function () {},
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:\"{$I}/get\",
+                    data:{
+                        {$PK}:{$PK}
+                    },
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                        case 'gets':
+                            $JsContent[]="gets: function ({$PK}s,callback) {
+                var configFn={
+                    success: function () {},
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:\"{$I}/gets\",
+                    data:{
+                        \"{$I}\":{$PK}s,
+                        \"P\":1,
+                        \"N\":1000000
+                    },
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                        case 'search':
+                            $JsContent[]="search: function (data,callback) {
+                var configFn={
+                    success: function () {},
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:\"{$I}/search\",
+                    data:data,
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                        default:
+                            $JsContent[]="{$methodName}: function ({$ParamStr}) {
+                var configFn={
+                    success: function () {},
+                    error: function (err) {tip.on(err)}
+                }
+                avalon.mix(configFn,callback)
+                $$.call({
+                    i:\"{$I}/del\",
+                    data:{
+                        {$DataStr}
+                    },
+                    success:configFn.success,
+                    error:configFn.error
+                })
+            }";
+                            break;
+                    }
+                }
+                $JsContent=implode(",\r\n",$JsContent);
+                $JsObjectName = 'obj_'.str_replace('/','_',$I);
+                $Js="//{$I}\r\ndefine('{$Object['OriginName']}',
+    ['avalon'],
+    function () {
+        var obj={      
+            {$JsContent}
+        }
+        return window['{$JsObjectName}']=obj
+    })";
+                file_put_contents($dir,$Js);
+                foreach([
+                            $Object['OriginName'].'List'=>$Object['zh'].'列表',
+                            $Object['OriginName'].'Details'=>$Object['zh'].'详情',
+                            $Object['OriginName'].'Edit'=>$Object['zh'].'编辑',
+                            $Object['OriginName'].'Add'=>$Object['zh'].'添加']
+                        as $key=>$value){
+                    $path = 'package/'.$key;
+                    if(!is_dir($path)){
+                        mkdir($path,0777,true);
+                    }
+                    file_put_contents("{$path}/{$key}.html","<!-- {$value} 模块 -->
+<div ms-controller='{$key}'>{$value} 在此编写该模块的HTML代码</div>");
+                    file_put_contents("{$path}/{$key}.js","//{$value} 模块
+    define('{$key}', [
+    'avalon',
+    'text!../../package/{$key}/{$key}.html',
+    'css!../../package/{$key}/{$key}.css'
+], function (avalon, html, css) {
+    var vm = avalon.define({
+        \$id: \"{$key}\",
+        ready: function (i) {
+            var obj = '{$I}';
+            if (obj != \"\") {
+                require(['../../obj/' + obj + '.js'], function () {
+                    start()
+                })
+            } else {
+                start()
+            }
+
+            function start() {
+                vm.reset();
+                index.html = html;
+                vm.now = i | 0;
+                //以及其他方法
+            }
+        },
+        reset: function () {
+            avalon.mix(vm, {
+                //要重置的东西最后都放回到这里
+            })
+        }
+      });
+      return window['{$key}'] = vm
+   }
+)");
+                    file_put_contents("{$path}/{$key}.css","");
+                    $nav[]=[
+                        'name'=>$value,
+                        'en'=>$key,
+                        'front'>false,
+                        'bePartOf'=>'',
+                        'only'=>0,
+                        'pageType'=>'_package'
+                    ];
+                }
+
+            }
+        }
+        file_put_contents('nav.json',json_encode($nav,JSON_UNESCAPED_UNICODE));
+    }
+    function createObj_js($OutPut){
+        $Obj = [];
+        foreach (self::$docs['PDM']['Tables'] as $TableName=>$Table){
+            $Columns=[];
+            $I='';
+            foreach ($Table['Columns'] as $Column){
+                if($Column['I']){
+                    $I=$Column['Code'];
+                }
+                $Columns[]=[
+                    "Name"=> $Column['Name'],
+                    "Code"=> $Column['Code'],
+                    "Comment"=> $Column['Comment'],
+                    "DataType"=> $Column['DataType'],
+                    "Length"=> [
+                        "11"
+                    ],
+                    "Must"=> $Column['M'],
+                    "Default"=> $Column['DefaultValue']?'':$Column['DefaultValue'],
+                    "Editable"=> false,
+                    "Hidden"=> false,
+                    "GetBy"=> false,
+                    "SearchBy"=> false,
+                    "RegExp"=> "",
+                    'QureyExp'=>[
+                        "EQ",
+                        "NEQ",
+                        "GT",
+                        "EGT",
+                        "LT",
+                        "ELT",
+                        "LIKE",
+                        "BETWEEN",
+                        "NOT BETWEEN",
+                        "IN",
+                        "NOT IN"
+                    ]
+                ];
+            }
+            $Obj[]=[
+                "Name"=> $Table['Name'],
+                "Code"=> $Table['Code'],
+                "Comment"=> $Table['Comment'],
+                "I"=> $I,
+                'ModuleName'=>$ModuleName,
+                "Columns"=>$Columns,
+            ];
+        }
+//        $Obj['obj']=$Obj;
+        file_put_contents($OutPut,str_replace(['{$PREFIX}','prefix_'],'',json_encode(['obj'=>$Obj],JSON_UNESCAPED_UNICODE)));
+
     }
 }

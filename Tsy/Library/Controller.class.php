@@ -160,9 +160,6 @@ class Controller
     protected function getControllerName(){
         return substr($this->__CLASS__,0,strlen($this->__CLASS__)-10);
     }
-    function set_swoole($swoole){
-        $this->swoole=$swoole;
-    }
     protected function send($UID,$data){
         //TODO 需要建立UID跟fd的连接信息，如果不是在swoole模式下还需要放到队列中去
     }
