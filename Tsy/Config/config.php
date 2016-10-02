@@ -82,7 +82,7 @@ return [
         'I'=>'get.i',
         'D'=>'post',
         'DISPATCH'=>["\\Tsy\\Tsy::\$Mode",'dispatch'],
-        'OUT'=>["\\Tsy\\Tsy::\$Mode",'output'],
+        'OUT'=>'\\Tsy\\Tsy::$Mode::output',
     ],
     'SQL_PREFIX'=>['{$PREFIX}','prefix_']
 ];
