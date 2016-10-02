@@ -19,7 +19,7 @@ class Alidayu implements MsgIFace
     protected $config=[
         'APP_KEY'=>'',
         'SECRET_KEY'=>'',
-        'SIGN_NAME'=>'大鱼测试'
+        'SIGN_NAME'=>'身份验证'
     ];
     public function __construct($config=[])
     {
@@ -58,8 +58,9 @@ class Alidayu implements MsgIFace
         {
             define("TOP_AUTOLOADER_PATH", __DIR__.DIRECTORY_SEPARATOR.'Alidayu/');
         }
-        spl_autoload_register('Tsy\Library\Msg\Driver\Alidayu::autoloader');
+        spl_autoload_register('Tsy\Library\Msg\Driver\Alidayu::autoload');
         $this->handle = new \TopClient($this->config['APP_KEY'],$this->config['SECRET_KEY']);
+        $this->handle->format='json';
 //        $this->handle = new \AlibabaAliqinFcSmsNumSendRequest();
     }
 
@@ -147,6 +148,12 @@ class Alidayu implements MsgIFace
         $req->setSmsType('normal');
         $req->setSmsFreeSignName($this->config['SIGN_NAME']);
         $rs = $this->handle->execute($req);
+        if(isset($rs['result']['success'])&&$rs['result']['success']){
+            return true;
+        }else{
+            L('Msg::SMS_ALIDAYU:'.$rs['sub_msg'],LOG_ERR);
+            return false;
+        }
     }
 
     /**
