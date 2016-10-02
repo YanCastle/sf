@@ -1102,17 +1102,18 @@ class {$ObjectName}Controller extends Controller
                         $ParamStr[]=$ParamName;
                         $DataStr[]="{$ParamName}:{$ParamName}";
                     }
-                    $ParamStr[]='callback';
+                    $ParamStr[]='success';
+                    $ParamStr[]='error';
                     $ParamStr=implode(',',$ParamStr);
                     $DataStr=implode(",\r\n",$DataStr);
                     switch ($methodName){
                         case 'add':
-                            $JsContent[]="add: function (data,callback) {
+                            $JsContent[]="add: function (data,success,error) {
                 var configFn={
-                    success: function () {},
-                    error: function (err) {tip.on(err)}
+                    success: success?success:function () {},
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
                     i:'{$I}/add',
                     data:data,
@@ -1122,12 +1123,12 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'save':
-                            $JsContent[]="save: function (ID,Params,callback) {
+                            $JsContent[]="save: function (ID,Params,success,error) {
                 var configFn={
-                    success: function () {},
-                    error: function (err) {tip.on(err)}
+                    success: success?success:function () {},
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
                     i:'{$I}/save',
                     data:{
@@ -1140,13 +1141,13 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'del':
-                            $JsContent[]="del: function (ID,callback) {
+                            $JsContent[]="del: function (ID,success,error) {
                 var configFn={
-                    success: function () {},
+                    success: success?success:function () {},
                     
-                    error: function (err) {tip.on(err)}
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
                     i:\"{$I}/del\",
                     data:{
@@ -1158,12 +1159,12 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'get':
-                            $JsContent[]="get: function ({$PK},callback) {
+                            $JsContent[]="get: function ({$PK},success,error) {
                 var configFn={
-                    success: function () {},
-                    error: function (err) {tip.on(err)}
+                    success: success?success:function () {},
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
                     i:\"{$I}/get\",
                     data:{
@@ -1175,12 +1176,12 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'gets':
-                            $JsContent[]="gets: function ({$PK}s,callback) {
+                            $JsContent[]="gets: function ({$PK}s,success,error) {
                 var configFn={
-                    success: function () {},
-                    error: function (err) {tip.on(err)}
+                    success: success?success:function () {},
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
                     i:\"{$I}/gets\",
                     data:{
@@ -1194,12 +1195,12 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'search':
-                            $JsContent[]="search: function (data,callback) {
+                            $JsContent[]="search: function (data,success,error) {
                 var configFn={
-                    success: function () {},
-                    error: function (err) {tip.on(err)}
+                    success: success?success:function () {},
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
                     i:\"{$I}/search\",
                     data:data,
@@ -1211,12 +1212,12 @@ class {$ObjectName}Controller extends Controller
                         default:
                             $JsContent[]="{$methodName}: function ({$ParamStr}) {
                 var configFn={
-                    success: function () {},
-                    error: function (err) {tip.on(err)}
+                    success: success?success:function () {},
+                    error: error?error:function (err) {tip.on(err)}
                 }
-                avalon.mix(configFn,callback)
+
                 $$.call({
-                    i:\"{$I}/del\",
+                    i:\"{$I}/{$methodName}\",
                     data:{
                         {$DataStr}
                     },
