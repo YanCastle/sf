@@ -7,67 +7,73 @@
  */
 
 namespace Tsy\Library;
-
-
-trait Report
+/**
+ * Class Report
+ * @package Tsy\Library
+ */
+class Report extends Controller
 {
-    /**
-     * 限制那些字段允许被Fields包含
-     * @var array
-     */
-    protected $Fields=[
-//        '字段名称'=>[
-//            '规则1','规则2'
-//        ],
-//        'UID'=>[
-//            'SUM','MAX','MIN'
-//        ]
-    ];
-    /**
-     * 限制哪些字段允许被Where包含
-     * @var array
-     */
-    protected $Where=[];
-    /**
-     * 限制允许哪些字段参与分组
-     * @var array
-     */
-    protected $Group=[];
-    /**
-     * 限制哪些字段允许排序
-     * @var array
-     */
-    protected $Order=[];
-    
-    function report($Fields,$Where=false,$Group=false,$Order=false,$KeyField=false,$KeyOrder=0){
-        if(!is_array($Fields)||!$Fields){
-            trigger_error('_ERROR_FIELDS_PARAM_');
-            return false;
-        }
-        if(is_array($Where)&&!$Where){
-            trigger_error('_ERROR_WHERE_PARAM_');
-            return false;
-        }
-        if(is_array($Group)&&!$Group){
-            trigger_error('_ERROR_GROUP_PARAM_');
-            return false;
-        }
-        if(is_array($Order)&&!$Order){
-            trigger_error('_ERROR_ORDER_PARAM_');
-            return false;
-        }
-        //过滤字段表
-        foreach ($Fields as $k=>$Field){
-            if(is_numeric($k)){
-                //直接字段
-                if(!isset($this->Fields[$Field])||preg_match('/[A-Za-z]+ [A-Za-z]+/',$Field)){
-                    trigger_error('_ERROR_FIELD_PARAM_:'.$Field);
-                    return false;
-                }
-            }elseif(!is_numeric($k)){
-                //函数字段
+    public $ReportModel='';//要查询数据的Model名称
+    public $ReportXColumn=[];//X轴限定信息配置
+    public $ReportValueColumn=[];//其他值限定信息配置
 
+    function report($Config=[],$Output='EChart'){
+//        $Config=[
+//            [
+////                'Zh'=>'',
+//                'Column'=>'1',
+//                'Start'=>'',
+//                'End'=>'',
+//                'Size'=>''
+//            ],
+//            [
+//                'Column'=>2,
+//            ]
+//        ];
+        $X=$Others=$ColumnConfig=[];
+        //配置检测开始
+        foreach ($Config as $config){
+            if(isset($config['Column'])){
+                if(isset($config['Start'])||isset($config['End'])||isset($config['Size'])){
+                    //表示这是X坐标
+                    $X=$config;
+                }else{
+                    $Others[]=$config;
+                    $ColumnConfig[$config['Column']]=isset($config['Func'])?strtoupper($config['Func']):'SUM';
+                }
+            }else{
+                return '配置结构不正确';
             }
         }
+        if(!$X){
+            return 'X坐标配置不正确,没法识别X坐标';
+        }
+        $Fields=array_column($Others,'Column');
+        $Fields[]=$X['Column'];
+        //生成Where配置
+        $Where=[];
+        $Size=1;
+        foreach ($X as $k=>$config){
+            switch ($k){
+                case 'Start':
+                    $Where[$X['Column']]=isset($Where[$X['Column']])?($Where[$X['Column']][0]=='elt'?['between',[$config,$Where[$X['Column']][1]]]:['egt',$config]):['egt',$config];
+                    break;
+                case 'End':
+                    $Where[$X['Column']]=isset($Where[$X['Column']])?($Where[$X['Column']][0]=='egt'?['between',[$Where[$X['Column']][1],$config]]:['elt',$config]):['elt',$config];
+                    break;
+                case 'Size':
+                    $Size=$config;
+                    break;
+                default:break;
+            }
+        }
+        //开始查询数据
+        $Model = new Model($this->ReportModel);
+        $Data = $Model->where($Where)->field($Fields)->select();
+//        开始按Size进行分组
+        $Data=array_group($Data,$X['Column'],$X['Start'],$X['End'],$Size);
+        $Data=array_column_function($Data,$ColumnConfig);
+        return $Data;
     }
+    
 }

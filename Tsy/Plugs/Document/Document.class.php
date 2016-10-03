@@ -706,16 +706,42 @@ class {$ObjectName}Controller extends Controller
                             }
                             //生成数据对象
                             $ColumnPrifix='';
-                            if($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE)
-                                $Object=array_merge($Object,array_fill_keys($Fields,1));
-                            elseif($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE_OBJECT){
-//                                处理一对一对象化信息
-                                $Object[$PropertyName]=array_fill_keys($Fields,1);
-                                $ColumnPrifix=$PropertyName;
-                            }else{
-                                $ColumnPrifix=$PropertyName;
-                                $Object[$PropertyName]=array_fill_keys($Fields,1);
+                            switch ($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]){
+                                case Tsy\Library\Object::PROPERTY_ONE:
+                                    $Object=array_merge($Object,array_fill_keys($Fields,1));
+                                    break;
+                                case Tsy\Library\Object::PROPERTY_ONE_PROPERTY:
+                                    $ColumnPrifix=$PropertyName;
+                                    $Object[$PropertyName]=array_fill_keys($Fields,1);
+                                    break;
+                                case Tsy\Library\Object::PROPERTY_ARRAY:
+                                    $Object[$PropertyName]=[];
+                                    $ColumnPrifix=$PropertyName;
+                                    $Object[$PropertyName][]=array_fill_keys($Fields,1);
+                                    break;
+                                case Tsy\Library\Object::PROPERTY_ONE_OBJECT:
+                                    //                                处理一对一对象化信息
+                                    $Object[$PropertyName]=array_fill_keys($Fields,1);
+                                    $ColumnPrifix=$PropertyName;
+                                    break;
+                                case Tsy\Library\Object::PROPERTY_ARRAY_OBJECT:
+                                    $Object[$PropertyName]=[];
+                                    $ColumnPrifix=$PropertyName;
+                                    $Object[$PropertyName][]=array_fill_keys($Fields,1);
+                                    break;
+                                dfault:break;
                             }
+
+//                            if($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE)
+//                                $Object=array_merge($Object,array_fill_keys($Fields,1));
+//                            elseif($ObjectProperty[Tsy\Library\Object::RELATION_TABLE_PROPERTY]==Tsy\Library\Object::PROPERTY_ONE_OBJECT){
+////                                处理一对一对象化信息
+//                                $Object[$PropertyName]=array_fill_keys($Fields,1);
+//                                $ColumnPrifix=$PropertyName;
+//                            }else{
+//                                $ColumnPrifix=$PropertyName;
+//                                $Object[$PropertyName]=array_fill_keys($Fields,1);
+//                            }
                             foreach (self::$docs['PDM']['Tables'][parse_name($TableName)]['Columns'] as $ColumnName=>$column){
                                 if(in_array($ColumnName,$Fields))
                                     $ObjectColumns[($ColumnPrifix?($ColumnPrifix.'.'):'').$ColumnName]=$column;
@@ -1094,7 +1120,11 @@ class {$ObjectName}Controller extends Controller
                 if(!is_dir(dirname($dir))){
                     mkdir(dirname($dir),0777,true);
                 }
-                $JsContent = [];
+                $JsContent = [
+                    "obj:".str_replace(':1',':""',preg_replace_callback('/"[A-Z][a-zA-Z]+":/',function($str){
+                        return str_replace('"','',$str[0]);
+                    },$Object['ObjectJSON']))
+                ];
                 $PK=$Object['ObjectSetting']['pk'];
                 foreach ($Object['methods'] as $methodName=>$method){
                     $ParamStr=$DataStr=[];
@@ -1132,7 +1162,7 @@ class {$ObjectName}Controller extends Controller
                 $$.call({
                     i:'{$I}/save',
                     data:{
-                        {$Object['ObjectSetting']['pk']}:{$Object['ObjectSetting']['pk']},
+                        {$Object['ObjectSetting']['pk']}:ID,
                         Params:Params
                     },
                     success:configFn.success,

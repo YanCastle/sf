@@ -240,3 +240,82 @@ function array_2d_merge(&$array,$properties,$properties_map){
         }
     }
 }
+
+/**
+ * 数组分组
+ * @param array $Array
+ * @param string $Column
+ * @param int $Start
+ * @param int $End
+ * @param int $Size
+ * @return array
+ */
+function array_group($Array,$Column,$Start,$End,$Size=1){
+    $Array=array_key_set($Array,$Column,true);
+    ksort($Array);//排序
+    array_key_set($Array,$Column);
+    $Result=[];
+//    $Empty=array_fill_keys(array_keys($Array[0]),0);//生成空值
+    if(is_array($Size)){
+
+    }else{
+        for ($i=$Start;$i<=$End;$i+=$Size){
+            $Result[$i]=[];
+        }
+        $IndexKeyMap = array_keys($Result);
+        foreach ($Array as $index=>$value){
+            if($index>=$Start&&$index<=$End){
+                $K = intval(($index-$Start)/$Size);//做左开右闭处理
+                $K = $IndexKeyMap[$K];
+//                $K = intval($K==intval($K)?$K-1:$K);
+                $Result[$K]=array_merge($Result[$K],$value);
+            }
+        }
+    }
+    return $Result;
+}
+
+/**
+ * 数组按字段处理二维数组
+ * @param array $Array
+ * @param array $ColumnConfig
+ */
+function array_column_function($Array,$ColumnConfig){
+    $ColumnChecked=false;
+    foreach ($Array as $k=>$values){
+        if(is_array($values)){
+//            if(!$ColumnChecked){
+//                foreach (array_keys($values) as $key){
+//                    //检查键配置是否合法，默认为删除
+//                    if(!isset($ColumnConfig[$key])){
+//                        $ColumnConfig[$key]='DEL';
+//                    }
+//                }
+//                $ColumnChecked=true;
+//            }
+            $Row=[];
+            foreach ($ColumnConfig as $Key=>$Config){
+                $ColumnValues=array_column($values,$Key);
+                switch (strtoupper($Config)){
+                    case 'SUM':
+                        $Row[$Key]=array_sum($ColumnValues);
+                        break;
+                    case 'AVERAGE':
+                        $Row[$Key]=array_sum($ColumnValues)/count($ColumnValues);
+                        break;
+                    case 'COUNT':
+                        $Row[$Key]=count($ColumnValues);
+                        break;
+                    case 'MAX':
+                        $Row[$Key]=max($ColumnValues);
+                        break;
+                    case 'MIN':
+                        $Row[$Key]=min($ColumnValues);
+                        break;
+                }
+            }
+            $Array[$k]=$Row;
+        }
+    }
+    return $Array;
+}
