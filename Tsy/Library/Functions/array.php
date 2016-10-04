@@ -257,7 +257,16 @@ function array_group($Array,$Column,$Start,$End,$Size=1){
     $Result=[];
 //    $Empty=array_fill_keys(array_keys($Array[0]),0);//生成空值
     if(is_array($Size)){
+        sort($Size);
+        foreach ($Size as $i){
+            $Result[$i]=[];
+        }
+        //开始折半查找
+        $CopySize = array_merge($Size,array_keys($Array));
+//        $SizeIndex=
+        foreach ($CopySize as $K=>$value){
 
+        }
     }else{
         for ($i=$Start;$i<=$End;$i+=$Size){
             $Result[$i]=[];
