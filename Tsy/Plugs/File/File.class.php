@@ -6,7 +6,7 @@
  * Time: 13:43
  */
 
-namespace Tsy\File;
+namespace Tsy\Plugs\File;
 
 
 use Tsy\Library\Upload;
