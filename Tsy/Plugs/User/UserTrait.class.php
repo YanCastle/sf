@@ -149,6 +149,8 @@ trait UserTrait
      * @return bool true/false
      */
     function sendVerify(int $UID,string $Address,string $Type='Email'){
+//        session('UID',)
+        session('VUID',$UID);session('VAddress',$Address);
         return Msg::send('Email',$Address,$this->createVerifyCode($UID));
     }
 
@@ -167,6 +169,19 @@ trait UserTrait
         return $Code;
     }
 
+    /**
+     * 通过验证码登录
+     * @param $UID
+     * @param $Account
+     * @param $Code
+     * @return mixed|string
+     */
+    function loginByCode($UID,$Account,$Code){
+        if(session('VUID')!=$UID)return '验证用户不匹配';
+        if(session('VAddress')!=$Account)return '验证用户不匹配';
+        if(!$this->checkVerifyCode($Code,$UID))return '验证码不正确';
+        return $this->loginSuccess([$UID=>$Account]);
+    }
     /**
      * 验证验证码
      * @param string $Code
