@@ -408,7 +408,7 @@ class {$ObjectName}Controller extends Controller
                     null,
                     function($path){
                         if(preg_match('/[A-Za-z]+\.class\.php$/',$path,$match)){
-                            $this->getDoc(str_replace([APP_PATH,'.class.php'],'',$path));
+                            $this->getDoc(str_replace("/","\\",str_replace([APP_PATH,'.class.php'],'',$path)));
                         }
                 }); //遍历循环
             }elseif(is_file($name)){
