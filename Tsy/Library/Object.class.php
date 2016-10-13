@@ -649,13 +649,22 @@ class Object
         if(!$LinkTableName||!$LinkTableColumn){
             return '错误的关联配置信息';
         }
+        $AddData=[];
+        $AddAll=false;
+        foreach ($Data as $Key=>$Value){
+            $Value[$LinkTableColumn]=$PKID;
+            if(is_numeric($Key)){
+                //进入批量操作逻辑
+                $AddAll=true;
+                $AddData[]=$Value;
+            }elseif(is_string($Key)&&$AddAll===false){
+                $AddData=$Value;
+            }
+        }
         $Model = M($LinkTableName);
-//        startTrans();
-        if($Model->add(array_merge($Data,[$LinkTableColumn=>$PKID]))){
-//            commit();
+        if($AddAll?$Model->addAll($AddData):$Model->add($AddData)){
             return $this->get($PKID);
         }
-//        rollback();
         return '绑定失败';
     }
 
