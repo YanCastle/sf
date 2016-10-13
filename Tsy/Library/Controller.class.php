@@ -139,13 +139,32 @@ class Controller
         $this->view->assign($name,$value);
         return $this;
     }
-
+    /**
+     * 绑定多对多属性到关联表
+     * @param string $Property 属性名称
+     * @param array $Data 绑定数据
+     * @param bool $PKID 主键ID
+     * @return array|bool|mixed
+     */
+    function bind(string $Property,array $Data,$PKID=false){
+        return $this->Object->bind($Property,$Data,$PKID);
+    }
+    /**
+     * 解除绑定多对多属性到关联表
+     * @param string $Property 属性名称
+     * @param array $Data 绑定数据
+     * @param bool $PKID 主键ID
+     * @return array|bool|mixed
+     */
+    function unbind(string $Property,array $Data,$PKID=false){
+        return $this->Object->unbind($Property,$Data,$PKID);
+    }
     function __call($name, $arguments)
     {
         $Object = $this->className.'Object';
         if($this->Object){
-            if(method_exists($ObjectClass,$name)){
-                return call_user_func_array($ObjectClass,$arguments);
+            if(method_exists($this->Object,$name)){
+                return call_user_func_array([$this->Object,$name],$arguments);
             }
         }else
         if(class_exists($Object)){
