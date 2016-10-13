@@ -630,6 +630,63 @@ class Object
             return false;
         }
     }
+
+    /**
+     * 绑定多对多属性到关联表
+     * @param string $Property 属性名称
+     * @param array $Data 绑定数据
+     * @param bool $PKID 主键ID
+     * @return array|bool|mixed
+     */
+    function bind(string $Property,array $Data,$PKID=false){
+        if(false===$PKID&&isset($_POST[$this->pk]))$PKID=$_POST[$this->pk];
+        if(false==$PKID||!is_numeric($PKID))return '错误的对象编号';
+        if(!isset($this->link[$Property]))return '错误的属性名称';
+        $PropertyConfig = $this->link[$Property];
+        $LinkTableName = $PropertyConfig[self::RELATION_TABLE_NAME];
+        $LinkTableHasProperty = isset($PropertyConfig[self::RELATION_TABLE_LINK_HAS_PROPERTY])?$PropertyConfig[self::RELATION_TABLE_LINK_HAS_PROPERTY]:false;
+        $LinkTableColumn = $PropertyConfig[self::RELATION_TABLE_COLUMN];
+        if(!$LinkTableName||!$LinkTableColumn){
+            return '错误的关联配置信息';
+        }
+        $Model = M($LinkTableName);
+//        startTrans();
+        if($Model->add(array_merge($Data,[$LinkTableColumn=>$PKID]))){
+//            commit();
+            return $this->get($PKID);
+        }
+//        rollback();
+        return '绑定失败';
+    }
+
+    /**
+     * Link表解除绑定
+     * @param string $Property
+     * @param array $Data
+     * @param bool $PKID
+     * @return array|bool|mixed|string
+     */
+    function unbind(string $Property,array $Data,$PKID=false){
+        if(false===$PKID&&isset($_POST[$this->pk]))$PKID=$_POST[$this->pk];
+        if(false==$PKID||!is_numeric($PKID))return '错误的对象编号';
+        if(!isset($this->link[$Property]))return '错误的属性名称';
+        $PropertyConfig = $this->link[$Property];
+        $LinkTableName = $PropertyConfig[self::RELATION_TABLE_NAME];
+        $LinkTableHasProperty = isset($PropertyConfig[self::RELATION_TABLE_LINK_HAS_PROPERTY])?$PropertyConfig[self::RELATION_TABLE_LINK_HAS_PROPERTY]:false;
+        $LinkTableColumn = $PropertyConfig[self::RELATION_TABLE_COLUMN];
+        if(!$LinkTableName||!$LinkTableColumn){
+            return '错误的关联配置信息';
+        }
+        $Model = M($LinkTableName);
+//        startTrans();
+        if($Model->where(array_merge($Data,[$LinkTableColumn=>$PKID]))->delete()){
+//            commit();
+            return $this->get($PKID);
+        }
+//        rollback();
+        return '解除绑定失败';
+    }
+
     function __call($name, $arguments)
     {
         $cmd = explode('_',$name);
