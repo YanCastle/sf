@@ -230,6 +230,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
         $Class=null;
     }catch (Exception $e){
         var_dump($e);
+        return $e->getMessage();
     }
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
 

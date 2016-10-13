@@ -573,11 +573,11 @@ class Object
                 $Objects[$ID][$PropertyName] = isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
             }
             //处理一对一的属性问题
-            foreach ($OneProperties as $PropertyName=>$Config){
-                $Object[$ID][$PropertyName]=isset($OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
+            foreach ($OneProperties as $PropertyName=>$PropertyConfig){
+                $Objects[$ID][$PropertyName]=isset($OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
             }
             //处理一对多的对象化关系组合
-            foreach ($ArrayObjectProperties as $PropertyName=>$Config){
+            foreach ($ArrayObjectProperties as $PropertyName=>$PropertyConfig){
                 $Objects[$ID][$PropertyName] = isset($ArrayObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
             }
 //            处理一对一对象化
