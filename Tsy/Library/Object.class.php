@@ -55,7 +55,7 @@ class Object
 //        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
     ];
     protected $searchWFieldsConf=[
-
+//        'Goods'=>'Goods',
     ];
     
     public $is_dic=false;
@@ -209,6 +209,33 @@ class Object
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
+            //允许添加时一次性添加其他属性
+            $Properties=$Links=[];
+            $dataKeys = array_keys($data);
+            $thisObjectKeys=array_keys($rs);
+            foreach (array_diff($dataKeys,$thisObjectKeys) as $Key){
+                if(isset($this->property[$Key])){
+                    $Property='Property';
+                }elseif(isset($this->link[$Key])){
+                    $Property='Link';
+                }else{
+                    continue;
+                }
+                switch ($Property){
+                    case 'Property':
+                        $Properties[$Key]=[
+                            'Config'=>$this->property[$Key],
+                            'Value'=>$data[$Key],
+                        ];
+                        break;
+                    case 'Link':
+                        $Links[$Key]=[
+                            'Config'=>$this->link[$Key],
+                            'Value'=>$data[$Key],
+                        ];
+                        break;
+                }
+            }
             startTrans();
             if($PKID = M($this->main)->add($data)){
                 commit();
@@ -243,7 +270,7 @@ class Object
      * @return mixed
      */
     protected function searchW(string $TableName,array $Where,string $Field,$Sort=''){
-        $Model = new Model($TableName);
+        $Model = M($TableName);
         return $Model->where($Where)->order($Sort)->getField($Field,true);
     }
 
@@ -277,12 +304,20 @@ class Object
             $Data = param_group($this->searchWFieldsGroup, $W);
             unset($Data[0]);
             foreach ($Data as $ObjectName => $Params) {
-                $a = isset($this->searchWFieldsConf[$ObjectName]);
+//                $ObjectName 键名称，$Params 该键的搜索配置
+//                $a = isset($this->searchWFieldsConf[$ObjectName]);
                 if (isset($this->searchWFieldsConf[$ObjectName])) {
                     //如果是一个字符串就直接当表名使用，否则检测是否是回调函数，如果是回调函数则回调，如果不是则空余并给出警告
                     if (is_string($this->searchWFieldsConf[$ObjectName]) && preg_match('/^[a-z_A-Z]+[a-zA-Z]$/', $this->searchWFieldsConf[$ObjectName])) {
+//                        $this->searchWFieldsConf
                         //直接值为表名
-                        $WObjectIDArray[] = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $this->pk);
+                        $ObjectClass = implode('\\',[$this->MC[0],'Object',$this->searchWFieldsConf[$ObjectName].'Object']);
+//                        if(class_exists($ObjectClass)){
+                            $PK = class_exists($ObjectClass)?(new $ObjectClass)->pk:$this->pk;
+//                        }
+                        $TableSearchIDs = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $PK);
+                        if($TableSearchIDs)
+                            $WObjectIDArray[]=$this->searchW($this->main,[$PK=>['IN',$TableSearchIDs]],$this->pk);
                     } elseif (is_callable($this->searchWFieldsConf[$ObjectName])) {
                         //回调
                         $Result = call_user_func($this->searchWFieldsConf[$ObjectName], $Params);
@@ -303,7 +338,7 @@ class Object
 
                     }
                 } else {
-                    L(E('_NO_SEARCH_TABLE_CONFIG_'));
+                    L(E('_NO_SEARCH_TABLE_CONFIG_').$ObjectName);
                 }
             }
         }
@@ -767,7 +802,7 @@ class Object
      * @param $Data
      * @return array|string
      */
-    protected function _parseChangeFieldsConfig($Method,&$Data){
+    protected function _parseChangeFieldsConfig($Method,$Data){
         //获取必填字段，并验证数据，再返回数据
         switch ($Method){
             case 'add':
