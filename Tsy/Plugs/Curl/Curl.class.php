@@ -108,7 +108,7 @@ class Curl {
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         if($cookie_id){
-            $cookie_jar = md5($cookie_id);
+            $cookie_jar = RUNTIME_PATH.'/Cookies/'.md5($cookie_id);
             curl_setopt($ch,CURLOPT_COOKIEFILE,$cookie_jar);
             curl_setopt($ch,CURLOPT_COOKIEJAR,$cookie_jar);
         }
@@ -123,13 +123,16 @@ class Curl {
     }
     function curl($url,$get=[],$post=[],$cookie_id=false,$referer=false,$header=false){
         if($this->UserID&&false===$cookie_id){$cookie_id=$this->UserID;}
-        $ch = curl_init($url.'?'.http_build_query($get));
+        $ch = curl_init($url.(is_array($get)&&$get?('?'.http_build_query($get)):''));
         if($post){
             curl_setopt($ch,CURLOPT_POSTFIELDS,is_string($post)?$post:http_build_query($post));
             curl_setopt($ch,CURLOPT_POST,true);
         }
         if($cookie_id){
-            $cookie_jar = md5($cookie_id);
+            $cookie_jar = RUNTIME_PATH.'/Cookies/'.md5($cookie_id);
+            if(!is_dir(dirname($cookie_jar))){
+                @mkdir(dirname($cookie_jar),0777,true);
+            }
             curl_setopt($ch,CURLOPT_COOKIEFILE,$cookie_jar);
             curl_setopt($ch,CURLOPT_COOKIEJAR,$cookie_jar);
         }
