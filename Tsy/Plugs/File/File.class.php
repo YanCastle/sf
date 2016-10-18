@@ -82,7 +82,7 @@ class File
                     'UploaderUID'=>session('UID'),
 //                    'URL'=>''
                 ];
-                $data['URL']=str_replace(array_keys($data),array_values($data),C(''));
+                $data['URL']=str_replace(array_keys($data),array_values($data),C('UPLOAD_URL'));
                 $UploadID = $Model->add($data);
                 if($UploadID){
                     $data['UploadID']=$UploadID;
