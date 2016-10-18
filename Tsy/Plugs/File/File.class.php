@@ -79,8 +79,10 @@ class File
                     'SavePath'=>$info['savepath'],
                     'FileMd5'=>$info['md5'],
                     'UploadTime'=>time(),
-                    'UploaderUID'=>session('UID')
+                    'UploaderUID'=>session('UID'),
+//                    'URL'=>''
                 ];
+                $data['URL']=str_replace(array_keys($data),array_values($data),C(''));
                 $UploadID = $Model->add($data);
                 if($UploadID){
                     $data['UploadID']=$UploadID;
