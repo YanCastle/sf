@@ -209,35 +209,35 @@ class Object
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
-            //允许添加时一次性添加其他属性
-            $Properties=$Links=[];
-            $dataKeys = array_keys($data);
-            $thisObjectKeys=array_keys($rs);
-            foreach (array_diff($dataKeys,$thisObjectKeys) as $Key){
-                if(isset($this->property[$Key])){
-                    $Property='Property';
-                }elseif(isset($this->link[$Key])){
-                    $Property='Link';
-                }else{
-                    continue;
-                }
-                switch ($Property){
-                    case 'Property':
-                        $Properties[$Key]=[
-                            'Config'=>$this->property[$Key],
-                            'Value'=>$data[$Key],
-                        ];
-                        break;
-                    case 'Link':
-                        $Links[$Key]=[
-                            'Config'=>$this->link[$Key],
-                            'Value'=>$data[$Key],
-                        ];
-                        break;
-                }
-            }
+//            //允许添加时一次性添加其他属性
+//            $Properties=$Links=[];
+//            $dataKeys = array_keys($data);
+//            $thisObjectKeys=array_keys($rs);
+//            foreach (array_diff($dataKeys,$thisObjectKeys) as $Key){
+//                if(isset($this->property[$Key])){
+//                    $Property='Property';
+//                }elseif(isset($this->link[$Key])){
+//                    $Property='Link';
+//                }else{
+//                    continue;
+//                }
+//                switch ($Property){
+//                    case 'Property':
+//                        $Properties[$Key]=[
+//                            'Config'=>$this->property[$Key],
+//                            'Value'=>$data[$Key],
+//                        ];
+//                        break;
+//                    case 'Link':
+//                        $Links[$Key]=[
+//                            'Config'=>$this->link[$Key],
+//                            'Value'=>$data[$Key],
+//                        ];
+//                        break;
+//                }
+//            }
             startTrans();
-            if($PKID = M($this->main)->add($data)){
+            if($PKID = M($this->main)->add($rs)){
                 commit();
             }else{
                 rollback();
