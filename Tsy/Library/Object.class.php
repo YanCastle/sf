@@ -646,9 +646,8 @@ class Object
                     $Objects=array_key_set($Objects,$this->pk);
                 }
             }
-        }else{
-            krsort($Objects);
         }
+        krsort($Objects);
         return $Objects;
     }
 
