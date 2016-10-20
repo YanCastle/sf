@@ -477,7 +477,9 @@ class Object
         if($this->_read_deny){
             $Model->field($this->_read_deny, true);
         }
-
+        if(property_exists($this,'order')&&$this->order){
+            $Model->order($this->order);
+        }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
         $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
         if (!$Objects) {
@@ -630,24 +632,7 @@ class Object
                 $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : [];
             }
         }
-//        krsort($Objects);
-        if(property_exists($this,'order')&&$this->order){
-            foreach ($this->order as $k=>$v){
-                $Key='';$SortWay='DESC';
-                if(!is_numeric($k)&&in_array(strtoupper($v),['DESC','ASC'])){
-                    $Key=$k;$SortWay = strtoupper($v);
-                }elseif(is_numeric($k)&&is_string($v)){
-                    $Key=$v;
-                }
-                if(isset(current($Objects)[$Key])){
-                    $Objects=array_key_set($Objects,$Key,true);
-                    $SortWay=='DESC'?krsort($Objects):ksort($Objects);
-                    $Objects=call_user_func_array('array_merge',$Objects);
-                    $Objects=array_key_set($Objects,$this->pk);
-                }
-            }
-        }
-        krsort($Objects);
+        $Objects=array_values($Objects);
         return $Objects;
     }
 
