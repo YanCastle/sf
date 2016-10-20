@@ -641,7 +641,7 @@ class Object
                 }
                 if(isset(current($Objects)[$Key])){
                     $Objects=array_key_set($Objects,$Key,true);
-                    $Objects=$SortWay=='DESC'?krsort($Objects):ksort($Objects);
+                    $SortWay=='DESC'?krsort($Objects):ksort($Objects);
                     $Objects=call_user_func_array('array_merge',$Objects);
                 }
             }
