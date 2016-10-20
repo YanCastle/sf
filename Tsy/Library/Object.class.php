@@ -643,6 +643,7 @@ class Object
                     $Objects=array_key_set($Objects,$Key,true);
                     $SortWay=='DESC'?krsort($Objects):ksort($Objects);
                     $Objects=call_user_func_array('array_merge',$Objects);
+                    $Objects=array_key_set($Objects,$this->pk);
                 }
             }
         }else{
