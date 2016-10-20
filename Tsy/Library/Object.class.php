@@ -477,6 +477,9 @@ class Object
         if($this->_read_deny){
             $Model->field($this->_read_deny, true);
         }
+        if(property_exists($this,'order')&&$this->order){
+            $Model->order($this->order);
+        }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
         $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
         if (!$Objects) {
