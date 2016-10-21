@@ -8,7 +8,7 @@
  */
 class Document
 {
-    static protected $docs=[
+    static $docs=[
         'Classes'=>[],
         'Functions'=>[],
         'Objects'=>[],
@@ -91,7 +91,7 @@ class Document
                         case 'UUID':
                             $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
                             break;
-                        case $PKColumns[0]:
+                        case array_keys($PKColumns)[0]:
                             $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
                             break;
                     }
@@ -180,18 +180,20 @@ class Document
 //                        $ChildTableName=parse_name(str_replace(['{$PREFIX}','prefix_'],'',$FKConfig['ChildTableCode']),1);
                         $ChildTableName=parse_name(sql_prefix($FKConfig['ChildTableCode'],''),1);
                         if(substr($Key,0,1)=='P'&&$FKConfig['Type']=='Parent'){
+                            $ChildTableCode=$ChildTableCode=self::delPrefix($FKConfig['ChildTableCode'],1);
                             $PropertyName=$PropertyName?$PropertyName:parse_name(sql_prefix($FKConfig['ChildTableCode'],''),1);
                             $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ParentTable']['Columns'][parse_name(sql_prefix($FKConfig['ParentTableColumnCode'],''),1)]['Name']}  {$FKConfig['ChildTable']['Name']}  属性
-            self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
+            self::RELATION_TABLE_NAME=>'{$ChildTableCode}',//属性关联表
             self::RELATION_TABLE_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//关联表中的关联字段
             self::RELATION_MAIN_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//主笔中的关联字段
             self::RELATION_TABLE_PROPERTY=>self::{$Relationship},            
         ],";
                         }
                         if(substr($Key,0,1)=='C'&&$FKConfig['Type']=='Child'){
+                            $ChildTableCode=$ChildTableCode=self::delPrefix($FKConfig['ParentTableCode'],1);
                             $PropertyName=$PropertyName?$PropertyName:parse_name(sql_prefix($FKConfig['ParentTableCode'],''),1);
                             $PropertyAndLinkConfig['Property'][]="'{$PropertyName}'=>[//{$FKConfig['ChildTable']['Columns'][parse_name(sql_prefix($FKConfig['ChildTableColumnCode'],''),1)]['Name']}  {$FKConfig['ParentTable']['Name']}  属性
-            self::RELATION_TABLE_NAME=>'{$ChildTableName}',//属性关联表
+            self::RELATION_TABLE_NAME=>'{$ChildTableCode}',//属性关联表
             self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',//关联表中的关联字段
             self::RELATION_MAIN_COLUMN=>'{$FKConfig['ChildTableColumnCode']}',//主笔中的关联字段
             self::RELATION_TABLE_PROPERTY=>self::{$Relationship},            
@@ -412,9 +414,18 @@ class {$ObjectName}Controller extends Controller
                         }
                 }); //遍历循环
             }elseif(is_file($name)){
-
-            }else{
+                foreach ([
+                    'Controller','Object','Model'
+                         ] as $item){
+                    if(strpos($name,$item.'.class.php')){
+//                        return $this->getDoc($name);
+                    }
+                }
+            }elseif(in_array($name,['Controller','Object','Model'])){
 //                return $this;
+                each_dir(APP_PATH,null,function($path){
+                    return $this->getDoc($path);
+                });
             }
         }elseif(is_object($name)){
             $this->parseClass($name,$MethodsAccess);
@@ -1112,6 +1123,9 @@ class {$ObjectName}Controller extends Controller
             mkdir($Path,0777,true);
         }
         $nav=[];
+        if(!self::$docs['Classes']){
+            $this->getDoc();
+        }
         foreach (self::$docs['Classes'] as $ObjectName=>$Object){
             if($Object['type']=='Object'){
                 $Title = str_replace(['\\Object\\','Object'],[DIRECTORY_SEPARATOR,''],$ObjectName);
