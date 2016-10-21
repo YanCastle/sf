@@ -16,7 +16,7 @@ trait UserTrait
 //    protected $
     public $allowReg=true;
     public $LoginView='User';
-    protected $_map=[
+    public $_map=[
         'Account'=>'Account',
         'PWD'=>'PWD',
     ];
@@ -41,8 +41,8 @@ trait UserTrait
             return '账号已使用';
         }
         $data=array_merge([
-            'Account'=>$Account,
-            'PWD'=>$this->password($PWD)
+            $this->_map['Account']=>$Account,
+            $this->_map['PWD']=>$this->password($PWD)
         ],$Properties);
         $data['data']=$data;
         return invokeClass($this,'add',$data);
@@ -126,7 +126,8 @@ trait UserTrait
      * @return bool 存在true,不存在false
      */
     function checkAccount(string $Account){
-        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
+//        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
+        return false;
     }
 
     /**
