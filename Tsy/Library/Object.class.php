@@ -8,7 +8,7 @@
 
 namespace Tsy\Library;
 
-use Tsy\Plugs\Db\Db;
+//use Tsy\Plugs\Db\Db;
 
 class Object
 {
@@ -31,6 +31,7 @@ class Object
     const RELATION_OBJECT_NAME = "09"; //映射关系对象名称
     const RELATION_OBJECT_COLUMN = "10"; //映射关系对象字段
     const RELATION_ORDER_COLUMN = "11"; //映射字段的排序算法
+    const RELATION_MUST=0xFF;
 
     //字段配置
     const FIELD_CONFIG_DEFAULT='D';//当值不存在时会取默认值
@@ -130,7 +131,7 @@ class Object
         $tables = array_map(function ($data) {
             return parse_name($data);
         }, $tables);
-        $Model = new Db();
+        $Model = new \Tsy\Plugs\Db\Db();
         $Columns = $Model->getColumns($tables, true);
         //生成map结构并缓存
         foreach ($Columns as $TableName => $column) {
@@ -632,7 +633,7 @@ class Object
                 $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : [];
             }
         }
-//        $Objects=array_values($Objects);
+        $Objects=array_values($Objects);
         return $Objects;
     }
 
