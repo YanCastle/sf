@@ -152,10 +152,11 @@ class Excel {
      * @param bool|false $FirstIsField
      * @return array
      */
-    function read($file,$FirstIsField=false){
+    function read($file, $extension = false)
+    {
         $data = [];
         $info = explode('.',$file);
-        $extension = $info[count($info)-1];
+        $extension = $extension ? $extension : $info[count($info) - 1];
         switch(strtoupper($extension)){
             case 'CSV':
 //                $content=str_replace("\r\n","\n",iconv('GBK','UTF-8',file_get_contents($file)));

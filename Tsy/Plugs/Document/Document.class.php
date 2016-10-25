@@ -1129,6 +1129,7 @@ class {$ObjectName}Controller extends Controller
         foreach (self::$docs['Classes'] as $ObjectName=>$Object){
             if($Object['type']=='Object'){
                 $Title = str_replace(['\\Object\\','Object'],[DIRECTORY_SEPARATOR,''],$ObjectName);
+                list($ModuleName, $ObjectName) = explode('\\', $Title);
                 $I = str_replace(DIRECTORY_SEPARATOR,'/',$Title);
                 $dir = implode(DIRECTORY_SEPARATOR,[$Path,$Title]).'.js';
                 if(!is_dir(dirname($dir))){
@@ -1284,55 +1285,73 @@ class {$ObjectName}Controller extends Controller
     })";
                 file_put_contents($dir,$Js);
                 foreach([
-                            $Object['OriginName'].'List'=>$Object['zh'].'列表',
-                            $Object['OriginName'].'Details'=>$Object['zh'].'详情',
-                            $Object['OriginName'].'Edit'=>$Object['zh'].'编辑',
-                            $Object['OriginName'].'Add'=>$Object['zh'].'添加']
+                            'List' => $Object['zh'] . '列表',
+                            'Details' => $Object['zh'] . '详情',
+                            'Edit' => $Object['zh'] . '编辑',
+                            'Add' => $Object['zh'] . '添加']
                         as $key=>$value){
-                    $path = 'package/'.$key;
+
+                    $FileName = $Object['OriginName'] . $key;
+                    $path = 'package/' . $FileName;
                     if(!is_dir($path)){
                         mkdir($path,0777,true);
                     }
-                    file_put_contents("{$path}/{$key}.html","<!-- {$value} 模块 -->
-<div ms-controller='{$key}'>{$value} 在此编写该模块的HTML代码</div>");
-                    file_put_contents("{$path}/{$key}.js","//{$value} 模块
-    define('{$key}', [
-    'avalon',
-    'text!../../package/{$key}/{$key}.html',
-    'css!../../package/{$key}/{$key}.css'
-], function (avalon, html, css) {
-    var vm = avalon.define({
-        \$id: \"{$key}\",
-        ready: function (i) {
-            var obj = '{$I}';
-            if (obj != \"\") {
-                require(['../../obj/' + obj + '.js'], function () {
-                    start()
-                })
-            } else {
-                start()
-            }
+                    $ResetJsCode = '';
+                    switch ($key) {
+                        case 'Edit':
+                            $ResetJsCode = "vm.{$Object['OriginName']}.get(i,function (data) {
+                vm.data=data
+            })";
+                            break;
+                        case 'Add':
+                            $ResetJsCode = '';
+                            break;
+                        case 'List':
+                            $ResetJsCode = "vm.User.search({
+                W:vm.\$where,
+                P:vm.P,
+                N:vm.N
+            },function (data) {
+                vm.list=data.L
+            })";
+                            break;
+                        case 'Details':
+                            $ResetJsCode = "vm.{$Object['OriginName']}.get(i,function (data) {
+                vm.data=data
+            })";
+                            break;
+                    }
+                    file_put_contents("{$path}/{$FileName}.html", "<!-- {$value} 模块 -->
+<div ms-controller='{$FileName}'>{$value} 在此编写 {$value} 模块的HTML代码</div>");
 
-            function start() {
-                vm.reset();
-                index.html = html;
-                vm.now = i | 0;
-                //以及其他方法
-            }
+                    file_put_contents("{$path}/{$FileName}.js", "//{$value} 模块
+    define('{$FileName}', [
+    'avalon',
+    'text!../../package/{$FileName}/{$FileName}.html',
+    'css!../../package/{$FileName}/{$FileName}.css',
+    '../../obj/{$ModuleName}/{$ObjectName}.js'
+], function (avalon, html, css,{$ObjectName}) {
+    var vm = avalon.define({
+        \$id: \"{$FileName}\",{$ObjectName}:{$ObjectName},
+        data:{$ObjectName}.obj,list:[],
+        P:1,N:20,\$where:[],
+        ready: function (i) {
+            index.html = html;
+            vm.now = i | 0;
+            //以及其他方法
+            vm.reset(i);
         },
-        reset: function () {
-            avalon.mix(vm, {
-                //要重置的东西最后都放回到这里
-            })
+        reset: function (i) {
+            {$ResetJsCode}
         }
       });
-      return window['{$key}'] = vm
+      return window['{$FileName}'] = vm
    }
 )");
-                    file_put_contents("{$path}/{$key}.css","");
+                    file_put_contents("{$path}/{$FileName}.css", "");
                     $nav[]=[
                         'name'=>$value,
-                        'en'=>$key,
+                        'en' => $FileName,
                         'front'>false,
                         'bePartOf'=>'',
                         'only'=>0,

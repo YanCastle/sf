@@ -55,7 +55,7 @@ trait UserTrait
      * @return UserObject
      */
     function login(string $Account,string $PWD){
-        $User = M($this->LoginView)->where(['Account'=>$Account])->getField('UID,PWD',true);
+        $User = M($this->LoginView)->where([$this->_map['Account'] => $Account])->getField('UID,PWD', true);
         if(false!==$User){
             foreach ($User as $UID=>$Hash){
                 if($this->password($PWD,$Hash)){

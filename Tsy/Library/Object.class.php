@@ -633,7 +633,7 @@ class Object
                 $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : [];
             }
         }
-        $Objects=array_values($Objects);
+//        $Objects=array_values($Objects);
         return $Objects;
     }
 
