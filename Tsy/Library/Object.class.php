@@ -21,7 +21,7 @@ class Object
 //    const PROPERTY_OBJECT = "02";
 
     const RELATION_TABLE_NAME = "03"; //关系表名称
-    const RELATION_MAIN_COLUMN = "103"; //关系表名称
+    const RELATION_MAIN_COLUMN = "103"; //主表字段名称
     const RELATION_TABLE_COLUMN = "04"; //关系表字段
     const RELATION_TABLE_FIELDS = "101"; //关系表字段接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
     const RELATION_TABLE_PROPERTY = "05"; //关系类型， 上面的一对多或者一对一
@@ -31,7 +31,8 @@ class Object
     const RELATION_OBJECT_NAME = "09"; //映射关系对象名称
     const RELATION_OBJECT_COLUMN = "10"; //映射关系对象字段
     const RELATION_ORDER_COLUMN = "11"; //映射字段的排序算法
-    const RELATION_MUST=0xFF;
+    const RELATION_MUST = 0xFF;//是否必须出现该属性，否则是默认属性
+//    const RELATION_TABLE=0xFF;
 
     //字段配置
     const FIELD_CONFIG_DEFAULT='D';//当值不存在时会取默认值
@@ -409,6 +410,24 @@ class Object
     function gets($IDs=[],$Properties=false,$Sort='')
     {
         !(false===$Properties&&isset($_POST['Properties'])) or $Properties=$_POST['Properties'];
+//        $AllProperties=array_merge(array_keys($this->property),array_keys($this->link));
+//        if(true===end($Properties))
+        $Exclude = true === end($Properties);
+        is_array($Properties) or $Properties = [];//初始化
+        foreach (array_merge($this->property, $this->link) as $PN => $P) {
+            if ($Exclude) {
+                if (false !== ($Key = array_search($PN, $Properties, true))) {
+                    unset($Properties[$Key]);
+                } else {
+                    $Properties[] = $PN;
+                }
+            } else {
+                if (!isset($P[self::RELATION_MUST]) || true === $P[self::RELATION_MUST]) {
+                    $Properties[] = $PN;
+                }
+            }
+        }
+//        true === end($Properties) ? $Properties=array_diff($AllProperties,$Properties):$Properties=$AllProperties;//做全局判定
 //        ID检测
         if(!$IDs&&isset($_POST[$this->pk.'s'])){$IDs=$_POST[$this->pk.'s'];}
         if (is_numeric($IDs) &&
@@ -425,18 +444,28 @@ class Object
         $UpperMainTable = strtoupper(parse_name($this->main));
         $Model = new Model($this->main);
         $Fields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
+
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
             if (isset($Config[self::RELATION_TABLE_PROPERTY]) &&
                 isset($Config[self::RELATION_TABLE_NAME]) &&
                 isset($Config[self::RELATION_TABLE_COLUMN])
+                && (in_array($PropertyName, $Properties, true))
+//                &&(!isset($Config[self::RELATION_MUST])||(isset($Config[self::RELATION_MUST])&&$Config[self::RELATION_MUST]===true)||in_array($PropertyName,$Properties))
             ) {
                 switch ($Config[self::RELATION_TABLE_PROPERTY]){
                     case self::PROPERTY_ONE:
                         //一对一属性
                         $TableName = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
                         $TableColumn = $Config[self::RELATION_TABLE_COLUMN];
+                        if (isset($Config[self::RELATION_TABLE_FIELDS]) && $Config[self::RELATION_TABLE_FIELDS]) {
+                            $Fields = array_merge($Fields, is_string($Config[self::RELATION_TABLE_FIELDS]) ?
+                                explode(',', "__{$TableName}__" . str_replace(',', "__{$TableName}__.", $Config[self::RELATION_TABLE_FIELDS])) :
+                                array_map(function ($field) use ($TableName) {
+                                    return "__{$TableName}__.{$field}";
+                                }, $Config[self::RELATION_TABLE_FIELDS]));
+                        }
                         $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                         break;
                     case self::PROPERTY_ONE_OBJECT:
@@ -475,11 +504,12 @@ class Object
                 $PropertyObjects[$PropertyName] = $Config;
             }
         }
-        if($this->_read_deny){
-            $Model->field($this->_read_deny, true);
-        }
         if(property_exists($this,'order')&&$this->order){
             $Model->order($this->order);
+        }
+        if ($Fields) {
+            $Model->field($Fields);
+            $Fields = [];
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
         $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
@@ -491,11 +521,11 @@ class Object
         foreach ($ArrayProperties as $PropertyName => $Config) {
             //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
-            $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_MAIN_COLUMN])]])->order(isset($Config[self::RELATION_ORDER_COLUMN])?$Config[self::RELATION_ORDER_COLUMN]:'')->select(), $Config[self::RELATION_TABLE_COLUMN], true);
+            $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->field(isset($Config[self::RELATION_TABLE_FIELDS]) ? $Config[self::RELATION_TABLE_FIELDS] : true)->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_MAIN_COLUMN])]])->order(isset($Config[self::RELATION_ORDER_COLUMN]) ? $Config[self::RELATION_ORDER_COLUMN] : '')->select(), $Config[self::RELATION_TABLE_COLUMN], true);
         }
         //处理一对一的属性结构
         foreach ($OneProperties as $PropertyName=>$Config){
-            $OnePropertyValues[$PropertyName]=array_key_set(M($Config[self::RELATION_TABLE_NAME])->where([$Config[self::RELATION_TABLE_COLUMN]=>['IN',array_column($Objects, $Config[self::RELATION_MAIN_COLUMN])]])->select(),$Config[self::RELATION_TABLE_COLUMN]);
+            $OnePropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->field(isset($Config[self::RELATION_TABLE_FIELDS]) ? $Config[self::RELATION_TABLE_FIELDS] : true)->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_MAIN_COLUMN])]])->select(), $Config[self::RELATION_TABLE_COLUMN]);
         }
 
         //封装一对一的对象结构
