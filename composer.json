@@ -1,8 +1,30 @@
 {
-  "name": "ChinaCastle/SocketFramework",
-  "description": "A Full Function Framework",
+  "name": "ChinaCastle/Castle",
+  "type": "library",
+  "description": "集成支付宝、微信支付等流行的支付接口，后续会持续跟进中",
+  "keywords": [
+    "swoole",
+    "model",
+    "pay"
+  ],
+  "homepage": "https://my.oschina.net/yanpengquan",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "castle",
+      "email": "castle@tansuyun.cn",
+      "homepage": "https://my.oschina.net/yanpengquan"
+    }
+  ],
   "require": {
-    "php": "^5.5.10 || ^7.0",
-    "another-vendor/package": "1.*"
+    "php": ">=5.5"
+  },
+  "require-dev": {
+    //    "phpunit/phpunit": "~4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Payment\\": "src/"
+    }
   }
 }
