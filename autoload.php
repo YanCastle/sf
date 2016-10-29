@@ -5,4 +5,4 @@
  * Date: 2016/10/29
  * Time: 12:16
  */
-include 'Tsy/Tsy.php';
+include __DIR__ . '/Tsy/Tsy.php';
