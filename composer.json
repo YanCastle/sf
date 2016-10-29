@@ -1,0 +1,8 @@
+{
+  "name": "ChinaCastle/SocketFramework",
+  "description": "A Full Function Framework",
+  "require": {
+    "php": "^5.5.10 || ^7.0",
+    "another-vendor/package": "1.*"
+  }
+}
