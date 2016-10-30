@@ -466,7 +466,7 @@ class Object
                                     return "__{$TableName}__.{$field}";
                                 }, $Config[self::RELATION_TABLE_FIELDS]));
                         }
-                        $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
+                        $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$Config[self::RELATION_MAIN_COLUMN]} = __{$TableName}__.{$TableColumn}", 'LEFT');
                         break;
                     case self::PROPERTY_ONE_OBJECT:
                         //一对一的对象式结构

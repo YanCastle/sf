@@ -102,7 +102,8 @@ trait UserTrait
      * @param string $PWD 新密码
      * @param string $Code 验证码或旧密码 当用户权限为管理员时不需要Code参数，如果不是则需要提供Code验证码或者旧密码做验证
      */
-    function resetPWD(string $Account,string $PWD,int $UID,string $Code=''){
+    function resetPWD(string $Account, string $PWD, int $UID, $Code = '')
+    {
         if(!$PWD||!$UID||!$Account){return '错误的账号密码';}
         if(session('UID')==$UID){
 //            修改自己的密码
@@ -135,7 +136,8 @@ trait UserTrait
      * @param string $SID 自动登录的验证字符
      * @return UserObject|bool 成功返回用户对象，否则返回false
      */
-    function reLogin(string $SID=''){
+    function reLogin($SID = '')
+    {
         if($UID = session('UID')){
             return $this->get($UID);
         }
@@ -149,7 +151,8 @@ trait UserTrait
      * @param string $Type 发送方式，默认为邮件，暂时支持邮件方式
      * @return bool true/false
      */
-    function sendVerify(int $UID,string $Address,string $Type='Email'){
+    function sendVerify(int $UID, string $Address, $Type = 'Email')
+    {
 //        session('UID',)
         session('VUID',$UID);session('VAddress',$Address);
         return Msg::send('Email',$Address,$this->createVerifyCode($UID));
