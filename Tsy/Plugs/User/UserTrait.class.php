@@ -93,7 +93,7 @@ trait UserTrait
      * @return array {'Email':"","Phone":"",'Account':"","UID":1}
      */
     function findAccount(string $Account){
-        return M($this->LoginView)->where(array_fill_keys(array_unique(array_merge($this->LoginAccountFields[$this->_map['Account']])),$Account))->getField('UID');
+        return M($this->LoginView)->where(array_fill_keys(array_unique(array_merge($this->LoginAccountFields,[$this->_map['Account']])),$Account))->getField('UID');
     }
 
     /**
