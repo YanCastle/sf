@@ -257,7 +257,7 @@ class Controller
                 $IDs=[$_REQUEST[$this->PRIKey]];
             }
             if($this->Object->allow_del){
-                return !!$this->Object->del($IDs);
+                return $this->Object->del($IDs);
             }
             trigger_error('_ERROR_DENY_DEL_');
             return false;
