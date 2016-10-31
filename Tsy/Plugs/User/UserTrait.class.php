@@ -102,7 +102,7 @@ trait UserTrait
      * @param string $PWD 新密码
      * @param string $Code 验证码或旧密码 当用户权限为管理员时不需要Code参数，如果不是则需要提供Code验证码或者旧密码做验证
      */
-    function resetPWD(string $Account, string $PWD, int $UID, $Code = '')
+    function resetPWD(string $Account, string $PWD, $UID, $Code = '')
     {
         if(!$PWD||!$UID||!$Account){return '错误的账号密码';}
         if(session('UID')==$UID){
