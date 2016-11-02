@@ -1124,10 +1124,12 @@ class {$ObjectName}Controller extends Controller
         }
         $nav=[];
         if(!self::$docs['Classes']){
-            $this->getDoc();
+            $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Controller');
+            $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Object');
         }
         foreach (self::$docs['Classes'] as $ObjectName=>$Object){
-            if($Object['type']=='Object'){
+            if($Object['type']=='Controller'){
+                $ObjectObject = isset(self::$docs['Objects'][str_replace('Controller','Object',$ObjectName)])?self::$docs['Objects'][str_replace('Controller','Object',$ObjectName)]:[];
                 $Title = str_replace(['\\Object\\','Object'],[DIRECTORY_SEPARATOR,''],$ObjectName);
                 list($ModuleName, $ObjectName) = explode('\\', $Title);
                 $I = str_replace(DIRECTORY_SEPARATOR,'/',$Title);
