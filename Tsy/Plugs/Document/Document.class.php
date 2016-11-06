@@ -133,38 +133,43 @@ class Document
                                 break;
                         }
                         if(strlen($Relation)==3){
-                            if(substr($Relation,2,1)=='O')
-                                $Properties[]='OBJECT';//对象化映射
-                            if(substr($Relation,2,1)=='P'&&$Properties[1]=='ONE')
-                                $Properties[]='PROPERTY';//支持一个属性的非对象化映射情况下的子属性
-                            if(substr($Relation,2,1)=='L'){
-                                //Link属性，
-                                //读取Link表的外键
-                                $LinkTables=[];
-                                $ChildTableCode=self::delPrefix($FKConfig['ChildTableCode'],1);
-                                $ChildTable = self::$docs['PDM']['Tables'][parse_name($ChildTableCode)];
-                                foreach ($ChildTable['FKs']['Child'] as $ChildFKConfig){
-                                    if(preg_match('/[PC]{2}\=[1NOPL]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$ChildFKConfig['Properties']['Comment'])){continue;}
-                                    $LinkTablePropertyName=self::delPrefix($ChildFKConfig['ParentTableCode'],1);
-                                    $LinkTableColumns=array_keys($ChildFKConfig['ParentTable']['Columns']);
-                                    $LinkTableColumns='\''.implode('\',\'',$LinkTableColumns).'\'';
-                                    $LinkTables[]="'{$LinkTablePropertyName}'=>[
+                            switch (substr($Relation,2,1)){
+                                case 'O':
+                                    $Properties[]='OBJECT';//对象化映射
+                                    break;
+                                case 'P':
+                                    if($Properties[1]=='ONE')
+                                        $Properties[]='PROPERTY';//支持一个属性的非对象化映射情况下的子属性
+                                    break;
+                                case 'L':
+                                    //Link属性，
+                                    //读取Link表的外键
+                                    $LinkTables=[];
+                                    $ChildTableCode=self::delPrefix($FKConfig['ChildTableCode'],1);
+                                    $ChildTable = self::$docs['PDM']['Tables'][parse_name($ChildTableCode)];
+                                    foreach ($ChildTable['FKs']['Child'] as $ChildFKConfig){
+                                        if(!preg_match('/[PC]{2}\=[1NOPL]{2,3}(\=[A-Za-z][A-Za-z0-9]+){0,}/',$ChildFKConfig['Properties']['Comment'])){continue;}
+
+                                        $LinkTablePropertyName=self::delPrefix($ChildFKConfig['ParentTableCode'],1);
+                                        $LinkTableColumns=array_keys($ChildFKConfig['ParentTable']['Columns']);
+                                        $LinkTableColumns='\''.implode('\',\'',$LinkTableColumns).'\'';
+                                        $LinkTables[]="'{$LinkTablePropertyName}'=>[
                     self::RELATION_TABLE_COLUMN=>'{$ChildFKConfig['ParentTableColumnCode']}',
                     self::RELATION_TABLE_FIELDS=>[{$LinkTableColumns}],
                 ],";
-                                }
-                                $LinkTableString=implode("\r\n",$LinkTables);
-                                $RelationTableFields=array_keys($ChildTable['Columns']);//关联表的字段
-                                $RelationTableLinkHasProperty=count($RelationTableFields)>3?'true':'false';//是否关联表中具有属性
-                                $RelationTableFieldsString = '\''.implode('\',\'',$RelationTableFields).'\'';
-                                if(count($RelationTableFields)>3){
-                                    $RelationTableLinkHasProperty='true';
-                                    $RelationTableLinkHasPropertyMemo='  ';
-                                }else{
-                                    $RelationTableLinkHasProperty='false';
-                                    $RelationTableLinkHasPropertyMemo='//';
-                                }
-                                $PropertyAndLinkConfig['Link'][]="'{$PropertyName}'=>[
+                                    }
+                                    $LinkTableString=implode("\r\n",$LinkTables);
+                                    $RelationTableFields=array_keys($ChildTable['Columns']);//关联表的字段
+                                    $RelationTableLinkHasProperty=count($RelationTableFields)>3?'true':'false';//是否关联表中具有属性
+                                    $RelationTableFieldsString = '\''.implode('\',\'',$RelationTableFields).'\'';
+                                    if(count($RelationTableFields)>3){
+                                        $RelationTableLinkHasProperty='true';
+                                        $RelationTableLinkHasPropertyMemo='  ';
+                                    }else{
+                                        $RelationTableLinkHasProperty='false';
+                                        $RelationTableLinkHasPropertyMemo='//';
+                                    }
+                                    $PropertyAndLinkConfig['Link'][]="'{$PropertyName}'=>[
             self::RELATION_TABLE_NAME=>'{$ChildTableCode}',
             self::RELATION_TABLE_COLUMN=>'{$FKConfig['ParentTableColumnCode']}',
             self::RELATION_TABLE_LINK_HAS_PROPERTY=>{$RelationTableLinkHasProperty},
@@ -172,8 +177,8 @@ class Document
             self::RELATION_TABLE_LINK_TABLES=>[
                  {$LinkTableString}
             ]
-        ]";
-                                continue;
+        ],";
+                                    break;
                             }
                         }
                         $Relationship = implode('_',$Properties);
