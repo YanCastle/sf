@@ -35,10 +35,7 @@ defined('MODULES') or define('MODULES','' );
 define('HTTP_COMMENT',"\x01");
 
 if(!is_dir(RUNTIME_PATH)){
-    if(is_writable(dirname(RUNTIME_PATH)))
-        mkdir(RUNTIME_PATH,0777,true);
-    else
-        die("临时目录不可写");
+    mkdir(RUNTIME_PATH,0777,true) or die("临时目录不可写");
 }
 
 define('TSY_PATH',__DIR__);

@@ -985,7 +985,7 @@ class {$ObjectName}Controller extends Controller
 //            限定输出的方法范围
             if(!in_array($access,$MethodsAccess)){continue;}
             $methods[$method->getName()]=array_merge([
-                'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic()
+                'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic(),'comment'=>$method->getDocComment()
             ],$this->parseDocComment($method->getDocComment(),$method));
         }
         self::$docs['Classes'][$RefClass->getName()]['methods']=$methods;
@@ -1128,21 +1128,45 @@ class {$ObjectName}Controller extends Controller
             $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Object');
         }
         foreach (self::$docs['Classes'] as $ObjectName=>$Object){
-            if($Object['type']=='Controller'){
-                $ObjectObject = isset(self::$docs['Objects'][str_replace('Controller','Object',$ObjectName)])?self::$docs['Objects'][str_replace('Controller','Object',$ObjectName)]:[];
-                $Title = str_replace(['\\Object\\','Object'],[DIRECTORY_SEPARATOR,''],$ObjectName);
+            if(strpos($Object['namespace'],'Controller')){
+                $ObjectObject = isset(self::$docs['Classes'][str_replace('Controller','Object',$ObjectName)])?self::$docs['Classes'][str_replace('Controller','Object',$ObjectName)]:[];
+                $Title = str_replace(['\\Controller\\','Controller'],[DIRECTORY_SEPARATOR,''],$ObjectName);
                 list($ModuleName, $ObjectName) = explode('\\', $Title);
                 $I = str_replace(DIRECTORY_SEPARATOR,'/',$Title);
                 $dir = implode(DIRECTORY_SEPARATOR,[$Path,$Title]).'.js';
                 if(!is_dir(dirname($dir))){
                     mkdir(dirname($dir),0777,true);
                 }
+                if(in_array($ObjectName,['Company'])){
+                    echo 1;
+                }
+                $jsObjContent = function($ObjectObject,$obj,$sub='')use($jsObjContent){
+                    $Comments=[];
+                    foreach ($obj as $k=>$v){
+                        if(is_array($v)){
+                            if($k===0){
+                                //数组，一对多结构
+                                $Comments[]= (isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$sub))."\r\n".(isset($v[0])?']':'}');
+                            }else{
+                                $Comments[] = $k.':'.(isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$k))."\r\n".(isset($v[0])?']':'}');
+                            }
+//                            $Comments[]=  ($k!=0?($sub?$sub:$k):'').(isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$k))."\r\n".(isset($v[0])?']':'}');
+                        }else{
+                            if($sub){
+                                $Column = $ObjectObject['ObjectColumns'][implode('.',[$sub,$k])];
+                            }else{
+                                $Column = $ObjectObject['ObjectColumns'][$k];
+                            }
+                            $Comments[]= "{$k}:'',//{$Column['Name']} ".str_replace(["\r\n","\r","\n"],';',$Column['Comment'])." {$Column['DataType']} 必填:{$Column['M']} 默认值:{$Column['DefaultValue']}";
+                        }
+                    }
+                    return $Comments;
+                };
+                $objContent = implode(",\r\n            ",($jsObjContent($ObjectObject,$ObjectObject['Object'])));
                 $JsContent = [
-                    "obj:".str_replace(':1',':""',preg_replace_callback('/"[A-Z][a-zA-Z]+":/',function($str){
-                        return str_replace('"','',$str[0]);
-                    },$Object['ObjectJSON']))
+                    "obj:{{$objContent}\r\n}",
                 ];
-                $PK=$Object['ObjectSetting']['pk'];
+                $PK=$ObjectObject['ObjectSetting']['pk'];
                 foreach ($Object['methods'] as $methodName=>$method){
                     $ParamStr=$DataStr=[];
                     foreach ($method['params'] as $ParamName=>$Config){
@@ -1170,7 +1194,7 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'save':
-                            $JsContent[]="save: function (ID,Params,success,error) {
+                            $JsContent[]="save: function ({$PK},Params,success,error) {
                 var configFn={
                     success: success?success:function () {},
                     error: error?error:function (err) {tip.on(err)}
@@ -1179,7 +1203,7 @@ class {$ObjectName}Controller extends Controller
                 $$.call({
                     i:'{$I}/save',
                     data:{
-                        {$Object['ObjectSetting']['pk']}:ID,
+                        {$PK}:{$PK},
                         Params:Params
                     },
                     success:configFn.success,
@@ -1188,7 +1212,7 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         case 'del':
-                            $JsContent[]="del: function (ID,success,error) {
+                            $JsContent[]="del: function ({$PK},success,error) {
                 var configFn={
                     success: success?success:function () {},
                     
@@ -1198,7 +1222,7 @@ class {$ObjectName}Controller extends Controller
                 $$.call({
                     i:\"{$I}/del\",
                     data:{
-                        \"{$PK}\":ID
+                        \"{$PK}\":{$PK}
                     },
                     success:configFn.success,
                     error:configFn.error
@@ -1257,12 +1281,13 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                         default:
+                            if(substr($methodName,0,1)!='_')
                             $JsContent[]="{$methodName}: function ({$ParamStr}) {
                 var configFn={
                     success: success?success:function () {},
                     error: error?error:function (err) {tip.on(err)}
                 }
-
+                
                 $$.call({
                     i:\"{$I}/{$methodName}\",
                     data:{
@@ -1274,10 +1299,11 @@ class {$ObjectName}Controller extends Controller
             }";
                             break;
                     }
+                    $JsContent[count($JsContent)-1]=str_replace(['$','string','int','array','bool'],'',"{$method['comment']}\r\n").end($JsContent);
                 }
-                $JsContent=implode(",\r\n",$JsContent);
+                $JsContent=implode(",\r\n            ",$JsContent);
                 $JsObjectName = 'obj_'.str_replace('/','_',$I);
-                $Js="//{$I}\r\ndefine('{$Object['OriginName']}',
+                $Js="//{$I}\r\n{$ObjectObject['Comment']}\r\ndefine('{$ObjectObject['OriginName']}',
     ['avalon'],
     function () {
         var obj={      
