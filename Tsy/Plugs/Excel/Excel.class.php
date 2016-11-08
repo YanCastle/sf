@@ -154,6 +154,9 @@ class Excel {
      */
     function read($file, $extension = false)
     {
+        if(!is_file($file)){
+            return false;
+        }
         $data = [];
         $info = explode('.',$file);
         $extension = $extension ? $extension : $info[count($info) - 1];

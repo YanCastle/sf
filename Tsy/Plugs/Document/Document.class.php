@@ -14,6 +14,29 @@ class Document
         'Objects'=>[],
         'ObjectMap'=>[]
     ];
+
+    /**
+     * 修复SQL错误
+     * @param $input
+     * @param $output
+     */
+    function fixSQL($input,$output,$prefix=false){
+        $prefix = $prefix?$prefix:C('DB_PREFIX');
+        $fieldRegexp="/([A-Z][_A-Za-z0-9]+)/";
+        $content = file_get_contents($input);
+        $content = str_replace(['prefix_','{$PREFIX}'],$prefix,$content);
+        $content = preg_replace([$fieldRegexp],['`${1}`'],$content);
+        $content = str_replace('`)
+);','`)
+)DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;',$content);
+
+        file_put_contents($output,"SET @ORIG_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;\r\n".$content);
+    }
+
+    function execute($sql){
+
+    }
+
     function loadPDM($File){
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
         $Tables=[];
@@ -1091,8 +1114,8 @@ class {$ObjectName}Controller extends Controller
                     $ParamStr=$VerStr=[];
 
                     foreach ($Info['methods'][$function]['params'] as $ParamName=>$Param){
-                        $ParamStr[]="{$Param['name']}".($Param['must']?'':"='{$Param['default']}'");
-                        $VerStr[]="{$Param['name']}";
+                        $ParamStr[]='$'."{$Param['name']}".($Param['must']?'':"=".(is_array($Param['default'])?'[]':"'{$Param['default']}'"));
+                        $VerStr[]='$'."{$Param['name']}";
                     }
                     $ParamStr = implode(',',$ParamStr);
                     $VerStr = implode(',',$VerStr);
@@ -1142,37 +1165,13 @@ class {$ObjectName}Controller extends Controller
                 if(!is_dir(dirname($dir))){
                     mkdir(dirname($dir),0777,true);
                 }
-                if(in_array($ObjectName,['Company'])){
-                    echo 1;
-                }
-                $jsObjContent = function($ObjectObject,$obj,$sub='')use($jsObjContent){
-                    $Comments=[];
-                    foreach ($obj as $k=>$v){
-                        if(is_array($v)){
-                            if($k===0){
-                                //数组，一对多结构
-                                $Comments[]= (isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$sub))."\r\n".(isset($v[0])?']':'}');
-                            }else{
-                                $Comments[] = $k.':'.(isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$k))."\r\n".(isset($v[0])?']':'}');
-                            }
-//                            $Comments[]=  ($k!=0?($sub?$sub:$k):'').(isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$k))."\r\n".(isset($v[0])?']':'}');
-                        }else{
-                            if($sub){
-                                $Column = $ObjectObject['ObjectColumns'][implode('.',[$sub,$k])];
-                            }else{
-                                $Column = $ObjectObject['ObjectColumns'][$k];
-                            }
-                            $Comments[]= "{$k}:'',//{$Column['Name']} ".str_replace(["\r\n","\r","\n"],';',$Column['Comment'])." {$Column['DataType']} 必填:{$Column['M']} 默认值:{$Column['DefaultValue']}";
-                        }
-                    }
-                    return $Comments;
-                };
-                $objContent = implode(",\r\n            ",($jsObjContent($ObjectObject,$ObjectObject['Object'])));
+                $objContent = implode(",\r\n            ",($this->jsObjContent($ObjectObject,$ObjectObject['Object'])));
                 $JsContent = [
-                    "obj:{{$objContent}\r\n}",
+                    "obj:{\r\n{$objContent}\r\n}",
                 ];
                 $PK=$ObjectObject['ObjectSetting']['pk'];
                 foreach ($Object['methods'] as $methodName=>$method){
+                    if(substr($methodName,0,1)=='_')continue;
                     $ParamStr=$DataStr=[];
                     foreach ($method['params'] as $ParamName=>$Config){
                         $ParamStr[]=$ParamName;
@@ -1285,8 +1284,20 @@ class {$ObjectName}Controller extends Controller
                 })
             }";
                             break;
+                        case 'bind':
+                            if($ObjectObject['ObjectSetting']['link']){
+                                $Comment = [];
+                                $PropertyValue=array_keys($ObjectObject['ObjectSetting']['link']);
+                                foreach ($ObjectObject['ObjectSetting']['link'] as $LinkPropertyName=>$LinkPropertyConfig){
+                                    $Comment[]="Property值:{$LinkPropertyName} PKID对应字段:{$LinkPropertyConfig[\Tsy\Library\Object::RELATION_TABLE_COLUMN]} ";
+                                }
+                            }
+                            break;
+                        case 'unbind':
+
+                            break;
                         default:
-                            if(substr($methodName,0,1)!='_')
+
                             $JsContent[]="{$methodName}: function ({$ParamStr}) {
                 var configFn={
                     success: success?success:function () {},
@@ -1395,6 +1406,28 @@ class {$ObjectName}Controller extends Controller
             }
         }
         file_put_contents('nav.json',json_encode($nav,JSON_UNESCAPED_UNICODE));
+    }
+    function jsObjContent($ObjectObject,$obj,$sub=''){
+        $Comments=[];
+        foreach ($obj as $k=>$v){
+            if(is_array($v)){
+                if($k===0){
+                    //数组，一对多结构
+                    $Comments[]= (isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$this->jsObjContent($ObjectObject,$v,$sub))."\r\n".(isset($v[0])?']':'}');
+                }else{
+                    $Comments[] = $k.':'.(isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$this->jsObjContent($ObjectObject,$v,$k))."\r\n".(isset($v[0])?']':'}');
+                }
+//                            $Comments[]=  ($k!=0?($sub?$sub:$k):'').(isset($v[0])?'[':"{")."\r\n".implode(",\r\n",$jsObjContent($ObjectObject,$v,$k))."\r\n".(isset($v[0])?']':'}');
+            }else{
+                if($sub){
+                    $Column = $ObjectObject['ObjectColumns'][implode('.',[$sub,$k])];
+                }else{
+                    $Column = $ObjectObject['ObjectColumns'][$k];
+                }
+                $Comments[]= "{$k}:'',//{$Column['Name']} ".str_replace(["\r\n","\r","\n"],';',$Column['Comment'])." {$Column['DataType']} 必填:{$Column['M']} 默认值:{$Column['DefaultValue']}";
+            }
+        }
+        return $Comments;
     }
     function createObj_js($OutPut){
         $Obj = [];

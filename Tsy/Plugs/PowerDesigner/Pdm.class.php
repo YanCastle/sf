@@ -55,7 +55,12 @@ class Pdm
         }
         return false;
     }
-
+    function errorCheck(){
+        //检查Index无Columns的错误
+        foreach (pq('oIndex') as $oIndex){
+            
+        }
+    }
     /**
      * 获取项目信息
      * @return array|bool

@@ -72,7 +72,9 @@ class Controller
     protected function display($templateFile='',$charset='',$contentType='',$content='',$prefix='') {
         $this->view->display($templateFile,$charset,$contentType,$content,$prefix);
     }
-
+    protected function error($msg){
+        L($msg,LOG_ERR);
+    }
     /**
      * 输出内容文本可以包括Html 并支持内容解析
      * @access protected

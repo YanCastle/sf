@@ -17,13 +17,20 @@
     }
   ],
   "require": {
-    "php": ">=5.5"
+    "php": ">=5.5",
+    "lokielse/omnipay-alipay": "^2.0"
   },
   "require-dev": {
   },
   "autoload": {
     "psr-4": {
       "Payment\\": "src/"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
     }
   }
 }
