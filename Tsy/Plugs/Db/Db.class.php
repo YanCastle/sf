@@ -235,7 +235,7 @@ class Db
         }
         $TableColumns = [];
         //是否强制刷新
-        if ($cache) {
+        if (!$cache) {
             foreach ($tables as $table) {
                 if ($CacheColumns = cache('ColumnsCache' . $prefix . $table)) {
                     $TableColumns[$table] = $CacheColumns;
