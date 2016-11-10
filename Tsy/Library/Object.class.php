@@ -53,7 +53,8 @@ class Object
     protected $_write_filter = [];//输入写入过滤配置
     protected $_read_filter = [];//输入读取过滤配置
     protected $_read_deny=[];//禁止读取字段
-
+    protected $_fieldMap=[];//通过字段查归属表的
+    protected $_tableFieldsMap=[];//表名=>[字段名称]
     protected $searchWFieldsGroup=[
 //        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
     ];
@@ -145,13 +146,26 @@ class Object
                     'D' => $item['default'],//默认值
                     'P' => 'PRI' == $item['key'],//是否主键
                     'N' => 'YES' == $item['null'],//是否为null
-                    'A' => 'auto_increment' == $item['extra']//是否自增
+                    'A' => 'auto_increment' == $item['extra'],//是否自增
+                    'F'=>$item['field']
                 ];
                 if (!$this->pk &&
                     'PRI' == $item['key']
                 ) {
                     $this->pk = $item['field'];
                 }
+                //生成反向查询
+                if(isset($this->_fieldMap[$item['field']])){
+                    //TODO 考虑重复字段名称怎么处理
+                    $this->_fieldMap[$item['field']]=[];
+                }else{
+                    $this->_fieldMap[$item['field']]=$TableName;
+                }
+                //生成反向Group
+                if(!isset($this->_tableFieldsMap[$TableName])){
+                    $this->_tableFieldsMap[$TableName]=[];
+                }
+                $this->_tableFieldsMap[$TableName][]=$item['field'];
             }
         }
         cache('ObjectMap' . $this->main, $this->map);
@@ -203,15 +217,25 @@ class Object
         }
     }
 
-    function add($data=[])
+    function add($data=[],$Properties=false)
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
         if(!$data&&$_POST)
             $data=$_POST;
+        if(is_array($Properties)&&true===end($Properties)){
+            $Properties=array_diff(array_merge(array_keys($this->property),array_keys($this->link)),$Properties);
+        }elseif(false===$Properties){
+            $Properties=array_merge(array_keys($this->property),array_keys($this->link));
+        }
+        $Properties = array_map(function($d){
+            return strtolower($d);
+        },$Properties);
+        $Properties[] = strtolower($this->main);
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
+            $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
 //            //允许添加时一次性添加其他属性
 //            $Properties=$Links=[];
 //            $dataKeys = array_keys($data);
@@ -240,12 +264,22 @@ class Object
 //                }
 //            }
             startTrans();
-            if($PKID = M($this->main)->add($rs)){
-                commit();
-            }else{
-                rollback();
+            foreach ($ObjectsColumns as $k=>$rows){
+                if(0===$k||!in_array($k,$Properties))continue;
+                if($ID = M($k)->add($rows)){
+                    if($k==strtolower($this->main))$PKID=$ID;
+                }else{
+                    rollback();
+                    return "属性:{$k}添加失败";
+                    break;
+                }
             }
-            return $PKID?$this->get($PKID):false;
+            if($PKID){
+                commit();
+                $RsData = $this->get($PKID);
+                return $RsData?$RsData:array_merge($data,[$this->pk=>$PKID]);
+            }
+            return APP_DEBUG?M()->getDbError():'未知错误';
         }else{
             return $rs;
         }
@@ -868,13 +902,14 @@ class Object
                 $Fields = M($this->main)->getDbFields();
             }
         }else{
-            $Fields = M($this->main)->getDbFields();
+            $Fields = $Fields = M($this->main)->getDbFields();;
         }
         $Fields = array_diff($Fields,[$this->pk]);//去掉PK，在Add和save中不需要用到这个参数
         //释放不必要的参数
-        foreach (array_diff(array_keys($Data),$Fields) as $Field){
-            unset($Data[$Field]);
-        }
+//        $Fields = array_keys($this->_fieldMap);
+//        foreach (array_diff(array_keys($Data),$Fields) as $Field){
+//            unset($Data[$Field]);
+//        }
         //开始处理数据、填充及其它规则处理
         foreach ($Rules as $Key=>$Rule){
             foreach ([self::FIELD_CONFIG_VALUE,self::FIELD_CONFIG_VALUE_FUNCTION,self::FIELD_CONFIG_DEFAULT,self::FIELD_CONFIG_DEFAULT_FUNCTION] as $RuleName){
@@ -900,7 +935,7 @@ class Object
                 }
             }
         }
-        if('add'==$Method&&count($Data)!=count($Fields)){
+        if('add'==$Method&&array_diff($Fields,array_keys($Data))){
             return L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
         }
         return $Data;
