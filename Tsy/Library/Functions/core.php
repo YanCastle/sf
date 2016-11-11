@@ -230,6 +230,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
         $Class=null;
     }catch (Exception $e){
         var_dump($e);
+        return $e->getMessage();
     }
 //    判断配置文件是否是当前模块配置文件，如果不是则加载当前模块配置文件
 
@@ -328,7 +329,7 @@ function L($msg = false,$Type=6,$trace=''){
         //TODO 完善log函数
         if('swoole'==APP_MODE_LOW&&!ob_get_level()){
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
-        }elseif(APP_DEBUG){
+        } elseif (APP_DEBUG && 'http' != APP_MODE_LOW) {
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
         }
         return $msg;

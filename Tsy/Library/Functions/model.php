@@ -243,17 +243,21 @@ function param_group(array $Group,array $Params,$Kv=false){
         $Group=[];
         foreach ($T as $k=>$v){// $BasicFields=['Name','Disable','Virtual','Memo','ProducerDicID','Number'];改为 Name =》‘BasicFields’,'Disable'=》‘BasicFields’,'Virtual'=》‘BasicFields’,'Memo'=》‘BasicFields’,'ProducerDicID'=》‘BasicFields’,'Number'=》‘BasicFields’
             foreach ($v as $p){
-                $Group[$p]=$k;
+                if(!isset($Group[$p]))
+                    $Group[$p]=[];
+                $Group[$p][]=$k;
             }
         }
     }
     $Data=[[]];
     foreach ($Params as $K=>$V){
         if(isset($Group[$K])){
-            if(!isset($Data[$Group[$K]])){
-                $Data[$Group[$K]]=[];
+            foreach ($Group[$K] as $group){
+                if(!isset($Data[$group])){
+                    $Data[$group]=[];
+                }
+                $Data[$group][$K]=$V;
             }
-            $Data[$Group[$K]][$K]=$V;
         }else{
             $Data[0][$K]=$V;
         }

@@ -2,16 +2,20 @@
 /**
  * Created by PhpStorm.
  * User: castle
- * Date: 5/31/16
- * Time: 4:52 PM
+ * Date: 2015/11/30
+ * Time: 13:43
  */
 
-namespace Tsy\Plugs;
+namespace Tsy\Plugs\File;
 
+
+use Tsy\Library\Upload;
 
 class File
 {
-    static function eachDir(){}
+    static function eachDir($path,$dir_callback,$file_callback){
+        return each_dir($path,$dir_callback,$file_callback);
+    }
 
     /**
      * 删除文件
@@ -52,44 +56,46 @@ class File
      * @link http://document.thinkphp.cn/manual_3_2.html#upload
      */
     static function upload($TPUploadConfig=[]){
-//        foreach(explode(',','mimes,maxSize,exts,autoSub,subName,rootPath,savePath,saveName,saveExt,replace,hash,callback,driver,driverConfig') as $config){
-//            if(!isset($TPUploadConfig[$config])){
-//                $c = C('UPLOAD_'.strtoupper($config),null,'');
-//                if($c){
-//                    $TPUploadConfig[$config]=$c;
-//                }
-//            }
-//        }
-//        $Upload = new Upload($TPUploadConfig);
-//        $infos = $Upload->upload();
-//        if($infos){
-//            $Model = M('Upload');
-//            $Rs = [];
-//            foreach($infos as $info){
-//                $data = [
-//                    'FileName'=>$info['name'],
-//                    'Extension'=>$info['ext'],
-//                    'MIME'=>$info['type'],
-//                    'Size'=>$info['size'],
-//                    'SaveName'=>$info['savename'],
-//                    'SavePath'=>$info['savepath'],
-//                    'FileMd5'=>$info['md5'],
-//                    'UploadTime'=>time(),
-//                    'UploaderUID'=>session('UID')
-//                ];
-//                $UploadID = $Model->add($data);
-//                if($UploadID){
-//                    $data['UploadID']=$UploadID;
-//                    $Rs[]=$data;
-//                }else{
-//                    return false;
-//                }
-//            }
-//            return $Rs;
-//        }else{
-//            //失败
-//            return $Upload->getError();
-//        }
+        foreach(explode(',','mimes,maxSize,exts,autoSub,subName,rootPath,savePath,saveName,saveExt,replace,hash,callback,driver,driverConfig') as $config){
+            if(!isset($TPUploadConfig[$config])){
+                $c = C('UPLOAD_'.strtoupper($config),null,'');
+                if($c){
+                    $TPUploadConfig[$config]=$c;
+                }
+            }
+        }
+        $Upload = new Upload($TPUploadConfig);
+        $infos = $Upload->upload();
+        if($infos){
+            $Model = M('Upload');
+            $Rs = [];
+            foreach($infos as $info){
+                $data = [
+                    'FileName'=>$info['name'],
+                    'Extension'=>$info['ext'],
+                    'MIME'=>$info['type'],
+                    'Size'=>$info['size'],
+                    'SaveName'=>$info['savename'],
+                    'SavePath'=>$info['savepath'],
+                    'FileMd5'=>$info['md5'],
+                    'UploadTime'=>time(),
+                    'UploaderUID'=>session('UID'),
+//                    'URL'=>''
+                ];
+                $data['URL']=str_replace(array_keys($data),array_values($data),C('UPLOAD_URL'));
+                $UploadID = $Model->add($data);
+                if($UploadID){
+                    $data['UploadID']=$UploadID;
+                    $Rs[]=$data;
+                }else{
+                    return false;
+                }
+            }
+            return $Rs;
+        }else{
+            //失败
+            return $Upload->getError();
+        }
     }
 
     /**

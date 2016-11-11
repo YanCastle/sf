@@ -16,7 +16,8 @@ class Model {
     const ASYNC=101;
 
     static public $InTranscation=0;
-
+    protected $lastSql = '';
+    static protected $sql_fields_map = [];
     // 当前数据库操作对象
     protected $db               =   null;
 	// 数据库对象池
@@ -636,7 +637,7 @@ class Model {
         if(is_string($resultSet)){
             return $resultSet;
         }
-
+        $this->lastSql = $this->getLastSql();
         $resultSet  =   array_map(array($this,'_read_data'),$resultSet);
         $this->_after_select($resultSet,$options);
         if(isset($options['index'])){ // 对数据集进行索引
@@ -749,29 +750,37 @@ class Model {
         }
     }
 
+    function getSqlFieldsMap($sql)
+    {
+        $md5 = md5($sql);
+        if (isset(self::$sql_fields_map[$md5])) {
+            return self::$sql_fields_map[$md5];
+        }
+        $map = array_flip($this->_map);
+//            需要解决join带来的字段名称没法恢复的问题
+//            只支持带表前缀的方式识别
+        if ($this->tablePrefix && preg_match_all("/{$this->tablePrefix}[A-Za-z0-9_`]+/", $this->lastSql, $match) > 0) {
+            $tables = array_unique($match[0]);
+            foreach (array_diff($tables, [$this->trueTableName]) as $table) {
+                $fields = $this->getDbFields(str_replace('`', '', $table));
+                foreach ($fields as $field) {
+                    $map[strtolower($field)] = $field;
+                }
+            }
+        }
+        return self::$sql_fields_map[$md5] = $map;
+    }
     /**
      * 数据读取后的处理
      * @access protected
      * @param array $data 当前数据
      * @return array
      */
-    protected function _read_data($data) {
+    protected function _read_data($data, $sql = '')
+    {
         // 检查字段映射
         if(!empty($this->_map) ) {
-            $map = array_flip($this->_map);
-//            需要解决join带来的字段名称没法恢复的问题
-//            只支持带表前缀的方式识别
-            if($this->tablePrefix&&preg_match_all("/{$this->tablePrefix}[A-Za-z0-9_`]+/",$this->db->queryStr,$match)>0){
-                $tables = array_unique($match[0]);
-//                if(count($tables)>1){
-                    foreach(array_diff($tables,[$this->trueTableName]) as $table){
-                        $fields = $this->getDbFields(str_replace('`','',$table));
-                        foreach ($fields as $field){
-                            $map[strtolower($field)]=$field;
-                        }
-                    }
-//                }
-            }
+            $map = $this->getSqlFieldsMap($this->lastSql);
 //            map的键为小写态
             foreach($data as $key=>$val){
                 if(isset($map[$key])&&$key==$map[$key]){continue;}
@@ -856,6 +865,7 @@ class Model {
         }
 
         // 读取数据后的处理
+        $this->lastSql = $this->getLastSql();
         $data   =   $this->_read_data($resultSet[0]);
 	    $data   =   $this->_unserialize($data);
         $this->_after_find($data,$options);
@@ -1031,6 +1041,7 @@ class Model {
                 }
             }
             $resultSet          =   $this->db->select($options);
+            $this->lastSql = $this->getLastSql();
             $resultSet  =   array_map(array($this,'_read_data'),$resultSet);
             if(!empty($resultSet)) {
                 $field          =   array_keys($resultSet[0]);
@@ -1057,6 +1068,7 @@ class Model {
                 $options['limit']   =   is_numeric($sepa)?$sepa:1;
             }
             $result = $this->db->select($options);
+            $this->lastSql = $this->getLastSql();
             $result  = is_array($result)?array_map(array($this,'_read_data'),$result):$result;
             if(!empty($result)) {
                 if(true !== $sepa && 1==$options['limit']) {

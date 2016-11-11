@@ -55,7 +55,12 @@ class Pdm
         }
         return false;
     }
-
+    function errorCheck(){
+        //检查Index无Columns的错误
+        foreach (pq('oIndex') as $oIndex){
+            
+        }
+    }
     /**
      * 获取项目信息
      * @return array|bool
@@ -102,7 +107,7 @@ class Pdm
                     'Comment'=>pq($oColumn)->find('aComment')->html(),
                     'DataType'=>pq($oColumn)->find('aDataType')->html(),
                     'I'=>pq($oColumn)->find('aIdentity')->html()==1,
-                    'M'=>pq($oColumn)->find('aColumnMandatory')->html(),
+                    'M'=>!!pq($oColumn)->find('aColumnMandatory')->html(),
                     'ID'=>$ColumnID,
                     'P'=>$PK?$PK==$ColumnID:0,
                     'DomainID'=>pq($oColumn)->find('cDomain oPhysicalDomain')->attr('Ref'),

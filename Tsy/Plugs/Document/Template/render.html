@@ -27,7 +27,7 @@
 |名称 | 代码 | 数据类型 | 逻辑代码 | 默认值 | 备注|
 |---|---|---|---|---|---|
 <foreach name="table['Columns']" item="column">
-|{$column.Name} | {$column.Code} | {$column.DataType} | <?php if($column['I'])echo 'I';if($column['M'])echo 'M';if($column['i'])echo 'P'; ?> | {$column.DefaultValue} | {$column.Comment}|{$line}
+|{$column.Name} | {$column.Code} | {$column.DataType} | <?php if($column['I'])echo 'I';if($column['M'])echo 'M';if($column['i'])echo 'P'; ?> | {$column.DefaultValue} | <?php echo is_string($column['Comment'])?str_replace(["\r\n","\n","\r"],';',$column['Comment']):''; ?>|{$line}
 </foreach>
 {$line}
 </foreach>

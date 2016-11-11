@@ -152,14 +152,18 @@ class Excel {
      * @param bool|false $FirstIsField
      * @return array
      */
-    function read($file,$FirstIsField=false){
+    function read($file, $extension = false)
+    {
+        if(!is_file($file)){
+            return false;
+        }
         $data = [];
         $info = explode('.',$file);
-        $extension = $info[count($info)-1];
+        $extension = $extension ? $extension : $info[count($info) - 1];
         switch(strtoupper($extension)){
             case 'CSV':
 //                $content=str_replace("\r\n","\n",iconv('GBK','UTF-8',file_get_contents($file)));
-                return array_map(function($v){return explode(',',$v);},explode("\n",str_replace("\r\n","\n",iconv('GBK','UTF-8',file_get_contents($file)))));
+                $data = ['csv'=>array_map(function($v){return explode(',',$v);},explode("\n",str_replace("\r\n","\n",iconv('GBK','UTF-8',file_get_contents($file)))))];
                 break;
             case 'XLSX':
                 $objLoader = \PHPExcel_IOFactory::load($file);
@@ -167,7 +171,7 @@ class Excel {
                 foreach($Sheets as $Sheet){
                     $data[$Sheet->getTitle()] = $Sheet->toArray();
                 }
-                return $data;
+//                return $data;
                 break;
             case 'XLS':
                 $objLoader = \PHPExcel_IOFactory::load($file);
@@ -175,12 +179,16 @@ class Excel {
                 foreach($Sheets as $Sheet){
                     $data[$Sheet->getTitle()] = $Sheet->toArray();
                 }
-                return $data;
+//                return $data;
                 break;
             default:
-                return [];
+                $data = [];
                 break;
         }
+//        if($FirstIsField){
+//
+//        }
+        return $data;
     }
 
     /**

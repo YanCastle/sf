@@ -14,14 +14,17 @@ define('LOG_TIP','TIP');
 defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
 defined('APP_DEBUG') or define('APP_DEBUG',false);
 defined('DB_DEBUG') or define('DB_DEBUG',APP_DEBUG);
-
+defined('APP_MODE') or define('APP_MODE','Http');
+defined('APP_NAME') or define('APP_NAME',defined('DEFAULT_MODULE')?DEFAULT_MODULE:md5($_SERVER['PHP_SELF']));
 //defined('PACKAGE_EOF') or define('PACKAGE_EOF',"\r\n\r\n");
 isset($APP_PATH) or $APP_PATH='.';
 if(isset($APP_PATH)&&!is_dir($APP_PATH)){
     mkdir($APP_PATH);
 }
+define('IS_WIN',strstr(PHP_OS, 'WIN') ? 1 : 0 );
+define('TEMP_DIR',IS_WIN?$_SERVER['TEMP']:'/tmp');
 define('APP_PATH',isset($APP_PATH)?realpath($APP_PATH):realpath('.'));
-define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:APP_PATH.DIRECTORY_SEPARATOR.'Runtime');
+define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:TEMP_DIR.DIRECTORY_SEPARATOR.APP_NAME.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
 defined('UPLOAD_PATH') or define('UPLOAD_PATH',APP_PATH.DIRECTORY_SEPARATOR.'Upload');
 //定义配置文件后缀
@@ -32,10 +35,7 @@ defined('MODULES') or define('MODULES','' );
 define('HTTP_COMMENT',"\x01");
 
 if(!is_dir(RUNTIME_PATH)){
-    if(is_writable(dirname(RUNTIME_PATH)))
-        mkdir(RUNTIME_PATH,0777,true);
-    else
-        die("临时目录不可写");
+    mkdir(RUNTIME_PATH,0777,true) or die("临时目录不可写");
 }
 
 define('TSY_PATH',__DIR__);

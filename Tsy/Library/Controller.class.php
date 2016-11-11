@@ -72,7 +72,9 @@ class Controller
     protected function display($templateFile='',$charset='',$contentType='',$content='',$prefix='') {
         $this->view->display($templateFile,$charset,$contentType,$content,$prefix);
     }
-
+    protected function error($msg){
+        L($msg,LOG_ERR);
+    }
     /**
      * 输出内容文本可以包括Html 并支持内容解析
      * @access protected
@@ -139,13 +141,32 @@ class Controller
         $this->view->assign($name,$value);
         return $this;
     }
-
+    /**
+     * 绑定多对多属性到关联表
+     * @param string $Property 属性名称
+     * @param array $Data 绑定数据
+     * @param bool $PKID 主键ID
+     * @return array|bool|mixed
+     */
+    function bind(string $Property,array $Data,$PKID=false){
+        return $this->Object->bind($Property,$Data,$PKID);
+    }
+    /**
+     * 解除绑定多对多属性到关联表
+     * @param string $Property 属性名称
+     * @param array $Data 绑定数据
+     * @param bool $PKID 主键ID
+     * @return array|bool|mixed
+     */
+    function unbind(string $Property,array $Data,$PKID=false){
+        return $this->Object->unbind($Property,$Data,$PKID);
+    }
     function __call($name, $arguments)
     {
         $Object = $this->className.'Object';
         if($this->Object){
-            if(method_exists($ObjectClass,$name)){
-                return call_user_func_array($ObjectClass,$arguments);
+            if(method_exists($this->Object,$name)){
+                return call_user_func_array([$this->Object,$name],$arguments);
             }
         }else
         if(class_exists($Object)){
@@ -159,9 +180,6 @@ class Controller
     }
     protected function getControllerName(){
         return substr($this->__CLASS__,0,strlen($this->__CLASS__)-10);
-    }
-    function set_swoole($swoole){
-        $this->swoole=$swoole;
     }
     protected function send($UID,$data){
         //TODO 需要建立UID跟fd的连接信息，如果不是在swoole模式下还需要放到队列中去
@@ -192,7 +210,7 @@ class Controller
      */
     function gets($IDs=[]){
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
-        if(class_exists($ObjectClass)){
+        if ($this->Object) {
             if($this->Object->is_dic){
                 return array_values($this->Object->getAll());
             }elseif ($IDs){
@@ -241,7 +259,7 @@ class Controller
                 $IDs=[$_REQUEST[$this->PRIKey]];
             }
             if($this->Object->allow_del){
-                return !!$this->Object->del($IDs);
+                return $this->Object->del($IDs);
             }
             trigger_error('_ERROR_DENY_DEL_');
             return false;

@@ -32,7 +32,16 @@ class Http implements Mode
         ];
     }
     function output($data){
-        return json_encode($data,JSON_UNESCAPED_UNICODE);
+        header('Content-Type:application/json; charset=utf-8');
+        return json_encode([
+            'G'=>session('G'),
+            'UN'=>session('UN'),
+            'UID'=>session('UID'),
+            'c'=>200,
+            'd'=>is_string($data)?false:$data,
+            'err'=>is_string($data)?$data:(false===$data?L(false,LOG_TIP):''),
+            'tsy'=>session('[id]')
+        ],JSON_UNESCAPED_UNICODE);
     }
     /**
      * 启动函数
@@ -60,7 +69,7 @@ class Http implements Mode
     }
     function out($Data=null){
         $Out = C('HTTP.OUT');
-        $Out = is_callable($Out)?$Out:C('DEFAULT_OUT');
+        $Out = is_callable($Out)?$Out:[$this,'output'];
         $OutData=call_user_func($Out,$Data);
         if(is_string($OutData)&&strlen($OutData)>0&&!($Data===null&&$OutData==='null')){
             self::$Out=true;

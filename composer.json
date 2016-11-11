@@ -1,0 +1,36 @@
+{
+  "name": "yanpengquan/socketframework",
+  "type": "library",
+  "description": "集成支付宝、微信支付等流行的支付接口，后续会持续跟进中",
+  "keywords": [
+    "swoole",
+    "model",
+    "pay"
+  ],
+  "homepage": "https://my.oschina.net/yanpengquan",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "castle",
+      "email": "castle@tansuyun.cn",
+      "homepage": "https://my.oschina.net/yanpengquan"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "lokielse/omnipay-alipay": "^2.0"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Payment\\": "src/"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
+    }
+  }
+}
