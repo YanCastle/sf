@@ -117,7 +117,7 @@ class Model {
                 if($this->name){
                     $Fields = $this->getDbFields();
                     foreach($Fields as $Field){
-                        $this->_map[$Field]=strtolower($Field);
+                        $this->_map[strtolower($Field)]=$Field;
                     }
                     cache('_map/'.strtolower($db.'.'.$this->tablePrefix.$this->name),$this->_map,C('DB_MAP_EXPIRE'));
                 }
@@ -698,10 +698,13 @@ class Model {
 //            foreach ($options['join'] as $join){
             if(preg_match_all('/join [a-z][a-z_\d]+ /',strtolower(implode(',',$options['join'])),$match)){
                 $match = explode(',',str_replace(['join',' '],'',implode(',',$match[0])));
-                $options['table']=array_diff($options['table'],$match);
+                $options['table']=array_diff(is_array($options['table'])?$options['table']:[$options['table']],$match);
 //                var_dump($match);
             }
 //            }
+        }
+        if(is_array($options['table'])){
+            $options['table']=implode(',',$options['table']);
         }
         // 数据表别名
         if(!empty($options['alias'])) {
@@ -792,18 +795,18 @@ class Model {
     protected function _read_data($data, $sql = '')
     {
         // 检查字段映射
-        if(!empty($this->_map) ) {
-            $map = $this->getSqlFieldsMap($this->lastSql);
+//        if(empty($this->_map) ) {
+        $map = empty($this->_map)?$this->getSqlFieldsMap($this->lastSql):$this->_map;
+//        }
 //            map的键为小写态
-            foreach($data as $key=>$val){
-                if(isset($map[$key])&&$key==$map[$key]){continue;}
-                if(isset($map[$key])){
-                    $data[$map[$key]]=$val;
-                }else{
-                    $data[ucfirst($key)]=$val;
-                }
-                unset($data[$key]);
+        foreach($data as $key=>$val){
+            if(isset($map[$key])&&$key==$map[$key]){continue;}
+            if(isset($map[$key])){
+                $data[$map[$key]]=$val;
+            }else{
+                $data[ucfirst($key)]=$val;
             }
+            unset($data[$key]);
         }
         return $data;
     }
