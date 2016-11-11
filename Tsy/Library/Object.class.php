@@ -241,33 +241,6 @@ class Object
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
             $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
-//            //允许添加时一次性添加其他属性
-//            $Properties=$Links=[];
-//            $dataKeys = array_keys($data);
-//            $thisObjectKeys=array_keys($rs);
-//            foreach (array_diff($dataKeys,$thisObjectKeys) as $Key){
-//                if(isset($this->property[$Key])){
-//                    $Property='Property';
-//                }elseif(isset($this->link[$Key])){
-//                    $Property='Link';
-//                }else{
-//                    continue;
-//                }
-//                switch ($Property){
-//                    case 'Property':
-//                        $Properties[$Key]=[
-//                            'Config'=>$this->property[$Key],
-//                            'Value'=>$data[$Key],
-//                        ];
-//                        break;
-//                    case 'Link':
-//                        $Links[$Key]=[
-//                            'Config'=>$this->link[$Key],
-//                            'Value'=>$data[$Key],
-//                        ];
-//                        break;
-//                }
-//            }
             startTrans();
             foreach ($ObjectsColumns as $k=>$rows){
                 if(0===$k||!in_array($k,$Properties))continue;
@@ -751,6 +724,24 @@ class Object
         }
         $rs = $this->_parseChangeFieldsConfig('save',$Params);
         if(false!==$rs){
+            $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
+            startTrans();
+            foreach ($ObjectsColumns as $k=>$rows){
+                if(0===$k||!in_array($k,$Properties))continue;
+                if($ID = M($k)->add($rows)){
+                    if($k==strtolower($this->main))$PKID=$ID;
+                }else{
+                    rollback();
+                    return "属性:{$k}添加失败";
+                    break;
+                }
+            }
+            if($PKID){
+                commit();
+                $RsData = $this->get($PKID);
+                return $RsData?$RsData:array_merge($data,[$this->pk=>$PKID]);
+            }
+            return APP_DEBUG?M()->getDbError():'未知错误';
             startTrans();
             if(false!==($rs=M($this->main)->where($Where)->save($Params))){
                 commit();

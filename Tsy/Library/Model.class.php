@@ -692,7 +692,17 @@ class Model {
             // 指定数据表 则重新获取字段列表 但不支持类型检测
             $fields             =   $this->getDbFields();
         }
-
+        if(isset($options['join'])){
+            //开始从table中去除join中已经加入的表
+//            echo 1;
+//            foreach ($options['join'] as $join){
+            if(preg_match_all('/join [a-z][a-z_\d]+ /',strtolower(implode(',',$options['join'])),$match)){
+                $match = explode(',',str_replace(['join',' '],'',implode(',',$match[0])));
+                $options['table']=array_diff($options['table'],$match);
+//                var_dump($match);
+            }
+//            }
+        }
         // 数据表别名
         if(!empty($options['alias'])) {
             $options['table']  .=   ' '.$options['alias'];
@@ -899,9 +909,10 @@ class Model {
         return $data;
     }
     protected function parseColumnName($key){
-        return preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){
+        return preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match)use($key){
             $tn  = $this->tablePrefix.strtolower($match[1]);
-            $this->table($tn,true);
+            if(!strpos(strtolower($key),'on'))
+                $this->table($tn,true);
             return strtolower($tn);
         }, $key);
     }
