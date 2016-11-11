@@ -221,13 +221,7 @@ class Object
             return $this->data[$name];
         }
     }
-
-    function add($data=[],$Properties=false)
-    {
-//        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
-        if(!$this->allow_add)return false;
-        if(!$data&&$_POST)
-            $data=$_POST;
+    protected function _parseProperties(&$Properties){
         if(is_array($Properties)&&true===end($Properties)){
             $Properties=array_diff(array_merge(array_keys($this->property),array_keys($this->link)),$Properties);
         }elseif(false===$Properties){
@@ -237,6 +231,14 @@ class Object
             return strtolower($d);
         },$Properties);
         $Properties[] = strtolower($this->main);
+    }
+    function add($data=[],$Properties=false)
+    {
+//        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
+        if(!$this->allow_add)return false;
+        if(!$data&&$_POST)
+            $data=$_POST;
+        $this->_parseProperties($Properties);
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
@@ -297,11 +299,11 @@ class Object
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
         $Model = new Model($this->searchTable ? $this->searchTable : $this->main);
-        $DB_PREFIX = C('DB_PREFIX');
+//        $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = false;
-        $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
-        $Tables = ['__' . strtoupper(parse_name($this->main)) . '__'];
-        $ObjectSearchConfig = [];
+//        $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
+//        $Tables = ['__' . strtoupper(parse_name($this->main)) . '__'];
+//        $ObjectSearchConfig = [];
         $Where = [];
         $WObjectIDArray = [];
         $KeywordObjectIDs=[];
@@ -704,7 +706,7 @@ class Object
         return $Objects;
     }
 
-    function save($ID=false,$Params)
+    function save($ID=false,$Params,$Properties=false)
     {
         if(!$this->allow_save)return false;
         $Where=[];
@@ -722,35 +724,58 @@ class Object
         }else{
             L(E('错误的对象编号'));
         }
+        $this->_parseProperties($Properties);
         $rs = $this->_parseChangeFieldsConfig('save',$Params);
         if(false!==$rs){
-            $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
-            startTrans();
-            foreach ($ObjectsColumns as $k=>$rows){
-                if(0===$k||!in_array($k,$Properties))continue;
-                if($ID = M($k)->add($rows)){
-                    if($k==strtolower($this->main))$PKID=$ID;
+            $MainColumns = [];
+            $ObjectsColumns=[];
+            foreach ($rs as $k=>$v){
+                if(is_array($v)){
+                    if(isset($this->property[$k])){
+                        $PK = isset($this->property[$k][self::RELATION_MAIN_COLUMN])?$this->property[$k][self::RELATION_MAIN_COLUMN]:$this->property[$k][self::RELATION_OBJECT_COLUMN];
+                        $PKID = $PK==$this->pk?$ID:(isset($rs[$PK])?$rs[$PK]:false);
+                        if(!$PKID)return "属性{$k}保存条件不成立";
+                        $ObjectsColumns[$k]=[
+                            $PKID,$v,isset($this->property[$k][self::RELATION_TABLE_NAME])?$this->property[$k][self::RELATION_TABLE_NAME]:false,$PK
+                        ];
+                    }
+
                 }else{
-                    rollback();
-                    return "属性:{$k}添加失败";
-                    break;
+                    if($k!=$this->pk)
+                        $MainColumns[$k]=$v;
                 }
             }
-            if($PKID){
-                commit();
-                $RsData = $this->get($PKID);
-                return $RsData?$RsData:array_merge($data,[$this->pk=>$PKID]);
-            }
-            return APP_DEBUG?M()->getDbError():'未知错误';
             startTrans();
-            if(false!==($rs=M($this->main)->where($Where)->save($Params))){
-                commit();
-                return is_array($ID)?$this->gets($ID):$this->get($ID);
-            }else{
-                rollback();
-                L('修改失败');
-                return false;
+            if($MainColumns){
+                if(false===($rs=M($this->main)->where($Where)->save($MainColumns))){
+                    rollback();
+                    return APP_DEBUG?M()->getDbError():'属性修改失败';
+                }
             }
+            foreach ($ObjectsColumns as $k=>$rows){
+                if(0===$k||!in_array(strtolower($k),$Properties))continue;
+                $ObjectClass = implode("\\",[$this->MC[0],'Object',$k.'Object']);
+                if(class_exists($ObjectClass)){
+                    //调用Object的存储方法
+                    $Object = new $ObjectClass();
+                    if(is_array($Rs = $Object->save($rows[0],$rows[1]))){
+
+                    }else{
+                        rollback();
+                        return $Rs;
+                    }
+                }else{
+                    //直接操作表格进行存储
+                    if($rows[2]&&$rows[3]&&M($rows[2])->where([$rows[3]=>$rows[0]])->save($rows[1])){
+
+                    }else{
+                        rollback();
+                        return APP_DEBUG?M()->getDbError():"属性{$k}保存失败";
+                    }
+                }
+            }
+            commit();
+            return $this->get($ID);
         }else{
             return false;
         }
