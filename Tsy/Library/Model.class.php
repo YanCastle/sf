@@ -80,6 +80,9 @@ class Model {
         }elseif(empty($this->name)){
             $this->name =   $this->getModelName();
         }
+//        if($this->name){
+//            $this->table($this->name);
+//        }
         // 设置表前缀
         if(is_null($tablePrefix)) {// 前缀为Null表示没有前缀
             $this->tablePrefix = '';
@@ -896,7 +899,11 @@ class Model {
         return $data;
     }
     protected function parseColumnName($key){
-        return preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, $key);
+        return preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){
+            $tn  = $this->tablePrefix.strtolower($match[1]);
+            $this->table($tn,true);
+            return strtolower($tn.$match[1]);
+        }, $key);
     }
     /**
      * 处理字段映射
@@ -1747,15 +1754,29 @@ class Model {
      * @param mixed $table
      * @return Model
      */
-    public function table($table) {
+    public function table($table,$add=false) {
+        $table = strtolower($table);
         $prefix =   $this->tablePrefix;
-        if(is_array($table)) {
-            $this->options['table'] =   $table;
-        }elseif(!empty($table)) {
-            //将__TABLE_NAME__替换成带前缀的表名
-            $table  = $this->parseColumnName($table);
-            $this->options['table'] =   $table;
+        if($add&&$table&&isset($this->options['table'])){
+            if(!empty($table)) {
+                //将__TABLE_NAME__替换成带前缀的表名
+                $table = [$this->parseColumnName($table)];
+            }
+            if(is_array($this->options['table'])){
+                $this->options['table']=array_unique(array_merge(is_array($this->options['table'])?$this->options['table']:[$this->options['table']],$table));
+            }else{
+                $this->options['table']=array_unique(array_merge(is_array($this->options['table'])?$this->options['table']:[$this->options['table']],$table));
+            }
+        }else{
+            if(is_array($table)) {
+                $this->options['table'] =   $table;
+            }elseif(!empty($table)) {
+                //将__TABLE_NAME__替换成带前缀的表名
+                $table  = $this->parseColumnName($table);
+                $this->options['table'] =   $table;
+            }
         }
+//        $this->options['table']=arrayun
         return $this;
     }
 
@@ -1860,7 +1881,7 @@ class Model {
      * @param boolean $except 是否排除
      * @return Model
      */
-    public function field($field,$except=false){
+    public function field($field,$except=false,$add=false){
         if(true === $field) {// 获取全部字段
             $fields     =  $this->getDbFields();
             $field      =  $fields?:'*';
@@ -1871,6 +1892,7 @@ class Model {
             $fields     =  $this->getDbFields();
             $field      =  $fields?array_diff($fields,$field):$field;
         }
+        $this->parseColumnName(is_string($field)?$field:implode(',',$field));
         //
         $_field         =   is_string($field)?explode(',', preg_replace('/ [AaSs]{2} /',' ',$field)):preg_replace('/ [AaSs]{2} /',' ',$field);
         foreach ($_field as $_map){
@@ -1879,7 +1901,10 @@ class Model {
                 $this->_map[$array[1]]=strtolower($array[1]);
             }
         }
-        $this->options['field']   =   $field;
+        if($add&&isset($this->options['field'])){
+            $this->options['field'] = array_unique(array_merge(is_array($this->options['field'])?$this->options['field']:[$this->options['field']],is_array($field)?$field:[$field]));
+        }else
+            $this->options['field']   =   $field;
         return $this;
     }
 
