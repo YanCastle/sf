@@ -138,9 +138,17 @@ function M($name='', $tablePrefix='',$connection='') {
     static $_model  = array();
     if(strpos($name,':')) {
         list($class,$name)    =  explode(':',$name);
+    }elseif($name){
+        $class = current_MCA('M')."\\Model\\{$name}Model";
+        if(class_exists($class)){
+//            $class
+        }else{
+            $class      =   'Tsy\\Library\\Model';
+        }
     }else{
         $class      =   'Tsy\\Library\\Model';
     }
+
     $guid           =   (is_array($connection)?implode('',$connection):$connection).$tablePrefix . $name . '_' . $class;
     if (!isset($_model[$guid]))
         $_model[$guid] = new $class($name,$tablePrefix,$connection);
