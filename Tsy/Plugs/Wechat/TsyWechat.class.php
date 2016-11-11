@@ -440,6 +440,6 @@ class TsyWechat extends Controller{
         }
     }
     function getOauth2AccessToken($Code){
-
+        return $this->WechatAuth->getOauth2AccessToken($Code);
     }
 }
