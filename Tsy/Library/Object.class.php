@@ -505,7 +505,13 @@ class Object
                                     return "__{$TableName}__.{$field}";
                                 }, $Config[self::RELATION_TABLE_FIELDS]));
                         }else{
-                            $Fields = array_merge(M($TableName)->getField());
+                            $field = isset($Config[self::RELATION_TABLE_COLUMN])?$Config[self::RELATION_TABLE_COLUMN]:M($TableName)->getDbFields();
+                            if(is_array($field)&&end($field)===true){//反向
+                                $field = array_diff(M($TableName)->getDbFields(),$field );
+                            }
+                            $Fields = array_map(function($d)use($TableName){
+                                return strpos(trim($d),'.')?$d:"__{$TableName}__.{$d}";
+                            },is_array($field)?$field:explode(',',$field));
                         }
                         $MainColumn = $Config[self::RELATION_MAIN_COLUMN] ? $Config[self::RELATION_MAIN_COLUMN] : $TableColumn;
                         $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$MainColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
@@ -549,7 +555,9 @@ class Object
         if(property_exists($this,'order')&&$this->order){
             $Model->order($this->order);
         }
-        $Fields = array_unique(array_merge(M($this->main)->getDbFields(),$Fields));
+        $Fields = array_unique(array_merge(array_map(function ($d)use($UpperMainTable){
+            return strpos(trim($d),'.')?$d:"__{$UpperMainTable}__.{$d}";
+        },M($this->main)->getDbFields()),$Fields));
         if($this->_read_filter){
             if(end($this->_read_filter)===true){
                 $Fields=$this->_read_filter;

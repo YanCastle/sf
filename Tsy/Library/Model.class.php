@@ -255,7 +255,7 @@ class Model {
     public function __call($method,$args) {
         if(in_array(strtolower($method),$this->methods,true)) {
             // 连贯操作的实现
-            $this->options[strtolower($method)] =   $args[0];
+            $this->options[strtolower($method)] =   $this->parseColumnName($args[0]);
             return $this;
         }elseif(in_array(strtolower($method),array('count','sum','min','max','avg'),true)){
             // 统计查询的实现
@@ -902,7 +902,7 @@ class Model {
         return preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){
             $tn  = $this->tablePrefix.strtolower($match[1]);
             $this->table($tn,true);
-            return strtolower($tn.$match[1]);
+            return strtolower($tn);
         }, $key);
     }
     /**
