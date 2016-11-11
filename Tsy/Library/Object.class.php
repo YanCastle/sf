@@ -41,6 +41,8 @@ class Object
     const FIELD_CONFIG_VALUE_FUNCTION='VF';//不管值是否存在直接覆盖
     const FIELD_CONFIG_CALLBACK_REPLACE_STR='###';
 
+    const READER_FILTER_FIELD='F';
+
     protected $main = '';//主表名称，默认为类名部分
     protected $pk = '';//表主键，默认自动获取
     protected $fields='';//自动化对象的字段过滤，接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
@@ -54,6 +56,9 @@ class Object
     protected $_read_filter = [];//输入读取过滤配置
     protected $_read_deny=[];//禁止读取字段
     protected $_fieldMap=[];//通过字段查归属表的
+    protected $_read_group='';
+    protected $_read_having='';
+    protected $_read_where=[];
     protected $_tableFieldsMap=[];//表名=>[字段名称]
     protected $searchWFieldsGroup=[
 //        'GroupName'=>['Name','Number','BarCode','Standard','PinYin','Memo']
@@ -499,6 +504,8 @@ class Object
                                 array_map(function ($field) use ($TableName) {
                                     return "__{$TableName}__.{$field}";
                                 }, $Config[self::RELATION_TABLE_FIELDS]));
+                        }else{
+                            $Fields = array_merge(M($TableName)->getField());
                         }
                         $MainColumn = $Config[self::RELATION_MAIN_COLUMN] ? $Config[self::RELATION_MAIN_COLUMN] : $TableColumn;
                         $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$MainColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
@@ -542,12 +549,26 @@ class Object
         if(property_exists($this,'order')&&$this->order){
             $Model->order($this->order);
         }
+        $Fields = array_unique(array_merge(M($this->main)->getDbFields(),$Fields));
+        if($this->_read_filter){
+            if(end($this->_read_filter)===true){
+                $Fields=$this->_read_filter;
+            }else{
+                foreach ($this->_read_filter as $Config=>$ColumnName){
+                    if(is_numeric($Config)&&is_string($ColumnName)){
+                        $Model->field($ColumnName,false,true);
+                    }else
+                        $Fields[$ColumnName]=$Config;
+                }
+
+            }
+        }
         if ($Fields) {
-            $Model->field($Fields);
+            $Model->field($Fields,false,true);
             $Fields = [];
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
-        $Objects = $Model->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
+        $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
         if (!$Objects) {
             return [];
         }
