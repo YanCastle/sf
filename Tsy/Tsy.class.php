@@ -17,6 +17,11 @@ use Tsy\Mode\Swoole;
 class Tsy
 {
     protected static $class_map = [];
+    public static $i='';
+    public static $d='';
+    public static $m='';
+    public static $t='';
+//    public static
     /**
      * @var Mode $Mode
      */
