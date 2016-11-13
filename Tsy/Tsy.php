@@ -26,7 +26,7 @@ define('TEMP_DIR',IS_WIN?$_SERVER['TEMP']:'/tmp');
 define('APP_PATH',isset($APP_PATH)?realpath($APP_PATH):realpath('.'));
 define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:TEMP_DIR.DIRECTORY_SEPARATOR.APP_NAME.DIRECTORY_SEPARATOR.'Runtime');
 define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
-defined('UPLOAD_PATH') or define('UPLOAD_PATH',APP_PATH.DIRECTORY_SEPARATOR.'Upload');
+defined('UPLOAD_PATH') or define('UPLOAD_PATH',dirname($_SERVER['SCRIPT_FILENAME']).DIRECTORY_SEPARATOR.'Upload');
 //定义配置文件后缀
 defined('CONFIG_SUFFIX') or define('CONFIG_SUFFIX','');
 
