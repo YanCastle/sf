@@ -208,6 +208,10 @@ function swoole_in_check($fd,$data){
         }
     }
     \Tsy\Library\Aop::exec('swoole_in',\Tsy\Library\Aop::$AOP_AFTER,$Data);
+    \Tsy\Tsy::$d=$Data['d'];
+    \Tsy\Tsy::$i=$Data['i'];
+    \Tsy\Tsy::$m=$Data['m'];
+    \Tsy\Tsy::$t=$Data['t'];
     return $Data;
 }
 
