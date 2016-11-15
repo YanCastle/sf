@@ -315,7 +315,7 @@ class Object
             }
             $Where['_logic'] = 'OR';
             $Model->where($Where);
-            $KeywordObjectIDs = $Model->order($Sort)->getField($this->pk, true);
+            $KeywordObjectIDs = $Model->getField($this->pk, true);
         }
         if ($W) {
             $Data = param_group($this->searchWFieldsGroup, $W);
@@ -371,9 +371,9 @@ class Object
             $ObjectIDs=$KeywordObjectIDs;
         }
         if (strlen($Keyword) === 0 && count($W) === 0) {
-            $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
+            $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
             return [
-                'L' => $ObjectIDs?array_values($this->gets($ObjectIDs)):[],
+                'L' => $ObjectIDs?array_values($this->gets($ObjectIDs,$Properties,$Sort)):[],
                 'P' => $P,
                 'N' => $N,
                 'T' => $Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count'],
@@ -456,7 +456,7 @@ class Object
         $Objects = [];
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
-        $Model = new Model($this->main);
+        $Model = M($this->main);
         $Fields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
 
         foreach ($this->property as $PropertyName => $Config) {
