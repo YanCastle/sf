@@ -298,7 +298,7 @@ class Object
      */
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
     {
-        $Model = new Model($this->searchTable ? $this->searchTable : $this->main);
+        $Model = M($this->searchTable ? $this->searchTable : $this->main);
 //        $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = false;
 //        $FieldPrefix = $DB_PREFIX . strtolower($this->main) . '.';
