@@ -570,7 +570,7 @@ class Object
         //封装一对一的对象结构
         foreach ($OneObjectProperties as $PropertyName=>$Config){
             $OneObjectIDs=[];
-            $OneObjectModel = new Model($Config[self::RELATION_TABLE_NAME]);
+            $OneObjectModel = M($Config[self::RELATION_TABLE_NAME]);
 //                    特殊指定主表字段与子表字段相同
             $OneObjectIDs = array_column($Objects,isset($Config[self::RELATION_MAIN_COLUMN])&&$Config[self::RELATION_MAIN_COLUMN]?$Config[self::RELATION_MAIN_COLUMN]:$Config[self::RELATION_TABLE_COLUMN]);
 //                    处理字段
@@ -586,15 +586,21 @@ class Object
         // 处理一对多的对象化结构
         foreach ($ArrayObjectProperties as $PropertyName=>$Config){
             $ArrayObjectIDs=[];
-            $ArrayObjectModel = new Model($Config[self::RELATION_TABLE_NAME]);
+            $ArrayObjectModel = M($Config[self::RELATION_TABLE_NAME]);
 //                    特殊指定主表字段与子表字段相同
             $ArrayObjectIDs = array_column($Objects,isset($Config[self::RELATION_MAIN_COLUMN])&&$Config[self::RELATION_MAIN_COLUMN]?$Config[self::RELATION_MAIN_COLUMN]:$Config[self::RELATION_TABLE_COLUMN]);
 //                    处理字段
-            $Fields = $this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:'',$Config[self::RELATION_TABLE_COLUMN]);
-            if($ArrayObjectIDs&&$Fields){
-                $ArrayObjectPropertyValues[$PropertyName] = array_key_set($ArrayObjectModel->where([
+//            $Fields = $this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:'',$Config[self::RELATION_TABLE_COLUMN]);
+            if($ArrayObjectIDs){
+//                $ArrayObjectPropertyValues[$PropertyName] = array_key_set($ArrayObjectModel->where([
+//                    $Config[self::RELATION_TABLE_COLUMN]=>['IN',$ArrayObjectIDs]
+//                ])->field($Fields)->order("{$Config[self::RELATION_TABLE_COLUMN]} DESC")->select(),$Config[self::RELATION_TABLE_COLUMN],true);
+                $ObjectClass=$this->MC[0]."\\Object\\".$Config[self::RELATION_TABLE_NAME]."Object";
+//                if(class_exists($ObjectClass))
+                $ArrayObjectPropertyValues[$PropertyName]=class_exists($ObjectClass)?(new $ObjectClass)->search('',[
                     $Config[self::RELATION_TABLE_COLUMN]=>['IN',$ArrayObjectIDs]
-                ])->field($Fields)->order("{$Config[self::RELATION_TABLE_COLUMN]} DESC")->select(),$Config[self::RELATION_TABLE_COLUMN],true);
+                ],'',1,9999):[];
+                $ArrayObjectPropertyValues[$PropertyName]=$ArrayObjectPropertyValues[$PropertyName]?array_key_set($ArrayObjectPropertyValues[$PropertyName]['L'],$Config[self::RELATION_TABLE_COLUMN],true):[];
             }else{
                 $ArrayObjectPropertyValues[$PropertyName]=[];
             }
