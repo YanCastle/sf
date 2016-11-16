@@ -794,6 +794,7 @@ class Model {
      */
     protected function _read_data($data, $sql = '')
     {
+        return $data;
         // 检查字段映射
 //        if(empty($this->_map) ) {
         $map = empty($this->_map)?$this->getSqlFieldsMap($this->lastSql):$this->_map;
