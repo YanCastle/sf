@@ -96,6 +96,8 @@ class Object
             if ($CachedMap = cache('ObjectMap' . $this->main)) {
                 //有缓存存在的情况下
                 $this->map = array_merge($CachedMap, $this->map);
+                $this->_tableFieldsMap = cache('ObjectTableFieldsMap'.$this->main);
+                $this->_fieldMap=cache('ObjectFieldMapMap'.$this->main);
             } else {
 //                没有缓存存在的情况下先获取缓存然后再缓存
                 $this->setMapByColumns();
@@ -170,9 +172,11 @@ class Object
                 if(!isset($this->_tableFieldsMap[$TableName])){
                     $this->_tableFieldsMap[$TableName]=[];
                 }
-                $this->_tableFieldsMap[$TableName][]=$item['field'];
+                $this->_tableFieldsMap[$TableName][]=$item['Field'];
             }
         }
+        cache('ObjectTableFieldsMap'.$this->main,$this->_tableFieldsMap);
+        cache('ObjectFieldMapMap'.$this->main,$this->_fieldMap);
         cache('ObjectMap' . $this->main, $this->map);
     }
 
@@ -228,9 +232,9 @@ class Object
             $Properties=array_merge(array_keys($this->property),array_keys($this->link));
         }
         $Properties = array_map(function($d){
-            return strtolower($d);
+            return parse_name($d);
         },$Properties);
-        $Properties[] = strtolower($this->main);
+        $Properties[] = parse_name($this->main);
     }
     function add($data=[],$Properties=false)
     {
@@ -247,7 +251,7 @@ class Object
             foreach ($ObjectsColumns as $k=>$rows){
                 if(0===$k||!in_array($k,$Properties))continue;
                 if($ID = M($k)->add($rows)){
-                    if($k==strtolower($this->main))$PKID=$ID;
+                    if($k==parse_name($this->main))$PKID=$ID;
                 }else{
                     rollback();
                     return "属性:{$k}添加失败";
@@ -745,7 +749,6 @@ class Object
                             $PKID,$v,isset($this->property[$k][self::RELATION_TABLE_NAME])?$this->property[$k][self::RELATION_TABLE_NAME]:false,$PK
                         ];
                     }
-
                 }else{
                     if($k!=$this->pk)
                         $MainColumns[$k]=$v;
