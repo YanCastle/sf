@@ -13,7 +13,9 @@
 function get_age($birthday) {
     $age = 0;
     $year = $month = $day = 0;
-    if(strlen($birthday)==10){
+    if(is_numeric($birthday)&&strlen()){
+
+    }if(strlen($birthday)==10){
         list($year,$month,$day)=explode('-',date('Y-m-d',$birthday));
     }elseif(strlen($birthday)==8&&is_numeric($birthday)){
         $year = substr($birthday,0,4);
