@@ -247,19 +247,21 @@ class Object
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
             $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
-            startTrans();
+//            startTrans();
             foreach ($ObjectsColumns as $k=>$rows){
                 if(0===$k||!in_array($k,$Properties))continue;
                 if($ID = M($k)->add($rows)){
-                    if($k==parse_name($this->main))$PKID=$ID;
+                    if($k==parse_name($this->main))
+                        $PKID=$ID;
+//                    commit();
                 }else{
-                    rollback();
+//                    rollback();
                     return "属性:{$k}添加失败";
                     break;
                 }
             }
             if($PKID){
-                commit();
+//                commit();
                 $RsData = $this->get($PKID);
                 return $RsData?$RsData:array_merge($data,[$this->pk=>$PKID]);
             }
