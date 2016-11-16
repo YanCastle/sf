@@ -249,7 +249,7 @@ class Object
             $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
 //            startTrans();
             foreach ($ObjectsColumns as $k=>$rows){
-                if(0===$k||!in_array($k,$Properties)||count($rows)>1)continue;
+                if(0===$k||!in_array($k,$Properties)||count($rows)<2)continue;
                 if($ID = M($k)->add($rows)){
                     if($k==parse_name($this->main))
                         $PKID=$ID;
