@@ -11,7 +11,7 @@
  * @param array $Config 初始化对象时的参数
  * @return \TSy\Library\Object
  */
-function O($Name,$Config=[]){
+function O($name,$config=[]){
 //    $Config=[
 //        'main'=>'printer',
 //        'pk'=>'PrinterClientID',
@@ -21,21 +21,23 @@ function O($Name,$Config=[]){
 //            ]
 //        ]
 //    ];
-    static $Objects=[];
-    $CacheKey = md5($Name.serialize($Config));
-    if (isset($Objects[$CacheKey])){
-        return $Objects[$CacheKey];
-    }
-    if(class_exists($Obj=implode('\\',[process_queue('controller','get')[0],'Object',$Name.'Object']))){
-        $OBJ=new $Obj($Name);
-        foreach ($Config as $K=>$config){
-            $OBJ->$K=$config;
+    static $_objects  = array();
+    if(strpos($name,':')) {
+        list($class,$name)    =  explode(':',$name);
+    }elseif($name){
+        $class = current_MCA('M')."\\Object\\{$name}Object";
+        if(class_exists($class)){
+//            $class
+        }else{
+            $class      =   'Tsy\\Library\\Object';
         }
-        $Objects[$CacheKey]=$OBJ;
     }else{
-        $OBJ=new \TSy\Library\Object($Name);
+        $class      =   'Tsy\\Library\\Object';
     }
-    return $OBJ;
+    $guid           =   (is_array($config)?implode('',$config):$config). $name . '_' . $class;
+    if (!isset($_objects[$guid]))
+        $_objects[$guid] = new $class($name,$config);
+    return $_objects[$guid];
 }
 
 function object_generate($Objects,$Properties){
