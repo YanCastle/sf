@@ -254,7 +254,7 @@ class Object
             }else{
                 rollback();
             }
-            return $PKID?$this->get($PKID):false;
+            return $PKID?$this->get($PKID):(APP_DEBUG?M()->getDbError():'添加失败');
         }else{
             return $rs;
         }
