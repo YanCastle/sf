@@ -421,6 +421,7 @@ class Object
         !(false===$Properties&&isset($_POST['Properties'])) or $Properties=$_POST['Properties'];
 //        $AllProperties=array_merge(array_keys($this->property),array_keys($this->link));
 //        if(true===end($Properties))
+        $emptyClass=new \stdClass();
         $Exclude = true === end($Properties);
         is_array($Properties) or $Properties = [];//初始化
         foreach (array_merge($this->property, $this->link) as $PN => $P) {
@@ -597,7 +598,7 @@ class Object
                 ],'',1,9999):[];
                 $ArrayObjectPropertyValues[$PropertyName]=$ArrayObjectPropertyValues[$PropertyName]?array_key_set($ArrayObjectPropertyValues[$PropertyName]['L'],$Config[self::RELATION_TABLE_COLUMN],true):[];
             }else{
-                $ArrayObjectPropertyValues[$PropertyName]=[];
+                $ArrayObjectPropertyValues[$PropertyName]=new \stdClass();
             }
         }
         //处理多对多属性
@@ -684,7 +685,7 @@ class Object
             }
             //处理一对一的属性问题
             foreach ($OneProperties as $PropertyName=>$PropertyConfig){
-                $Objects[$ID][$PropertyName]=isset($OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
+                $Objects[$ID][$PropertyName]=isset($OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OnePropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:$emptyClass;
             }
             //处理一对多的对象化关系组合
             foreach ($ArrayObjectProperties as $PropertyName=>$PropertyConfig){
@@ -692,7 +693,7 @@ class Object
             }
 //            处理一对一对象化
             foreach ($OneObjectProperties as $PropertyName=>$PropertyConfig){
-                $Objects[$ID][$PropertyName]=isset($OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:[];
+                $Objects[$ID][$PropertyName]=isset($OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]])?$OneObjectPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]:$emptyClass;
             }
 //            处理多对多关系
             foreach ($this->link as $PropertyName => $PropertyConfig) {
@@ -700,7 +701,7 @@ class Object
             }
 //            处理Object配置
             foreach ($PropertyObjects as $Key => $Config) {
-                $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : [];
+                $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : $emptyClass;
             }
         }
 //        $Objects=array_values($Objects);
