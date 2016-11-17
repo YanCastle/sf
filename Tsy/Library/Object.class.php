@@ -245,30 +245,16 @@ class Object
         if(!$this->allow_add)return false;
         if(!$data&&$_POST)
             $data=$_POST;
-        $this->_parseProperties($Properties);
         //遍历添加过滤配置
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
-            $ObjectsColumns=param_group($this->_tableFieldsMap,$rs);
-//            startTrans();
-            foreach ($ObjectsColumns as $k=>$rows){
-                if(0===$k||!in_array($k,$Properties)||count($rows)<2)continue;
-                if($ID = O($k)->add($rows)){
-                    if($k==parse_name($this->main))
-                        $PKID=$ID;
-//                    commit();
-                }else{
-//                    rollback();
-                    return "属性:{$k}添加失败";
-                    break;
-                }
+            startTrans();
+            if($PKID = M($this->main)->add($rs)){
+                commit();
+            }else{
+                rollback();
             }
-            if($PKID){
-//                commit();
-                $RsData = $this->get($PKID);
-                return $RsData?$RsData:array_merge($data,[$this->pk=>$PKID]);
-            }
-            return APP_DEBUG?M()->getDbError():'未知错误';
+            return $PKID?$this->get($PKID):false;
         }else{
             return $rs;
         }
