@@ -175,7 +175,7 @@ class Model {
         unset($this->fields['_pk']);
         foreach ($fields as $key=>$val){
             // 记录字段类型
-            $type[$key]     =   $val['type'];
+            $type[$key]     =   $val['type'].($val['notnull']?'NOTNULL':'').($val['autoinc']?'AUTOINC':'');
             if($val['primary']) {
                   // 增加复合主键支持
                 if (isset($this->fields['_pk']) && $this->fields['_pk'] != null) {
@@ -754,6 +754,12 @@ class Model {
     protected function _parseType(&$data,$key) {
         if(!isset($this->options['bind'][':'.$key]) && isset($this->fields['_type'][$key])){
             $fieldType = strtolower($this->fields['_type'][$key]);
+            if(strpos($fieldType,'autoinc')){
+                unset($data[$key]);
+            }else
+            if(!strpos($fieldType,'notnull')&&$data[$key]===''){
+                unset($data[$key]);
+            }else
             if(false !== strpos($fieldType,'enum')){
                 // 支持ENUM类型优先检测
             }elseif(false === strpos($fieldType,'bigint') && false !== strpos($fieldType,'int')) {
