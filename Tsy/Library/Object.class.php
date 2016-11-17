@@ -81,7 +81,7 @@ class Object
     protected $__CLASS__;
     protected $MC=[];
     protected $directProperties=[];
-    function __construct()
+    function __construct($name='',$config=[])
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
 //        提取数据库字段，合并到map中
@@ -108,6 +108,9 @@ class Object
             if(isset($Config[self::RELATION_TABLE_PROPERTY])&&$Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
                 $this->directProperties[$PropertyName]=$this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_NAME])?$Config[self::RELATION_TABLE_NAME]:'');
             }
+        }
+        foreach ($config as $k=>$v){
+            $this->$k=$v;
         }
     }
 
@@ -250,7 +253,7 @@ class Object
 //            startTrans();
             foreach ($ObjectsColumns as $k=>$rows){
                 if(0===$k||!in_array($k,$Properties)||count($rows)<2)continue;
-                if($ID = M($k)->add($rows)){
+                if($ID = O($k)->add($rows)){
                     if($k==parse_name($this->main))
                         $PKID=$ID;
 //                    commit();
