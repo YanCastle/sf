@@ -373,9 +373,11 @@ class Model {
                     return false;
                 }
                 return $insertId;
-            }
+            }else
             if(false === $this->_after_insert($data,$options)) {
                 return false;
+            }elseif(!$insertId&&!$this->autoinc){
+                return $data[$pk];
             }
         }
         return $result;
