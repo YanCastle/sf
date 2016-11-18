@@ -108,6 +108,12 @@ class Object
             if(isset($Config[self::RELATION_TABLE_PROPERTY])&&$Config[self::RELATION_TABLE_PROPERTY]==self::PROPERTY_ONE){
                 $this->directProperties[$PropertyName]=$this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_NAME])?$Config[self::RELATION_TABLE_NAME]:'');
             }
+            if(!isset($Config[self::RELATION_MAIN_COLUMN])&&isset($Config[self::RELATION_TABLE_COLUMN])){
+                $Config[self::RELATION_MAIN_COLUMN]=$Config[self::RELATION_TABLE_COLUMN];
+            }
+            if(!isset($Config[self::RELATION_TABLE_COLUMN])&&isset($Config[self::RELATION_MAIN_COLUMN])){
+                $Config[self::RELATION_TABLE_COLUMN]=$Config[self::RELATION_MAIN_COLUMN];
+            }
         }
         foreach ($config as $k=>$v){
             $this->$k=$v;
@@ -410,7 +416,6 @@ class Object
         }
         return M($this->main)->where([$this->pk => ['IN', $IDs]])->delete();
     }
-
     /**
      * 获取多个对象属性
      * @param array|int $IDs 主键字段编号值
