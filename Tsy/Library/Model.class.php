@@ -748,7 +748,8 @@ class Model {
                 $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){
                     return strtolower($this->tablePrefix.$match[1]);
                 },trim($v));
-                $options['field'][$k] = (strpos($options['field'][$k],'.')?str_replace('.','.`',$options['field'][$k]):"`{$options['field'][$k]}").'`';
+                if(!strpos($options['field'][$k],'`'))
+                    $options['field'][$k] = (strpos($options['field'][$k],'.')?str_replace('.','.`',$options['field'][$k]):"`{$options['field'][$k]}").'`';
             }
         }
         // 查询过后清空sql表达式组装 避免影响下次查询
