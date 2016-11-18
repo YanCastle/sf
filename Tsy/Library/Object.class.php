@@ -422,7 +422,7 @@ class Object
 //        $AllProperties=array_merge(array_keys($this->property),array_keys($this->link));
 //        if(true===end($Properties))
         $emptyClass=new \stdClass();
-        $Exclude = true === end($Properties);
+        $Exclude = true === $Properties&&end($Properties);
         is_array($Properties) or $Properties = [];//初始化
         foreach (array_merge($this->property, $this->link) as $PN => $P) {
             if ($Exclude) {
