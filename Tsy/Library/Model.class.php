@@ -58,6 +58,8 @@ class Model {
     protected $methods          =   array('strict','order','alias','having','group','lock','distinct','auto','filter','validate','result','token','index','force');
 
     protected $serialize        =   [];
+
+    protected $fieldName        =   [];
 //    protected $tables=[];//该数据库中所有存在的表
 	/**
      * 架构函数
@@ -577,7 +579,7 @@ class Model {
     protected function _before_delete($options) {}
     // 删除成功后的回调方法
     protected function _after_delete($data,$options) {}
-
+    protected function _field_check(){}
     /**
      * 查询数据集
      * @access public
@@ -587,6 +589,7 @@ class Model {
     public function select($options=array()) {
         $this->_auto_map();
         $pk   =  $this->getPk();
+
         if(is_string($options) || is_numeric($options)) {
             // 根据主键查询
             if(strpos($options,',')) {
@@ -620,6 +623,9 @@ class Model {
         }
         // 分析表达式
         $options    =  $this->_parseOptions($options);
+        if(false===$options){
+            return $options;
+        }
         // 判断查询缓存
         if(isset($options['cache'])){
             $cache  =   $options['cache'];
@@ -732,7 +738,14 @@ class Model {
         }
         if(isset($options['field'])&&is_array($options['field'])){
             foreach ($options['field'] as $k=>$v){
-                $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return strtolower($this->tablePrefix.$match[1]);}, trim($v));
+                $columnName = explode('.',$options['field'][$k]);
+                $columnName = strtolower(trim(count($columnName)==2?$columnName[1]:$columnName[0],'``'));
+                if(in_array($columnName,$this->fieldName)){
+                    $this->error='SQL错误:'.$columnName;
+                    return false;
+                }
+                $this->fieldName[]=$columnName;
+                $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return '`'.strtolower($this->tablePrefix.$match[1]).'`';}, '`'.trim($v).'`');
             }
         }
         // 查询过后清空sql表达式组装 避免影响下次查询
