@@ -402,7 +402,7 @@ class Alipay
      * 针对notify_url验证消息是否是支付宝发出的合法消息
      * @return 验证结果
      */
-    function verifyNotify($notify_id,$sign,$trade_status,$trade_status,$trade_no,$out_trade_no){
+    function verifyNotify($notify_id,$sign,$trade_status,$trade_no,$out_trade_no){
         if(empty($_POST)) {//判断POST来的数组是否为空
             return false;
         }
