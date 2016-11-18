@@ -739,13 +739,16 @@ class Model {
         if(isset($options['field'])&&is_array($options['field'])){
             foreach ($options['field'] as $k=>$v){
                 $columnName = explode('.',$options['field'][$k]);
-                $columnName = strtolower(trim(count($columnName)==2?$columnName[1]:$columnName[0],'``'));
+                $columnName = strtolower(trim(count($columnName)==2?$columnName[1]:$columnName[0],'`'));
                 if(in_array($columnName,$this->fieldName)){
                     $this->error='SQL 字段重复:'.$v;
                     return false;
                 }
                 $this->fieldName[]=$columnName;
-                $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){ return '`'.strtolower($this->tablePrefix.$match[1]).'`';}, '`'.trim($v).'`');
+                $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){
+                    return strtolower($this->tablePrefix.$match[1]);
+                },trim($v));
+                $options['field'][$k] = (strpos($options['field'][$k],'.')?str_replace('.','.`',$options['field'][$k]):"`{$options['field'][$k]}").'`';
             }
         }
         // 查询过后清空sql表达式组装 避免影响下次查询

@@ -455,6 +455,7 @@ class Object
             return false;
         }
         $Objects = [];
+        $fields=[];
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
         $Model = M($this->main);
@@ -531,9 +532,21 @@ class Object
         if(property_exists($this,'order')&&$this->order){
             $Model->order($this->order);
         }
+        //获取所有字段
         $Fields = array_unique(array_merge(array_map(function ($d)use($UpperMainTable){
             return strpos(trim($d),'.')?$d:"__{$UpperMainTable}__.{$d}";
         },M($this->main)->getDbFields()),$Fields));
+        //准备做字段冲突检测，若有冲突则以前面的为准。
+//        if(count($Fields)!=count(array_unique(explode(',',preg_replace('/[_A-Za-z]+\./','',implode(',',$Fields)))))){
+//
+//        }
+        foreach ($Fields as $k=>$field){
+            $field = end(explode('.',$field));
+            if(in_array($field,$fields)||strlen($field)==0){
+                unset($Fields[$k]);continue;
+            }
+            $fields[]=$field;
+        }
         if($this->_read_filter){
             if(end($this->_read_filter)===true){
                 $Fields=$this->_read_filter;
@@ -544,7 +557,6 @@ class Object
                     }else
                         $Fields[$ColumnName]=$Config;
                 }
-
             }
         }
         if ($Fields) {
