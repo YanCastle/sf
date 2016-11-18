@@ -741,7 +741,7 @@ class Model {
                 $columnName = explode('.',$options['field'][$k]);
                 $columnName = strtolower(trim(count($columnName)==2?$columnName[1]:$columnName[0],'``'));
                 if(in_array($columnName,$this->fieldName)){
-                    $this->error='SQL错误:'.$columnName;
+                    $this->error='SQL 字段重复:'.$v;
                     return false;
                 }
                 $this->fieldName[]=$columnName;
@@ -1687,7 +1687,8 @@ class Model {
      * @return string
      */
     public function getDbError() {
-        return $this->db->getError();
+        $error = $this->db->getError();
+        return $this->error?$this->error:$error;
     }
 
     /**
