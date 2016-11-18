@@ -481,13 +481,13 @@ class Object
                                     return "__{$TableName}__.{$field}";
                                 }, $Config[self::RELATION_TABLE_FIELDS]));
                         }else{
-                            $field = isset($Config[self::RELATION_TABLE_COLUMN])?$Config[self::RELATION_TABLE_COLUMN]:M($TableName)->getDbFields();
+                            $field = isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:M($Config[self::RELATION_TABLE_NAME])->getDbFields();
                             if(is_array($field)&&end($field)===true){//反向
-                                $field = array_diff(M($TableName)->getDbFields(),$field );
+                                $field = array_diff(M($Config[self::RELATION_TABLE_NAME])->getDbFields(),$field );
                             }
-                            $Fields = array_map(function($d)use($TableName){
+                            $Fields = array_merge($Fields,array_map(function($d)use($TableName){
                                 return strpos(trim($d),'.')?$d:"__{$TableName}__.{$d}";
-                            },is_array($field)?$field:explode(',',$field));
+                            },is_array($field)?$field:explode(',',$field)));
                         }
                         $MainColumn = $Config[self::RELATION_MAIN_COLUMN] ? $Config[self::RELATION_MAIN_COLUMN] : $TableColumn;
                         $Model->join("__{$TableName}__ ON __{$UpperMainTable}__.{$MainColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
