@@ -13,7 +13,7 @@ create table {$PREFIX}upload
    SaveName             char(250),
    SavePath             char(250),
    FileMd5              char(50),
-   UploadTime           int(10) not null,
+   UploadTime           int(11) not null,
    UploaderUID          int(11),
    primary key (UploadID)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;

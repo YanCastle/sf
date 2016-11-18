@@ -556,6 +556,7 @@ class Object
         if (!$Objects) {
             return [];
         }
+        $this->_afterObjectsGetsSelect($Objects);
         //处理一对多的情况
         $ArrayPropertyValues = $OnePropertyValues = $ArrayObjectPropertyValues =[];
         foreach ($ArrayProperties as $PropertyName => $Config) {
@@ -683,6 +684,7 @@ class Object
         }
 //         组合生成最终的Object对象
         $Objects = array_key_set($Objects, $this->pk);
+        $this->_beforeObjectGetsForeach($Objects,$ArrayProperties,$OneProperties,$ArrayObjectProperties,$OneObjectProperties,$LinkPropertyValues,$PropertyObjects);
         foreach ($Objects as $ID => $Object) {
 //            处理一对多关系
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig) {
@@ -708,8 +710,10 @@ class Object
             foreach ($PropertyObjects as $Key => $Config) {
                 $Objects[$ID][$Key] = isset($PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]]) ? $PropertyObjectValues[$Key][$Object[$Config[self::RELATION_OBJECT_COLUMN]]] : $emptyClass;
             }
+            $this->_foreachObjectGets($Objects,$ID);
         }
 //        $Objects=array_values($Objects);
+        $this->_beforeObjectGetsReturn($Objects);
         return $Objects;
     }
 
@@ -1085,8 +1089,36 @@ class Object
                 }
             }
         }
-
-
-
     }
+
+    /**
+     * 在gets的select后触发
+     * @param $Objects
+     */
+    protected function _afterObjectsGetsSelect(&$Objects){}
+
+    /**
+     * 在foreach中被触发，用于添加逻辑字段
+     * @param $Objects
+     * @param $ObjectID
+     */
+    protected function _foreachObjectGets(&$Objects,$ObjectID){}
+
+    /**
+     * 在返回前触发，用于输出过滤
+     * @param $Objects
+     */
+    protected function _beforeObjectGetsReturn(&$Objects){}
+
+    /**
+     * 在开始foreach之前触发，
+     * @param $Objects
+     * @param $ArrayProperties
+     * @param $OneProperties
+     * @param $ArrayObjectProperties
+     * @param $OneObjectProperties
+     * @param $LinkPropertyValues
+     * @param $PropertyObjects
+     */
+    protected function _beforeObjectGetsForeach(&$Objects,&$ArrayProperties,&$OneProperties,&$ArrayObjectProperties,&$OneObjectProperties,&$LinkPropertyValues,&$PropertyObjects){}
 }

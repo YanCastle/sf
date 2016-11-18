@@ -1632,7 +1632,7 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>Admin</a:Creator>
 <a:ModificationDate>1449650341</a:ModificationDate>
 <a:Modifier>castle</a:Modifier>
-<a:DataType>int(10)</a:DataType>
+<a:DataType>int(11)</a:DataType>
 <a:Length>10</a:Length>
 <a:PhysicalDomain.Mandatory>1</a:PhysicalDomain.Mandatory>
 </o:PhysicalDomain>
@@ -1828,7 +1828,7 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>castle</a:Creator>
 <a:ModificationDate>1449650341</a:ModificationDate>
 <a:Modifier>castle</a:Modifier>
-<a:DataType>int(10)</a:DataType>
+<a:DataType>int(11)</a:DataType>
 <a:Length>10</a:Length>
 <a:Column.Mandatory>1</a:Column.Mandatory>
 <c:Domain>
