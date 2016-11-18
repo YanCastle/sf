@@ -590,9 +590,14 @@ class Object
 //                    处理字段
             $Fields = $this->_parseFieldsConfig($Config[self::RELATION_TABLE_NAME],isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:'',$Config[self::RELATION_TABLE_COLUMN]);
             if($OneObjectIDs&&$Fields){
-                $OneObjectPropertyValues[$PropertyName] = array_key_set($OneObjectModel->where([
+//                $OneObjectPropertyValues[$PropertyName] = array_key_set($OneObjectModel->where([
+//                    $Config[self::RELATION_TABLE_COLUMN]=>['IN',$OneObjectIDs]
+//                ])->field($Fields)->select(),$Config[self::RELATION_TABLE_COLUMN]);
+                $ObjectClass=$this->MC[0]."\\Object\\".$Config[self::RELATION_TABLE_NAME]."Object";
+                $OneObjectPropertyValues[$PropertyName]=class_exists($ObjectClass)?(new $ObjectClass)->search('',[
                     $Config[self::RELATION_TABLE_COLUMN]=>['IN',$OneObjectIDs]
-                ])->field($Fields)->select(),$Config[self::RELATION_TABLE_COLUMN]);
+                ],'',1,9999):[];
+                $OneObjectPropertyValues[$PropertyName]=$OneObjectPropertyValues[$PropertyName]?array_key_set($OneObjectPropertyValues[$PropertyName]['L'],$Config[self::RELATION_TABLE_COLUMN]):[];
             }else{
                 $OneObjectPropertyValues[$PropertyName]=[];
             }
