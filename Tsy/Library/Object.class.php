@@ -149,27 +149,27 @@ class Object
         foreach ($Columns as $TableName => $column) {
 //            解析并生成格式限制和转化配置
             foreach ($column as $item) {
-                $type = explode(',', str_replace(['(', ')', ' '], ',', $item['type']));
-                $this->map[$TableName . '.' . $item['field']] = [
-                    'U' => strpos($item['type'], 'unsigned') > 0,//是否无符号
+                $type = explode(',', str_replace(['(', ')', ' '], ',', $item['Type']));
+                $this->map[$TableName . '.' . $item['Field']] = [
+                    'U' => strpos($item['Type'], 'unsigned') > 0,//是否无符号
                     'T' => count($type) == 1 ? $type : [$type[0], $type[1]],//数据库类型
-                    'D' => $item['default'],//默认值
-                    'P' => 'PRI' == $item['key'],//是否主键
-                    'N' => 'YES' == $item['null'],//是否为null
-                    'A' => 'auto_increment' == $item['extra'],//是否自增
-                    'F'=>$item['field']
+                    'D' => $item['Default'],//默认值
+                    'P' => 'PRI' == $item['Key'],//是否主键
+                    'N' => 'YES' == $item['Null'],//是否为null
+                    'A' => 'auto_increment' == $item['Extra'],//是否自增
+                    'F'=>$item['Field']
                 ];
                 if (!$this->pk &&
-                    'PRI' == $item['key']
+                    'PRI' == $item['Key']
                 ) {
-                    $this->pk = $item['field'];
+                    $this->pk = $item['Field'];
                 }
                 //生成反向查询
-                if(isset($this->_fieldMap[$item['field']])){
+                if(isset($this->_fieldMap[$item['Field']])){
                     //TODO 考虑重复字段名称怎么处理
-                    $this->_fieldMap[$item['field']]=[];
+                    $this->_fieldMap[$item['Field']]=[];
                 }else{
-                    $this->_fieldMap[$item['field']]=$TableName;
+                    $this->_fieldMap[$item['Field']]=$TableName;
                 }
                 //生成反向Group
                 if(!isset($this->_tableFieldsMap[$TableName])){
