@@ -773,9 +773,9 @@ class Model {
     protected function _parseType(&$data,$key) {
         if(!isset($this->options['bind'][':'.$key]) && isset($this->fields['_type'][$key])){
             $fieldType = strtolower($this->fields['_type'][$key]);
-            if(strpos($fieldType,'autoinc')){
-                unset($data[$key]);
-            }else
+//            if(strpos($fieldType,'autoinc')){
+//                unset($data[$key]);
+//            }else
             if(!strpos($fieldType,'notnull')&&$data[$key]===''){
                 unset($data[$key]);
             }else
