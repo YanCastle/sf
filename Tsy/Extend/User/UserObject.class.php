@@ -55,7 +55,7 @@ class UserObject extends Object
      * @param string $RePWD 重置密码验证
      * @return bool
      */
-    function resetPWD(int $UID,string $PWD,string $Code,string $RePWD=''){
+    function resetPWD($UID,$PWD,$Code,$RePWD=''){
         return true;
     }
 
@@ -76,7 +76,7 @@ class UserObject extends Object
      * @param string $Way
      * @return mixed
      */
-    function sendVerifyCode(int $UID,string $Way){
+    function sendVerifyCode($UID,$Way){
         return true;
     }
     function reLogin(){}

@@ -14,14 +14,14 @@ namespace Tsy\Library\Test;
  */
 class Data
 {
-    function char(int $length):string {
+    function char($length) {
 
     }
-    function int(int $Length,$AllowNegative,int $Min=false,int $Max=false):int{
+    function int($Length,$AllowNegative,$Min=false,$Max=false){
 
     }
-    function bool(bool $bool=null):bool {
+    function bool($bool=null){
 
     }
-    function timestamp(int $time){}
+    function timestamp($time){}
 }

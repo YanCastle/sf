@@ -151,7 +151,7 @@ trait UserTrait
      * @param string $Type 发送方式，默认为邮件，暂时支持邮件方式
      * @return bool true/false
      */
-    function sendVerify(int $UID, string $Address, $Type = 'Email')
+    function sendVerify($UID, $Address, $Type = 'Email')
     {
 //        session('UID',)
         session('VUID',$UID);session('VAddress',$Address);
@@ -192,7 +192,7 @@ trait UserTrait
      * @param int $UID
      * @return bool
      */
-    private function checkVerifyCode(string $Code,int $UID){
+    private function checkVerifyCode($Code,$UID){
         return $Code==cache('VerifyCode'.$UID);
     }
 }
