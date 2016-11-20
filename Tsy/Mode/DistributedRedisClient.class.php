@@ -26,7 +26,7 @@ class DistributedRedisClient extends \Tsy\Library\Fathers\Distribute
      * @param string $channel
      * @param string $msg
      */
-    function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
+    function onRedisSubscribe(\Redis $redis,$channel,$msg){
 //        $data=[
 //            'i'=>'',
 //            'd'=>'',

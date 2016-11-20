@@ -44,7 +44,7 @@ class MySqlFuture implements FutureIntf
         if($this->SQL&&$this->config){
             if($MySqli = self::getInstance($this->config)){
                 self::$inUse[$this->md5]=true;
-                swoole_mysql_query($MySqli,$this->SQL,function (\mysqli $link,mixed $result)use(&$promise,&$content,&$this){
+                swoole_mysql_query($MySqli,$this->SQL,function (\mysqli $link,$result)use(&$promise,&$content,&$this){
                     unset(MySqlFuture::$inUse[$this->md5]);
                     $promise->accept([
                         'mysql_query'=>new MySqlResult($this->SQL,$result,$link->_insert_id,$link->_affected_rows)

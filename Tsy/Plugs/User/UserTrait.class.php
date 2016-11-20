@@ -32,7 +32,7 @@ trait UserTrait
      * @param array $Properties 其他属性
      * @return UserObject
      */
-    function reg(string $Account,string $PWD,array $Properties=[]){
+    function reg($Account,$PWD,array $Properties=[]){
         if(!$this->allowReg){
             return '禁止注册';
         }
@@ -54,7 +54,7 @@ trait UserTrait
      * @param string $PWD 账户密码
      * @return UserObject
      */
-    function login(string $Account,string $PWD){
+    function login($Account,$PWD){
         $User = M($this->LoginView)->where([$this->_map['Account'] => $Account])->getField('UID,PWD', true);
         if(false!==$User){
             foreach ($User as $UID=>$Hash){
@@ -92,7 +92,7 @@ trait UserTrait
      * @param string $Account 账户名称
      * @return array {'Email':"","Phone":"",'Account':"","UID":1}
      */
-    function findAccount(string $Account){
+    function findAccount($Account){
         return M($this->LoginView)->where(array_fill_keys(array_unique(array_merge($this->LoginAccountFields,[$this->_map['Account']])),$Account))->getField('UID');
     }
 
@@ -102,7 +102,7 @@ trait UserTrait
      * @param string $PWD 新密码
      * @param string $Code 验证码或旧密码 当用户权限为管理员时不需要Code参数，如果不是则需要提供Code验证码或者旧密码做验证
      */
-    function resetPWD(string $Account, string $PWD, $UID, $Code = '')
+    function resetPWD($Account, $PWD, $UID, $Code = '')
     {
         if(!$PWD||!$UID||!$Account){return '错误的账号密码';}
         if(session('UID')==$UID){
@@ -126,7 +126,7 @@ trait UserTrait
      * @param string $Account 账户名称
      * @return bool 存在true,不存在false
      */
-    function checkAccount(string $Account){
+    function checkAccount($Account){
 //        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
         return false;
     }

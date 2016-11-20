@@ -28,7 +28,7 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
      * @param string $channel
      * @param string $msg
      */
-    function onRedisSubscribe(\Redis $redis,string $channel,string $msg){
+    function onRedisSubscribe(\Redis $redis,$channel,$msg){
         file_put_contents('dd',$msg);
         $data = json_decode($msg,true);
         switch ($channel){
@@ -121,7 +121,7 @@ class DistributedRedisServer extends \Tsy\Library\Fathers\Distribute
      * 负载算法
      * @return string
      */
-    function distribute():string{
+    function distribute(){
         self::$Clients = cache('DistributeClients');
         if(self::$Clients){
             //返回一个频道
