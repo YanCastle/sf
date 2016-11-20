@@ -251,7 +251,7 @@ class Upload {
      */
     private function setDriver($driver = null, $config = null){
         $driver = $driver ? : ($this->driver       ? : C('FILE_UPLOAD_TYPE'));
-        $config = $config ? : ($this->driverConfig ? : C('UPLOAD_TYPE_CONFIG'));
+        $config = $config ? : ($this->driverConfig ? : C('FILE_UPLOAD_TYPE_CONFIG'));
         $class = strpos($driver,'\\')? $driver : 'Tsy\\Library\\Upload\\Driver\\'.ucfirst(strtolower($driver));
         $this->uploader = new $class($config);
         if(!$this->uploader){

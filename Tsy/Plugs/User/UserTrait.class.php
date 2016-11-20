@@ -163,7 +163,7 @@ trait UserTrait
      * @param int $Expire 默认半个小时
      * @return string
      */
-    private function createVerifyCode(int $UID,int $Expire=1800){
+    private function createVerifyCode($UID,$Expire=1800){
         // 添加过期时间控制
         $Code = '';
         for($i=0;$i<rand(5,10);$i++){

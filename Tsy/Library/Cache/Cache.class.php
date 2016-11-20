@@ -56,6 +56,7 @@ abstract class Cache
      * @return array|bool|mixed
      */
     public function queue($name,$value=''){
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         $Queue = $this->get($name);
         if(!$Queue){
             $Queue=new \SplQueue();
@@ -78,6 +79,7 @@ abstract class Cache
                 $Queue->push($value);
                 break;
         }
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->set($name,$value);
     }
 
@@ -88,6 +90,7 @@ abstract class Cache
      * @return int|mixed
      */
     function setInc($key,$value=1){
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         $V = $this->get($key);
         if(!is_numeric($V)){
             $V=0;
@@ -104,6 +107,7 @@ abstract class Cache
      * @return int|mixed
      */
     function setDec($key,$value=1){
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         $V = $this->get($key);
         if(!is_numeric($V)){
             $V=0;
