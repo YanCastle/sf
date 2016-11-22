@@ -645,7 +645,7 @@ class Object
 //                $Fields=[
 //                    "__{$UpperMainTable}__.{$Config[self::RELATION_TABLE_COLUMN]}"
 //                ];
-                $Fields = $this->_parseFieldsConfig(parse_name($Config[self::RELATION_TABLE_NAME]),isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:($Config[self::RELATION_TABLE_LINK_HAS_PROPERTY]?[]:[true]),$Config[self::RELATION_TABLE_COLUMN]);
+                $Fields = $Config[self::RELATION_TABLE_LINK_HAS_PROPERTY]?$this->_parseFieldsConfig(parse_name($Config[self::RELATION_TABLE_NAME]),isset($Config[self::RELATION_TABLE_FIELDS])?$Config[self::RELATION_TABLE_FIELDS]:($Config[self::RELATION_TABLE_LINK_HAS_PROPERTY]?[]:[true]),$Config[self::RELATION_TABLE_COLUMN]):[$Config[self::RELATION_TABLE_COLUMN]];
                 $UpperJoinTable = strtoupper(parse_name($Config[self::RELATION_TABLE_NAME]));
 //                TODO Link表中的多对多关系先忽略不计
                 foreach ($Config[self::RELATION_TABLE_LINK_TABLES] as $OriginTableName => $Conf) {
@@ -653,7 +653,7 @@ class Object
                     $TableColumn = $Conf[self::RELATION_TABLE_COLUMN];
                     $LinkModel->join("__{$TableName}__ ON __{$UpperJoinTable}__.{$TableColumn} = __{$TableName}__.{$TableColumn}", 'LEFT');
                     //拿到这张表的所有字段
-                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,isset($Conf[self::RELATION_TABLE_FIELDS])?$Conf[self::RELATION_TABLE_FIELDS]:[],isset($Conf[self::RELATION_TABLE_COLUMN])?$Conf[self::RELATION_TABLE_COLUMN]:[]));
+                    $Fields = array_merge($Fields,$this->_parseFieldsConfig($OriginTableName,isset($Conf[self::RELATION_TABLE_FIELDS])?$Conf[self::RELATION_TABLE_FIELDS]:[]));
                 }
                 $LinkModel->field($Fields);
                 $LinkPropertyValues[$PropertyName] = array_key_set($LinkModel->select(), $Config[self::RELATION_TABLE_COLUMN], true);
