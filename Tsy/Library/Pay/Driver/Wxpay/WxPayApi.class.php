@@ -401,7 +401,7 @@ class WxPayApi
  	/**
  	 * 
  	 * 支付结果通用通知
- 	 * @param function $callback
+ 	 * @param callable $callback
  	 * 直接回调函数使用方法: notify(you_function);
  	 * 回调类成员函数方法:notify(array($this, you_function));
  	 * $callback  原型为：function function_name($data){}
@@ -417,8 +417,7 @@ class WxPayApi
 			$msg = $e->errorMessage();
 			return false;
 		}
-		
-		return call_user_func($callback, $result);
+		return $result;
 	}
 	
 	/**

@@ -7,8 +7,9 @@
  */
 namespace Tsy\Library\Pay\Driver;
 use Tsy\Library\Pay\PayIFace;
-
-class Wxpay implements PayIFace
+use Tsy\Tsy;
+require_once __DIR__.'/Wxpay/WxPayDataBase.class.php';
+class Wxpay extends \WxPayNotifyReply implements PayIFace
 {
     const WXPAY_QR='QRCode';
 
@@ -31,8 +32,8 @@ class Wxpay implements PayIFace
     {
         $this->WX_SDK_DIR=__DIR__.'/Wxpay/';
         require_once $this->WX_SDK_DIR."WxPayException.class.php";
-        require_once $this->WX_SDK_DIR."WxPayDataBase.class.php";
-        require_once $this->WX_SDK_DIR."WxPayNotify.class.php";
+//        require_once $this->WX_SDK_DIR."WxPayDataBase.class.php";
+//        require_once $this->WX_SDK_DIR."WxPayNotify.class.php";
         require_once $this->WX_SDK_DIR."WxPayApi.class.php";
 //        require_once $this->WX_SDK_DIR."WxPayJsApiPay.class.php";
 //        require_once $this->WX_SDK_DIR."WxPayNativePay.class.php";
@@ -62,7 +63,32 @@ class Wxpay implements PayIFace
      * @param callable|null $fail
      * @return mixed
      */
-    function notify(){}
+    function notify($success,$finish,$fail){
+        Tsy::$Out=false;
+        $msg = 'OK';
+        $xml = isset($GLOBALS['HTTP_RAW_POST_DATA'])&&$GLOBALS['HTTP_RAW_POST_DATA']?$GLOBALS['HTTP_RAW_POST_DATA']:file_get_contents('php://input');
+        try {
+            $result = \WxPayResults::Init($xml);
+        } catch (\WxPayException $e){
+            $msg = $e->errorMessage();
+            return false;
+        }
+        if($result){
+            $this->SetReturn_code("SUCCESS");
+            $this->SetReturn_msg("OK");
+            file_put_contents('data',json_encode($result,JSON_UNESCAPED_UNICODE));
+            $this->ReplyNotify(true);
+        }else{
+            $this->error=$msg;
+            $this->SetReturn_code("FAIL");
+            $this->SetReturn_msg($msg);
+            $this->ReplyNotify(false);
+            return false;
+        }
+    }
+    function notifyCallback($data){
+        return $data;
+    }
     /**
      * 支付
      * @param $OrderID

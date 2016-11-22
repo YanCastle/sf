@@ -15,12 +15,12 @@ interface PayIFace
 
     /**
      * 异步回调通知
-     * @param callable $success
-     * @param callable $finish
-     * @param callable|null $fail
+     * @param callable $success 支付成功
+     * @param callable $finish 支付完成
+     * @param callable|null $fail 支付失败
      * @return mixed
      */
-    function notify();
+    function notify($success,$finish,$fail);
     /**
      * 支付
      * @param $OrderID
