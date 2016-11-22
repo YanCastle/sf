@@ -70,7 +70,7 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
         try {
             $result = \WxPayResults::Init($xml);
         } catch (\WxPayException $e){
-            $msg = $e->errorMessage();
+            $this->error = $e->errorMessage();
             return false;
         }
         if($result){
@@ -132,6 +132,7 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
                     $Value=$Name;
                     break;
                 case 'OutTradeNo':
+                    $Value = $OrderID.'_';
                     if(strlen($Value)<10){
                         $Value.=uniqid();
                     }
@@ -187,5 +188,20 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
         $notify = new \NativePay();
         $result = $notify->GetPayUrl($input);
         return $result["code_url"];
+    }
+    /**
+     *
+     * 回复通知
+     * @param bool $needSign 是否需要签名输出
+     */
+    final private function ReplyNotify($needSign = true)
+    {
+        //如果需要签名
+        if($needSign == true &&
+            $this->GetReturn_code() == "SUCCESS")
+        {
+            $this->SetSign();
+        }
+        \WxPayApi::replyNotify($this->ToXml());
     }
 }
