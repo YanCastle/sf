@@ -29,9 +29,9 @@ class Wxpay implements PayIFace
         require_once $this->WX_SDK_DIR."WxPayDataBase.class.php";
         require_once $this->WX_SDK_DIR."WxPayNotify.class.php";
         require_once $this->WX_SDK_DIR."WxPayApi.class.php";
-        require_once $this->WX_SDK_DIR."WxPayJsApiPay.class.php";
-        require_once $this->WX_SDK_DIR."WxPayNativePay.class.php";
-        require_once $this->WX_SDK_DIR."WxPayMicroPay.class.php";
+//        require_once $this->WX_SDK_DIR."WxPayJsApiPay.class.php";
+//        require_once $this->WX_SDK_DIR."WxPayNativePay.class.php";
+//        require_once $this->WX_SDK_DIR."WxPayMicroPay.class.php";
         $this->config($Config);
     }
     function config($Config=[]){
@@ -70,7 +70,17 @@ class Wxpay implements PayIFace
             return $this->payQRCode($OrderID,$Name,$Money,$Memo);
         }
     }
+
+    /**
+     * 需要将返回内容生成成二维码供微信扫码支付u
+     * @param $OrderID
+     * @param $Name
+     * @param $Money
+     * @param string $Memo
+     * @return mixed
+     */
     function payQRCode($OrderID,$Name,$Money,$Memo=''){
+        require_once $this->WX_SDK_DIR."WxPayMicroPay.class.php";
         $notify = new \NativePay();
         $input = new \WxPayUnifiedOrder();
         $input->SetBody($Name);
