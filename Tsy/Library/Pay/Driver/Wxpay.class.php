@@ -76,8 +76,15 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
         if($result){
             $this->SetReturn_code("SUCCESS");
             $this->SetReturn_msg("OK");
-            file_put_contents('data',json_encode($result,JSON_UNESCAPED_UNICODE));
+            file_put_contents('data.json',json_encode($result,JSON_UNESCAPED_UNICODE));
             $this->ReplyNotify(true);
+            call_user_func_array($success,[
+                explode('_',$result['out_trade_no'])[0],//支付订单号
+                $result['total_fee']/100,//支付金额
+                $result['trade_type'],//支付方式
+                $result['transaction_id'],//支付系统订单号
+                $result//整个返回结果，用来做额外处理
+            ]);
         }else{
             $this->error=$msg;
             $this->SetReturn_code("FAIL");
