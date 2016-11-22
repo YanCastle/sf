@@ -46,9 +46,9 @@ class Pay
      * @param $Money
      * @param string $Memo
      */
-    function pay($OrderID,$Name,$Money,$Memo=''){
+    function pay($Type,$OrderID,$Name,$Money,$Memo=''){
         if($this->handle){
-            $rs = $this->handle->pay($OrderID,$Name,$Money,$Memo);
+            $rs = $this->handle->pay($Type,$OrderID,$Name,$Money,$Memo);
             if($rs){
                 return $rs;
             }else{
@@ -58,4 +58,5 @@ class Pay
         }
         return false;
     }
+//    function
 }

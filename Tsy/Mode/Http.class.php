@@ -10,6 +10,7 @@ namespace Tsy\Mode;
 
 
 use Tsy\Mode;
+use Tsy\Tsy;
 
 class Http implements Mode
 {
@@ -71,7 +72,7 @@ class Http implements Mode
         $Out = C('HTTP.OUT');
         $Out = is_callable($Out)?$Out:[$this,'output'];
         $OutData=call_user_func($Out,$Data);
-        if(is_string($OutData)&&strlen($OutData)>0&&!($Data===null&&$OutData==='null')){
+        if(Tsy::$Out&&is_string($OutData)&&strlen($OutData)>0&&!($Data===null&&$OutData==='null')){
             self::$Out=true;
             echo $OutData;
         }

@@ -10,6 +10,7 @@ namespace Wechat;
 use Tsy\Library\Controller;
 use Tsy\Library\Model;
 use Tsy\Plugs\Db\Db;
+use Tsy\Tsy;
 
 class TsyWechat extends Controller{
     private $appid='';
@@ -72,6 +73,7 @@ class TsyWechat extends Controller{
      * 微信调用方法
      */
     function wechat(){
+        Tsy::$Out=false;
         if(isset($_GET['signature'])&&isset($_GET['echostr'])
             &&isset($_GET['timestamp'])&&isset($_GET['nonce'])){
             echo $_GET['echostr'];
