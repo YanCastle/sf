@@ -571,7 +571,8 @@ class Object
 //
 //        }
         foreach ($Fields as $k=>$field){
-            $field = end(explode('.',$field));
+            $explode = explode('.',$field);
+            $field = end($explode);
             if(in_array($field,$fields)||strlen($field)==0){
                 unset($Fields[$k]);continue;
             }
