@@ -740,6 +740,7 @@ class Model {
         }
         if(isset($options['field'])&&is_array($options['field'])){
             foreach ($options['field'] as $k=>$v){
+                if('_'==substr($k,0,1))continue;
                 $columnName = explode('.',$options['field'][$k]);
                 $columnName = strtolower(trim(count($columnName)==2?$columnName[1]:$columnName[0],'`'));
                 if(in_array($columnName,$this->fieldName)){
