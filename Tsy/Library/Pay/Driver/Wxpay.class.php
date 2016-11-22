@@ -59,11 +59,9 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
     /**
      * 异步回调通知
      * @param callable $success
-     * @param callable $finish
-     * @param callable|null $fail
      * @return mixed
      */
-    function notify($success,$finish,$fail){
+    function notify($success){
         Tsy::$Out=false;
         $msg = 'OK';
         $xml = isset($GLOBALS['HTTP_RAW_POST_DATA'])&&$GLOBALS['HTTP_RAW_POST_DATA']?$GLOBALS['HTTP_RAW_POST_DATA']:file_get_contents('php://input');

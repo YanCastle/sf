@@ -11,16 +11,15 @@ namespace Tsy\Library\Pay;
 
 interface PayIFace
 {
+//    public $error;
     function __construct($Type,$Config='');
 
     /**
      * 异步回调通知
      * @param callable $success 支付成功
-     * @param callable $finish 支付完成
-     * @param callable|null $fail 支付失败
      * @return mixed
      */
-    function notify($success,$finish,$fail);
+    function notify($success);
     /**
      * 支付
      * @param $OrderID
