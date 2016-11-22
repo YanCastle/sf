@@ -353,4 +353,17 @@ class Controller
         $ID = D($this->ControllerName)->add($_POST);
         return $ID?array_values(D($this->ControllerName)->obj([$ID]))[0]:false;
     }
+
+    /**
+     * 批量添加
+     * @param array $data
+     * @return mixed|string
+     */
+    function adds($data=[]){
+        if(!$data)$data=$_POST;
+        if($this->Object instanceof Object){
+            return invokeClass($this->Object,'adds',$data);
+        }
+        return '类不存在';
+    }
 }

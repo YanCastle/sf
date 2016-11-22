@@ -134,6 +134,36 @@ class Object
     }
 
     /**
+     * 批量添加接口
+     * @param array $data
+     * @return array|bool|mixed|string
+     */
+    function adds($data=[]){
+        //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
+        if(!$this->allow_add)return false;
+        if( !$data && isset($_POST['data']) && $_POST['data'] )
+            $data=$_POST['data'];
+        //遍历添加过滤配置
+        $addDatas=[];
+        foreach ($data as $k=>$row){
+            if(!is_array($row)||!is_array($rs = $this->_parseChangeFieldsConfig('add',$row))){
+                return '数据不合规范';
+            }
+            $addDatas[]=$rs;
+        }
+        if(is_array($addDatas)&&$addDatas){
+            startTrans();
+            if($PKID = M($this->main)->addAll($addDatas)){
+                commit();
+            }else{
+                rollback();
+            }
+            return $PKID?$this->get($PKID):(APP_DEBUG?M()->getDbError():'添加失败');
+        }else{
+            return $data;
+        }
+    }
+    /**
      * 设置字段过滤配置相关信息
      */
     private function setMapByColumns()
