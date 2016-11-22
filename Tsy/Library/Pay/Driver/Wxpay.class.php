@@ -15,7 +15,7 @@ class Wxpay implements PayIFace
     const TRADE_TYPE_JSAPI='JSAPI';
     const TRADE_TYPE_NATIVE='NATIVE';
     const TRADE_TYPE_APP='APP';
-
+    public $error='';
     static public $NOTIFY_URL='';
     static public $APPID='';
     static public $MCHID='';
@@ -114,7 +114,7 @@ class Wxpay implements PayIFace
                     $Value=$Money;
                     if(!is_numeric($Value)||!is_float($Value)){
                         $this->error='错误的金额';
-                        return '错误的金额';
+                        return false;
                     }
                     $Value *= 100;
 //                    if(intval($Value)!=$Value){
@@ -138,17 +138,22 @@ class Wxpay implements PayIFace
                     }
                     if(!is_numeric($Value)&&strlen($Value)!=10){
                         $this->error='错误的时间设定';
-                        return '错误的时间设定';
+                        return false;
                     }
                     break;
                 case 'TradeType':
                     if(!$Value)$Value=self::TRADE_TYPE_NATIVE;
                     if(!in_array($Value,[self::TRADE_TYPE_APP,self::TRADE_TYPE_JSAPI,self::TRADE_TYPE_NATIVE])){
-                        return '错误的支付方式';
+                        $this->error='错误的支付方式';
+                        return false;
                     }
                     break;
                 case 'NotifyUrl':
                     $Value = $Value?$Value:self::$NOTIFY_URL;
+                    if(!$Value){
+                        $this->error='错误的回调地址';
+                        return false;
+                    }
                     break;
             }
             call_user_func([$input,"Set{$k}"],$Value);

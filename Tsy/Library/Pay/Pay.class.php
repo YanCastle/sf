@@ -15,7 +15,7 @@ class Pay
     const TRADE_FINISH='FINISH';//完成
     const TRADE_FAILD='FAILD';//失败
 
-    public $error='';
+    public static $error='';
     private $handle=null;
     function __construct($Type,$Config=[])
     {
@@ -33,7 +33,7 @@ class Pay
      */
     function notify(callable $success,callable $finish,callable $fail=null){
         $verifyResult=$this->handle->notify();
-
+        return $verifyResult;
     }
     function redirect(){
 
