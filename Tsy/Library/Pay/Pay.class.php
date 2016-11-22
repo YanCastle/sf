@@ -46,7 +46,7 @@ class Pay
      * @param $Money
      * @param string $Memo
      */
-    function pay($Type,$OrderID,$Name,$Money,$Memo=''){
+    function pay($Type,$OrderID,$Name,$Money,$Memo='',$Config=[]){
         if($this->handle){
             $rs = $this->handle->pay($Type,$OrderID,$Name,$Money,$Memo);
             if($rs){
