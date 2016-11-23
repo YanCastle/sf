@@ -757,6 +757,7 @@ class Model {
         }
         // 查询过后清空sql表达式组装 避免影响下次查询
         $this->options  =   array();
+        $this->fieldName=[];
         // 表达式过滤
         $this->_options_filter($options);
         return $options;
@@ -1755,7 +1756,7 @@ class Model {
             if(is_array($this->options['table'])&&!is_numeric(key($this->options['table']))){
                 $table  =   key($this->options['table']);
             }else{
-                $table  =   $this->options['table'];
+                $table  =   is_array($this->options['table'])?value($this->options['table'])[0]:$this->options['table'];
             }
             $fields     =   $this->db->getFields($table);
             return  $fields ? array_keys($fields) : false;
