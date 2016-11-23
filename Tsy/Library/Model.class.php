@@ -1752,7 +1752,7 @@ class Model {
             }
         }
         if(isset($this->options['table'])) {// 动态指定表名
-            if(is_array($this->options['table'])){
+            if(is_array($this->options['table'])&&!is_numeric(key($this->options['table']))){
                 $table  =   key($this->options['table']);
             }else{
                 $table  =   $this->options['table'];
