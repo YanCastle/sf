@@ -8,7 +8,7 @@ use \Aliyun\OSS\OSSClient;
  * @version $Id$
  */
 
-require_once dirname(__FILE__).'/Oss/aliyun.php';
+require_once(VENDOR_PATH.'/Oss/aliyun.php');
 
 class Oss{
 

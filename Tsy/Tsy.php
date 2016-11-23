@@ -59,6 +59,9 @@ if('http'==strtolower(APP_MODE)&&isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$
     header('Access-Control-Request-Method:GET,POST');
     header('Access-Control-Allow-Headers:X-Requested-With,Cookie,ContentType');
 }
+
+define('VENDOR_PATH',TSY_PATH.'/Vendor');
+
 include_once TSY_PATH.DIRECTORY_SEPARATOR.'Tsy.class.php';
 $Tsy = new Tsy\Tsy();
 $Tsy->start();

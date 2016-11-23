@@ -42,7 +42,7 @@ final class ResourceManager {
     public function getString($string) {
 
         if ($this->strings == null) {
-            $this->strings = require __DIR__.'/'.self::DEFAULT_STRINGS_FILENAME;
+            $this->strings = require __DIR__.'ResourceManager.php/'.self::DEFAULT_STRINGS_FILENAME;
         }
 
         if (!isset($this->strings[$string])) {
