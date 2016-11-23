@@ -6,7 +6,7 @@
  * Time: 22:20
  */
 
-
+date_default_timezone_set('Asia/Shanghai');
 define('LOG_SQL','SQL');
 define('LOG_MSG','MSG');
 define('LOG_TIP','TIP');
