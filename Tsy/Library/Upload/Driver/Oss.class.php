@@ -1,6 +1,8 @@
 <?php
 namespace Tsy\Library\Upload\Driver;
 use \Aliyun\OSS\OSSClient;
+use OSS\Core\OssException;
+
 /**
  * 
  * @authors Your Name (you@example.org)
@@ -8,16 +10,16 @@ use \Aliyun\OSS\OSSClient;
  * @version $Id$
  */
 
-require_once(VENDOR_PATH.'/Oss/aliyun.php');
+require_once(VENDOR_PATH.'/aliyun-oss-php-sdk-2.2.0.phar');
 
 class Oss{
 
     private $config = array(
-    'AccessKeyId' => '', //OSS用户
-    'AccessKeySecret' => '', //OSS密码
-    'domain'        =>'',   //OSS空间路径
-    'Bucket'   => '', //空间名称
-    'Endpoint'  => '', //超时时间
+        'AccessKeyId' => '', //OSS用户
+        'AccessKeySecret' => '', //OSS密码
+        'domain'        =>'',   //OSS空间路径
+        'Bucket'   => '', //空间名称
+        'Endpoint'  => '', //带http的节点名称
     );
 
     /**
@@ -75,17 +77,7 @@ class Oss{
         $content = fopen( $file['tmp_name'],'r');
         $size = $file['size'];
         $client = $this->client();
-        $save = $client->putObject(array(
-            'Bucket'    => $this->config['Bucket'],
-            'Key'       => $key,
-            'Content'   => $content,
-            'ContentLength'=> $size,
-            ));
-        if ($save) {
-            return OSS.$key;
-        }else{
-            return false;
-        }
+        return $client&&$client->putObject($this->config['Bucket'],$key,$content);
     }
 
     /**
@@ -98,11 +90,12 @@ class Oss{
 
     //创建client对象
     function client(){
-        $client = OSSClient::factory(array(
-            'Endpoint' => $this->config['Endpoint'],
-            'AccessKeyId' => $this->config['AccessKeyId'],
-            'AccessKeySecret' => $this->config['AccessKeySecret'],
-        ));
+        try{
+            $client = new \OSS\OssClient($this->config['AccessKeyId'],$this->config['AccessKeySecret'],$this->config['Endpoint']);
+        }catch (OssException $e){
+            L($e->getErrorMessage());
+            return null;
+        }
         return $client;
     }
 }
