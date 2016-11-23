@@ -359,9 +359,10 @@ class Controller
      * @param array $data
      * @return mixed|string
      */
-    function adds($data=[]){
+    function adds($data=[],$Replace=false){
         if(!$data)$data=$_POST;
         if($this->Object instanceof Object){
+            $data['Replace']=$Replace;
             return invokeClass($this->Object,'adds',$data);
         }
         return '类不存在';
