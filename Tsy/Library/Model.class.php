@@ -1804,11 +1804,11 @@ class Model {
                 //将__TABLE_NAME__替换成带前缀的表名
                 $table = [$this->parseColumnName($table)];
             }
-            if(is_array($this->options['table'])){
+//            if(is_array($this->options['table'])){
                 $this->options['table']=array_unique(array_merge(is_array($this->options['table'])?$this->options['table']:[$this->options['table']],$table));
-            }else{
-                $this->options['table']=array_unique(array_merge(is_array($this->options['table'])?$this->options['table']:[$this->options['table']],$table));
-            }
+//            }else{
+//                $this->options['table']=array_unique(array_merge(is_array($this->options['table'])?$this->options['table']:[$this->options['table']],$table));
+//            }
         }else{
             if(is_array($table)) {
                 $this->options['table'] =   $table;
