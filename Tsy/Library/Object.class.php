@@ -138,7 +138,7 @@ class Object
      * @param array $data
      * @return array|bool|mixed|string
      */
-    function adds($data=[]){
+    function adds($data=[],$Replace=false){
         //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
         if( !$data && isset($_POST['data']) && $_POST['data'] )
@@ -153,7 +153,7 @@ class Object
         }
         if(is_array($addDatas)&&$addDatas){
             startTrans();
-            if($PKID = M($this->main)->addAll($addDatas)){
+            if($PKID = M($this->main)->addAll($addDatas,[],$Replace)){
                 commit();
             }else{
                 rollback();
