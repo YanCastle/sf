@@ -81,6 +81,7 @@ class Object
     protected $__CLASS__;
     protected $MC=[];
     protected $directProperties=[];
+    public $allow_replaceW=false;
     function __construct($name='',$config=[])
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
@@ -144,21 +145,49 @@ class Object
         if( !$data && isset($_POST['data']) && $_POST['data'] )
             $data=$_POST['data'];
         //遍历添加过滤配置
-        $addDatas=[];
+//        $addDatas=[];
+        $ReplaceDatas=$AddDatas=[];
         foreach ($data as $k=>$row){
-            if(!is_array($row)||!is_array($rs = $this->_parseChangeFieldsConfig('add',$row))){
+            if(!is_array($row)){
                 return '数据不合规范';
             }
-            $addDatas[]=$rs;
+            if(isset($row[$this->pk])&&$row[$this->pk]){
+                if(is_array($rs = $this->_parseChangeFieldsConfig('save',$row))){
+                    $ReplaceDatas[]=$rs;
+                }else{
+                    return $rs;
+                }
+            }else{
+                if(is_array($rs = $this->_parseChangeFieldsConfig('add',$row))){
+                    $AddDatas[]=$rs;
+                }else{
+                    return $rs;
+                }
+            }
         }
-        if(is_array($addDatas)&&$addDatas){
+        if((is_array($AddDatas)&&$AddDatas)||(is_array($ReplaceDatas)&&$ReplaceDatas)){
             startTrans();
-            if($PKID = M($this->main)->addAll($addDatas,[],$Replace)){
+            $Rs = true;
+            if($AddDatas){
+                $Rs=$Rs&&!!M($this->main)->addAll($AddDatas);
+            }
+            if($ReplaceDatas){
+                foreach ($ReplaceDatas as $k=>$row){
+                    if($Rs&&($Rs=$Rs&&(false!==M($this->main)->where([$this->pk=>$row[$this->pk]])->save($row)))){
+//                        $ReplaceDatas[$k][$this->pk]
+                    }else{
+                        rollback();
+                        return APP_DEBUG?M()->getDbError():'失败';
+                    }
+                }
+            }
+            if($Rs){
                 commit();
+                return true;
             }else{
                 rollback();
+                return APP_DEBUG?M()->getDbError():'失败';
             }
-            return $PKID?$this->get($PKID):(APP_DEBUG?M()->getDbError():'添加失败');
         }else{
             return $data;
         }
@@ -836,6 +865,22 @@ class Object
             return $this->get($ID);
         }else{
             return false;
+        }
+    }
+
+    function saveW($W,$Data){
+
+    }
+
+    function replaceW($W,$Data){
+        //删除原有数据并用新数据替换，仅针对数据量小的情况下使用，有危险。
+        if(!$this->allow_replaceW)return '该类禁止此操作';
+        if($W&&$Data){
+            foreach ($W as $K=>$V){
+                if(!is_string($V)){//仅允许直接相等的情况下做处理
+                    
+                }
+            }
         }
     }
 
