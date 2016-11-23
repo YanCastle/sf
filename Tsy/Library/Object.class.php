@@ -347,7 +347,7 @@ class Object
      * @param string $Field
      * @return mixed
      */
-    protected function searchW(string $TableName,array $Where,string $Field,$Sort=''){
+    protected function searchW($TableName,array $Where,$Field,$Sort=''){
         $Model = M($TableName);
         return $Model->where($Where)->order($Sort)->getField($Field,true);
     }
