@@ -82,6 +82,7 @@ class Object
     protected $MC=[];
     protected $directProperties=[];
     public $allow_replaceW=false;
+    public $save_add_if_not_exist=false;
     function __construct($name='',$config=[])
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
@@ -831,6 +832,9 @@ class Object
                     if($k!=$this->pk)
                         $MainColumns[$k]=$v;
                 }
+            }
+            if($this->save_add_if_not_exist&&!$this->get($ID)){
+                return $this->add(array_merge($Params,[$this->pk=>$ID]));
             }
             startTrans();
             if($MainColumns){
