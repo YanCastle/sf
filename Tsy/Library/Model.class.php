@@ -1756,7 +1756,7 @@ class Model {
             if(is_array($this->options['table'])&&!is_numeric(key($this->options['table']))){
                 $table  =   key($this->options['table']);
             }else{
-                $table  =   is_array($this->options['table'])?value($this->options['table'])[0]:$this->options['table'];
+                $table  =   is_array($this->options['table'])?current($this->options['table']):$this->options['table'];
             }
             $fields     =   $this->db->getFields($table);
             return  $fields ? array_keys($fields) : false;
