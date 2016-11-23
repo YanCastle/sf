@@ -877,11 +877,26 @@ class Object
         if(!$this->allow_replaceW)return '该类禁止此操作';
         if($W&&$Data){
             foreach ($W as $K=>$V){
-                if(!is_string($V)){//仅允许直接相等的情况下做处理
-                    
+                if(!is_numeric($V)){//仅允许直接相等的情况下做处理
+                    return '禁止该替换逻辑生效';
                 }
             }
+            foreach ($Data as $K=>$V){
+                $Data[$K]=array_merge($V,$W);
+            }
+            startTrans();
+            if(false===M($this->main)->where($W)->delete()){
+                rollback();
+                return APP_DEBUG?M()->getDbError():'删除失败';
+            }
+            if(true===($Rs=$this->adds($Data))){
+                //成功
+                commit();
+                return $this->search('',$W);
+            }
+            return APP_DEBUG?M()->getDbError():$Rs;
         }
+        return '错误的数据结构';
     }
 
     /**

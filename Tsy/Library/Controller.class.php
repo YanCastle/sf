@@ -367,4 +367,13 @@ class Controller
         }
         return '类不存在';
     }
+    function replaceW($W,$Data){
+        if($this->Object instanceof Object){
+            return invokeClass($this->Object,'replaceW',[
+                'W'=>$W,
+                'Data'=>$Data
+            ]);
+        }
+        return false;
+    }
 }
