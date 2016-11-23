@@ -9,9 +9,9 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 namespace Tsy\Library\Storage\Driver;
-use Aliyun\OSS\OSSClient;
+use OSS\Core\OssException;
 use Tsy\Library\Storage;
-require_once(VENDOR_PATH.'/Oss/aliyun.php');
+require_once(VENDOR_PATH.'/aliyun-oss-php-sdk-2.2.0.phar');
 // 本地文件写入存储类
 class Oss extends Storage{
     private $config = array(
@@ -30,11 +30,11 @@ class Oss extends Storage{
      */
     public function __construct($config) {
         $this->config = array_merge($this->config,$config);
-        $this->handle = OSSClient::factory(array(
-            'Endpoint' => $this->config['Endpoint'],
-            'AccessKeyId' => $this->config['AccessKeyId'],
-            'AccessKeySecret' => $this->config['AccessKeySecret'],
-        ));
+        try{
+            $this->handle = new \OSS\OssClient($this->config['AccessKeyId'],$this->config['AccessKeySecret'],$this->config['Endpoint']);
+        }catch (OssException $e){
+            L($e->getErrorMessage());
+        }
     }
 
     /**
@@ -58,16 +58,10 @@ class Oss extends Storage{
         $key = $filename;
 //        $content = fopen( $file['tmp_name'],'r');
         $size = strlen($content);
-        $save = $this->handle->putObject(array(
-            'Bucket'    => $this->config['Bucket'],
-            'Key'       => $key,
-            'Content'   => $content,
-            'ContentLength'=> $size,
-        ));
-        if ($save) {
-            return true;
-        }else{
-            L($this->handle->errorStr);
+        try{
+            return $this->handle->putObject($this->config['Bucket'],$key,$content);
+        }catch (OssException $e){
+            L($e->getErrorMessage());
             return false;
         }
     }
@@ -80,14 +74,12 @@ class Oss extends Storage{
      * @return boolean        
      */
     public function append($filename,$content,$type=''){
-        if($this->handle->getObject([
-            'Bucket'=>$this->config['Bucket'],
-            'Key'=>$filename,
-            'MetaOnly'=>true
-        ])){
-            $content =  $this->read($filename,$type).$content;
+        try{
+            return !!$this->handle->appendObject($this->config['Bucket'],$filename,$content,0);
+        }catch (OssException $e){
+            L($e->getErrorMessage());
+            return false;
         }
-        return $this->put($filename,$content,$type);
     }
 
     /**
@@ -111,11 +103,7 @@ class Oss extends Storage{
      * @return boolean     
      */
     public function has($filename,$type=''){
-        return !!$this->handle->getObject([
-            'Bucket'=>$this->config['Bucket'],
-            'Key'=>$filename,
-            'MetaOnly'=>true
-        ]);
+        return !!$this->handle->doesObjectExist($this->config['Bucket'],$filename);
     }
 
     /**
@@ -127,10 +115,7 @@ class Oss extends Storage{
     public function unlink($filename,$type=''){
 //        unset($this->contents[$filename]);
 //        return is_file($filename) ? unlink($filename) : false;
-        return !!$this->handle->deleteObject([
-            'Bucket'=>$this->config['Bucket'],
-            'Key'=>$filename,
-        ]);
+        return !!$this->handle->deleteObject($this->config['Bucket'],$filename);
     }
 
     /**
@@ -140,19 +125,10 @@ class Oss extends Storage{
      * @param string $name  信息名 mtime或者content
      * @return boolean     
      */
-    public function get($filename,$name,$type=''){
+    public function get($filename,$name='content',$type=''){
         if(!isset($this->contents[$filename])){
-            if(!is_file($filename)) return false;
-           $this->contents[$filename]=$this->handle->getObject([
-               'Bucket'=>$this->config['Bucket'],
-               'Key'=>$filename
-           ]);
+            $this->contents[$filename]=$this->handle->getObject($this->config['Bucket'],$filename);
         }
-        $content=$this->contents[$filename];
-        $info   =   array(
-            'mtime'     =>  time(),
-            'content'   =>  $content
-        );
-        return $info[$name];
+        return $name=='content'?$this->contents[$filename]:time();
     }
 }

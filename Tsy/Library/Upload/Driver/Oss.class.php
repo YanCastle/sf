@@ -1,6 +1,5 @@
 <?php
 namespace Tsy\Library\Upload\Driver;
-use \Aliyun\OSS\OSSClient;
 use OSS\Core\OssException;
 
 /**
