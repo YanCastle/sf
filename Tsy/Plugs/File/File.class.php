@@ -55,16 +55,16 @@ class File
      * 上传文件
      * @link http://document.thinkphp.cn/manual_3_2.html#upload
      */
-    static function upload($TPUploadConfig=[]){
-        foreach(explode(',','mimes,maxSize,exts,autoSub,subName,rootPath,savePath,saveName,saveExt,replace,hash,callback,driver,driverConfig') as $config){
-            if(!isset($TPUploadConfig[$config])){
-                $c = C('UPLOAD_'.strtoupper($config),null,'');
+    static function upload($config = array(), $driver = '', $driverConfig = null){
+        foreach(explode(',','mimes,maxSize,exts,autoSub,subName,rootPath,savePath,saveName,saveExt,replace,hash,callback,driver,driverConfig') as $k){
+            if(!isset($config[$k])){
+                $c = C('UPLOAD_'.strtoupper($k),null,'');
                 if($c){
-                    $TPUploadConfig[$config]=$c;
+                    $config[$k]=$c;
                 }
             }
         }
-        $Upload = new Upload($TPUploadConfig);
+        $Upload = new Upload($config,$driver,$driverConfig);
         $infos = $Upload->upload();
         if($infos){
             $Model = M('Upload');
@@ -80,6 +80,7 @@ class File
                     'FileMd5'=>$info['md5'],
                     'UploadTime'=>time(),
                     'UploaderUID'=>session('UID'),
+                    'DriverType'=>$Upload->driver
 //                    'URL'=>''
                 ];
                 $data['URL']=str_replace(array_keys($data),array_values($data),C('UPLOAD_URL'));

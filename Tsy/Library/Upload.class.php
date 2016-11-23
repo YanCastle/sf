@@ -9,6 +9,7 @@
 namespace Tsy\Library;
 
 class Upload {
+    public $driver='';
     /**
      * 默认上传配置
      * @var array
@@ -254,6 +255,7 @@ class Upload {
         $config = $config ? : ($this->driverConfig ? : C('FILE_UPLOAD_TYPE_CONFIG'));
         $class = strpos($driver,'\\')? $driver : 'Tsy\\Library\\Upload\\Driver\\'.ucfirst(strtolower($driver));
         $this->uploader = new $class($config);
+        $this->driver=$driver;
         if(!$this->uploader){
             E("不存在上传驱动：{$driver}");
         }
