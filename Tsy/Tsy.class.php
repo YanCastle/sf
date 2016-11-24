@@ -22,6 +22,7 @@ class Tsy
     public static $m='';
     public static $t='';
     public static $Out=true;
+    public static $fd=-1;
 //    public static
     /**
      * @var Mode $Mode
