@@ -14,7 +14,7 @@ abstract class Cache
     public static $QUEUE_ALL="\x00";
     public static $setInc="\x01";
     public static $setDec="\x02";
-    public $handler;
+    public static $handler;
     public $options=[];
     //读取缓存
     public function get($name){}
