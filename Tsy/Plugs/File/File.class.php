@@ -118,4 +118,20 @@ class File
      * zip解压
      */
     static function unzip(){}
+
+    /**
+     * 获取上传文件的下载地址
+     * @param $UploadID
+     * @return bool|mixed|string
+     */
+    static function getUploadFileURL($UploadID){
+        if($File=M('Upload')->where(['UploadID'=>$UploadID])->find()){
+            $URL = C('FILE_UPLOAD_TYPE_URL');
+            if($URL&&is_callable($URL)){
+                return call_user_func($URL,$File);
+            }
+            return $URL?(implode('/',array_merge(explode('/',$URL),[$File['SavePath'],$File['SaveName']]))):false;
+        }
+        return false;
+    }
 }
