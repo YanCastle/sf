@@ -345,8 +345,9 @@ class Controller
 //            return FALSE;
 //        }
     }
-    function add($data=false){
+    function add($data=false,$Properties=[]){
         if(!$data)$data=$_POST;
+        $data['Properties']=$Properties;
         if($this->Object instanceof Object){
             return invokeClass($this->Object,'add',$data);
         }
