@@ -543,7 +543,14 @@ function swoole_get_callback($callback){
     }
 }
 
+/**
+ * 设定和获取fd
+ * @param null $fd
+ * @return null
+ */
 function fd($fd=null){
-    static $fd_static=0;
-    return $fd?$fd_static=$fd:$fd_static;
+    if($fd){
+        \Tsy\Tsy::$fd=$fd;
+    }
+    return \Tsy\Tsy::$fd=$fd;
 }
