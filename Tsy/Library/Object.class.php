@@ -873,13 +873,19 @@ class Object
     }
 
     function saveW($W,$Data){
-
+        if(is_array($W)&&is_array($Data)&&$this->allow_saveW){
+            if($Save=M($this->main)->where($W)->save($Data)){
+                return $this->gets(M($this->main)->where($W)->getField($this->pk));
+            }
+            return APP_DEBUG?M()->getDbError():'修改失败';
+        }
+        return false;
     }
 
     function replaceW($W,$Data){
         //删除原有数据并用新数据替换，仅针对数据量小的情况下使用，有危险。
         if(!$this->allow_replaceW)return '该类禁止此操作';
-        if($W&&$Data){
+        if(is_array($W)&&is_array($Data)){
             foreach ($W as $K=>$V){
                 if(!is_numeric($V)){//仅允许直接相等的情况下做处理
                     return '禁止该替换逻辑生效';
