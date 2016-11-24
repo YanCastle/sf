@@ -104,4 +104,26 @@ class Redis extends Cache implements CacheInterface
     public function clear() {
         return $this->handler->flushDB();
     }
+
+    /**
+     * 发布订阅
+     * @param $Chanel
+     * @param $Date
+     * @return bool|int
+     */
+    public function publish($Chanel,$Date){
+        if($this->handler->pubSub('numsub',is_array($Chanel)?$Chanel:[$Chanel])){
+            return $this->handler->publish($Chanel,is_string($Date)?$Date:serialize($Date));
+        }
+        return false;
+    }
+
+    /**
+     * 订阅
+     * @param $Chanel
+     * @param callable $func
+     */
+    public function subscribe($Chanel,callable $func){
+        $this->handler->subscribe($Chanel,$func);
+    }
 }
