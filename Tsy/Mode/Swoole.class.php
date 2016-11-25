@@ -46,7 +46,14 @@ class Swoole implements Mode
             $ProcessesConf=[];
             foreach ($SwooleConfig['LISTEN'] as $Listen){
                 if($Server){
-                    call_user_func_array([$Server,'addListener'],$Listen);
+                    $port = call_user_func_array([$Server,'addListener'],$Listen);
+                    if(isset($Listen['ON']))
+                        foreach ($Listen['ON'] as $method=>$func){
+                            $port->on($method,$func);
+                        }
+                    if(isset($Listen['SET'])&&is_array($Listen['SET'])){
+                        $port->set($Listen['SET']);
+                    }
                 }else{
                     $Server=new \swoole_server($Listen[0],$Listen[1]);
                 }
