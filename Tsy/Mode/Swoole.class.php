@@ -11,6 +11,7 @@ namespace Tsy\Mode;
 
 use Tsy\Library\Aop;
 use Tsy\Mode;
+use Tsy\Tsy;
 
 /**
  * swoole模式
@@ -46,7 +47,8 @@ class Swoole implements Mode
             $ProcessesConf=[];
             foreach ($SwooleConfig['LISTEN'] as $Listen){
                 if($Server){
-                    $port = call_user_func_array([$Server,'addListener'],$Listen);
+//                    $port = call_user_func_array([$Server,'addListener'],$Listen);
+                    $port = $Server->listen($Listen[0],$Listen[1],$Listen[2]);
                     if(isset($Listen['ON']))
                         foreach ($Listen['ON'] as $method=>$func){
                             $port->on($method,$func);
@@ -55,7 +57,30 @@ class Swoole implements Mode
                         $port->set($Listen['SET']);
                     }
                 }else{
-                    $Server=new \swoole_server($Listen[0],$Listen[1]);
+                    switch (strtolower($Listen['TYPE'])){
+                        case 'http':
+                            $Server=new \swoole_http_server($Listen[0],$Listen[1]);
+                            $Server->on('request',function(\swoole_http_request $request,\swoole_http_response $response){
+                                ob_start();
+
+                                $data = ob_get_clean();
+                                if(Tsy::$Out){
+                                    $data = '';//TODO Fix Http Date
+                                }
+                                $response->end($data);
+                            });
+                            break;
+                        case 'websocket':
+                            $Server=new \swoole_websocket_server($Listen[0],$Listen[1]);
+                            break;
+                        case 'socket':
+                            $Server=new \swoole_server($Listen[0],$Listen[1]);
+                            break;
+                        default:
+                            L('Type Error');
+                            break;
+                    }
+
                 }
             }
             if(null===$Server){

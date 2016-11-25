@@ -400,10 +400,14 @@ function swoole_load_config(){
             'PROCESS'=>is_array($SwooleProcess)?$SwooleProcess:[],
             'TABLE'=>is_array($SwooleTable)?$SwooleTable:[]
         ];
-        foreach ($Listen as $Config) {
+        $StartListen = [];
+        foreach ($Listen as $k=>$Config) {
+            if(in_array(strtolower($Config['TYPE']),['websocket','http'])){
+                $StartListen[]=$k;
+            }
             $Config['TYPE'] = isset($Config['TYPE']) ? $Config['TYPE'] : 'Socket';
             if (isset($Config['HOST']) && isset($Config['PORT']) && is_numeric($Config['PORT']) && $Config['PORT'] > 0 && $Config['PORT'] < 65536 && long2ip(ip2long($Config['HOST'])) == $Config['HOST']) {
-                $Returns['LISTEN'][]=[$Config['HOST'],$Config['PORT'],SWOOLE_SOCK_TCP];
+                $Returns['LISTEN'][]=array_merge($Config,[$Config['HOST'],$Config['PORT'],SWOOLE_SOCK_TCP]);
                 //分析ALLOW_IP
                 if(isset($Config['ALLOW_IP'])&&is_array($Config['ALLOW_IP'])&&$Config['ALLOW_IP']){
                     foreach ($Config['ALLOW_IP'] as $k=>$Rule){
@@ -453,7 +457,8 @@ function swoole_load_config(){
                 return false;
             }
         }
-        return $Returns['LISTEN']?$Returns:false;
+//        if(count())
+        return $Returns['LISTEN']&&count($StartListen)<2?$Returns:false;
     }else{
         return false;
     }
