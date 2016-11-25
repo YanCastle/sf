@@ -139,21 +139,25 @@ function broadcast($Port,$value){
  * @return array|bool
  */
 function port_group($port,$fd=false){
+    static $Redis;
+    if(!$Redis){
+        $Redis=new \Tsy\Library\Cache\Driver\Redis();
+    }
     if(false===$fd){
-        $g = cache('tmp_port_group'.$port);
+        $g = $Redis->get('tmp_port_group'.$port);
         return is_array($g)?$g:[];
     }elseif(null===$fd){
-        $g = cache('tmp_port_group'.$port);
+        $g = $Redis->get('tmp_port_group'.$port);
         $g = is_array($g)?$g:[];
         if($k = array_search(fd(),$g)){
             unset($g[$k]);
         }
-        cache('tmp_port_group'.$port,$fd);
+        $Redis->set('tmp_port_group'.$port,$fd);
     }else{
-        $g = cache('tmp_port_group'.$port);
+        $g = $Redis->get('tmp_port_group'.$port);
         $g = is_array($g)?$g:[];
         $g[]=$fd;
-        cache('tmp_port_group'.$port,$g);
+        $Redis->set('tmp_port_group'.$port,$g);
     }
 }
 
