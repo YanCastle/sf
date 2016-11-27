@@ -36,12 +36,12 @@ class Redis extends Cache implements CacheInterface
         $this->options['prefix'] =  isset($options['prefix'])?  $options['prefix']  :   C('DATA_CACHE_PREFIX');
         $this->options['length'] =  isset($options['length'])?  $options['length']  :   0;
         $func = $options['persistent'] ? 'pconnect' : 'connect';
-        if(!$this->handler){
-            $this->handler  = new \Redis();
+        if(!self::$handler){
+            self::$handler  = new \Redis();
         }
         $options['timeout'] === false ?
-            $this->handler->$func($options['host'], $options['port']) :
-            $this->handler->$func($options['host'], $options['port'], $options['timeout']);
+            self::$handler->$func($options['host'], $options['port']) :
+            self::$handler->$func($options['host'], $options['port'], $options['timeout']);
     }
 
     /**
@@ -52,7 +52,7 @@ class Redis extends Cache implements CacheInterface
      */
     public function get($name) {
 //        N('cache_read',1);
-        $value = $this->handler->get($this->options['prefix'].$name);
+        $value = self::$handler->get($this->options['prefix'].$name);
         if($value){
             try{
                 $jsonData  = unserialize( $value);
@@ -81,9 +81,9 @@ class Redis extends Cache implements CacheInterface
         //对数组/对象数据进行缓存处理，保证数据完整性
         $value  =  serialize($value);
         if(is_int($expire) && $expire) {
-            $result = $this->handler->setex($name, $expire, $value);
+            $result = self::$handler->setex($name, $expire, $value);
         }else{
-            $result = $this->handler->set($name, $value);
+            $result = self::$handler->set($name, $value);
         }
         return $result;
     }
@@ -95,7 +95,7 @@ class Redis extends Cache implements CacheInterface
      * @return boolean
      */
     public function rm($name) {
-        return $this->handler->delete($this->options['prefix'].$name);
+        return self::$handler->delete($this->options['prefix'].$name);
     }
 
     /**
@@ -104,7 +104,7 @@ class Redis extends Cache implements CacheInterface
      * @return boolean
      */
     public function clear() {
-        return $this->handler->flushDB();
+        return self::$handler->flushDB();
     }
 
     /**
@@ -114,8 +114,8 @@ class Redis extends Cache implements CacheInterface
      * @return bool|int
      */
     public function publish($Chanel,$Date){
-        if($this->handler->pubSub('numsub',is_array($Chanel)?$Chanel:[$Chanel])){
-            return $this->handler->publish($Chanel,is_string($Date)?$Date:serialize($Date));
+        if(self::$handler->pubSub('numsub',is_array($Chanel)?$Chanel:[$Chanel])){
+            return self::$handler->publish($Chanel,is_string($Date)?$Date:serialize($Date));
         }
         return false;
     }
@@ -126,6 +126,6 @@ class Redis extends Cache implements CacheInterface
      * @param callable $func
      */
     public function subscribe($Chanel,callable $func){
-        $this->handler->subscribe($Chanel,$func);
+        self::$handler->subscribe($Chanel,$func);
     }
 }
