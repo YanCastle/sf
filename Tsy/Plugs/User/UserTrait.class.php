@@ -193,6 +193,10 @@ trait UserTrait
      * @return bool
      */
     private function checkVerifyCode($Code,$UID){
-        return $Code==cache('VerifyCode'.$Code);
+        if($Code==cache('VerifyCode'.$Code)){
+            cache('VerifyCode'.$Code,null);
+            return true;
+        }
+        return false;
     }
 }
