@@ -148,10 +148,10 @@ trait UserTrait
      * 发送验证码
      * @param int $UID 用户名
      * @param int $Address 地址
-     * @param string $Type 发送方式，默认为邮件，暂时支持邮件方式
+     * @param string $Type 发送方式，默认为邮件(Email)，暂时支持邮件方式
      * @return bool true/false
      */
-    function sendVerify($UID, $Address, $Type = 'Email')
+    function sendVerify($UID='', $Address, $Type = 'Email')
     {
 //        session('UID',)
         session('VUID',$UID);session('VAddress',$Address);
