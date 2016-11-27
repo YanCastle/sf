@@ -169,7 +169,7 @@ trait UserTrait
         for($i=0;$i<rand(5,10);$i++){
             $Code.=chr(rand(65,90));
         }
-        cache('VerifyCode'.$UID,$Code,$Expire);
+        cache('VerifyCode'.$Code,$Code,$Expire);
         return $Code;
     }
 
@@ -193,6 +193,6 @@ trait UserTrait
      * @return bool
      */
     private function checkVerifyCode($Code,$UID){
-        return $Code==cache('VerifyCode'.$UID);
+        return $Code==cache('VerifyCode'.$Code);
     }
 }
