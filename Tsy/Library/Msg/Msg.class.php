@@ -58,7 +58,7 @@ class Msg implements MsgIFace
     function send($To, $Content)
     {
         // TODO: Implement send() method.
-        $this->current->send($To,$Content);
+        return $this->current->send($To,$Content);
     }
 
     /**
