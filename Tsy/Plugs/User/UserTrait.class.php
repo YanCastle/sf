@@ -114,7 +114,7 @@ trait UserTrait
         if(!$this->checkVerifyCode($Code,$UID)){
             return '验证码错误';
         }
-        if($this->findAccount($Account)==$UID){
+        if($this->findAccount($Account)['UID']==$UID){
             $data[$this->_map['PWD']]=$this->password($PWD);
             return $this->save($UID,$data);
         }
