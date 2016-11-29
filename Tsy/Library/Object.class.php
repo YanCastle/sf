@@ -1109,7 +1109,14 @@ class Object
             }
         }
         if('add'==$Method&&array_diff($Fields,array_keys($Data))){
-            return L('如下字段不存在:'.implode(',',array_diff($Fields,array_keys($Data))));
+            $NotExistFields=[];
+            foreach (M($this->main)->getDbFields(null,true) as $ColumnName=>$Conf){
+                if(is_array($Conf)&&$Conf['default']===null&&$Conf['autonic']!=true&&$Conf['notnull']===true){
+                    $NotExistFields[]=$ColumnName;
+                }
+            }
+            //TODO 判断数据库必填选项，若数据库必填且默认值不存在的情况下返回字段不存在
+            return $NotExistFields?L('如下字段不存在:'.implode(',',$NotExistFields)):$Data;
         }
         return $Data;
         //暂时直接从POST中取有效数据返回
