@@ -1735,19 +1735,19 @@ class Model {
      * @access public
      * @return array
      */
-    public function getDbFields($table=null){
+    public function getDbFields($table=null,$config=false){
         if($table){
             $db   =  $this->dbName?:C('DB_NAME');
             if(DB_DEBUG){
                 $rs = $this->db->getFields($table);
                 cache('_field/'.strtolower($db.'.'.$this->tablePrefix.$table),array_keys($rs));
-                return $rs?array_keys($rs):false;
+                return $rs?($config?$rs:array_keys($rs)):false;
             }else{
                 $map = cache('_field/'.strtolower($db.'.'.$this->tablePrefix.$table));
                 if(!$map){
                     $rs = $this->db->getFields($table);
                     cache('_field/'.strtolower($db.'.'.$this->tablePrefix.$table),array_keys($rs));
-                    return $rs?array_keys($rs):false;
+                    return $rs?($config?$rs:array_keys($rs)):false;
                 }
                 return $map;
             }
@@ -1759,16 +1759,24 @@ class Model {
                 $table  =   is_array($this->options['table'])?current($this->options['table']):$this->options['table'];
             }
             $fields     =   $this->db->getFields($table);
-            return  $fields ? array_keys($fields) : false;
+            return  $fields ? ($config?$fields:array_keys($fields)) : false;
         }
         if($this->fields) {
             $fields     =  $this->fields;
             unset($fields['_type'],$fields['_pk']);
+            if($config){
+                $Data=[];
+                $Fields = $this->db->getFields($this->trueTableName);
+                foreach (array_intersect($fields,array_keys($Fields)) as $k){
+                    $Data[$k]=$Fields[$k];
+                }
+                return $Data;
+            }
             return $fields;
         }
         return false;
     }
-
+    function getDbColumns(){}
     /**
      * 设置数据对象值
      * @access public
