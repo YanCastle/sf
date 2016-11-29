@@ -1,25 +1,8 @@
 <?php
-/* ---------------------------------------------------- */
-/* 程序名称: PHP探针-Yahei
-/* 程序功能: 探测系统的Web服务器运行环境
-/* 程序开发: Yahei.Net
-/* 联系方式: info@Yahei.net
-/* Date: 1970-01-01 / 2012-07-08
-/* ---------------------------------------------------- */
-/* 使用条款:
-/* 1.该软件免费使用.
-/* 2.禁止任何衍生版本.
-/* ---------------------------------------------------- */
-/* 感谢以下朋友为探针做出的贡献:
-/* zyypp,酷を龙卷风,龙智超,菊花肿了,闲人,Clare Lou,hotsnow
-/* 二戒,yexinzhu,wangyu1314,Kokgog,gibyasus,黃子珅,A大,huli
-/* 小松,charwin,华景网络
-/* 您可能是下一个?
-/* ---------------------------------------------------- */
 function memory_usage()
 {
 
-    $memory	 = ( ! function_exists('memory_get_usage')) ? '0' : round(memory_get_usage()/1024/1024, 2).'MB';
+    $memory = (!function_exists('memory_get_usage')) ? '0' : round(memory_get_usage() / 1024 / 1024, 2) . 'MB';
 
     return $memory;
 
@@ -43,26 +26,25 @@ function microtime_float()
 //单位转换
 function formatsize($size)
 {
-    $danwei=array(' B ',' K ',' M ',' G ',' T ');
-    $allsize=array();
-    $i=0;
+    $danwei = array(' B ', ' K ', ' M ', ' G ', ' T ');
+    $allsize = array();
+    $i = 0;
 
-    for($i = 0; $i <5; $i++)
-    {
-        if(floor($size/pow(1024,$i))==0){break;}
+    for ($i = 0; $i < 5; $i++) {
+        if (floor($size / pow(1024, $i)) == 0) {
+            break;
+        }
     }
 
-    for($l = $i-1; $l >=0; $l--)
-    {
-        $allsize1[$l]=floor($size/pow(1024,$l));
-        $allsize[$l]=$allsize1[$l]-$allsize1[$l+1]*1024;
+    for ($l = $i - 1; $l >= 0; $l--) {
+        $allsize1[$l] = floor($size / pow(1024, $l));
+        $allsize[$l] = $allsize1[$l] - $allsize1[$l + 1] * 1024;
     }
 
-    $len=count($allsize);
+    $len = count($allsize);
 
-    for($j = $len-1; $j >=0; $j--)
-    {
-        $fsize=$fsize.$allsize[$j].$danwei[$j];
+    for ($j = $len - 1; $j >= 0; $j--) {
+        $fsize = $fsize . $allsize[$j] . $danwei[$j];
     }
     return $fsize;
 }
@@ -75,156 +57,80 @@ function formatsize($size)
 function valid_email($str)
 {
 
-    return ( ! preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $str)) ? FALSE : TRUE;
-
-}
-// 检测函数支持
-
-function isfun($funName = '')
-{
-
-    if (!$funName || trim($funName) == '' || preg_match('~[^a-z0-9\_]+~i', $funName, $tmp)) return '错误';
-
-    return (false !== function_exists($funName)) ? '<font color="green">√</font>' : '<font color="red">×</font>';
-}
-function isfun1($funName = '')
-{
-    if (!$funName || trim($funName) == '' || preg_match('~[^a-z0-9\_]+~i', $funName, $tmp)) return '错误';
-    return (false !== function_exists($funName)) ? '√' : '×';
-}
-
-//整数运算能力测试
-
-function test_int()
-{
-
-    $timeStart = gettimeofday();
-
-    for($i = 0; $i < 3000000; $i++)
-    {
-
-        $t = 1+1;
-
-    }
-
-    $timeEnd = gettimeofday();
-
-    $time = ($timeEnd["usec"]-$timeStart["usec"])/1000000+$timeEnd["sec"]-$timeStart["sec"];
-
-    $time = round($time, 3)."秒";
-
-    return $time;
+    return (!preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $str)) ? FALSE : TRUE;
 
 }
 
-
-
-//浮点运算能力测试
 /**
- * 浮点运算能力测试
- * @return float|string
+ * @return array
  */
-function test_float()
+function GetCoreInformation()
 {
-
-    //得到圆周率值
-
-    $t = pi();
-
-    $timeStart = gettimeofday();
-
-
-
-    for($i = 0; $i < 3000000; $i++)
-    {
-
-        //开平方
-
-        sqrt($t);
-
+    $data = file('/proc/stat');
+    $cores = array();
+    foreach ($data as $line) {
+        if (preg_match('/^cpu[0-9]/', $line)) {
+            $info = explode(' ', $line);
+            $cores[] = array('user' => $info[1], 'nice' => $info[2], 'sys' => $info[3], 'idle' => $info[4], 'iowait' => $info[5], 'irq' => $info[6], 'softirq' => $info[7]);
+        }
     }
-
-
-
-    $timeEnd = gettimeofday();
-
-    $time = ($timeEnd["usec"]-$timeStart["usec"])/1000000+$timeEnd["sec"]-$timeStart["sec"];
-
-    $time = round($time, 3)."秒";
-
-    return $time;
-
+    return $cores;
 }
 
-
-
-//IO能力测试
 /**
- * IO能力测试
- * @return string
+ * 获取CPU使用率
+ * @param $stat1
+ * @param $stat2
+ * @return array|void
  */
-function test_io()
+function GetCpuPercentages($stat1, $stat2)
 {
-
-    $fp = @fopen(PHPSELF, "r");
-
-    $timeStart = gettimeofday();
-
-    for($i = 0; $i < 10000; $i++)
-    {
-
-        @fread($fp, 10240);
-
-        @rewind($fp);
-
+    if (count($stat1) !== count($stat2)) {
+        return;
     }
-
-    $timeEnd = gettimeofday();
-
-    @fclose($fp);
-
-    $time = ($timeEnd["usec"]-$timeStart["usec"])/1000000+$timeEnd["sec"]-$timeStart["sec"];
-
-    $time = round($time, 3)."秒";
-
-    return($time);
-
+    $cpus = array();
+    for ($i = 0, $l = count($stat1); $i < $l; $i++) {
+        $dif = array();
+        $dif['user'] = $stat2[$i]['user'] - $stat1[$i]['user'];
+        $dif['nice'] = $stat2[$i]['nice'] - $stat1[$i]['nice'];
+        $dif['sys'] = $stat2[$i]['sys'] - $stat1[$i]['sys'];
+        $dif['idle'] = $stat2[$i]['idle'] - $stat1[$i]['idle'];
+        $dif['iowait'] = $stat2[$i]['iowait'] - $stat1[$i]['iowait'];
+        $dif['irq'] = $stat2[$i]['irq'] - $stat1[$i]['irq'];
+        $dif['softirq'] = $stat2[$i]['softirq'] - $stat1[$i]['softirq'];
+        $total = array_sum($dif);
+        $cpu = array();
+        foreach ($dif as $x => $y) $cpu[$x] = round($y / $total * 100, 2);
+        $cpus['cpu' . $i] = $cpu;
+    }
+    return $cpus;
 }
-
-function GetCoreInformation() {$data = file('/proc/stat');$cores = array();foreach( $data as $line ) {if( preg_match('/^cpu[0-9]/', $line) ){$info = explode(' ', $line);$cores[]=array('user'=>$info[1],'nice'=>$info[2],'sys' => $info[3],'idle'=>$info[4],'iowait'=>$info[5],'irq' => $info[6],'softirq' => $info[7]);}}return $cores;}
-function GetCpuPercentages($stat1, $stat2) {if(count($stat1)!==count($stat2)){return;}$cpus=array();for( $i = 0, $l = count($stat1); $i < $l; $i++) {	$dif = array();	$dif['user'] = $stat2[$i]['user'] - $stat1[$i]['user'];$dif['nice'] = $stat2[$i]['nice'] - $stat1[$i]['nice'];	$dif['sys'] = $stat2[$i]['sys'] - $stat1[$i]['sys'];$dif['idle'] = $stat2[$i]['idle'] - $stat1[$i]['idle'];$dif['iowait'] = $stat2[$i]['iowait'] - $stat1[$i]['iowait'];$dif['irq'] = $stat2[$i]['irq'] - $stat1[$i]['irq'];$dif['softirq'] = $stat2[$i]['softirq'] - $stat1[$i]['softirq'];$total = array_sum($dif);$cpu = array();foreach($dif as $x=>$y) $cpu[$x] = round($y / $total * 100, 2);$cpus['cpu' . $i] = $cpu;}return $cpus;}
-//$stat1 = GetCoreInformation();sleep(1);$stat2 = GetCoreInformation();$data = GetCpuPercentages($stat1, $stat2);
-//$cpu_show = $data['cpu0']['user']."%us,  ".$data['cpu0']['sys']."%sy,  ".$data['cpu0']['nice']."%ni, ".$data['cpu0']['idle']."%id,  ".$data['cpu0']['iowait']."%wa,  ".$data['cpu0']['irq']."%irq,  ".$data['cpu0']['softirq']."%softirq";
-function makeImageUrl($title, $data) {$api='http://api.yahei.net/tz/cpu_show.php?id=';$url.=$data['user'].',';$url.=$data['nice'].',';$url.=$data['sys'].',';$url.=$data['idle'].',';$url.=$data['iowait'];$url.='&chdl=User|Nice|Sys|Idle|Iowait&chdlp=b&chl=';$url.=$data['user'].'%25|';$url.=$data['nice'].'%25|';$url.=$data['sys'].'%25|';$url.=$data['idle'].'%25|';$url.=$data['iowait'].'%25';$url.='&chtt=Core+'.$title;return $api.base64_encode($url);}
-//if($_GET['act'] == "cpu_percentage"){echo "<center><b><font face='Microsoft YaHei' color='#666666' size='3'>图片加载慢，请耐心等待！</font></b><br /><br />";foreach( $data as $k => $v ) {echo '<img src="' . makeImageUrl( $k, $v ) . '" style="width:360px;height:240px;border: #CCCCCC 1px solid;background: #FFFFFF;margin:5px;padding:5px;" />';}echo "</center>";exit();}
-
-
 
 // 根据不同系统取得CPU相关信息
 
 
-function get_os_info(){
-    $sysReShow=[];
-    switch(PHP_OS)
-    {
+function get_os_info()
+{
+    $sysReShow = [];
+    switch (PHP_OS) {
 
         case "Linux":
 
-            $sysReShow = (false !== ($sysInfo = sys_linux()))?"show":"none";
+            $sysReShow = (false !== ($sysInfo = sys_linux())) ? "show" : "none";
 
             break;
 
 
         case "FreeBSD":
 
-            $sysReShow = (false !== ($sysInfo = sys_freebsd()))?"show":"none";
+            $sysReShow = (false !== ($sysInfo = sys_freebsd())) ? "show" : "none";
 
             break;
 
 
         case "WINNT":
 
-            $sysReShow = (false !== ($sysInfo = sys_windows()))?"show":"none";
+            $sysReShow = (false !== ($sysInfo = sys_windows())) ? "show" : "none";
 
             break;
 
@@ -240,9 +146,7 @@ function get_os_info(){
 
 //linux系统探测
 
-function sys_linux()
-
-{
+function sys_linux(){
 
     // CPU
 
@@ -258,34 +162,17 @@ function sys_linux()
 
     @preg_match_all("/bogomips\s{0,}\:+\s{0,}([\d\.]+)[\r\n]+/", $str, $bogomips);
 
-    if (false !== is_array($model[1]))
-
-    {
+    if (false !== is_array($model[1])) {
 
         $res['cpu']['num'] = sizeof($model[1]);
-        /*
-
-        for($i = 0; $i < $res['cpu']['num']; $i++)
-
-        {
-
-            $res['cpu']['model'][] = $model[1][$i].'&nbsp;('.$mhz[1][$i].')';
-
-            $res['cpu']['mhz'][] = $mhz[1][$i];
-
-            $res['cpu']['cache'][] = $cache[1][$i];
-
-            $res['cpu']['bogomips'][] = $bogomips[1][$i];
-
-        }*/
-        if($res['cpu']['num']==1)
+        if ($res['cpu']['num'] == 1)
             $x1 = '';
         else
-            $x1 = ' ×'.$res['cpu']['num'];
-        $mhz[1][0] = ' | 频率:'.$mhz[1][0];
-        $cache[1][0] = ' | 二级缓存:'.$cache[1][0];
-        $bogomips[1][0] = ' | Bogomips:'.$bogomips[1][0];
-        $res['cpu']['model'][] = $model[1][0].$mhz[1][0].$cache[1][0].$bogomips[1][0].$x1;
+            $x1 = ' ×' . $res['cpu']['num'];
+        $mhz[1][0] = ' | 频率:' . $mhz[1][0];
+        $cache[1][0] = ' | 二级缓存:' . $cache[1][0];
+        $bogomips[1][0] = ' | Bogomips:' . $bogomips[1][0];
+        $res['cpu']['model'][] = $model[1][0] . $mhz[1][0] . $cache[1][0] . $bogomips[1][0] . $x1;
 
         if (false !== is_array($res['cpu']['model'])) $res['cpu']['model'] = implode("<br />", $res['cpu']['model']);
 
@@ -319,11 +206,11 @@ function sys_linux()
 
     $min = floor($min - ($days * 60 * 24) - ($hours * 60));
 
-    if ($days !== 0) $res['uptime'] = $days."天";
+    if ($days !== 0) $res['uptime'] = $days . "天";
 
-    if ($hours !== 0) $res['uptime'] .= $hours."小时";
+    if ($hours !== 0) $res['uptime'] .= $hours . "小时";
 
-    $res['uptime'] .= $min."分钟";
+    $res['uptime'] .= $min . "分钟";
 
 
     // MEMORY
@@ -336,31 +223,31 @@ function sys_linux()
     preg_match_all("/Buffers\s{0,}\:+\s{0,}([\d\.]+)/s", $str, $buffers);
 
 
-    $res['memTotal'] = round($buf[1][0]/1024, 2);
+    $res['memTotal'] = round($buf[1][0] / 1024, 2);
 
-    $res['memFree'] = round($buf[2][0]/1024, 2);
+    $res['memFree'] = round($buf[2][0] / 1024, 2);
 
-    $res['memBuffers'] = round($buffers[1][0]/1024, 2);
-    $res['memCached'] = round($buf[3][0]/1024, 2);
+    $res['memBuffers'] = round($buffers[1][0] / 1024, 2);
+    $res['memCached'] = round($buf[3][0] / 1024, 2);
 
-    $res['memUsed'] = $res['memTotal']-$res['memFree'];
+    $res['memUsed'] = $res['memTotal'] - $res['memFree'];
 
-    $res['memPercent'] = (floatval($res['memTotal'])!=0)?round($res['memUsed']/$res['memTotal']*100,2):0;
+    $res['memPercent'] = (floatval($res['memTotal']) != 0) ? round($res['memUsed'] / $res['memTotal'] * 100, 2) : 0;
 
 
     $res['memRealUsed'] = $res['memTotal'] - $res['memFree'] - $res['memCached'] - $res['memBuffers']; //真实内存使用
     $res['memRealFree'] = $res['memTotal'] - $res['memRealUsed']; //真实空闲
-    $res['memRealPercent'] = (floatval($res['memTotal'])!=0)?round($res['memRealUsed']/$res['memTotal']*100,2):0; //真实内存使用率
+    $res['memRealPercent'] = (floatval($res['memTotal']) != 0) ? round($res['memRealUsed'] / $res['memTotal'] * 100, 2) : 0; //真实内存使用率
 
-    $res['memCachedPercent'] = (floatval($res['memCached'])!=0)?round($res['memCached']/$res['memTotal']*100,2):0; //Cached内存使用率
+    $res['memCachedPercent'] = (floatval($res['memCached']) != 0) ? round($res['memCached'] / $res['memTotal'] * 100, 2) : 0; //Cached内存使用率
 
-    $res['swapTotal'] = round($buf[4][0]/1024, 2);
+    $res['swapTotal'] = round($buf[4][0] / 1024, 2);
 
-    $res['swapFree'] = round($buf[5][0]/1024, 2);
+    $res['swapFree'] = round($buf[5][0] / 1024, 2);
 
-    $res['swapUsed'] = round($res['swapTotal']-$res['swapFree'], 2);
+    $res['swapUsed'] = round($res['swapTotal'] - $res['swapFree'], 2);
 
-    $res['swapPercent'] = (floatval($res['swapTotal'])!=0)?round($res['swapUsed']/$res['swapTotal']*100,2):0;
+    $res['swapPercent'] = (floatval($res['swapTotal']) != 0) ? round($res['swapUsed'] / $res['swapTotal'] * 100, 2) : 0;
 
 
     // LOAD AVG
@@ -377,7 +264,6 @@ function sys_linux()
     return $res;
 
 }
-
 
 
 //FreeBSD系统探测
@@ -413,17 +299,17 @@ function sys_freebsd()
 
     $min = floor($min - ($days * 60 * 24) - ($hours * 60));
 
-    if ($days !== 0) $res['uptime'] = $days."天";
+    if ($days !== 0) $res['uptime'] = $days . "天";
 
-    if ($hours !== 0) $res['uptime'] .= $hours."小时";
+    if ($hours !== 0) $res['uptime'] .= $hours . "小时";
 
-    $res['uptime'] .= $min."分钟";
+    $res['uptime'] .= $min . "分钟";
 
     //MEMORY
 
     if (false === ($buf = get_key("hw.physmem"))) return false;
 
-    $res['memTotal'] = round($buf/1024/1024, 2);
+    $res['memTotal'] = round($buf / 1024 / 1024, 2);
 
 
     $str = get_key("vm.vmtotal");
@@ -433,24 +319,23 @@ function sys_freebsd()
     preg_match_all("/\nReal Memory[\:\s]*\(Total[\:\s]*([\d]+)K[\,\s]*Active[\:\s]*([\d]+)K\)\n/i", $str, $buf, PREG_SET_ORDER);
 
 
-    $res['memRealUsed'] = round($buf[0][2]/1024, 2);
+    $res['memRealUsed'] = round($buf[0][2] / 1024, 2);
 
-    $res['memCached'] = round($buff[0][2]/1024, 2);
+    $res['memCached'] = round($buff[0][2] / 1024, 2);
 
-    $res['memUsed'] = round($buf[0][1]/1024, 2) + $res['memCached'];
+    $res['memUsed'] = round($buf[0][1] / 1024, 2) + $res['memCached'];
 
     $res['memFree'] = $res['memTotal'] - $res['memUsed'];
 
-    $res['memPercent'] = (floatval($res['memTotal'])!=0)?round($res['memUsed']/$res['memTotal']*100,2):0;
+    $res['memPercent'] = (floatval($res['memTotal']) != 0) ? round($res['memUsed'] / $res['memTotal'] * 100, 2) : 0;
 
 
-    $res['memRealPercent'] = (floatval($res['memTotal'])!=0)?round($res['memRealUsed']/$res['memTotal']*100,2):0;
+    $res['memRealPercent'] = (floatval($res['memTotal']) != 0) ? round($res['memRealUsed'] / $res['memTotal'] * 100, 2) : 0;
 
 
     return $res;
 
 }
-
 
 
 //取得参数值 FreeBSD
@@ -463,7 +348,6 @@ function get_key($keyName)
 }
 
 
-
 //确定执行文件位置 FreeBSD
 
 function find_command($commandName)
@@ -471,8 +355,7 @@ function find_command($commandName)
 
     $path = array('/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin');
 
-    foreach($path as $p)
-    {
+    foreach ($path as $p) {
 
         if (@is_executable("$p/$commandName")) return "$p/$commandName";
 
@@ -481,7 +364,6 @@ function find_command($commandName)
     return false;
 
 }
-
 
 
 //执行系统命令 FreeBSD
@@ -493,11 +375,9 @@ function do_command($commandName, $args)
 
     if (false === ($command = find_command($commandName))) return false;
 
-    if ($fp = @popen("$command $args", 'r'))
-    {
+    if ($fp = @popen("$command $args", 'r')) {
 
-        while (!@feof($fp))
-        {
+        while (!@feof($fp)) {
 
             $buffer .= @fgets($fp, 4096);
 
@@ -512,14 +392,12 @@ function do_command($commandName, $args)
 }
 
 
-
 //windows系统探测
 
 function sys_windows()
 {
 
-    if (PHP_VERSION >= 5)
-    {
+    if (PHP_VERSION >= 5) {
 
         $objLocator = new COM("WbemScripting.SWbemLocator");
 
@@ -527,23 +405,19 @@ function sys_windows()
 
         $prop = $wmi->get("Win32_PnPEntity");
 
-    }
-    else
-    {
+    } else {
         return false;
 
     }
 
 
-
     //CPU
 
-    $cpuinfo = GetWMI($wmi,"Win32_Processor", array("Name","L2CacheSize","NumberOfCores"));
+    $cpuinfo = GetWMI($wmi, "Win32_Processor", array("Name", "L2CacheSize", "NumberOfCores"));
 
     $res['cpu']['num'] = $cpuinfo[0]['NumberOfCores'];
 
-    if (null == $res['cpu']['num'])
-    {
+    if (null == $res['cpu']['num']) {
 
         $res['cpu']['num'] = 1;
 
@@ -557,29 +431,29 @@ function sys_windows()
 		$res['cpu']['cache'] .= $cpuinfo[0]['L2CacheSize']."<br />";
 
 	}*/
-    $cpuinfo[0]['L2CacheSize'] = ' ('.$cpuinfo[0]['L2CacheSize'].')';
-    if($res['cpu']['num']==1)
+    $cpuinfo[0]['L2CacheSize'] = ' (' . $cpuinfo[0]['L2CacheSize'] . ')';
+    if ($res['cpu']['num'] == 1)
         $x1 = '';
     else
-        $x1 = ' ×'.$res['cpu']['num'];
-    $res['cpu']['model'] = $cpuinfo[0]['Name'].$cpuinfo[0]['L2CacheSize'].$x1;
+        $x1 = ' ×' . $res['cpu']['num'];
+    $res['cpu']['model'] = $cpuinfo[0]['Name'] . $cpuinfo[0]['L2CacheSize'] . $x1;
 
     // SYSINFO
 
-    $sysinfo = GetWMI($wmi,"Win32_OperatingSystem", array('LastBootUpTime','TotalVisibleMemorySize','FreePhysicalMemory','Caption','CSDVersion','SerialNumber','InstallDate'));
+    $sysinfo = GetWMI($wmi, "Win32_OperatingSystem", array('LastBootUpTime', 'TotalVisibleMemorySize', 'FreePhysicalMemory', 'Caption', 'CSDVersion', 'SerialNumber', 'InstallDate'));
 
-    $sysinfo[0]['Caption']=iconv('GBK', 'UTF-8',$sysinfo[0]['Caption']);
+    $sysinfo[0]['Caption'] = iconv('GBK', 'UTF-8', $sysinfo[0]['Caption']);
 
-    $sysinfo[0]['CSDVersion']=iconv('GBK', 'UTF-8',$sysinfo[0]['CSDVersion']);
+    $sysinfo[0]['CSDVersion'] = iconv('GBK', 'UTF-8', $sysinfo[0]['CSDVersion']);
 
-    $res['win_n'] = $sysinfo[0]['Caption']." ".$sysinfo[0]['CSDVersion']." 序列号:{$sysinfo[0]['SerialNumber']} 于".date('Y年m月d日H:i:s',strtotime(substr($sysinfo[0]['InstallDate'],0,14)))."安装";
+    $res['win_n'] = $sysinfo[0]['Caption'] . " " . $sysinfo[0]['CSDVersion'] . " 序列号:{$sysinfo[0]['SerialNumber']} 于" . date('Y年m月d日H:i:s', strtotime(substr($sysinfo[0]['InstallDate'], 0, 14))) . "安装";
 
     //UPTIME
 
     $res['uptime'] = $sysinfo[0]['LastBootUpTime'];
 
 
-    $sys_ticks = 3600*8 + time() - strtotime(substr($res['uptime'],0,14));
+    $sys_ticks = 3600 * 8 + time() - strtotime(substr($res['uptime'], 0, 14));
 
     $min = $sys_ticks / 60;
 
@@ -591,30 +465,30 @@ function sys_windows()
 
     $min = floor($min - ($days * 60 * 24) - ($hours * 60));
 
-    if ($days !== 0) $res['uptime'] = $days."天";
+    if ($days !== 0) $res['uptime'] = $days . "天";
 
-    if ($hours !== 0) $res['uptime'] .= $hours."小时";
+    if ($hours !== 0) $res['uptime'] .= $hours . "小时";
 
-    $res['uptime'] .= $min."分钟";
+    $res['uptime'] .= $min . "分钟";
 
 
     //MEMORY
 
-    $res['memTotal'] = round($sysinfo[0]['TotalVisibleMemorySize']/1024,2);
+    $res['memTotal'] = round($sysinfo[0]['TotalVisibleMemorySize'] / 1024, 2);
 
-    $res['memFree'] = round($sysinfo[0]['FreePhysicalMemory']/1024,2);
+    $res['memFree'] = round($sysinfo[0]['FreePhysicalMemory'] / 1024, 2);
 
-    $res['memUsed'] = $res['memTotal']-$res['memFree'];	//上面两行已经除以1024,这行不用再除了
+    $res['memUsed'] = $res['memTotal'] - $res['memFree'];    //上面两行已经除以1024,这行不用再除了
 
-    $res['memPercent'] = round($res['memUsed'] / $res['memTotal']*100,2);
+    $res['memPercent'] = round($res['memUsed'] / $res['memTotal'] * 100, 2);
 
 
-    $swapinfo = GetWMI($wmi,"Win32_PageFileUsage", array('AllocatedBaseSize','CurrentUsage'));
+    $swapinfo = GetWMI($wmi, "Win32_PageFileUsage", array('AllocatedBaseSize', 'CurrentUsage'));
 
 
     // LoadPercentage
 
-    $loadinfo = GetWMI($wmi,"Win32_Processor", array("LoadPercentage"));
+    $loadinfo = GetWMI($wmi, "Win32_Processor", array("LoadPercentage"));
 
     $res['loadAvg'] = $loadinfo[0]['LoadPercentage'];
 
@@ -624,57 +498,28 @@ function sys_windows()
 }
 
 
-
-function GetWMI($wmi,$strClass, $strValue = array())
+function GetWMI($wmi, $strClass, $strValue = array())
 {
-
     $arrData = array();
-
-
     $objWEBM = $wmi->Get($strClass);
-
     $arrProp = $objWEBM->Properties_;
-
     $arrWEBMCol = $objWEBM->Instances_();
-
-    foreach($arrWEBMCol as $objItem)
-    {
-
+    foreach ($arrWEBMCol as $objItem) {
         @reset($arrProp);
-
         $arrInstance = array();
-
-        foreach($arrProp as $propItem)
-        {
-
+        foreach ($arrProp as $propItem) {
             eval("\$value = \$objItem->" . $propItem->Name . ";");
-
-            if (empty($strValue))
-            {
-
+            if (empty($strValue)) {
                 $arrInstance[$propItem->Name] = trim($value);
-
-            }
-            else
-            {
-
-                if (in_array($propItem->Name, $strValue))
-                {
-
+            } else {
+                if (in_array($propItem->Name, $strValue)) {
                     $arrInstance[$propItem->Name] = trim($value);
-
                 }
-
             }
-
         }
-
         $arrData[] = $arrInstance;
-
     }
-
     return $arrData;
-
 }
 
 //
@@ -763,5 +608,3 @@ function GetWMI($wmi,$strClass, $strValue = array())
 //    exit;
 //
 //}
-
-?>
