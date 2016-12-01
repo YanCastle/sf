@@ -842,7 +842,7 @@ class Model {
         // 检查字段映射
         if(!empty($this->_map) ) {
             foreach($data as $key=>$value){
-                if($this->_map[$key]&&$this->_map[$key]!=$key){
+                if(isset($this->_map[$key])&&$this->_map[$key]!=$key){
                     $data[$this->_map[$key]]=$value;
                     unset($data[$key]);
                 }
