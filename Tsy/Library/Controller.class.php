@@ -349,12 +349,12 @@ class Controller
         if(!$data)$data=$_POST;
         $data['Properties']=$Properties;
         if($this->Object instanceof Object){
-            if(method_exists($this->Object,'_before_add')){
-                $this->Object->_before_add($data);//前置调用
+            if(method_exists($this,'_before_add')){
+                $this->_before_add($data);//前置调用
             }
             $rs = invokeClass($this->Object,'add',$data);
-            if(method_exists($this->Object,'_after_add')){
-                $this->Object->_before_add($data,$rs);
+            if(method_exists($this,'_after_add')){
+                $this->_before_add($data,$rs);
             }
             return $rs;
         }

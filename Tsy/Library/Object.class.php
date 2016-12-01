@@ -312,6 +312,9 @@ class Object
         if(!$data&&$_POST)
             $data=$_POST;
         //遍历添加过滤配置
+        if(method_exists($this,'_before_add')){
+            $this->_before_add($data,$Properties);
+        }
         $rs = $this->_parseChangeFieldsConfig('add',$data);
         if(is_array($rs)&&$rs){
             startTrans();
@@ -319,6 +322,9 @@ class Object
                 commit();
             }else{
                 rollback();
+            }
+            if(method_exists($this,'_after_add')){
+                $this->_after_add($data,$PKID);
             }
             return $PKID?$this->get($PKID):(APP_DEBUG?M()->getDbError():'添加失败');
         }else{
