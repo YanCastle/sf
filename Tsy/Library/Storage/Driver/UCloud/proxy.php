@@ -1,9 +1,9 @@
 <?php
 
 
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/http.php");
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/utils.php");
-require_once(\Tsy\Library\Storage\Driver\UCloud::$UCloudSDKPath."/digest.php");
+require_once(__DIR__."/http.php");
+require_once(__DIR__."/utils.php");
+require_once(__DIR__."/digest.php");
 
 
 //------------------------------普通上传------------------------------

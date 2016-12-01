@@ -6,5 +6,5 @@
  * Time: 11:44
  */
 $_GET['i'] = 'Index/index';
-
+//var_dump($_FILES);
 include 'http.php';
