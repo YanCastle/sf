@@ -349,7 +349,14 @@ class Controller
         if(!$data)$data=$_POST;
         $data['Properties']=$Properties;
         if($this->Object instanceof Object){
-            return invokeClass($this->Object,'add',$data);
+            if(method_exists($this->Object,'_before_add')){
+                $this->Object->_before_add($data);//前置调用
+            }
+            $rs = invokeClass($this->Object,'add',$data);
+            if(method_exists($this->Object,'_after_add')){
+                $this->Object->_before_add($data,$rs);
+            }
+            return $rs;
         }
         $ID = D($this->ControllerName)->add($_POST);
         return $ID?array_values(D($this->ControllerName)->obj([$ID]))[0]:false;

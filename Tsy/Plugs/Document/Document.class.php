@@ -274,7 +274,8 @@ class {$ObjectName}Object extends Object
         '{$ObjectName}'=>[{$SearchColumnsString}],
     ];
 }";
-            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
+            if(filemtime($ObjectName.'Object.class.php')==filectime($ObjectName.'Object.class.php'))
+                file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Object.class.php',$FileContent);
         }
         return $this;
     }
@@ -314,7 +315,8 @@ class {$ObjectName}Model extends Model
      */
      protected \$_map=[{$ModelMapString}];
 }";
-            file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Model.class.php',$FileContent);
+            if(filemtime($ObjectName.'Model.class.php')==filectime($ObjectName.'Model.class.php'))
+                file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Model.class.php',$FileContent);
         }
         return $this;
     }
@@ -349,6 +351,7 @@ class {$ObjectName}Controller extends Controller
      * @var string
      */
 }";
+            if(filemtime($ObjectName.'Controller.class.php')==filectime($ObjectName.'Controller.class.php'))
             file_put_contents($Path.DIRECTORY_SEPARATOR.$ObjectName.'Controller.class.php',$FileContent);
         }
         return $this;
