@@ -96,13 +96,15 @@ function decrypt($str,$key=false){
 /**
  * 访问资源服务器的签名
  * @param $UID
- * @param string $Key
  * @param string $Group
  * @param string $Callback
- * @param array $Params
+ * @param string $Params
+ * @param string $Host
+ * @param string $Key
+ * @param int $Expire 签名有效期，根据业务逻辑定义，默认为15分钟
  * @return string
  */
-function resource_sign($UID,$Group='',$Callback='',$Params='',$Host='',$Key=''){
+function resource_sign($UID,$Group='',$Callback='',$Params='',$Host='',$Key='',$Expire=900){
     if(!$Key)$Key=C('RESOURCE_KEY');
     if(!$Host)$Host=C('RESOURCE_HOST');
     return gzencode(encrypt(serialize([
@@ -110,5 +112,5 @@ function resource_sign($UID,$Group='',$Callback='',$Params='',$Host='',$Key=''){
         'G'=>$Group,
         'C'=>$Callback,
         'P'=>is_array($Params)?http_build_str($Params):$Params,
-    ]),md5($Host.$Key)));
+    ]),$Expire,md5($Host.$Key)));
 }
