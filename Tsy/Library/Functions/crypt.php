@@ -92,3 +92,23 @@ function decrypt($str,$key=false){
     $key=$key?$key:C('CRYPT.KEY');
     return authcode($str,'DECODE',$key);
 }
+
+/**
+ * 访问资源服务器的签名
+ * @param $UID
+ * @param string $Key
+ * @param string $Group
+ * @param string $Callback
+ * @param array $Params
+ * @return string
+ */
+function resource_sign($UID,$Group='',$Callback='',$Params='',$Host='',$Key=''){
+    if(!$Key)$Key=C('RESOURCE_KEY');
+    if(!$Host)$Host=C('RESOURCE_HOST');
+    return gzencode(encrypt(serialize([
+        'U'=>$UID,
+        'G'=>$Group,
+        'C'=>$Callback,
+        'P'=>is_array($Params)?http_build_str($Params):$Params,
+    ]),md5($Host.$Key)));
+}
