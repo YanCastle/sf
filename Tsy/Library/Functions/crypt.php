@@ -107,10 +107,10 @@ function decrypt($str,$key=false){
 function resource_sign($UID,$Group='',$Callback='',$Params='',$Host='',$Key='',$Expire=900){
     if(!$Key)$Key=C('RESOURCE_KEY');
     if(!$Host)$Host=C('RESOURCE_HOST');
-    return gzencode(encrypt(serialize([
+    return encrypt(serialize([
         'U'=>$UID,
         'G'=>$Group,
         'C'=>$Callback,
         'P'=>is_array($Params)?http_build_str($Params):$Params,
-    ]),$Expire,md5($Host.$Key)));
+    ]),$Expire,md5($Host.$Key));
 }
