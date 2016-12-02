@@ -69,12 +69,14 @@ class Http implements Mode
         exit();
     }
     function out($Data=null){
-        $Out = C('HTTP.OUT');
-        $Out = is_callable($Out)?$Out:[$this,'output'];
-        $OutData=call_user_func($Out,$Data);
-        if(Tsy::$Out&&is_string($OutData)&&strlen($OutData)>0&&!($Data===null&&$OutData==='null')){
-            self::$Out=true;
-            echo $OutData;
+        if(Tsy::$Out){
+            $Out = C('HTTP.OUT');
+            $Out = is_callable($Out)?$Out:[$this,'output'];
+            $OutData=call_user_func($Out,$Data);
+            if(Tsy::$Out&&is_string($OutData)&&strlen($OutData)>0&&!($Data===null&&$OutData==='null')){
+                self::$Out=true;
+                echo $OutData;
+            }
         }
     }
     function in($Data=null){
