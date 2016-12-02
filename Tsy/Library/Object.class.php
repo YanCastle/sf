@@ -399,6 +399,7 @@ class Object
 //                        if(class_exists($ObjectClass)){
                             $PK = class_exists($ObjectClass)?(new $ObjectClass)->pk:$this->pk;
 //                        }
+                        if(isset($W['_logic'])&&in_array(strtolower($W['_logic']),['or','and']))$Params['_logic']=$W['_logic'];
                         $TableSearchIDs = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $PK);
                         if($TableSearchIDs)
                             $WObjectIDArray[]=$this->searchW($this->main,[$PK=>['IN',$TableSearchIDs]],$this->pk);
