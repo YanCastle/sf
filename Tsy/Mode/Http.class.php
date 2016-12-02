@@ -38,7 +38,7 @@ class Http implements Mode
             'G'=>session('G'),
             'UN'=>session('UN'),
             'UID'=>session('UID'),
-            'c'=>200,
+            'c'=>Tsy::$c,
             'd'=>is_string($data)?false:$data,
             'err'=>is_string($data)?$data:(false===$data?L(false,LOG_TIP):''),
             'tsy'=>session('[id]')

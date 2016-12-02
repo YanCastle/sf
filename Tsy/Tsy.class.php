@@ -21,6 +21,8 @@ class Tsy
     public static $d='';
     public static $m='';
     public static $t='';
+    public static $c=200;
+    public static $err='';
     public static $Out=true;
     public static $fd=-1;
 //    public static
