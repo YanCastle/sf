@@ -378,7 +378,7 @@ class Object
             strlen($Keyword) > 0 && $this->searchFields
         ) {
             foreach ($this->searchFields as $Filed) {
-                $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';', "\r\n"], '', $Keyword) . '%'];
+                $Where[$Filed] = ['LIKE', '%' . str_replace([' ', ';',"%", "\r\n"], '', $Keyword) . '%'];
             }
             $Where['_logic'] = 'OR';
             $Model->where($Where);
