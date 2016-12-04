@@ -414,8 +414,7 @@ class Object
 //                        }
                         if(isset($W['_logic'])&&in_array(strtolower($W['_logic']),['or','and']))$Params['_logic']=$W['_logic'];
                         $TableSearchIDs = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $PK);
-                        if($TableSearchIDs)
-                            $WObjectIDArray[]=$this->searchW($this->main,[$PK=>['IN',$TableSearchIDs]],$this->pk);
+                        $WObjectIDArray[]=$TableSearchIDs?$this->searchW($this->main,[$PK=>['IN',$TableSearchIDs]],$this->pk):[];
                     } elseif (is_callable($this->searchWFieldsConf[$ObjectName])) {
                         //回调
                         $Result = call_user_func($this->searchWFieldsConf[$ObjectName], $Params);
@@ -441,7 +440,7 @@ class Object
             }
         }
         if($WObjectIDArray){
-            $ObjectIDs=array_unique(call_user_func_array('array_merge',$WObjectIDArray));
+            $ObjectIDs=array_unique(call_user_func_array((isset($W['_logic'])&&strtolower($W['_logic'])=='or')?'array_merge':'array_intersect',$WObjectIDArray));
         }
         //取交集
         if($ObjectIDs){
