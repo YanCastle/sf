@@ -71,9 +71,11 @@ class Object
     public $allow_add=true;//是否允许添加
     public $addFields=[];//定义允许添加的字段，规则同字段限定,默认不限制
     public $addFieldsConfig=[];
+    public $addFieldsGroup=[];
     public $allow_save=true;//是否允许修改
     public $saveFields=[];//定义允许修改的字段，规则同字段限定
     public $saveFieldsConfig=[];
+    public $saveFieldsGroup=[];
     public $allow_del=true;//是否允许删除
     public $map = [
 //        自动生成
@@ -296,14 +298,25 @@ class Object
     }
     protected function _parseProperties(&$Properties){
         if(is_array($Properties)&&true===end($Properties)){
-            $Properties=array_diff(array_merge(array_keys($this->property),array_keys($this->link)),$Properties);
+            $Properties=array_diff(array_keys($this->propertyMap),$Properties);
         }elseif(false===$Properties){
-            $Properties=array_merge(array_keys($this->property),array_keys($this->link));
+            $Properties=array_keys($this->propertyMap);
         }
-        $Properties = array_map(function($d){
-            return parse_name($d);
-        },$Properties);
-        $Properties[] = parse_name($this->main);
+        $Properties = array_unique($Properties);
+        $Properties = array_intersect($Properties,array_keys($this->saveFieldsGroup));
+        $Properties[] = $this->main;
+        $PropertiesColumns=[];
+        foreach ($Properties as $property){
+            if(isset($this->propertyMap[$property])){
+                $PropertiesColumns[$property]=
+                    $this->propertyMap[$property]['Type']=='Property'
+                        ?(isset($this->property[$property][self::RELATION_TABLE_FIELDS])?$this->property[$property][self::RELATION_TABLE_FIELDS]:M($property)->getDbFields())
+                        :(isset($this->link[$property][self::RELATION_TABLE_FIELDS])?$this->link[$property][self::RELATION_TABLE_FIELDS]:M($property)->getDbFields());
+            }elseif($property==$this->main){
+                $PropertiesColumns[$property]=M($property)->getDbFields();
+            }
+        }
+        $Properties=$PropertiesColumns;
     }
     function add($data=[],$Properties=false)
     {
@@ -822,56 +835,65 @@ class Object
         }
         $this->_parseProperties($Properties);
         $rs = $this->_parseChangeFieldsConfig('save',$Params);
+        $rs = param_group($Properties,$rs);
         if(false!==$rs){
             $MainColumns = [];
             $ObjectsColumns=[];
-            foreach ($rs as $k=>$v){
-                if(is_array($v)){
-                    if(isset($this->property[$k])){
-                        $PK = isset($this->property[$k][self::RELATION_MAIN_COLUMN])?$this->property[$k][self::RELATION_MAIN_COLUMN]:$this->property[$k][self::RELATION_OBJECT_COLUMN];
-                        $PKID = $PK==$this->pk?$ID:(isset($rs[$PK])?$rs[$PK]:false);
-                        if(!$PKID)return "属性{$k}保存条件不成立";
-                        $ObjectsColumns[$k]=[
-                            $PKID,$v,isset($this->property[$k][self::RELATION_TABLE_NAME])?$this->property[$k][self::RELATION_TABLE_NAME]:false,$PK
-                        ];
-                    }
-                }else{
-                    if($k!=$this->pk)
-                        $MainColumns[$k]=$v;
-                }
-            }
-            if($this->save_add_if_not_exist&&!$this->get($ID)){
-                return $this->add(array_merge($Params,[$this->pk=>$ID]));
-            }
+            unset($rs[0]);
             startTrans();
-            if($MainColumns){
-                if(false===($rs=M($this->main)->where($Where)->save($MainColumns))){
-                    rollback();
-                    return APP_DEBUG?M()->getDbError():'属性修改失败';
-                }
-            }
-            foreach ($ObjectsColumns as $k=>$rows){
-                if(0===$k||!in_array(strtolower($k),$Properties))continue;
-                $ObjectClass = implode("\\",[$this->MC[0],'Object',$k.'Object']);
-                if(class_exists($ObjectClass)){
-                    //调用Object的存储方法
-                    $Object = new $ObjectClass();
-                    if(is_array($Rs = $Object->save($rows[0],$rows[1]))){
-
-                    }else{
+            foreach ($rs as $k=>$v){
+                if($k==$this->main){
+                    if(false===M($this->main)->where($Where)->save($v)){
                         rollback();
-                        return $Rs;
+                        return false;
                     }
                 }else{
-                    //直接操作表格进行存储
-                    if($rows[2]&&$rows[3]&&M($rows[2])->where([$rows[3]=>$rows[0]])->save($rows[1])){
+                    $ObjectClass = implode("\\",[$this->MC[0],'Object',$k.'Object']);
+                    if(class_exists($ObjectClass)) {
+                        //调用Object的存储方法
+                        $Object = new $ObjectClass();
+                        if (is_array($Rs = $Object->save($rows[0], $rows[1]))) {
 
-                    }else{
-                        rollback();
-                        return APP_DEBUG?M()->getDbError():"属性{$k}保存失败";
+                        } else {
+                            rollback();
+                            return $Rs;
+                        }
                     }
                 }
             }
+            return $this->get($ID);
+//            if($this->save_add_if_not_exist&&!$this->get($ID)){
+//                return $this->add(array_merge($Params,[$this->pk=>$ID]));
+//            }
+//            startTrans();
+//            if($MainColumns){
+//                if(false===($rs=M($this->main)->where($Where)->save($MainColumns))){
+//                    rollback();
+//                    return APP_DEBUG?M()->getDbError():'属性修改失败';
+//                }
+//            }
+//            foreach ($ObjectsColumns as $k=>$rows){
+//                if(0===$k||!in_array(strtolower($k),$Properties))continue;
+//                $ObjectClass = implode("\\",[$this->MC[0],'Object',$k.'Object']);
+//                if(class_exists($ObjectClass)){
+//                    //调用Object的存储方法
+//                    $Object = new $ObjectClass();
+//                    if(is_array($Rs = $Object->save($rows[0],$rows[1]))){
+//
+//                    }else{
+//                        rollback();
+//                        return $Rs;
+//                    }
+//                }else{
+//                    //直接操作表格进行存储
+//                    if($rows[2]&&$rows[3]&&M($rows[2])->where([$rows[3]=>$rows[0]])->save($rows[1])){
+//
+//                    }else{
+//                        rollback();
+//                        return APP_DEBUG?M()->getDbError():"属性{$k}保存失败";
+//                    }
+//                }
+//            }
             commit();
             return $this->get($ID);
         }else{
