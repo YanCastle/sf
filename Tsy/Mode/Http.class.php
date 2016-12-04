@@ -61,6 +61,13 @@ class Http implements Mode
         if(isset($_SERVER['REQUEST_METHOD'])&&$_SERVER['REQUEST_METHOD']=='OPTIONS'){
             exit();
         }
+        if($_COOKIE['tsy']){
+            session('[id]',$_COOKIE['tsy']);
+        }else{
+            $session_id = uniqid();
+            session('[id]',$session_id);
+            setcookie('tsy',$session_id);
+        }
         $HttpDispatch = http_in_check();
         $this->out(controller($HttpDispatch['i'],$HttpDispatch['d']));
     }
@@ -85,13 +92,6 @@ class Http implements Mode
             'i'=>isset($_GET['i'])?'Empty/_empty':$_GET['i'],
             'd'=>$_POST?$_POST:[],
         ];
-        if($_COOKIE['tsy']){
-            session('[id]',$_COOKIE['tsy']);
-        }else{
-            $session_id = uniqid();
-            session('[id]',$session_id);
-            setcookie('tsy',$session_id);
-        }
         $Dispatch = C('HTTP.DISPATCH');
         if(is_callable($Dispatch)){
             $tmpData = call_user_func($Dispatch);
