@@ -61,7 +61,7 @@ class Http implements Mode
         if(isset($_SERVER['REQUEST_METHOD'])&&$_SERVER['REQUEST_METHOD']=='OPTIONS'){
             exit();
         }
-        if($_COOKIE['tsy']){
+        if(isset($_COOKIE['tsy'])&&$_COOKIE['tsy']){
             session('[id]',$_COOKIE['tsy']);
         }else{
             $session_id = uniqid();
