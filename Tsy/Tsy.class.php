@@ -32,8 +32,7 @@ class Tsy
     public static $Mode;
     function __construct()
     {
-//        加载框架function函数库
-        include_once TSY_PATH.DIRECTORY_SEPARATOR.'function.php';
+
         spl_autoload_register('Tsy\Tsy::autoload');
         register_shutdown_function('Tsy\Tsy::fatalError');
         set_error_handler('Tsy\Tsy::appError');
@@ -52,6 +51,7 @@ class Tsy
         defined('APP_MODE') or define('APP_MODE','Http');
         defined('APP_NAME') or define('APP_NAME',defined('DEFAULT_MODULE')?DEFAULT_MODULE:md5($_SERVER['PHP_SELF']));
 //defined('PACKAGE_EOF') or define('PACKAGE_EOF',"\r\n\r\n");
+        global $APP_PATH;
         isset($APP_PATH) or $APP_PATH='.';
         if(isset($APP_PATH)&&!is_dir($APP_PATH)){
             mkdir($APP_PATH);
@@ -97,7 +97,9 @@ class Tsy
         define('VENDOR_PATH',TSY_PATH.'/Vendor');
     }
     function start(){
+        //        加载框架function函数库
         $this->init();
+        include_once TSY_PATH.DIRECTORY_SEPARATOR.'function.php';
 //        加载配置文件
 //        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
         Storage::connect();
