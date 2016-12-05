@@ -20,5 +20,8 @@
     "php": ">=5.5"
   },
   "require-dev": {
+  },
+  "autoload":{
+    "psr-0":{"Tsy":"Tsy/"}
   }
 }
