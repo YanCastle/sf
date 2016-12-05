@@ -440,7 +440,11 @@ class Object
             }
         }
         if($WObjectIDArray){
-            $ObjectIDs=array_unique(call_user_func_array((isset($W['_logic'])&&strtolower($W['_logic'])=='or')?'array_merge':'array_intersect',$WObjectIDArray));
+            if(1==count($WObjectIDArray)){
+                $ObjectIDs=$WObjectIDArray[0];
+            }else{
+                $ObjectIDs=array_unique(call_user_func_array((isset($W['_logic'])&&strtolower($W['_logic'])=='or')?'array_merge':'array_intersect',$WObjectIDArray));
+            }
         }
         //取交集
         if($ObjectIDs){
