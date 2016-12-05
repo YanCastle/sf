@@ -408,10 +408,14 @@ class Object
                     if (is_string($this->searchWFieldsConf[$ObjectName]) && preg_match('/^[a-z_A-Z]+[a-zA-Z]$/', $this->searchWFieldsConf[$ObjectName])) {
 //                        $this->searchWFieldsConf
                         //直接值为表名
-                        $ObjectClass = implode('\\',[$this->MC[0],'Object',$this->searchWFieldsConf[$ObjectName].'Object']);
+                        if($ObjectName==$this->MC[0]){
+                            $PK=$this->pk;
+                        }else{
+                            $ObjectClass = implode('\\',[$this->MC[0],'Object',$this->searchWFieldsConf[$ObjectName].'Object']);
 //                        if(class_exists($ObjectClass)){
                             $PK = class_exists($ObjectClass)?(new $ObjectClass)->pk:$this->pk;
 //                        }
+                        }
                         if(isset($W['_logic'])&&in_array(strtolower($W['_logic']),['or','and']))$Params['_logic']=$W['_logic'];
                         $TableSearchIDs = $this->searchW($this->searchWFieldsConf[$ObjectName], $Params, $PK);
                         $WObjectIDArray[]=$TableSearchIDs?$this->searchW($this->main,[$PK=>['IN',$TableSearchIDs]],$this->pk):[];
