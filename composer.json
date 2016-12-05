@@ -22,6 +22,6 @@
   "require-dev": {
   },
   "autoload":{
-    "psr-0":{"Tsy":"Tsy/"}
+    "psr-0":{"Tsy\\":"Tsy/"}
   }
 }
