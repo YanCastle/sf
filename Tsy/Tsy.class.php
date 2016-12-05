@@ -102,9 +102,7 @@ class Tsy
 //        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
         Storage::connect();
         $this->loadFunctions();//加载框架function和项目function
-        
         $this->loadConfig();
-
         $GLOBALS['Config']=C();
 
 //        分析配置，决定是http模式还是swoole模式
