@@ -47,7 +47,7 @@ class Tsy
 //开始各种define检测
         defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
         defined('APP_DEBUG') or define('APP_DEBUG',false);
-        defined('DB_DEBUG') or define('DB_DEBUG',APP_DEBUG);
+        defined('DB_DEBUG') or define('DB_DEBUG',defined('DB_DEBUG')?DB_DEBUG:APP_DEBUG);
         defined('APP_MODE') or define('APP_MODE','Http');
         defined('APP_NAME') or define('APP_NAME',defined('DEFAULT_MODULE')?DEFAULT_MODULE:md5($_SERVER['PHP_SELF']));
 //defined('PACKAGE_EOF') or define('PACKAGE_EOF',"\r\n\r\n");
