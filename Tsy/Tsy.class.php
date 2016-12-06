@@ -32,7 +32,9 @@ class Tsy
     public static $Mode;
     function __construct()
     {
-
+        $this->init();
+//        加载框架function函数库
+        include_once TSY_PATH.DIRECTORY_SEPARATOR.'function.php';
         spl_autoload_register('Tsy\Tsy::autoload');
         register_shutdown_function('Tsy\Tsy::fatalError');
         set_error_handler('Tsy\Tsy::appError');
@@ -97,9 +99,6 @@ class Tsy
         define('VENDOR_PATH',TSY_PATH.'/Vendor');
     }
     function start(){
-        //        加载框架function函数库
-        $this->init();
-        include_once TSY_PATH.DIRECTORY_SEPARATOR.'function.php';
 //        加载配置文件
 //        Aop::exec(__METHOD__,Aop::$AOP_BEFORE);
         Storage::connect();
