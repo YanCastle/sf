@@ -29,6 +29,9 @@ class Server
     function init(){
 
     }
+    function onMessage(\swoole_server $server,\swoole_websocket_frame $frame){
+        $this->onReceive($server,$frame->fd,0,$frame->data);
+    }
     /**
      * 收到消息
      * @param \swoole_server $server

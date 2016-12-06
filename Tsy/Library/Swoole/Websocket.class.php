@@ -28,24 +28,25 @@ class Websocket extends Swoole
      * @return bool
      */
     function handshake($buffer){
-        if(APP_MODE_LOW=='websocket'){
-            return false;
-        }
-        if($pos = strpos($buffer,'Sec-WebSocket-Key:')){
-            $buf  = substr($buffer,$pos+18);
-            $key  = trim(substr($buf,0,strpos($buf,"\r\n")));
-            $new_key = base64_encode(sha1($key."258EAFA5-E914-47DA-95CA-C5AB0DC85B11",true));
-            $new_message = "HTTP/1.1 101 Switching Protocols\r\n";
-            $new_message .= "Upgrade: websocket\r\n";
-            $new_message .= "Sec-WebSocket-Version: 13\r\n";
-            $new_message .= "Connection: Upgrade\r\n";
-            $new_message .= "Sec-WebSocket-Accept: " . $new_key . "\r\n\r\n";
-            return $new_message;
-        }
-
+//        if(APP_MODE_LOW=='websocket'){
+//            return false;
+//        }
+//        if($pos = strpos($buffer,'Sec-WebSocket-Key:')){
+//            $buf  = substr($buffer,$pos+18);
+//            $key  = trim(substr($buf,0,strpos($buf,"\r\n")));
+//            $new_key = base64_encode(sha1($key."258EAFA5-E914-47DA-95CA-C5AB0DC85B11",true));
+//            $new_message = "HTTP/1.1 101 Switching Protocols\r\n";
+//            $new_message .= "Upgrade: websocket\r\n";
+//            $new_message .= "Sec-WebSocket-Version: 13\r\n";
+//            $new_message .= "Connection: Upgrade\r\n";
+//            $new_message .= "Sec-WebSocket-Accept: " . $new_key . "\r\n\r\n";
+//            return $new_message;
+//        }
+        return false;
     }
 
     function uncode($str){
+        return $str;
         if(APP_MODE_LOW=='websocket'){
             return $str;
         }
@@ -87,6 +88,7 @@ class Websocket extends Swoole
     }
 
     function code($message) {
+        return $message;
         if(APP_MODE_LOW=='websocket'){
             return $message;
         }
