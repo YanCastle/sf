@@ -1484,4 +1484,39 @@ class {$ObjectName}Controller extends Controller
         file_put_contents($OutPut,str_replace(['{$PREFIX}','prefix_'],'',json_encode(['obj'=>$Obj],JSON_UNESCAPED_UNICODE)));
 
     }
+
+    /**
+     * 初始化认证数据
+     */
+    function initAuth(){
+        $AuthRules=[];
+        $Model = M('UserAccessDic');
+        $KeyModel = M('UserAccessDic');
+        foreach (self::$docs['Classes'] as $row){
+//            if('Controller'==$row['type']){
+                foreach ($row['methods'] as $method){
+                    if($method['access']=='public'&&substr($method['name'],0,1)!='_'){
+                        //public属性且不是私有变量
+
+                        $data=[
+                            'Module'=>explode('\\',$row['namespace'])[0],
+                            'Class'=>str_replace('Controller','',explode('\\',$row['name'])[2]),
+                            'Action'=>$method['name'],
+                            'Type'=>$row['type'],
+                            'Title'=>$row['zh'].' '.$method['zh'],
+                            'AGID'=>0,
+                        ];
+                        if($_GET['i']==implode('/',[$data['Module'],$data['Class'],$data['Action']]))continue;
+//                        if(!$Model->where(['Module'=>$data['Module'],'Class'=>$data['Class'],'Action'=>$data['Action'],'Type'=>$row['type']])->field('AID')->find()){
+                            $AuthRules[]=$data;
+//                        }
+                    }
+                }
+//            }
+        }
+        if($AuthRules){
+//TODO            查找并添加权限组
+            $Model->addAll($AuthRules);
+        }
+    }
 }
