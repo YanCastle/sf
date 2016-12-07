@@ -807,7 +807,7 @@ class WechatAuth {
             'lang'=>'zh_CN'
         ]),true);
     }
-    function templateSend(string $OpenID,string $TemplateID,string $URL,array $Data){
+    function templateSend($OpenID,$TemplateID,$URL,array $Data){
         $data=[
             'touser'=>$OpenID,
             'template_id'=>$TemplateID,
