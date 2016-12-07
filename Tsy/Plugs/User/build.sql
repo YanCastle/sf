@@ -1,104 +1,136 @@
 /*==============================================================*/
 /* Table: prefix_user_access_dic                                */
 /*==============================================================*/
-create table prefix_user_access_dic
+CREATE TABLE prefix_user_access_dic
 (
-   AID                  int unsigned not null auto_increment,
-   Title                char(250) not null,
-   Module               char(50) not null,
-   Class                char(50) not null,
-   Action               char(50) not null,
-   Type                 char(50) not null default 'Controller' comment 'Controller/Model/Object',
-   AGID                 char(50) not null,
-   primary key (AID)
-)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  AID    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  Title  CHAR(250)    NOT NULL,
+  Module CHAR(50)     NOT NULL,
+  Class  CHAR(50)     NOT NULL,
+  Action CHAR(50)     NOT NULL,
+  Type   CHAR(50)     NOT NULL DEFAULT 'Controller'
+  COMMENT 'Controller/Model/Object',
+  AGID   CHAR(50)     NOT NULL,
+  PRIMARY KEY (AID)
+)
+  ENGINE = MyISAM
+  DEFAULT CHARSET = utf8;
 
 /*==============================================================*/
 /* Index: MCAT                                                  */
 /*==============================================================*/
-create unique index MCAT on prefix_user_access_dic
-(
-   Module,
-   Class,
-   Action,
-   Type
-);
+CREATE UNIQUE INDEX MCAT
+  ON prefix_user_access_dic
+  (
+    Module,
+    Class,
+    Action,
+    Type
+  );
 
 /*==============================================================*/
 /* Table: prefix_user_access_group_dic                          */
 /*==============================================================*/
-create table prefix_user_access_group_dic
+CREATE TABLE prefix_user_access_group_dic
 (
-   AGID                 int unsigned not null auto_increment,
-   Title                char(50) not null,
-   primary key (AGID)
-)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  AGID  INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  Title CHAR(50)     NOT NULL,
+  PRIMARY KEY (AGID)
+)
+  ENGINE = MyISAM
+  DEFAULT CHARSET = utf8;
 
 /*==============================================================*/
 /* Table: prefix_user_group                                     */
 /*==============================================================*/
-create table prefix_user_group
+CREATE TABLE prefix_user_group
 (
-   LID                  int unsigned not null auto_increment,
-   GID                  int unsigned not null,
-   UID                  int unsigned not null,
-   primary key (LID)
-)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  LID INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  GID INT UNSIGNED NOT NULL,
+  UID INT UNSIGNED NOT NULL,
+  PRIMARY KEY (LID)
+)
+  ENGINE = MyISAM
+  DEFAULT CHARSET = utf8;
 
 /*==============================================================*/
 /* Index: UIDGID                                                */
 /*==============================================================*/
-create unique index UIDGID on prefix_user_group
-(
-   GID,
-   UID
-);
+CREATE UNIQUE INDEX UIDGID
+  ON prefix_user_group
+  (
+    GID,
+    UID
+  );
 
 /*==============================================================*/
 /* Table: prefix_user_group_access                              */
 /*==============================================================*/
-create table prefix_user_group_access
+CREATE TABLE prefix_user_group_access
 (
-   LID                  int unsigned not null auto_increment,
-   GID                  int unsigned not null,
-   AID                  int unsigned not null,
-   `Condition`          varchar(1000) not null default '“”',
-   primary key (LID)
-)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  LID         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  GID         INT UNSIGNED  NOT NULL,
+  AID         INT UNSIGNED  NOT NULL,
+  `Condition` VARCHAR(1000) NOT NULL DEFAULT '“”',
+  PRIMARY KEY (LID)
+)
+  ENGINE = MyISAM
+  DEFAULT CHARSET = utf8;
 
 /*==============================================================*/
 /* Index: GIDAID                                                */
 /*==============================================================*/
-create index GIDAID on prefix_user_group_access
-(
-   AID,
-   GID
-);
+CREATE INDEX GIDAID
+  ON prefix_user_group_access
+  (
+    AID,
+    GID
+  );
 
 /*==============================================================*/
 /* Table: prefix_user_group_dic                                 */
 /*==============================================================*/
-create table prefix_user_group_dic
+CREATE TABLE prefix_user_group_dic
 (
-   GID                  int unsigned not null auto_increment,
-   Title                char(250) not null,
-   Sort                 int not null default 0,
-   PGID                 int unsigned not null default 0,
-   primary key (GID)
-)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  GID   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  Title CHAR(250)    NOT NULL,
+  Sort  INT          NOT NULL DEFAULT 0,
+  PGID  INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (GID)
+)
+  ENGINE = MyISAM
+  DEFAULT CHARSET = utf8;
 
 /*==============================================================*/
 /* Index: Sort                                                  */
 /*==============================================================*/
-create index Sort on prefix_user_group_dic
-(
-   Sort
-);
+CREATE INDEX Sort
+  ON prefix_user_group_dic
+  (
+    Sort
+  );
 
 /*==============================================================*/
 /* Index: Title                                                 */
 /*==============================================================*/
-create index Title on prefix_user_group_dic
-(
-   Title
-);
+CREATE INDEX Title
+  ON prefix_user_group_dic
+  (
+    Title
+  );
+
+CREATE VIEW `prefix_user_access_search` AS
+  SELECT
+    `prefix_user_group_access`.`GID`       AS `GID`,
+    `prefix_user_group_access`.`Condition` AS `Condition`,
+    `prefix_user_access_dic`.`AID`         AS `AID`,
+    `prefix_user_access_dic`.`Title`       AS `Title`,
+    `prefix_user_access_dic`.`Module`      AS `Module`,
+    `prefix_user_access_dic`.`Class`       AS `Class`,
+    `prefix_user_access_dic`.`Action`      AS `Action`,
+    `prefix_user_access_dic`.`Type`        AS `Type`,
+    `prefix_user_access_dic`.`AGID`        AS `AGID`,
+    `prefix_user_group`.`UID`              AS `UID`
+  FROM ((`prefix_user_group_access`
+    JOIN `prefix_user_access_dic` ON ((`prefix_user_group_access`.`AID` = `prefix_user_access_dic`.`AID`))) JOIN
+    `prefix_user_group` ON ((`prefix_user_group`.`GID` = `prefix_user_group_access`.`GID`)));
