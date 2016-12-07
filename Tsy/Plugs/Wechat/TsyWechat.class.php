@@ -136,6 +136,7 @@ class TsyWechat extends Controller{
 
                 //执行Demo
 //                $this->demo($wechat, $data);
+                $this->member($data['FromUserName']);
                 $this->msgType($data);
                 $this->match($data);
                 $this->log($data);
@@ -145,7 +146,13 @@ class TsyWechat extends Controller{
             @file_put_contents('./error.json', json_encode($e->getMessage()));
         }
     }
-
+    function member($openid){
+        if(!M('WechatMember')->where(['OpenID'=>$openid])->find()){
+            M('WechatMember')->add([
+                'OpenID'=>$openid
+            ]);
+        }
+    }
     /**
      * 获取系统记录的消息类型编号
      * @param $data
@@ -369,13 +376,6 @@ class TsyWechat extends Controller{
         return $media['media_id'];
     }
     function download($media_id,$savepath){
-
-    }
-
-    /**
-     * @param $data 微信推送出来的数据
-     */
-    function member($data){
 
     }
     function getAllMembers(){}
