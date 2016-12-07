@@ -623,7 +623,6 @@ class WechatAuth {
 
         //发生错误，抛出异常
 //        if($error) throw new \Exception('请求发生错误：' . $error);
-
         return  $error?$error:$data;
     }
 

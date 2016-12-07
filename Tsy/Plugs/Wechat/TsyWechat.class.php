@@ -51,7 +51,7 @@ class TsyWechat extends Controller{
             $this->WechatAuth  = new WechatAuth($this->appid, $this->secret);
             $token = $this->WechatAuth->getAccessToken();
             $this->access_token=$token['access_token'];
-            S($this->tokenKey,$this->access_token.'|'.(time()+7200));
+            S($this->tokenKey,$this->access_token.'|'.(time()+$token['expires_in']));
         }
         if(!$this->ticket){
             $ticket = $this->WechatAuth->getJSTicket();
@@ -186,7 +186,7 @@ class TsyWechat extends Controller{
                 'Precision'=>$data['Precision']
             ]):(isset($data['Content'])?$data['Content']:(isset($data['EventKey'])?$data['EventKey']:'')),
             'MsgID'=>$data['MsgId'],
-            'MatchRuleID'=>$this->MatchRule?$this->MatchRule['ConfigID']:null,
+            'MatchRuleID'=>$this->MatchRule?$this->MatchRule['ConfigID']:"",
             'Match'=>json_encode($this->MatchRule,JSON_UNESCAPED_UNICODE)
         ]);
     }
@@ -197,8 +197,8 @@ class TsyWechat extends Controller{
      */
     function match($data){
         $MatchModel = M('WechatMatch');
-        $DefaultRule = null;
-        $MatchRule = null;
+        $DefaultRule = "";
+        $MatchRule = "";
         $Rules = $MatchModel->where(['MsgTypeID'=>['IN',[$this->MsgTypeID,'21']],'Open'=>1])->order('`Order`,MatchTimes DESC')->select();
         if($Rules){
             //有匹配规则的
@@ -370,7 +370,7 @@ class TsyWechat extends Controller{
         }
 
         if($media["errcode"] == 42001){ //access_token expired
-            session("token", null);
+            session("token", "");
             return $this->upload($type,$filename);
         }
         return $media['media_id'];
@@ -413,9 +413,9 @@ class TsyWechat extends Controller{
     /**
      * 获取所有的用户信息
      */
-    private function initMemberInfo(){
+    function initMemberInfo(){
         $WechatMemberModel = M('WechatMember');
-        $NeedInfoOpenIDs = $WechatMemberModel->where('NickName IS NULL')->getField('OpenID',true);
+        $NeedInfoOpenIDs = $WechatMemberModel->where('NickName = ""')->getField('OpenID',true);
         if(!$NeedInfoOpenIDs){$NeedInfoOpenIDs=[];}
         foreach($NeedInfoOpenIDs as $OpenID){
             $UserInfo = $this->WechatAuth->userInfo($OpenID);
