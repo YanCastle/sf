@@ -162,7 +162,7 @@ class Date {
             $tmpdate = $date;
 
         } else {
-            if (get_class($date) == "Date") {
+            if ($date instanceof Date) {
                 //如果是Date对象
                 $tmpdate = $date->date;
             } else {
