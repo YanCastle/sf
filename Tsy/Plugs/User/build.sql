@@ -1,13 +1,3 @@
-drop table if exists prefix_user_access_dic;
-
-drop table if exists prefix_user_access_group_dic;
-
-drop table if exists prefix_user_group;
-
-drop table if exists prefix_user_group_access;
-
-drop table if exists prefix_user_group_dic;
-
 /*==============================================================*/
 /* Table: prefix_user_access_dic                                */
 /*==============================================================*/
@@ -19,8 +9,9 @@ create table prefix_user_access_dic
    Class                char(50) not null,
    Action               char(50) not null,
    Type                 char(50) not null default 'Controller' comment 'Controller/Model/Object',
-   AGID                 char(50) not null
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+   AGID                 char(50) not null,
+   primary key (AID)
+)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 /*==============================================================*/
 /* Index: MCAT                                                  */
@@ -39,8 +30,9 @@ create unique index MCAT on prefix_user_access_dic
 create table prefix_user_access_group_dic
 (
    AGID                 int unsigned not null auto_increment,
-   Title                char(50) not null
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+   Title                char(50) not null,
+   primary key (AGID)
+)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 /*==============================================================*/
 /* Table: prefix_user_group                                     */
@@ -49,8 +41,9 @@ create table prefix_user_group
 (
    LID                  int unsigned not null auto_increment,
    GID                  int unsigned not null,
-   UID                  int unsigned not null
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+   UID                  int unsigned not null,
+   primary key (LID)
+)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 /*==============================================================*/
 /* Index: UIDGID                                                */
@@ -69,8 +62,9 @@ create table prefix_user_group_access
    LID                  int unsigned not null auto_increment,
    GID                  int unsigned not null,
    AID                  int unsigned not null,
-   `Condition`          varchar(1000) not null default ''
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+   `Condition`          varchar(1000) not null default '“”',
+   primary key (LID)
+)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 /*==============================================================*/
 /* Index: GIDAID                                                */
@@ -89,8 +83,9 @@ create table prefix_user_group_dic
    GID                  int unsigned not null auto_increment,
    Title                char(250) not null,
    Sort                 int not null default 0,
-   PGID                 int unsigned not null default 0
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+   PGID                 int unsigned not null default 0,
+   primary key (GID)
+)ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 /*==============================================================*/
 /* Index: Sort                                                  */
