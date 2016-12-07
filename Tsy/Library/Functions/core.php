@@ -191,6 +191,12 @@ function controller($i,$data,$mid='',$layer="Controller"){
         load_module_config($M);
 //    如果要切换配置需要先还原Common配置再加载需要加载的模块配置文件
         $ClassName = implode('\\',[$M,$layer,$C.$layer]);
+        if(AUTH_ON){//开启Auth认证
+            if(!\Tsy\Plugs\User\UserObject::check($M,$C,$A,$layer)){
+                \Tsy\Tsy::$c=403;
+                return '权限不足';
+            }
+        }
         if(!class_exists($ClassName)){
             $ClassName=str_replace($C,'Empty',$ClassName);
             if(!class_exists($ClassName)){
@@ -377,7 +383,7 @@ function build_cache($Models=[]){
  * @param callable|null $dir_callback
  * @param callable|null $file_callback
  */
-function each_dir(string $dir,callable $dir_callback=null,callable $file_callback=null){
+function each_dir($dir,callable $dir_callback=null,callable $file_callback=null){
     if(is_dir($dir)){
         foreach (scandir($dir) as $path){
             if(!in_array($path, ['.','..'])){
