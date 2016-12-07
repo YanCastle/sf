@@ -29,8 +29,14 @@ class UserObject extends Object
             $UID = $UID?$UID:0;
         }
 //        获取该用户所属用户组
-        $GIDs=M('UserGroup')->where(['UID'=>$UID])->getField('GID',true);
-        if(!$GIDs||!is_array($GIDs)){return false;}//该用户不属于任何组
-
+//        $GIDs=M('UserGroup')->where(['UID'=>$UID])->getField('GID',true);
+//        if(!$GIDs||!is_array($GIDs)){return false;}//该用户不属于任何组
+//        $GIDs = $GIDs?$GIDs:DEFAULT_USER_GROUP;//获取默认的用户组
+        $Conditons = M('UserAccessSearch')->where(['Module'=>$Module,'Class'=>$Class,'Action'=>$Action,'Type'=>$Layer,'UID'=>$UID])->field('Condition,Title')->select();
+        if($Conditons){
+//            $Conditons 规则 
+        }else{
+            return false;
+        }
     }
 }
