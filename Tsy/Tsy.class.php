@@ -97,6 +97,7 @@ class Tsy
             header('Access-Control-Allow-Headers:X-Requested-With,Cookie,ContentType');
         }
         define('VENDOR_PATH',TSY_PATH.'/Vendor');
+        defined('AUTH_ON') or define('AUTH_ON',false);
     }
     function start(){
 //        加载配置文件
