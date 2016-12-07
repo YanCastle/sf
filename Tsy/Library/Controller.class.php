@@ -188,6 +188,12 @@ class Controller
         $Object = $this->className;
         return class_exists($this->className)?controller($this->className.'/'.$Action,$Data,'','Object'):"{$this->className}/{$Action}方法不存在";
     }
+
+    /**
+     * 获取单个对象属性
+     * @param array $ID
+     * @return array
+     */
     function get($ID=[]){
         if(!$ID){
             !isset($_POST[$this->PRIKey]) or $ID = $_POST[$this->PRIKey];
@@ -231,6 +237,12 @@ class Controller
             return FALSE;
         }
     }
+
+    /**
+     * 存储修改数据
+     * @param array $Params 修改数据
+     * @return bool|mixed|string
+     */
     function save(array $Params){
         $ObjectClass = str_replace('Controller','Object',$this->__CLASS__);
         if(class_exists($ObjectClass)){
@@ -244,6 +256,11 @@ class Controller
             return $Model->where([$this->PRIKey=>$_REQUEST[$this->PRIKey]])->save($Params);
         }else{return FALSE;}
     }
+
+    /**
+     * 删除对象
+     * @return bool
+     */
     function del(){
         if($this->PRIKey&&isset($_REQUEST[$this->PRIKey])&&(is_numeric($_REQUEST[$this->PRIKey])||is_array($_REQUEST[$this->PRIKey]))){
             $IDs=[];
@@ -265,6 +282,17 @@ class Controller
             return false;
         }else{return FALSE;}
     }
+
+    /**
+     * 搜索对象
+     * @param string $Keyword 关键字
+     * @param array $W 逻辑条件
+     * @param int $P 页码
+     * @param int $N 每页数量
+     * @param array $Sort 排序方式
+     * @param bool $Properties 获取属性列表
+     * @return array
+     */
     function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[],$Properties=false){
         if($this->Object instanceof Object){
 //            $OBVN = $this->ObjectVarName;
@@ -345,6 +373,13 @@ class Controller
 //            return FALSE;
 //        }
     }
+
+    /**
+     * 添加对象
+     * @param bool $data
+     * @param array $Properties
+     * @return bool|mixed|string
+     */
     function add($data=false,$Properties=[]){
         if(!$data)$data=$_POST;
         $data['Properties']=$Properties;
@@ -375,6 +410,13 @@ class Controller
         }
         return '类不存在';
     }
+
+    /**
+     * 条件置换
+     * @param $W
+     * @param $Data
+     * @return bool|mixed|string
+     */
     function replaceW($W,$Data){
         if($this->Object instanceof Object){
             return invokeClass($this->Object,'replaceW',[
