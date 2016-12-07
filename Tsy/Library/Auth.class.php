@@ -27,6 +27,7 @@ namespace Tsy\Library;
 class Auth{
 
     //默认配置
+    protected $db_prefix='';
     protected $_config = array(
         'AUTH_ON'           => true,                      // 认证开关
         'AUTH_TYPE'         => 1,                         // 认证方式，1为实时认证；2为登录认证。
@@ -35,17 +36,19 @@ class Auth{
         'AUTH_RULE'         => 'auth_rule',         // 权限规则表
         'AUTH_USER'         => 'user_view'             // 用户信息表
     );
-
-    public function __construct() {
-        $prefix = C('DB_PREFIX');
-        $this->_config['AUTH_GROUP'] = $prefix.$this->_config['AUTH_GROUP'];
-        $this->_config['AUTH_RULE'] = $prefix.$this->_config['AUTH_RULE'];
-        $this->_config['AUTH_USER'] = $prefix.$this->_config['AUTH_USER'];
-        $this->_config['AUTH_GROUP_ACCESS'] = $prefix.$this->_config['AUTH_GROUP_ACCESS'];
+    public function __construct($DbPrefix='') {
+        if(!$DbPrefix){
+            $DbPrefix=C('DB_PREFIX');
+        }
+        $this->db_prefix=$DbPrefix;
         if (C('AUTH_CONFIG')) {
             //可设置配置项 AUTH_CONFIG, 此配置项为数组。
             $this->_config = array_merge($this->_config, C('AUTH_CONFIG'));
         }
+        $this->_config['AUTH_GROUP']=$this->db_prefix.$this->_config['AUTH_GROUP'];
+        $this->_config['AUTH_GROUP_ACCESS']=$this->db_prefix.$this->_config['AUTH_GROUP_ACCESS'];
+        $this->_config['AUTH_RULE']=$this->db_prefix.$this->_config['AUTH_RULE'];
+        $this->_config['AUTH_USER']=$this->db_prefix.$this->_config['AUTH_USER'];
     }
 
     /**
@@ -99,7 +102,7 @@ class Auth{
      * 根据用户id获取用户组,返回值为数组
      * @param  uid int     用户id
      * @return array       用户所属的用户组 array(
-     *     array('uid'=>'用户id','group_id'=>'用户组id','title'=>'用户组名称','rules'=>'用户组拥有的规则id,多个,号隔开'),
+     *     array('uid'=>'用户id','GID'=>'用户组id','title'=>'用户组名称','rules'=>'用户组拥有的规则id,多个,号隔开'),
      *     ...)
      */
     public function getGroups($uid) {
@@ -109,8 +112,8 @@ class Auth{
         $user_groups = M()
             ->table($this->_config['AUTH_GROUP_ACCESS'] . ' a')
             ->where("a.uid='$uid' and g.status='1'")
-            ->join($this->_config['AUTH_GROUP']." g on a.group_id=g.id")
-            ->field('uid,group_id,title,rules')->select();
+            ->join($this->_config['AUTH_GROUP']." g on a.GID=g.GID")
+            ->field('uid,GID,title,rules')->select();
         $groups[$uid]=$user_groups?:array();
         return $groups[$uid];
     }
@@ -143,7 +146,7 @@ class Auth{
         }
 
         $map=array(
-            'id'=>array('in',$ids),
+            'gid'=>array('in',$ids),
             'type'=>$type,
             'status'=>1,
         );
