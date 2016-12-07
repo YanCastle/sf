@@ -7,6 +7,7 @@
  */
 
 namespace Tsy\Library;
+use Tsy\Tsy;
 
 /**
  * Server类，用来处理SwooleServer的各种回调
@@ -161,7 +162,11 @@ class Server
             //回调task任务，仅支持静态方法或者函数
             session('[id]',$data->sid);
             if(is_callable($data->cmd)){
-                call_user_func($data->cmd,$data->data);
+                try{
+                    call_user_func($data->cmd,$data->data);
+                }catch (\Exception $e){
+                    L($e,LOG_ERR);
+                }
             }
         }
         Aop::exec(__METHOD__, Aop::$AOP_AFTER,$AopData);

@@ -564,8 +564,9 @@ function swoole_get_callback($callback){
  * @return null
  */
 function fd($fd=null){
+    static $sfd;
     if($fd){
-        \Tsy\Tsy::$fd=$fd;
+        $sfd=$fd;
     }
-    return \Tsy\Tsy::$fd=$fd;
+    return $sfd;
 }
