@@ -212,7 +212,7 @@ class Object
             return parse_name($data);
         }, $tables);
         $Model = new \Tsy\Plugs\Db\Db();
-        $Columns = $Model->getColumns($tables, true);
+        $Columns = $Model->getColumns($tables,true, DB_DEBUG);
         //生成map结构并缓存
         foreach ($Columns as $TableName => $column) {
 //            解析并生成格式限制和转化配置
