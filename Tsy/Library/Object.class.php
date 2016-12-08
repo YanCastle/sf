@@ -859,7 +859,7 @@ class Object
                     if(class_exists($ObjectClass)) {
                         //调用Object的存储方法
                         $Object = new $ObjectClass();
-                        if (is_array($Rs = $Object->save($rows[0], $rows[1]))) {
+                        if (is_array($Rs = $Object->save($ID, $v))) {
 
                         } else {
                             rollback();
