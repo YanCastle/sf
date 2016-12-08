@@ -868,39 +868,6 @@ class Object
                     }
                 }
             }
-            return $this->get($ID);
-//            if($this->save_add_if_not_exist&&!$this->get($ID)){
-//                return $this->add(array_merge($Params,[$this->pk=>$ID]));
-//            }
-//            startTrans();
-//            if($MainColumns){
-//                if(false===($rs=M($this->main)->where($Where)->save($MainColumns))){
-//                    rollback();
-//                    return APP_DEBUG?M()->getDbError():'属性修改失败';
-//                }
-//            }
-//            foreach ($ObjectsColumns as $k=>$rows){
-//                if(0===$k||!in_array(strtolower($k),$Properties))continue;
-//                $ObjectClass = implode("\\",[$this->MC[0],'Object',$k.'Object']);
-//                if(class_exists($ObjectClass)){
-//                    //调用Object的存储方法
-//                    $Object = new $ObjectClass();
-//                    if(is_array($Rs = $Object->save($rows[0],$rows[1]))){
-//
-//                    }else{
-//                        rollback();
-//                        return $Rs;
-//                    }
-//                }else{
-//                    //直接操作表格进行存储
-//                    if($rows[2]&&$rows[3]&&M($rows[2])->where([$rows[3]=>$rows[0]])->save($rows[1])){
-//
-//                    }else{
-//                        rollback();
-//                        return APP_DEBUG?M()->getDbError():"属性{$k}保存失败";
-//                    }
-//                }
-//            }
             commit();
             return $this->get($ID);
         }else{
