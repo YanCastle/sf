@@ -334,7 +334,7 @@ function L($msg = false,$Type=6,$trace=''){
         }
         //TODO 完善log函数
         if(is_string($msg)&&(strpos($msg,'Unknow')||strpos($msg,'doesn\'t exist'))){
-            echo 'stop';
+//            echo 'stop';
         }
         if('swoole'==APP_MODE_LOW&&!ob_get_level()){
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
