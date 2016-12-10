@@ -778,7 +778,7 @@ class Model {
 //            if(strpos($fieldType,'autoinc')){
 //                unset($data[$key]);
 //            }else
-            if(!strpos($fieldType,'notnull')&&$data[$key]===''){
+            if(!strpos($fieldType,'notnull')){
                 unset($data[$key]);
             }else
             if(false !== strpos($fieldType,'enum')){
