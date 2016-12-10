@@ -349,7 +349,13 @@ function swoole_send($fd,$str){
         if(method_exists('Tsy\\Mode\\'.APP_MODE,'send' )){
             call_user_func_array('Tsy\\Mode\\'.APP_MODE.'::send',[$fd,$str] );
         }else{
-            $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
+            if($GLOBALS['_SWOOLE'] instanceof swoole_websocket_server){
+                $GLOBALS['_SWOOLE']->push($fd,$str);
+            }elseif($GLOBALS['_SWOOLE'] instanceof swoole_http_server){
+                $GLOBALS['_SWOOLE']->end($str);
+            }else{
+                $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
+            }
             if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
                 $GLOBALS['_SWOOLE']->close($fd);
                 $GLOBALS['_close']=false;
@@ -558,8 +564,9 @@ function swoole_get_callback($callback){
  * @return null
  */
 function fd($fd=null){
+    static $sfd;
     if($fd){
-        \Tsy\Tsy::$fd=$fd;
+        $sfd=$fd;
     }
-    return \Tsy\Tsy::$fd=$fd;
+    return $sfd;
 }

@@ -96,7 +96,8 @@ class Swoole implements Mode
                 $GLOBALS['_TASK_WORKER_SUM']=$Server->setting['worker_num']+$Server->setting['task_worker_num'];
                 $Swoole = new \Tsy\Library\Server($SwooleConfig['PortModeMap']);
                 $GLOBALS['_PortModeMap']=$SwooleConfig['PortModeMap'];
-                $Server->on('receive',[$Swoole,'onReceive']);
+                if(!($Server instanceof \swoole_websocket_server))
+                    $Server->on('receive',[$Swoole,'onReceive']);
                 $Server->on('connect',[$Swoole,'onConnect']);
                 $Server->on('close',[$Swoole,'onClose']);
                 $Server->on('start',[$Swoole,'onStart']);
@@ -107,6 +108,8 @@ class Swoole implements Mode
                 $Server->on('packet',[$Swoole,'onPacket']);
                 $Server->on('task',[$Swoole,'onTask']);
                 $Server->on('finish',[$Swoole,'onFinish']);
+                if($Server instanceof \swoole_websocket_server)
+                    $Server->on('message',[$Swoole,'OnMessage']);
                 $Server->on('PipeMessage',[$Swoole,'onPipeMessage']);
                 $Server->on('WorkerError',[$Swoole,'onWorkerError']);
                 $Server->on('ManagerStart',[$Swoole,'onManagerStart']);

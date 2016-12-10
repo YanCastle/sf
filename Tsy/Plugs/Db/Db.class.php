@@ -210,8 +210,9 @@ class Db
      * @param bool $prefix
      * @return array|mixed
      */
-    function getColumns($tables = [], $prefix = false, $cache = APP_DEBUG)
+    function getColumns($tables = [], $prefix = false, $cache = DB_DEBUG)
     {
+        static $StaticTableColumns=[];
         $one = false;
         if (is_string($tables)) {
             $tables = [$tables];
@@ -237,14 +238,19 @@ class Db
         //是否强制刷新
         if (!$cache) {
             foreach ($tables as $table) {
-                if ($CacheColumns = cache('ColumnsCache' . $prefix . $table)) {
+                if(isset($StaticTableColumns[$table])){
+                    $TableColumns[$table] = $StaticTableColumns[$table];
+                }else
+                if ($CacheColumns = cache('ColumnsCache'.$table)) {
                     $TableColumns[$table] = $CacheColumns;
+                    $StaticTableColumns[$table] = $CacheColumns;
                 } else {
                     $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
                     if ($Columns) {
                         $TableColumns[$table] = $Columns;
+                        cache('ColumnsCache'.$table, $Columns);
+                        $StaticTableColumns[$table]=$Columns;
                     }
-                    cache('ColumnsCache' . $prefix . $table, $Columns);
                 }
             }
         } else {
@@ -252,8 +258,9 @@ class Db
                 $Columns = $this->Model->query("SHOW columns From {$prefix}{$table}");
                 if ($Columns) {
                     $TableColumns[$table] = $Columns;
+                    cache('ColumnsCache'.$table, $Columns);
+                    $StaticTableColumns[$table]=$Columns;
                 }
-                cache('ColumnsCache' . $prefix . $table, $Columns);
             }
         }
         return $one ? $TableColumns[$tables[0]] : $TableColumns;
