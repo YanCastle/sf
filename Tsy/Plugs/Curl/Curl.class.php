@@ -96,10 +96,10 @@ class Curl {
 //        fclose($flog);
 //        return $local;
     }
-    function upload($url,$filename,$path,$type,$cookie_id=false){
+    function upload($url,$path,$cookie_id=false,$header=[]){
         if($this->UserID&&false===$cookie_id){$cookie_id=$this->UserID;}
         $data = array(
-            'pic'=>'@'.realpath($path).";type=".$type.";filename=".$filename
+            'pic'=>new \CURLFile($path)
         );
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -107,6 +107,8 @@ class Curl {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        if($header)
+            curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
         if($cookie_id){
             $cookie_jar = RUNTIME_PATH.'/Cookies/'.md5($cookie_id);
             curl_setopt($ch,CURLOPT_COOKIEFILE,$cookie_jar);
