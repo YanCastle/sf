@@ -202,7 +202,7 @@ function swoole_in_check($fd,$data){
 //            实例化Controller
     $Dispatch = swoole_get_port_property($Port,'DISPATCH');
     if(is_callable($Dispatch)){
-        $tmpData = call_user_func($Dispatch,$data);
+        $tmpData = call_user_func_array($Dispatch,[$data,$fd]);
         if($tmpData===null){
             return null;
         }elseif(is_string($tmpData)&&strlen($tmpData)>0){
