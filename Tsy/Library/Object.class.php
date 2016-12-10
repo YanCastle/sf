@@ -84,6 +84,7 @@ class Object
     protected $MC=[];
     protected $directProperties=[];
     public $allow_replaceW=false;
+    public $allow_saveW=true;
     public $save_add_if_not_exist=false;
     function __construct($name='',$config=[])
     {
