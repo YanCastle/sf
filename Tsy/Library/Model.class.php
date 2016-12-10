@@ -778,9 +778,9 @@ class Model {
 //            if(strpos($fieldType,'autoinc')){
 //                unset($data[$key]);
 //            }else
-            if(!strpos($fieldType,'notnull')){
-                unset($data[$key]);
-            }else
+//            if(!strpos($fieldType,'notnull')){
+//                unset($data[$key]);
+//            }else
             if(false !== strpos($fieldType,'enum')){
                 // 支持ENUM类型优先检测
             }elseif(false === strpos($fieldType,'bigint') && false !== strpos($fieldType,'int')) {
