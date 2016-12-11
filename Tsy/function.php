@@ -32,11 +32,14 @@ function session($name,$value=false){
         }
         return '';
     }
+    if(!$session_id){
+        $session_id=uniqid();
+    }
     $session_expire = C('SESSION_EXPIRE');
-//    $session_expire = is_numeric($session_expire)
     if(null===$name){
         //清空session
-        cache('sess_'.$session_id,[],$session_expire);
+        cache('sess_'.$session_id,[]);
+        return ;
     }
 
     $session = cache('sess_'.$session_id);
@@ -56,6 +59,7 @@ function session($name,$value=false){
         return isset($session[$name])?$session[$name]:null;
     }
     cache('sess_'.$session_id,$session,$session_expire);
+    return true;
 }
 
 
