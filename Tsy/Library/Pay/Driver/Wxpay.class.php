@@ -146,7 +146,7 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
                     break;
                 case 'TotalFee':
                     $Value=$Money;
-                    if(!is_numeric($Value)||!is_float($Value)){
+                    if(!is_numeric($Value)){
                         $this->error='错误的金额';
                         return false;
                     }
@@ -194,6 +194,9 @@ class Wxpay extends \WxPayNotifyReply implements PayIFace
         }
         $notify = new \NativePay();
         $result = $notify->GetPayUrl($input);
+        if(isset($result['return_code'])){
+            $this->error = $result['return_msg'];
+        }
         return $result["code_url"];
     }
     /**
