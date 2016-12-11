@@ -201,7 +201,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
             $ClassName=str_replace($C,'Empty',$ClassName);
             if(!class_exists($ClassName)){
                 L($C.'类不存在',LOG_ERR);
-                return null;
+                return '类不存在';
             }
         }
         $result = '';//返回结果
@@ -214,7 +214,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
                 $result = call_user_func_array([$Class,$A],$data);
             }else{
                 L($A.'方法不存在',LOG_ERR);
-                return null;
+                return '方法不存在';
             }
             return $result;
         }
@@ -280,13 +280,9 @@ function invokeClass($Class,$A,$data){
                     $ParamName='IDs';
                 }
                 if(isset($data[$ParamName])){
-//                    if(!(is_string($data[$ParamName])&&strlen($data[$ParamName])>0)){
-//                        L($ParamName.':参数为空',LOG_ERR);
-//                        return null;
-//                    }else{
-                        $args[$ParamName]=$data[$ParamName];
-//                    }
-                }elseif($Param->isDefaultValueAvailable()){
+                    $args[$ParamName]=$data[$ParamName];
+                }else
+                if($Param->isDefaultValueAvailable()){
                     $args[$ParamName]=$Param->getDefaultValue();
                 }else{
                     L($ParamName.':必填参数未传入完整',LOG_TIP);
@@ -391,6 +387,8 @@ function each_dir($dir,callable $dir_callback=null,callable $file_callback=null)
         foreach (scandir($dir) as $path){
             if(!in_array($path, ['.','..'])){
                 $path = $dir.DIRECTORY_SEPARATOR.$path;
+                $path = str_replace("\\",'/',$path);
+                $path = str_replace("//",'/',$path);
                 if(is_dir($path)){
                     if(is_callable($dir_callback)&&false===call_user_func($dir_callback,$path)){
 //                        call_user_func($dir_callback,$path);
