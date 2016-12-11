@@ -1037,7 +1037,29 @@ class {$ObjectName}Controller extends Controller
         return $content;
     }
     function renderHTML(){}
-    function renderDOC(){}
+    function renderDOC($outputFile=''){
+        $View = new \Tsy\Library\View();
+        $View->assign(self::$docs);
+        $View->assign('line',"\r\n");
+        $content = $View->fetch(__DIR__.DIRECTORY_SEPARATOR.'Template/document/word/document.xml');
+//        $content = sql_prefix($content,'');
+//        copy(__DIR__.'/Template/document.docx',TEMP_PATH.'/Template/document.docx');
+        if(file_exists($outputFile.'.zip')){
+            unlink($outputFile.'.zip');
+        }
+        $Zip = new ZipArchive();
+        $RS=$Zip->open($outputFile.'.zip',ZipArchive::CREATE);
+        $TemplatePath=__DIR__.'/Template/document/';
+        $TemplatePath = str_replace("\\",'/',$TemplatePath);
+        each_dir($TemplatePath,function ($path){},function($path)use($Zip,$TemplatePath){
+            if('document.xml'!=pathinfo($path,PATHINFO_BASENAME)){
+                $RS = $Zip->addFromString(str_replace($TemplatePath,'',$path),file_get_contents($path));
+            }
+        });
+        $RS=$Zip->addFromString('word/document.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.str_replace("\r\n",'',$content));
+        $RS=$Zip->close();
+        rename($outputFile.'.zip',$outputFile);
+    }
     function renderUML(){}
     function renderXLS(){}
     function renderCSV(){}
