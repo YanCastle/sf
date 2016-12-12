@@ -478,7 +478,7 @@ class Object
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->limit($P,$N)->getField($this->pk,true);
             $Objects = $this->gets($ObjectIDs,$Properties,$Sort);
         }else{
-            rsort($ObjectIDs, SORT_NUMERIC);
+            $Sort or rsort($ObjectIDs, SORT_NUMERIC);
             $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
             $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1], $Properties,$Sort) : [];
         }
