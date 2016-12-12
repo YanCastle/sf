@@ -40,10 +40,10 @@ trait UserTrait
         if($this->checkAccount($Account)){
             return '账号已使用';
         }
-        $data=array_merge([
+        $data=array_merge($Properties,[
             $this->_map['Account']=>$Account,
             $this->_map['PWD']=>$this->password($PWD)
-        ],$Properties);
+        ]);
         $data['data']=$data;
         return invokeClass($this,'add',$data);
     }
