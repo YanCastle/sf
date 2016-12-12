@@ -270,9 +270,11 @@ function swoole_out_check($fd,$data){
     $OutData=is_callable($Out)?call_user_func($Out,$data):C('DEFAULT_OUT');
     if(is_string($OutData)&&strlen($OutData)>0){
         \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_BEFORE,$OutData);
-        swoole_send($fd,$Class->code($OutData));
+        $rs = swoole_send($fd,$Class->code($OutData));
         \Tsy\Library\Aop::exec('swoole_out',\Tsy\Library\Aop::$AOP_AFTER,$OutData);
+        return $rs;
     }
+    return false;
 }
 
 function swoole_connect_check(\swoole_server $server,$info,$fd){

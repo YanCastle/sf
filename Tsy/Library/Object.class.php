@@ -460,7 +460,7 @@ class Object
             $ObjectIDs=$KeywordObjectIDs;
         }
         if (strlen($Keyword) === 0 && count($W) === 0) {
-            $ObjectIDs = $Model->page($P, $N)->getField($this->pk, true);
+            $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
             return [
                 'L' => $ObjectIDs?array_values($this->gets($ObjectIDs,$Properties,$Sort)):[],
                 'P' => $P,
@@ -652,8 +652,11 @@ class Object
             $Model->field($Fields,false,true);
             $Fields = [];
         }
+        if($Sort){
+            $Model->order($Sort);
+        }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
-        $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->order($Sort)->select();
+        $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->select();
         if (!$Objects) {
             return [];
         }
