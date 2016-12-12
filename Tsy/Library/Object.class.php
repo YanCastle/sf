@@ -474,7 +474,7 @@ class Object
             ];
         }
         $T = count($ObjectIDs);
-        if($Sort){
+        if($Sort&&!$W&&!$Keyword){//之前没有任何排序
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->limit($P,$N)->getField($this->pk,true);
             $Objects = $this->gets($ObjectIDs,$Properties,$Sort);
         }else{
