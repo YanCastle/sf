@@ -475,7 +475,7 @@ class Object
         }
         $T = count($ObjectIDs);
         if($Sort){//之前没有任何排序
-            $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->limit($P,$N)->getField($this->pk,true);
+            $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->page($P,$N)->getField($this->pk,true);
             $Objects = $this->gets($ObjectIDs,$Properties,$Sort);
         }else{
             $Sort or rsort($ObjectIDs, SORT_NUMERIC);
