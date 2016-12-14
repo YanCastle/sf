@@ -1038,27 +1038,24 @@ class {$ObjectName}Controller extends Controller
     }
     function renderHTML(){}
     function renderDOC($outputFile=''){
+        if(!$outputFile){
+            $outputFile = 'doc.docx';
+        }
+        if(file_exists($outputFile)){
+            unlink($outputFile);
+        }
         $View = new \Tsy\Library\View();
         $View->assign(self::$docs);
         $View->assign('line',"\r\n");
-        $content = $View->fetch(__DIR__.DIRECTORY_SEPARATOR.'Template/document/word/document.xml');
-//        $content = sql_prefix($content,'');
-//        copy(__DIR__.'/Template/document.docx',TEMP_PATH.'/Template/document.docx');
-        if(file_exists($outputFile.'.zip')){
-            unlink($outputFile.'.zip');
-        }
+        $path = __DIR__.'/Template/document.xml';
+        $content = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.$View->fetch($path);
         $Zip = new ZipArchive();
-        $RS=$Zip->open($outputFile.'.zip',ZipArchive::CREATE);
-        $TemplatePath=__DIR__.'/Template/document/';
-        $TemplatePath = str_replace("\\",'/',$TemplatePath);
-        each_dir($TemplatePath,function ($path){},function($path)use($Zip,$TemplatePath){
-            if('document.xml'!=pathinfo($path,PATHINFO_BASENAME)){
-                $RS = $Zip->addFromString(str_replace($TemplatePath,'',$path),file_get_contents($path));
-            }
-        });
-        $RS=$Zip->addFromString('word/document.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.str_replace("\r\n",'',$content));
+        $RS=$Zip->open(__DIR__.'/Template/1.docx',ZipArchive::CHECKCONS );
+        $RS=$Zip->deleteIndex('word/document.xml');
+        $RS=$Zip->addFromString('word/document.xml',str_replace("\r\n",'',$content));
         $RS=$Zip->close();
-        rename($outputFile.'.zip',$outputFile);
+        copy(__DIR__.'/Template/1.docx',$outputFile);
+//        rename($outputFile.'.zip',$outputFile);
     }
     function renderUML(){}
     function renderXLS(){}
