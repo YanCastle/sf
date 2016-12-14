@@ -63,7 +63,10 @@ class Http implements Mode
         }
         if(isset($_COOKIE['tsy'])&&$_COOKIE['tsy']){
             session('[id]',$_COOKIE['tsy']);
-        }else{
+        }elseif(isset($_GET['tsy'])&&$_GET['tsy']){
+            session('[id]',$_GET['tsy']);
+        }
+        else{
             $session_id = uniqid();
             session('[id]',$session_id);
             setcookie('tsy',$session_id);
