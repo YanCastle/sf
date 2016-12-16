@@ -89,4 +89,14 @@ class Ucloud
     public function getError(){
         return $this->error;
     }
+
+    /**
+     * 获取私有文件访问地址
+     * @param string $bucket bucket名称
+     * @param string $key 文件路径
+     * @return string
+     */
+    public function getUrl($bucket,$key){
+        return UCloud_MakePrivateUrl($bucket,$key);
+    }
 }
