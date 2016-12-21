@@ -426,4 +426,13 @@ class Upload {
         }
         return $name;
     }
+    /**
+     * 获取私有文件访问地址
+     * @param string $bucket bucket名称
+     * @param string $key 文件路径
+     * @return string
+     */
+    function getUrl($bucket,$key){
+        return $this->uploader->getUrl($bucket,$key);
+    }
 }
