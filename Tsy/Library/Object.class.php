@@ -476,7 +476,7 @@ class Object
         $T = count($ObjectIDs);
         if($Sort){//之前没有任何排序
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->page($P,$N)->getField($this->pk,true);
-            $Objects = $this->gets($ObjectIDs,$Properties,$Sort);
+            $Objects = $this->gets($ObjectIDs,$Properties);
         }else{
             $Sort or rsort($ObjectIDs, SORT_NUMERIC);
             $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
@@ -831,6 +831,13 @@ class Object
         return $Objects;
     }
 
+    /**
+     * 保存修改
+     * @param int|array $ID 对象主键
+     * @param array $Params 对象属性
+     * @param bool|array $Properties 对象映射属性列表
+     * @return array|bool|mixed
+     */
     function save($ID=false,$Params,$Properties=false)
     {
         if(!$this->allow_save)return false;
@@ -884,6 +891,12 @@ class Object
         }
     }
 
+    /**
+     * 按条件保存修改
+     * @param array $W 条件限定
+     * @param array $Data 保存数据
+     * @return array|bool|string
+     */
     function saveW($W,$Data){
         if(is_array($W)&&is_array($Data)&&$this->allow_saveW){
             if($Save=M($this->main)->where($W)->save($Data)){
@@ -894,6 +907,12 @@ class Object
         return false;
     }
 
+    /**
+     * 按条件替换数据
+     * @param array $W 条件限定
+     * @param array $Data 替换的数据
+     * @return array|bool|mixed|string
+     */
     function replaceW($W,$Data){
         //删除原有数据并用新数据替换，仅针对数据量小的情况下使用，有危险。
         if(!$this->allow_replaceW)return '该类禁止此操作';
