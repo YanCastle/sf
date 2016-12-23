@@ -33,3 +33,14 @@ function get_age($birthday) {
     if (date('m') < $month || (date('m') == $month && date('d') < $day)) $age--;
     return $age;
 }
+
+/**
+ * 设定执行时间函数
+ * @param bool $time
+ * @return bool|int
+ */
+function keep_time($time=false){
+    static $t;
+    if($time)$t=$time;
+    return $t?$t:time();
+}
