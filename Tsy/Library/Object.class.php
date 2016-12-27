@@ -563,6 +563,9 @@ class Object
                 && (in_array($PropertyName, $Properties, true))
 //                &&(!isset($Config[self::RELATION_MUST])||(isset($Config[self::RELATION_MUST])&&$Config[self::RELATION_MUST]===true)||in_array($PropertyName,$Properties))
             ) {
+                if(!isset($Config[self::RELATION_MAIN_COLUMN])&&isset($Config[self::RELATION_TABLE_COLUMN])){
+                    $Config[self::RELATION_MAIN_COLUMN]=$Config[self::RELATION_TABLE_COLUMN];
+                }
                 switch ($Config[self::RELATION_TABLE_PROPERTY]){
                     case self::PROPERTY_ONE:
                         //一对一属性
@@ -671,7 +674,10 @@ class Object
         foreach ($ArrayProperties as $PropertyName => $Config) {
             //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
             if(is_array($Properties)&&!in_array($PropertyName,$Properties))continue;
-            $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->field(isset($Config[self::RELATION_TABLE_FIELDS]) ? $Config[self::RELATION_TABLE_FIELDS] : true)->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', array_column($Objects, $Config[self::RELATION_MAIN_COLUMN])]])->order(isset($Config[self::RELATION_ORDER_COLUMN]) ? $Config[self::RELATION_ORDER_COLUMN] : '')->select(), $Config[self::RELATION_TABLE_COLUMN], true);
+            if($InData = array_column($Objects, $Config[self::RELATION_MAIN_COLUMN]))
+                $ArrayPropertyValues[$PropertyName] = array_key_set(M($Config[self::RELATION_TABLE_NAME])->field(isset($Config[self::RELATION_TABLE_FIELDS]) ? $Config[self::RELATION_TABLE_FIELDS] : true)->where([$Config[self::RELATION_TABLE_COLUMN] => ['IN', $InData]])->order(isset($Config[self::RELATION_ORDER_COLUMN]) ? $Config[self::RELATION_ORDER_COLUMN] : '')->select(), $Config[self::RELATION_TABLE_COLUMN], true);
+            else
+                $ArrayPropertyValues[$PropertyName]=[];
         }
         //处理一对一的属性结构
         foreach ($OneProperties as $PropertyName=>$Config){

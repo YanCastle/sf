@@ -744,8 +744,8 @@ class Model {
                 $columnName = explode('.',$options['field'][$k]);
                 $columnName = strtolower(trim(count($columnName)==2?$columnName[1]:$columnName[0],'`'));
                 if(in_array($columnName,$this->fieldName)){
+                    unset($options['field'][$k]);
                     $this->error='SQL 字段重复:'.$v;
-                    return false;
                 }
                 $this->fieldName[]=$columnName;
                 $options['field'][$k] = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function($match){
