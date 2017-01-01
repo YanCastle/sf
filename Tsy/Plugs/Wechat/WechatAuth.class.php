@@ -790,7 +790,32 @@ class WechatAuth {
             session('OpenID',$JSON['openid']);
             session('AccessToken',$JSON['access_token']);
         }
-        return ['AccessToken'=>$JSON,'UserInfo'=>self::snsUserInfo($JSON['access_token'],$JSON['openid'])];
+        $snsUserInfo=M('WechatMember')->where(['OpenID'=>$JSON['openid']])->find();
+        if(!$snsUserInfo){
+            $snsUserInfo=self::snsUserInfo($JSON['access_token'],$JSON['openid']);
+            if(isset($snsUserInfo['errcode'])){
+                return '获取用户数据失败';
+            }
+            $snsUserInfo = [
+                'OpenID'=>$JSON['openid'],
+                'NickName'=>$snsUserInfo['nickname'],
+                'Subscribe'=>0,
+                'Sex'=>$snsUserInfo['sex'],
+                'Province'=>$snsUserInfo['province'],
+                'City'=>$snsUserInfo['city'],
+                'Country'=>$snsUserInfo['country'],
+                'HeadImgUrl'=>$snsUserInfo['headimgurl'],
+                'Privilege'=>$snsUserInfo['privilege'],
+                'Unionid'=>$snsUserInfo['unionid'],
+                'Remark'=>'',
+                'Group'=>0,
+                'Subscribe'=>0,
+            ];
+            if(M('WechatMember')->add($snsUserInfo)){
+
+            }
+        }
+        return ['AccessToken'=>$JSON,'UserInfo'=>$snsUserInfo];
     }
 
     /**

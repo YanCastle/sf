@@ -415,7 +415,7 @@ class TsyWechat extends Controller{
      */
     function initMemberInfo(){
         $WechatMemberModel = M('WechatMember');
-        $NeedInfoOpenIDs = $WechatMemberModel->where('NickName = ""')->getField('OpenID',true);
+        $NeedInfoOpenIDs = $WechatMemberModel->where('NickName IS NULL OR NickName = ""')->getField('OpenID',true);
         if(!$NeedInfoOpenIDs){$NeedInfoOpenIDs=[];}
         foreach($NeedInfoOpenIDs as $OpenID){
             $UserInfo = $this->WechatAuth->userInfo($OpenID);
