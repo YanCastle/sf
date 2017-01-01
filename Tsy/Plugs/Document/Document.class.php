@@ -366,7 +366,7 @@ class {$ObjectName}Controller extends Controller
      * @link http://www.baidu.com?
      *
      */
-    function getDoc($name='',$MethodsAccess=['public']){
+    function getDoc($name='',$MethodsAccess=['public','private','protected']){
 //        self::$docs=[
 //            'Classes'=>[
 //                '完整类名'=>[
@@ -428,7 +428,15 @@ class {$ObjectName}Controller extends Controller
 //                ]
 //            ]
 //        ];
+//        $APP_PATH = str_replace("\\",'/',APP_PATH);
         if(is_string($name)){
+            if(in_array($name,['Controller','Object','Model'])){
+                each_dir(APP_PATH,null,function($path)use($name,$MethodsAccess){
+                    if(preg_match('/[A-Za-z]+'.$name.'\.class\.php$/',$path,$match)){
+                        $this->getDoc(str_replace(APP_PATH,'',str_replace(["/",'.class.php'],["\\",''],$path)),$MethodsAccess);
+                    }
+                });
+            }else
             if(is_object($name)){
                 $this->parseClass($name,$MethodsAccess);
             }elseif(class_exists($name)){
@@ -439,9 +447,9 @@ class {$ObjectName}Controller extends Controller
             }elseif(is_dir($name)){
                 each_dir($name,//遍历循环
                     null,
-                    function($path){
+                    function($path)use($MethodsAccess){
                         if(preg_match('/[A-Za-z]+\.class\.php$/',$path,$match)){
-                            $this->getDoc(str_replace("/","\\",str_replace([APP_PATH,'.class.php'],'',$path)));
+                            $this->getDoc(str_replace(APP_PATH,'',str_replace(["/",'.class.php'],["\\",''],$path)),$MethodsAccess);
                         }
                 }); //遍历循环
             }elseif(is_file($name)){
@@ -452,17 +460,19 @@ class {$ObjectName}Controller extends Controller
 //                        return $this->getDoc($name);
                     }
                 }
-            }elseif(in_array($name,['Controller','Object','Model'])){
-//                return $this;
-                each_dir(APP_PATH,null,function($path){
-                    return $this->getDoc($path);
-                });
             }
         }elseif(is_object($name)){
             $this->parseClass($name,$MethodsAccess);
         }
         return $this;
     }
+
+    /**
+     *
+     * @param $class
+     * @param $MethodsAccess
+     * @return $this
+     */
     function parseClass($class,$MethodsAccess){
 //        判断类是否是Controller/Object/Model中的一种，如果是则调用对应类型的解析方法
         $RefClass = new ReflectionClass($class);
@@ -870,6 +880,7 @@ class {$ObjectName}Controller extends Controller
 //        preg_replace('//','',$ObjectZhName);
 //        TODO 更换替换逻辑
         $ObjectZhName=str_replace(['字典表'],'',$ObjectZhName);
+        $ControllerClassName = str_replace('Object','Controller',$ClassName);
         foreach ($RefClass->getMethods() as $reflectionMethod){
             $MethodName = $reflectionMethod->getName();
             switch ($MethodName){
@@ -957,13 +968,17 @@ class {$ObjectName}Controller extends Controller
                         'name'=>'search','access'=>'public','static'=>false,'Comment'=>$Comment
                     ],$this->parseDocComment($Comment));
                     break;
+                case 'replaceW':
+                    if(!$Class->allow_replaceW){break;}
+                case 'saveW':
+                    if(!$Class->allow_saveW){break;}
                 default:
                     $access = 'public';
                     if($reflectionMethod->isPrivate()){$access='private';}
                     if($reflectionMethod->isProtected()){$access='protected';}
                     if($reflectionMethod->isPublic()){$access='public';}
 //            限定输出的方法范围
-                    if(!in_array($access,$MethodsAccess)){continue;}
+                    if(!in_array(ucfirst($access),$MethodsAccess)){continue;}
                     //过滤以下划线开头的操作方法
                     if('_'==substr($MethodName,0,1)){continue;}
                     if($MethodName=='getAll'&&$Class->is_dic===false){continue;}
@@ -971,6 +986,9 @@ class {$ObjectName}Controller extends Controller
                         'name'=>$MethodName,'access'=>$access,'static'=>$reflectionMethod->isStatic(),'Comment'=>$reflectionMethod->getDocComment()
                     ],$this->parseDocComment($reflectionMethod->getDocComment(),$reflectionMethod));
                     break;
+            }
+            if($methods[$MethodName]&&self::$docs['Classes'][$ControllerClassName]&&isset(self::$docs['Classes'][$ControllerClassName]['methods'][$MethodName])){
+                self::$docs['Classes'][$ControllerClassName]['methods'][$MethodName]=$methods[$MethodName];
             }
         }
         self::$docs['Classes'][$ClassName]['methods']=$methods;
@@ -1014,7 +1032,7 @@ class {$ObjectName}Controller extends Controller
             if($method->isProtected()){$access='protected';}
             if($method->isPublic()){$access='public';}
 //            限定输出的方法范围
-            if(!in_array($access,$MethodsAccess)){continue;}
+            if(!in_array(ucfirst($access),$MethodsAccess)){continue;}
             $methods[$method->getName()]=array_merge([
                 'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic(),'comment'=>$method->getDocComment()
             ],$this->parseDocComment($method->getDocComment(),$method));

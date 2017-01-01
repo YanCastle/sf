@@ -7,4 +7,4 @@
  */
 //$Config=[];
 //return file_exists(__DIR__.'castle.php')? array_merge($Config,require_once __DIR__.'castle.php'):$Config;
-return require __DIR__.'/castle.php';
+return include_once __DIR__.'/castle.php';

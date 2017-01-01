@@ -784,7 +784,7 @@ class WechatAuth {
         $JSON = json_decode($content,true);
         if(isset($JSON['errcode'])){
             $this->error=$JSON['errmsg'];
-            return false;
+            return $this->error;
         }else{
 //            S('AccessToken'.$JSON['openid'],$JSON['access_token'].'|'.(time()+7200));
             session('OpenID',$JSON['openid']);
