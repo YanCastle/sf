@@ -127,8 +127,8 @@ trait UserTrait
      * @return bool 存在true,不存在false
      */
     function checkAccount($Account){
-//        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
-        return false;
+        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
+//        return false;
     }
 
     /**
@@ -154,8 +154,12 @@ trait UserTrait
     function sendVerify($UID='', $Address, $Type = 'Email')
     {
 //        session('UID',)
-        session('VUID',$UID);session('VAddress',$Address);
-        return Msg::send('Email',$Address,$this->createVerifyCode($UID));
+        if($UID){
+            session('VUID',$UID);session('VAddress'.$Address,$Address);
+        }else{
+
+        }
+        return Msg::send($Type,$Address,$this->createVerifyCode($UID));
     }
 
     /**
@@ -163,7 +167,7 @@ trait UserTrait
      * @param int $Expire 默认半个小时
      * @return string
      */
-    private function createVerifyCode($UID,$Expire=1800){
+    protected function createVerifyCode($UID,$Expire=1800){
         // 添加过期时间控制
         $Code = '';
         for($i=0;$i<rand(5,10);$i++){
