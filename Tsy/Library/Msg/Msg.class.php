@@ -57,8 +57,8 @@ class Msg implements MsgIFace
      */
     function send($To, $Content)
     {
-        // TODO: Implement send() method.
-        return $this->current->send($To,$Content);
+        // Implement send() method.
+        return $this->current?$this->current->send($To,$Content):false;
     }
 
     /**
@@ -70,7 +70,7 @@ class Msg implements MsgIFace
      */
     function RemoteTemplateSend($To, $Params, $TemplateID)
     {
-        // TODO: Implement RemoteTemplateSend() method.
+        // Implement RemoteTemplateSend() method.
         return $this->current->RemoteTemplateSend($To,$Params,$TemplateID);
     }
 
