@@ -184,8 +184,8 @@ trait UserTrait
      * @param $Code
      * @return mixed|string
      */
-    function loginByCode($UID,$Account,$Code){
-        if(session('VUID')!=$UID)return '验证用户不匹配';
+    function loginByCode($Account,$Code){
+//        if(session('VUID')!=$UID)return '验证用户不匹配';
         if(session('VAddress')!=$Account)return '验证用户不匹配';
         if(!$this->checkVerifyCode($Code,$UID))return '验证码不正确';
         return $this->loginSuccess([$UID=>$Account]);
@@ -196,7 +196,7 @@ trait UserTrait
      * @param int $UID
      * @return bool
      */
-    private function checkVerifyCode($Code,$UID){
+    protected function checkVerifyCode($Code,$UID){
         if($Code==cache('VerifyCode'.$Code)){
             cache('VerifyCode'.$Code,null);
             return true;
