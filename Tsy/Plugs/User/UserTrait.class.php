@@ -127,7 +127,7 @@ trait UserTrait
      * @return bool 存在true,不存在false
      */
     function checkAccount($Account){
-        return !!M($this->LoginView)->where(array_fill_keys($this->LoginAccountFields,$Account))->find();
+        return !!M($this->LoginView)->where(array_merge(array_fill_keys($this->LoginAccountFields,$Account),['_logic'=>'or']))->find();
 //        return false;
     }
 
