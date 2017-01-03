@@ -197,6 +197,9 @@ trait UserTrait
      * @return bool
      */
     protected function checkVerifyCode($Code,$UID){
+        if(APP_DEBUG){
+            return $Code==C('VERIFY_CODE');
+        }
         if($Code==cache('VerifyCode'.$Code)){
             cache('VerifyCode'.$Code,null);
             return true;
