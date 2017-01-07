@@ -507,7 +507,7 @@ class Object
             L($this->main . '删除失败', LOG_ERR);
             return false;
         }
-        return !!M($this->main)->where([$this->pk => ['IN', $IDs]])->delete();
+        return is_numeric(M($this->main)->where([$this->pk => ['IN', $IDs]])->delete());
     }
     /**
      * 获取多个对象属性
