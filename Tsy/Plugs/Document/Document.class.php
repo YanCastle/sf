@@ -367,6 +367,9 @@ class {$ObjectName}Controller extends Controller
      *
      */
     function getDoc($name='',$MethodsAccess=['public','private','protected']){
+        if(is_array($MethodsAccess)){
+            $MethodsAccess = array_map(function($i){return strtolower($i);},$MethodsAccess);
+        }
 //        self::$docs=[
 //            'Classes'=>[
 //                '完整类名'=>[
@@ -978,7 +981,7 @@ class {$ObjectName}Controller extends Controller
                     if($reflectionMethod->isProtected()){$access='protected';}
                     if($reflectionMethod->isPublic()){$access='public';}
 //            限定输出的方法范围
-                    if(!in_array(ucfirst($access),$MethodsAccess)){continue;}
+                    if(!in_array($access,$MethodsAccess)){continue;}
                     //过滤以下划线开头的操作方法
                     if('_'==substr($MethodName,0,1)){continue;}
                     if($MethodName=='getAll'&&$Class->is_dic===false){continue;}
@@ -1032,7 +1035,7 @@ class {$ObjectName}Controller extends Controller
             if($method->isProtected()){$access='protected';}
             if($method->isPublic()){$access='public';}
 //            限定输出的方法范围
-            if(!in_array(ucfirst($access),$MethodsAccess)){continue;}
+            if(!in_array(strtolower($access),$MethodsAccess)){continue;}
             $methods[$method->getName()]=array_merge([
                 'name'=>$method->getName(),'access'=>$access,'static'=>$method->isStatic(),'comment'=>$method->getDocComment()
             ],$this->parseDocComment($method->getDocComment(),$method));
@@ -1139,7 +1142,7 @@ class {$ObjectName}Controller extends Controller
         }
         //循环遍历
         foreach ($Objects as $object){
-            $this->getDoc($object);
+            $this->getDoc($object,['public']);
         }
         foreach (self::$docs['Classes'] as $Class=>$Info){
             if($Info['type']=='Object'){
@@ -1159,7 +1162,7 @@ class {$ObjectName}Controller extends Controller
                     }
                     $ParamStr = implode(',',$ParamStr);
                     $VerStr = implode(',',$VerStr);
-                    $str[]="    /**{$Info['methods'][$function]['Comment']}*/
+                    $str[]="    {$Info['methods'][$function]['Comment']}
     function {$function}({$ParamStr}){
         return \$this->Object->{$function}({$VerStr});
     }";
@@ -1192,8 +1195,8 @@ class {$ObjectName}Controller extends Controller
         }
         $nav=[];
         if(!self::$docs['Classes']){
-            $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Controller');
-            $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Object');
+            $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Controller',['public']);
+            $this->getDoc(APP_PATH.DIRECTORY_SEPARATOR.current_MCA('M').'/Object',['public']);
         }
         foreach (self::$docs['Classes'] as $ObjectName=>$Object){
             if(strpos($Object['namespace'],'Controller')){
