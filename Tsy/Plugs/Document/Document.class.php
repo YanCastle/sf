@@ -1159,7 +1159,7 @@ class {$ObjectName}Controller extends Controller
                     }
                     $ParamStr = implode(',',$ParamStr);
                     $VerStr = implode(',',$VerStr);
-                    $str[]="    {$Info['methods'][$function]['Comment']}
+                    $str[]="    /**{$Info['methods'][$function]['Comment']}*/
     function {$function}({$ParamStr}){
         return \$this->Object->{$function}({$VerStr});
     }";
