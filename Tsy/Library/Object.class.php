@@ -319,7 +319,7 @@ class Object
         }
         $Properties=$PropertiesColumns;
     }
-    function add($data=[],$Properties=false)
+    function add($data=[],$Properties=false,$OnlyPK=false)
     {
 //        此处自动读取属性并判断是否是必填属性，如果是必填属性且无。。。则。。。
         if(!$this->allow_add)return false;
@@ -340,7 +340,7 @@ class Object
             if(method_exists($this,'_after_add')){
                 $this->_after_add($data,$PKID);
             }
-            return $PKID?$this->get($PKID):(APP_DEBUG?M()->getDbError():'添加失败');
+            return $PKID?($OnlyPK?$PKID:$this->get($PKID)):(APP_DEBUG?M()->getDbError():'添加失败');
         }else{
             return $rs;
         }
@@ -377,7 +377,7 @@ class Object
      * @param array $W
      * @param string $Sort
      */
-    function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false)
+    function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false,$Group=false,$Fields=false)
     {
         $Model = M($this->searchTable ? $this->searchTable : $this->main);
 //        $DB_PREFIX = C('DB_PREFIX');
