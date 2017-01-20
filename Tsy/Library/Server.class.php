@@ -228,7 +228,7 @@ class Server
     function onWorkerStart(\swoole_server $server, $worker_id){
         define('PROCESS_ID',$worker_id);
         define('WORKER_TYPE',$worker_id>= $server->setting['worker_num']?'TASK':'WORKER');
-        L("启动线程：线程编号{$worker_id},线程类型：".WORKER_TYPE."");
+        L("启动线程：线程编号{$worker_id},线程类型：".WORKER_TYPE."",LOG_TIP);
         if(WORKER_TYPE){
             swoole_set_process_name('PHP '.DEFAULT_MODULE.' '.WORKER_TYPE.' PROCESS');
         }
@@ -250,7 +250,7 @@ class Server
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$worker_id]);
         }
-        L("线程停止：线程编号{$worker_id},线程类型：".WORKER_TYPE."");
+        L("线程停止：线程编号{$worker_id},线程类型：".WORKER_TYPE."",LOG_TIP);
     }
 
     /**
@@ -303,7 +303,7 @@ class Server
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$worker_id,$worker_pid,$exit_code]);
         }
-        L("线程错误：线程编号{$worker_id},线程类型：".WORKER_TYPE." 错误代码：".$exit_code);
+        L("线程错误：线程编号{$worker_id}, 错误代码：".$exit_code,LOG_TIP);
     }
 
     /**

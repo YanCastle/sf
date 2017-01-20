@@ -36,6 +36,7 @@ abstract class Cache
         if(!isset($_map[$key])){
             $class  =   strpos($type,'\\')? $type : 'Tsy\\Library\\Cache\\Driver\\'.ucwords(strtolower($type));
             if(class_exists($class)){
+                L("创建缓存驱动:{$key}=>$type",LOG_TIP);
                 $cache = new $class([]);
                 $_map[$key]=$cache;
             }
