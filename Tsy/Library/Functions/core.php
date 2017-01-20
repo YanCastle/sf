@@ -291,6 +291,9 @@ function invokeClass($Class,$A,$data){
             }
             \Tsy\Library\Aop::exec('dispatch',\Tsy\Library\Aop::$AOP_BEFORE,$args);
             \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_BEFORE,$args);
+            if('add'===$A&&!$args['data']){
+                $args['data']=$_POST;
+            }
             $result = $ReflectMethod->invokeArgs($Class,$args);
             \Tsy\Library\Aop::exec('dispatch_'.get_class($Class).'::'.$A,\Tsy\Library\Aop::$AOP_AFTER,$result);
         }else{
