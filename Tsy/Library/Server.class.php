@@ -232,6 +232,18 @@ class Server
         if(WORKER_TYPE){
             swoole_set_process_name('PHP '.DEFAULT_MODULE.' '.WORKER_TYPE.' PROCESS');
         }
+        //在task线程上开启文件目录监听，
+        if(WORKER_TYPE=='TASK'&&$fp=fopen(RUNTIME_PATH.'/AUTO_RELOAD.lock','w+')){
+            if(flock($fp,LOCK_EX)){
+                $Inotify = new \Inotify();
+                $Inotify->watch(APP_PATH);
+                $Inotify->start(function($path,$event)use($server){
+                    if(pathinfo($path,PATHINFO_EXTENSION)=='php'){
+                        $server->reload();
+                    }
+                });
+            }
+        }
         $_GET['_server']=$server;
         $callback = swoole_get_callback('WORKER_START');
         if(is_callable($callback)){
