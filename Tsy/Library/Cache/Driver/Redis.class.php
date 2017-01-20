@@ -36,12 +36,13 @@ class Redis extends Cache implements CacheInterface
         $this->options['prefix'] =  isset($options['prefix'])?  $options['prefix']  :   C('DATA_CACHE_PREFIX');
         $this->options['length'] =  isset($options['length'])?  $options['length']  :   0;
         $func = $options['persistent'] ? 'pconnect' : 'connect';
-        if(!self::$handler){
+//        if(!self::$handler){
             self::$handler  = new \Redis();
-        }
-        $options['timeout'] === false ?
-            self::$handler->$func($options['host'], $options['port']) :
-            self::$handler->$func($options['host'], $options['port'], $options['timeout']);
+            self::$handler->connect($options['host'], $options['port']);
+//        }
+//        $options['timeout'] === false ?
+//            self::$handler->$func($options['host'], $options['port']) :
+//            self::$handler->$func($options['host'], $options['port'], $options['timeout']);
     }
 
     /**
