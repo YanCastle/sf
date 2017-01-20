@@ -233,7 +233,7 @@ class Server
             swoole_set_process_name('PHP '.DEFAULT_MODULE.' '.WORKER_TYPE.' PROCESS');
         }
         //在task线程上开启文件目录监听，
-        if(WORKER_TYPE=='TASK'&&$fp=fopen(RUNTIME_PATH.'/AUTO_RELOAD.lock','w+')){
+        if(WORKER_TYPE=='WORKER'&&$fp=fopen(RUNTIME_PATH.'/AUTO_RELOAD.lock','w+')){
             if(flock($fp,LOCK_EX)){
                 $Inotify = new \Inotify();
                 $Inotify->watch(APP_PATH);
