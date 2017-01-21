@@ -39,4 +39,10 @@ class UserObject extends Object
             return false;
         }
     }
+    function loginByOpenID($OpenID){
+        if($UID=M('User')->where(['OpenID'=>$OpenID])->getField('UID')){
+            return $this->loginSuccess($UID);
+        }
+        return false;
+    }
 }
