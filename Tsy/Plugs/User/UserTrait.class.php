@@ -74,7 +74,7 @@ trait UserTrait
      * @return mixed
      */
     protected function loginSuccess($User){
-        $UID = isset($User['UID'])?$User['UID']:(is_numeric(array_keys($User)[0])?array_keys($User)[0]:0);
+        $UID = is_numeric($User)?$User:(isset($User['UID'])?$User['UID']:(is_numeric(array_keys($User)[0])?array_keys($User)[0]:0));
         session('UID',$UID);
 //        session('GIDs',)
         return $this->get($UID);
