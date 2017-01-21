@@ -40,7 +40,7 @@ class Http implements Mode
             'UID'=>session('UID'),
             'c'=>Tsy::$c,
             'd'=>is_string($data)?false:$data,
-            'err'=>is_string($data)?$data:(false===$data?L(false,LOG_TIP):''),
+            'err'=>is_string($data)?$data:'',
             'tsy'=>session('[id]')
         ],JSON_UNESCAPED_UNICODE);
     }
