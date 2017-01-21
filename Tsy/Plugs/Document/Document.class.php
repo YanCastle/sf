@@ -14,6 +14,12 @@ class Document
         'Objects'=>[],
         'ObjectMap'=>[]
     ];
+    function __construct($PDM='')
+    {
+        if($PDM&&'pdm'==pathinfo($PDM,PATHINFO_EXTENSION)){
+            $this->loadPDM($PDM);
+        }
+    }
 
     /**
      * 修复SQL错误
@@ -38,6 +44,8 @@ class Document
     }
 
     function loadPDM($File){
+        if(!is_file($File)||!is_readable($File))return false;
+        if(self::$docs['PDM'])return true;
         $JSON = \Tsy\Plugs\PowerDesigner\PowerDesigner::analysis($File);
         $Tables=[];
         foreach ($JSON['Tables'] as $k=>$table){
@@ -1378,7 +1386,7 @@ class {$ObjectName}Controller extends Controller
                             'Add' => $Object['zh'] . '添加']
                         as $key=>$value){
 
-                    $FileName = $Object['OriginName'] . $key;
+                    $FileName = $ObjectName . $key;
                     $path = 'package/' . $FileName;
                     if(!is_dir($path)){
                         mkdir($path,0777,true);
