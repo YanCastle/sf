@@ -303,7 +303,7 @@ class Model {
                 $fields =   $this->fields;
             }
             foreach ($data as $key=>$val){
-                if(!in_array($key,$fields,true)){
+                if(!in_array($key,$fields)){
                     if(!empty($this->options['strict'])){
                         L(E('_DATA_TYPE_INVALID_').':['.$key.'=>'.$val.']');
                     }
@@ -794,6 +794,9 @@ class Model {
                 $data[$key]   =  floatval($data[$key]);
             }elseif(false !== strpos($fieldType,'bool')){
                 $data[$key]   =  (bool)$data[$key];
+            }elseif(false !== strpos($fieldType,'datetime')){
+                if(is_numeric($data[$key]));
+                    $data[$key]   =  date('Y-m-d H:i:s',$data[$key]);//转化时间戳为数据库的datetime值
             }
         }
     }
