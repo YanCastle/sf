@@ -359,6 +359,10 @@ class Model {
         if(false === $this->_before_insert($data,$options)) {
             return false;
         }
+        if(!(is_array($data)&&$data)){
+            $this->error='没有添加数据';
+            return false;
+        }
         // 写入数据到数据库
         $result = $this->db->insert($data,$options,$replace);
         if(false !== $result && is_numeric($result)) {
