@@ -476,7 +476,7 @@ class Object
         $T = count($ObjectIDs);
         if($Sort){//之前没有任何排序
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->page($P,$N)->getField($this->pk,true);
-            $Objects = $this->gets($ObjectIDs,$Properties);
+            $Objects = $this->gets($ObjectIDs,$Properties,$Sort);
         }else{
             $Sort or rsort($ObjectIDs, SORT_NUMERIC);
             $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
