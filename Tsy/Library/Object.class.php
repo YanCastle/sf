@@ -551,7 +551,7 @@ class Object
         $Objects = [];
         $fields=[];
         $PropertyObjects = [];
-        $UpperMainTable = strtoupper(parse_name($this->main));
+        $UpperMainTable = strtoupper(parse_name($this->main_get_table?$this->main_get_table:$this->main));
         $Model = M($this->main_get_table?$this->main_get_table:$this->main);
         $Fields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
 
@@ -632,7 +632,7 @@ class Object
         //获取所有字段
         $Fields = array_unique(array_merge(array_map(function ($d)use($UpperMainTable){
             return strpos(trim($d),'.')?$d:"__{$UpperMainTable}__.{$d}";
-        },M($this->main)->getDbFields()),$Fields));
+        },M($this->main_get_table?$this->main_get_table:$this->main)->getDbFields()),$Fields));
         //准备做字段冲突检测，若有冲突则以前面的为准。
 //        if(count($Fields)!=count(array_unique(explode(',',preg_replace('/[_A-Za-z]+\./','',implode(',',$Fields)))))){
 //
