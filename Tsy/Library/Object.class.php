@@ -44,6 +44,7 @@ class Object
     const READER_FILTER_FIELD='F';
 
     protected $main = '';//主表名称，默认为类名部分
+    protected $main_get_table='';//用于特殊指定的主表搜索表，通常是一个视图
     protected $pk = '';//表主键，默认自动获取
     protected $fields='';//自动化对象的字段过滤，接受字符串或数组，如果数组最后一个值为布尔值且为true表示排除这些字段
     protected $link = [];//多对多属性配置
@@ -551,7 +552,7 @@ class Object
         $fields=[];
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main));
-        $Model = M($this->main);
+        $Model = M($this->main_get_table?$this->main_get_table:$this->main);
         $Fields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
 
         foreach ($this->property as $PropertyName => $Config) {
