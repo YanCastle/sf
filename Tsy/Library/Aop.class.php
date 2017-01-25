@@ -56,7 +56,7 @@ class Aop
      * @param $when
      * @param array $data
      */
-    public static function exec(string $name,$when,&$data=[],$async=null){
+    public static function exec($name,$when,&$data=[],$async=null){
         if(isset(self::$config[$name][$when])){
             foreach (self::$config[$name][$when] as $callbacks){
                 foreach ($callbacks as $callback){
