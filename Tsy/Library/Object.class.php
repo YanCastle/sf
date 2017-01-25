@@ -1192,6 +1192,9 @@ class Object
 //            }
 //        }else
         if(is_string($Rule)){
+            if(method_exists($this,$Rule )){
+                $Data[$Key]=call_user_func_array([$this, $Rule], [$Data,$Key]);
+            }else
             if('unset'==$Rule){
                 unset($Data[$Key]);
             }else
