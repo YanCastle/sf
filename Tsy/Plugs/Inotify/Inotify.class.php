@@ -25,10 +25,12 @@ class Inotify
     protected $wd=[];
     function __construct()
     {
-        $this->inotify = inotify_init();
+        if(extension_loaded('inotify'))
+            $this->inotify = inotify_init();
     }
 
     function watch($Dir){
+        if(!$this->inotify)return false;
         $Dir=realpath($Dir);
         if(is_dir($Dir)||is_file($Dir)){
             if(!in_array($Dir, $this->wd)){
@@ -44,6 +46,7 @@ class Inotify
         return false;
     }
     function eachDir($path){
+        if(!$this->inotify)return false;
         if(!in_array($path, $this->wd)&&is_dir($path)) {
             inotify_add_watch($this->inotify, $path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVE);
             $this->wd[] = $path;
@@ -80,6 +83,7 @@ class Inotify
      * @param $Dir
      */
     function unwatch($Dir){
+        if(!$this->inotify)return false;
         if(in_array($Dir,$this->watched )){
             inotify_rm_watch($this->inotify,$Dir );
         }
@@ -90,6 +94,7 @@ class Inotify
      * @param callable $function
      */
     function start(callable $function){
+        if(!$this->inotify)return false;
         swoole_event_add($this->inotify,function($fd)use($function){
             $events = inotify_read($fd);
             if($events){
@@ -105,5 +110,7 @@ class Inotify
             }
         });
     }
-    function stop(){}
+    function stop(){
+        if(!$this->inotify)return false;
+    }
 }
