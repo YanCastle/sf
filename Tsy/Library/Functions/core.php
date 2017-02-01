@@ -213,8 +213,8 @@ function controller($i,$data,$mid='',$layer="Controller"){
             }elseif(method_exists($Class,'__call')){
                 $result = call_user_func_array([$Class,$A],$data);
             }else{
-                L($A.'方法不存在',LOG_ERR);
-                return '方法不存在';
+                L($i.'方法不存在',LOG_ERR);
+                return $i.'方法不存在';
             }
             return $result;
         }
@@ -286,7 +286,7 @@ function invokeClass($Class,$A,$data){
                     $args[$ParamName]=$Param->getDefaultValue();
                 }else{
                     L($ParamName.':必填参数未传入完整',LOG_TIP);
-                    return false;
+                    return $ParamName.':必填参数未传入完整';
                 }
             }
             \Tsy\Library\Aop::exec('dispatch',\Tsy\Library\Aop::$AOP_BEFORE,$args);
