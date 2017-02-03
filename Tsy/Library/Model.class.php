@@ -795,7 +795,7 @@ class Model {
             }elseif(false !== strpos($fieldType,'bool')){
                 $data[$key]   =  (bool)$data[$key];
             }elseif(false !== strpos($fieldType,'datetime')){
-                if(is_numeric($data[$key]));
+                if(is_numeric($data[$key])&&strlen($data[$key])<=10);
                     $data[$key]   =  date('Y-m-d H:i:s',$data[$key]);//转化时间戳为数据库的datetime值
             }
         }
