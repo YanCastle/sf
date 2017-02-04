@@ -1379,6 +1379,7 @@ class {$ObjectName}Controller extends Controller
         return window['{$JsObjectName}']=obj
     })";
                 file_put_contents($dir,$Js);
+                $JsFunction='';
                 foreach([
                             'List' => $Object['zh'] . '列表',
                             'Details' => $Object['zh'] . '详情',
@@ -1394,7 +1395,7 @@ class {$ObjectName}Controller extends Controller
                     $ResetJsCode = '';
                     switch ($key) {
                         case 'Edit':
-                            $ResetJsCode = "vm.{$Object['OriginName']}.get(i,function (data) {
+                            $ResetJsCode = "vm.\${$ObjectName}.get(i,function (data) {
                 vm.data=data
             })";
                             break;
@@ -1402,22 +1403,29 @@ class {$ObjectName}Controller extends Controller
                             $ResetJsCode = '';
                             break;
                         case 'List':
-                            $ResetJsCode = "vm.User.search({
-                W:vm.\$where,
-                P:vm.P,
-                N:vm.N
-            },function (data) {
-                vm.list=data.L
-            })";
+                            $ResetJsCode = "vm.\${$ObjectName}search()";
+                            $JsFunction="search{$ObjectName}:function(){
+                                var data = {
+                                    P:vm.P,
+                                    N:vm.N,
+                                    W:vm.\$where,
+                                }
+                                if(vm.Keyword)data.Keyword=vm.Keyword
+                                vm.\${$ObjectName}.search(data,function(res){
+                                    vm.list=res.L
+                                })
+                            }";
                             break;
                         case 'Details':
-                            $ResetJsCode = "vm.{$Object['OriginName']}.get(i,function (data) {
+                            $ResetJsCode = "vm.\${$ObjectName}.get(i,function (data) {
                 vm.data=data
             })";
                             break;
                     }
                     file_put_contents("{$path}/{$FileName}.html", "<!-- {$value} 模块 -->
-<div ms-controller='{$FileName}'>{$value} 在此编写 {$value} 模块的HTML代码</div>");
+<div ms-controller='{$FileName}'>
+{$value} 在此编写 {$value} 模块的HTML代码
+</div>");
 
                     file_put_contents("{$path}/{$FileName}.js", "//{$value} 模块
     define('{$FileName}', [
@@ -1427,18 +1435,25 @@ class {$ObjectName}Controller extends Controller
     '../../obj/{$ModuleName}/{$ObjectName}.js'
 ], function (avalon, html, css,{$ObjectName}) {
     var vm = avalon.define({
-        \$id: \"{$FileName}\",{$ObjectName}:{$ObjectName},
-        data:{$ObjectName}.obj,list:[],
-        P:1,N:20,\$where:[],
-        ready: function (i) {
+        \$id: \"{$FileName}\",\${$ObjectName}:{$ObjectName},
+        data:{$ObjectName}.obj,list:[],Keyword:'',
+        P:1,N:20,\$where:[],i:0,G:0,
+        ready: function (i) {            
+            vm.i=i;
             index.html = html;
             vm.now = i | 0;
             //以及其他方法
             vm.reset(i);
         },
         reset: function (i) {
+            vm.data=\${$ObjectName}.obj;
+            vm.list=[];
+            vm.\$where={};
+            vm.Keyword='';
+            vm.G=index.G;
             {$ResetJsCode}
-        }
+        },
+        {$JsFunction}
       });
       return window['{$FileName}'] = vm
    }
