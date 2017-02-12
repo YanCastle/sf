@@ -30,7 +30,7 @@ trait UserTrait
      * @param string $Account 注册帐号
      * @param string $PWD 注册密码
      * @param array $Properties 其他属性
-     * @return UserObject
+     * @return UserObject|bool
      */
     function reg($Account,$PWD,array $Properties=[]){
         if(!$this->allowReg){
@@ -45,9 +45,19 @@ trait UserTrait
             $this->_map['PWD']=>$this->password($PWD)
         ]);
         $data['data']=$data;
-        return invokeClass($this,'add',$data);
+        startTrans();
+        if($user = invokeClass($this,'add',$data)){
+            if(!$this->_regSuccess($user)){
+                rollback();
+                return false;
+            }
+        }
+        commit();
+        return $user;
     }
-
+    protected function _regSuccess(&$user){
+        return true;
+    }
     /**
      * 用户登录
      * @param string $Account 账户名
