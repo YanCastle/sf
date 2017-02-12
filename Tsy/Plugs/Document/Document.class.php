@@ -1364,10 +1364,10 @@ class {$ObjectName}Controller extends Controller
             })";
                             break;
                         case 'Add':
-                            $ResetJsCode = '';
+                            $ResetJsCode = "vm.data=vm.\${$ObjectName}.obj;";
                             break;
                         case 'List':
-                            $ResetJsCode = "vm.\${$ObjectName}search()";
+                            $ResetJsCode = "vm.search{$ObjectName}()";
                             $JsFunction="search{$ObjectName}:function(){
                                 var data = {
                                     P:vm.P,
@@ -1410,7 +1410,7 @@ class {$ObjectName}Controller extends Controller
             vm.reset(i);
         },
         reset: function (i) {
-            vm.data=\${$ObjectName}.obj;
+            vm.data=vm.\${$ObjectName}.obj;
             vm.list=[];
             vm.\$where={};
             vm.Keyword='';
