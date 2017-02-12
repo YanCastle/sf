@@ -1378,7 +1378,14 @@ class {$ObjectName}Controller extends Controller
                                 vm.\${$ObjectName}.search(data,function(res){
                                     vm.list=res.L
                                 })
-                            }";
+                            },remove:function (CID) {
+            if(confirm('确认删除?')){
+                vm.\${$ObjectName}.del(CID,function (res) {
+                    tip.on('删除成功',1);
+                    vm.search{$ObjectName}();
+                });
+            }
+        }";
                             break;
                         case 'Details':
                             $ResetJsCode = "vm.\${$ObjectName}.get(i,function (data) {
@@ -1386,6 +1393,8 @@ class {$ObjectName}Controller extends Controller
             })";
                             break;
                     }
+                    $HtmlContent="";
+                    
                     file_put_contents("{$path}/{$FileName}.html", "<!-- {$value} 模块 -->
 <div ms-controller='{$FileName}'>
 {$value} 在此编写 {$value} 模块的HTML代码
