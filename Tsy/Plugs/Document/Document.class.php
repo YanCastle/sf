@@ -1235,79 +1235,53 @@ class {$ObjectName}Controller extends Controller
                     switch ($methodName){
                         case 'add':
                             $JsContent[]="add: function (data,success,error) {
-                var configFn={
-                    success: success?success:function () {},
-                    error: error?error:function (err) {tip.on(err)}
-                }
-
                 $$.call({
                     i:'{$I}/add',
                     data:data,
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
                         case 'save':
                             $JsContent[]="save: function ({$PK},Params,success,error) {
-                var configFn={
-                    success: success?success:function () {},
-                    error: error?error:function (err) {tip.on(err)}
-                }
-
                 $$.call({
                     i:'{$I}/save',
                     data:{
                         {$PK}:{$PK},
                         Params:Params
                     },
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
                         case 'del':
                             $JsContent[]="del: function ({$PK},success,error) {
-                var configFn={
-                    success: success?success:function () {},
-                    
-                    error: error?error:function (err) {tip.on(err)}
-                }
-
                 $$.call({
                     i:\"{$I}/del\",
                     data:{
                         \"{$PK}\":{$PK}
                     },
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
                         case 'get':
                             $JsContent[]="get: function ({$PK},success,error) {
-                var configFn={
-                    success: success?success:function () {},
-                    error: error?error:function (err) {tip.on(err)}
-                }
-
                 $$.call({
                     i:\"{$I}/get\",
                     data:{
                         {$PK}:{$PK}
                     },
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
                         case 'gets':
                             $JsContent[]="gets: function ({$PK}s,success,error) {
-                var configFn={
-                    success: success?success:function () {},
-                    error: error?error:function (err) {tip.on(err)}
-                }
-
                 $$.call({
                     i:\"{$I}/gets\",
                     data:{
@@ -1315,23 +1289,18 @@ class {$ObjectName}Controller extends Controller
                         \"P\":1,
                         \"N\":1000000
                     },
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
                         case 'search':
                             $JsContent[]="search: function (data,success,error) {
-                var configFn={
-                    success: success?success:function () {},
-                    error: error?error:function (err) {tip.on(err)}
-                }
-
                 $$.call({
                     i:\"{$I}/search\",
                     data:data,
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
@@ -1350,18 +1319,13 @@ class {$ObjectName}Controller extends Controller
                         default:
 
                             $JsContent[]="{$methodName}: function ({$ParamStr}) {
-                var configFn={
-                    success: success?success:function () {},
-                    error: error?error:function (err) {tip.on(err)}
-                }
-                
                 $$.call({
                     i:\"{$I}/{$methodName}\",
                     data:{
                         {$DataStr}
                     },
-                    success:configFn.success,
-                    error:configFn.error
+                    success:success?success:function () {},
+                    error:error?error:function (err) {tip.on(err)}
                 })
             }";
                             break;
