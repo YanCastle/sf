@@ -56,7 +56,39 @@ abstract class Driver {
         'db_like_fields'    =>  '', 
     );
     // 数据库表达式
-    protected $exp = array('eq'=>'=','neq'=>'<>','gt'=>'>','egt'=>'>=','lt'=>'<','elt'=>'<=','notlike'=>'NOT LIKE','like'=>'LIKE','in'=>'IN','notin'=>'NOT IN','not in'=>'NOT IN','between'=>'BETWEEN','not between'=>'NOT BETWEEN','notbetween'=>'NOT BETWEEN');
+    protected $exp = array(
+        'eq' => '=',
+        'neq' => '<>',
+        'gt' => '>',
+        'egt' => '>=',
+        'lt' => '<',
+        'elt' => '<=',
+        'notlike' => 'NOT LIKE',
+        'like' => 'LIKE',
+        'in' => 'IN',
+        'notin' => 'NOT IN',
+        'not in' => 'NOT IN',
+        'between' => 'BETWEEN',
+        'not between' => 'NOT BETWEEN',
+        'notbetween' => 'NOT BETWEEN',
+        '<' => '<',
+        '<=' => '<=',
+        '>' => '>',
+        '>=' => '>=',
+        '<>' => '<>',
+        '!=' => '<>',
+        '小于' => '<',
+        '大于' => '>',
+        '小于等于' => '<=',
+        '大于等于' => '>=',
+        '不等于' => '<>',
+        '在范围' => 'BETWEEN',
+        '不在范围' => 'NOT BETWEEN',
+        '模糊包含' => 'LIKE',
+        '模糊不包含' => 'NOT LIKE',
+        '精确包含' => 'IN',
+        '精确不包含' => 'NOT IN',
+    );
     // 查询表达式
     protected $selectSql  = 'SELECT%DISTINCT% %FIELD% FROM %TABLE%%FORCE%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%%LIMIT% %UNION%%LOCK%%COMMENT%';
     // 查询次数
@@ -585,7 +617,7 @@ abstract class Driver {
         if(is_array($val)) {
             if(is_string($val[0])) {
 				$exp	=	strtolower($val[0]);
-                if(preg_match('/^(eq|neq|gt|egt|lt|elt)$/',$exp)) { // 比较运算
+                if(isset($this->exp[$exp])) { // 比较运算
                     $whereStr .= $key.' '.$this->exp[$exp].' '.$this->parseValue($val[1]);
                 }elseif(preg_match('/^(notlike|like)$/',$exp)){// 模糊查找
                     if(is_array($val[1])) {
