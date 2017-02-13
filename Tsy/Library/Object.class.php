@@ -665,7 +665,7 @@ class Object
             $Model->order($Sort);
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
-        $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => ['IN', $IDs]])->select();
+        $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => count($IDs)==1?end($IDs):['IN', $IDs]])->select();
         if (!$Objects) {
             return [];
         }
