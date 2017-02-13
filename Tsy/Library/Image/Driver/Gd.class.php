@@ -413,7 +413,7 @@ class Gd{
         if(!is_file($font)) E("不存在的字体文件：{$font}");
 
         //获取文字信息
-        $info = imagettfbbox($size, $angle, $font, $text);
+        $info = \imagettfbbox($size, $angle, $font, $text);
         $minx = min($info[0], $info[2], $info[4], $info[6]); 
         $maxx = max($info[0], $info[2], $info[4], $info[6]); 
         $miny = min($info[1], $info[3], $info[5], $info[7]); 
