@@ -165,7 +165,7 @@ class Tsy
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
         !APP_DEBUG&&!CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
-        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(HOST_NAME).'.php'));
+        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(HOSTNAME).'.php'));
         //开始加载aop配置文件
         $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');
         if(is_array($AopConfig)){
