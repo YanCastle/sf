@@ -618,7 +618,8 @@ abstract class Driver {
             if(is_string($val[0])) {
 				$exp	=	strtolower($val[0]);
                 if(isset($this->exp[$exp])) { // 比较运算
-                    $whereStr .= $key.' '.$this->exp[$exp].' '.$this->parseValue($val[1]);
+                    $d = $this->parseValue($val[1]);
+                    $whereStr .= ($key.' '.$this->exp[$exp].' '.(is_array($d)?('('.implode(',',$d).')'):$d));
                 }elseif(preg_match('/^(notlike|like)$/',$exp)){// 模糊查找
                     if(is_array($val[1])) {
                         $likeLogic  =   isset($val[2])?strtoupper($val[2]):'OR';

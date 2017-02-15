@@ -412,18 +412,27 @@ class Gd{
         if(empty($this->img)) E('没有可以被写入文字的图像资源');
         if(!is_file($font)) E("不存在的字体文件：{$font}");
 
-        //获取文字信息
-        $info = imagettfbbox($size, $angle, $font, $text);
-        $minx = min($info[0], $info[2], $info[4], $info[6]); 
-        $maxx = max($info[0], $info[2], $info[4], $info[6]); 
-        $miny = min($info[1], $info[3], $info[5], $info[7]); 
-        $maxy = max($info[1], $info[3], $info[5], $info[7]); 
+        if(function_exists('imagettfbbox')){
+            //获取文字信息
+        $info = \imagettfbbox($size, $angle, $font, $text);
+        $minx = min($info[0], $info[2], $info[4], $info[6]);
+        $maxx = max($info[0], $info[2], $info[4], $info[6]);
+        $miny = min($info[1], $info[3], $info[5], $info[7]);
+        $maxy = max($info[1], $info[3], $info[5], $info[7]);
 
-        /* 计算文字初始坐标和尺寸 */
+            /* 计算文字初始坐标和尺寸 */
         $x = $minx;
         $y = abs($miny);
         $w = $maxx - $minx;
         $h = $maxy - $miny;
+        }
+        else{
+            //TODO 修复环境问题
+            $x=10;
+            $y=10;
+            $w=10;
+            $h=10;
+        }
 
         /* 设定文字位置 */
         switch ($locate) {

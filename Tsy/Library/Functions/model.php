@@ -149,10 +149,10 @@ function M($name='', $tablePrefix='',$connection='') {
         $class      =   'Tsy\\Library\\Model';
     }
 
-    $guid           =   (is_array($connection)?implode('',$connection):$connection).$tablePrefix . $name . '_' . $class;
-    if (!isset($_model[$guid]))
-        $_model[$guid] = new $class($name,$tablePrefix,$connection);
-    return $_model[$guid];
+//    $guid           =   (is_array($connection)?implode('',$connection):$connection).$tablePrefix . $name . '_' . $class;
+//    if (!isset($_model[$guid]))
+//        $_model[$guid] = new $class($name,$tablePrefix,$connection);
+    return new $class($name,$tablePrefix,$connection);
 }
 
 /**
