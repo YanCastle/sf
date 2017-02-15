@@ -107,7 +107,7 @@ class Tsy
         $this->loadFunctions();//加载框架function和项目function
         $this->loadConfig();
         $GLOBALS['Config']=C();
-
+        define('HOSTNAME',isset($_SERVER['HOSTNAME'])?$_SERVER['HOSTNAME']:$_SERVER['COMPUTERNAME']);
 //        分析配置，决定是http模式还是swoole模式
 ////        如果是http模式则实例化http类，如果是swoole模式则实例化swoole类
         if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php')){
@@ -165,6 +165,7 @@ class Tsy
         !APP_DEBUG or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).'_debug.php'));
         !APP_DEBUG&&!CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
+        C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(HOST_NAME).'.php'));
         //开始加载aop配置文件
         $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');
         if(is_array($AopConfig)){
