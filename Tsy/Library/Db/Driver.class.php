@@ -617,10 +617,72 @@ abstract class Driver {
         if(is_array($val)) {
             if(is_string($val[0])) {
 				$exp	=	strtolower($val[0]);
-                if(isset($this->exp[$exp])) { // 比较运算
-                    $d = $this->parseValue($val[1]);
-                    $whereStr .= ($key.' '.$this->exp[$exp].' '.(is_array($d)?('('.implode(',',$d).')'):$d));
-                }elseif(preg_match('/^(notlike|like)$/',$exp)){// 模糊查找
+                switch ($exp){
+                    case '<':
+                        $exp = 'lt';
+                        break;
+                    case '<=':
+                        $exp = 'elt';
+                        break;
+                    case '>':
+                        $exp = 'gt';
+                        break;
+                    case '>=':
+                        $exp = 'egt';
+                        break;
+                    case '=':
+                        $exp = 'eq';
+                        break;
+                    case '==':
+                        $exp = 'eq';
+                        break;
+                    case '<>':
+                        $exp = 'neq';
+                        break;
+                    case '!=':
+                        $exp = 'neq';
+                        break;
+                    case '大于':
+                        $exp = 'gt';
+                        break;
+                    case '小于':
+                        $exp = 'lt';
+                        break;
+                    case '不等于':
+                        $exp = 'neq';
+                        break;
+                    case '大于等于':
+                        $exp = 'egt';
+                        break;
+                    case '小于等于':
+                        $exp = 'elt';
+                        break;
+                    case '在范围':
+                        $exp = 'between';
+                        break;
+                    case '不在范围':
+                        $exp = 'net between';
+                        break;
+                    case '模糊包含':
+                        $exp = 'like';
+                        break;
+                    case '模糊不包含':
+                        $exp = 'not like';
+                        break;
+                    case '精确包含':
+                        $exp = 'in';
+                        break;
+                    case '精确不包含':
+                        $exp = 'not in';
+                        break;
+                }
+                if(in_array($exp,[
+                    'eq','neq','gt','egt','lt','elt'
+                ] )) { // 比较运算
+                    $whereStr .= $key.' '.$this->exp[$exp].' '.$this->parseValue($val[1]);
+                }elseif(in_array($exp,[
+                    'notlike','like'
+                ])){// 模糊查找
                     if(is_array($val[1])) {
                         $likeLogic  =   isset($val[2])?strtoupper($val[2]):'OR';
                         if(in_array($likeLogic,array('AND','OR','XOR'))){
