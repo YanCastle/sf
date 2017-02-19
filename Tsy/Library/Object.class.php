@@ -1170,8 +1170,21 @@ class Object
      * @param $Rule
      */
     protected function _execFieldFunctionConfig(&$Data,$Key,$Rule){
+        $KeyFrom = $Key;
+        if(strpos($Rule,':')){
+            $Rules = explode(':',$Rule );
+            parse_str($Rules[1],$W);
+            $Rule=$Rules[0];
+            foreach ($W as $t=>$w){
+                switch ($t){
+                    case 'K':
+                        $KeyFrom=$w;
+                        break;
+                }
+            }
+        }
         if(is_callable($Rule)){
-            $Data[$Key]=call_user_func($Rule);
+            $Data[$Key]=call_user_func_array($Rule,[$Data[$KeyFrom],$Key,$Rule]);
         }else
 //        if(is_array($Rule)){
 //            //如果是数组，
@@ -1200,7 +1213,7 @@ class Object
             }else
             if(is_callable($Rule)){
 //                'time';
-                $Data[$Key]=call_user_func($Rule);
+                $Data[$Key]=call_user_func_array($Rule,[$Data[$KeyFrom],$Key,$Rule]);
             }elseif('$'==substr($Rule,0,1)){
 //                取变量
 //                $_POST['UID'];

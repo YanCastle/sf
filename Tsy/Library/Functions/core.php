@@ -435,3 +435,12 @@ function process_queue($key,$op='push',$value=''){
     }
     return true;
 }
+
+/**
+ * 获取拼音码
+ * @param $str
+ * @return string
+ */
+function pinyin($str){
+    return strtolower(\Tsy\Plugs\Pinyin\Pinyin::getAllPY($str).'|'.\Tsy\Plugs\Pinyin\Pinyin::getFirstPY($str));
+}
