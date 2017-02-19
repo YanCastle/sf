@@ -122,7 +122,7 @@ class Pinyin
         }
     }
 
-    private function zh_to_pys($chinese, $delimiter = ' ', $first=0){
+    function zh_to_pys($chinese, $delimiter = ' ', $first=0){
         $result = array();
         for($i=0; $i<strlen($chinese); $i++) {
             $p = ord(substr($chinese,$i,1));
