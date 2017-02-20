@@ -5,9 +5,6 @@
  * Date: 2016/4/11
  * Time: 22:20
  */
-if(isset($_SERVER['REQUEST_METHOD'])&&'options'==strtolower($_SERVER['REQUEST_METHOD'])){
-    exit();
-}
 if(defined('CURL')&&defined('APP_DEBUG')&&APP_DEBUG&&CURL){
     $cmd = explode(' ',CURL);
     $url = $cmd[1];

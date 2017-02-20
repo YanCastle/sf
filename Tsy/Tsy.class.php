@@ -87,14 +87,17 @@ class Tsy
             die('需要5.5.0以上的PHP版本');
         }
         define('APP_MODE_LOW',strtolower(APP_MODE));
-        if('http'==strtolower(APP_MODE)&&isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$_SERVER['REQUEST_METHOD']){
+        if('http'==strtolower(APP_MODE)){
             if(isset($_SERVER['HTTP_ORIGIN'])) {
                 define('Domain', $_SERVER['HTTP_ORIGIN']);
                 header('Access-Control-Allow-Origin:' . $_SERVER['HTTP_ORIGIN']);
             }
-            header('Access-Control-Allow-Credentials:true');
-            header('Access-Control-Request-Method:GET,POST');
-            header('Access-Control-Allow-Headers:X-Requested-With,Cookie,ContentType');
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Request-Method: GET,POST');
+            header('Access-Control-Allow-Headers: X-Requested-With,Cookie,ContentType');
+            if(isset($_SERVER['REQUEST_METHOD'])&&'OPTIONS'==$_SERVER['REQUEST_METHOD']){
+                exit();
+            }
         }
         define('VENDOR_PATH',TSY_PATH.'/Vendor');
         defined('AUTH_ON') or define('AUTH_ON',false);
