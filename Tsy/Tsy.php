@@ -7,12 +7,12 @@
  */
 defined('APP_MODE') or define('APP_MODE','Http' );
 if(defined('CURL')&&defined('APP_DEBUG')&&APP_DEBUG&&CURL){
-    $cmd = explode(' ',CURL);
+    $cmd = explode(' ',str_replace("\"",'',CURL));
     $url = $cmd[1];
-    $query  = parse_url(trim($url,'\''),PHP_URL_QUERY);
+    $query  = parse_url(trim($url,'\'"'),PHP_URL_QUERY);
     parse_str($query,$GET);
     $_GET = array_merge($_GET,$GET);
-    parse_str(trim($cmd[count($cmd)-2],'\''),$POST);
+    parse_str(trim($cmd[count($cmd)-2],'\'"'),$POST);
     $_POST = array_merge($_POST,$POST);
     unset($GET,$POST);
 }

@@ -99,7 +99,7 @@ class Curl {
     function upload($url,$path,$cookie_id=false,$header=[]){
         if($this->UserID&&false===$cookie_id){$cookie_id=$this->UserID;}
         $data = array(
-            'pic'=>new \CURLFile($path)
+            'pic'=>new \CURLFile(realpath($path))
         );
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
