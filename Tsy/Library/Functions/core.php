@@ -327,7 +327,7 @@ function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
     static $fp=null;
     if(!$fp){
-        $fp = fopen(RUNTIME_PATH.'/'.date('Ymd').'log','a+');
+        $fp = fopen(RUNTIME_PATH.'/'.date('Ymd').'.log','a+');
     }
     if($msg){
         if(isset($_log[$Type])){
@@ -351,7 +351,8 @@ function L($msg = false,$Type=6,$trace=''){
         return $Type===0?$_log:$_log[$Type];
     }elseif(null===$msg&&$Type===null){
         $_log=[];
-        fwrite($fp,"\r\n");
+        $time=microtime(true)-$_SERVER['REQUEST_TIME_FLOAT'];
+        fwrite($fp,"请求耗时:{$time}s\r\n\r\n");
         fclose($fp);
     }
     return $msg;

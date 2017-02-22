@@ -43,9 +43,9 @@ class Tsy
     }
     function init(){
         date_default_timezone_set('Asia/Shanghai');
-        define('LOG_SQL','SQL');
-        define('LOG_MSG','MSG');
-        define('LOG_TIP','TIP');
+        defined('LOG_SQL') or define('LOG_SQL','SQL');
+        defined('LOG_MSG') or define('LOG_MSG','MSG');
+        defined('LOG_TIP') or define('LOG_TIP','TIP');
 //开始各种define检测
         defined('NEED_PHP_VERSION') or define('NEED_PHP_VERSION','5.5.16');
         defined('APP_DEBUG') or define('APP_DEBUG',false);
@@ -318,6 +318,7 @@ class Tsy
             }
             L($e,LOG_ERR);
         }
+        L(null,null);
     }
     function build(){
         foreach ([APP_PATH,CONF_PATH,RUNTIME_PATH,TEMP_PATH,] as $dir){
