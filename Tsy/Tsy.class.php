@@ -61,7 +61,7 @@ class Tsy
         define('IS_WIN',strstr(PHP_OS, 'WIN') ? 1 : 0 );
         define('TEMP_DIR',IS_WIN?$_SERVER['TEMP']:'/tmp');
         define('APP_PATH',isset($APP_PATH)?realpath($APP_PATH):realpath('.'));
-        define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:TEMP_DIR.DIRECTORY_SEPARATOR.APP_NAME.DIRECTORY_SEPARATOR.'Runtime');
+        defined('RUNTIME_PATH') or define('RUNTIME_PATH',isset($RUNTIME_PATH)?$RUNTIME_PATH:TEMP_DIR.DIRECTORY_SEPARATOR.APP_NAME.DIRECTORY_SEPARATOR.'Runtime');
         define('TEMP_PATH',RUNTIME_PATH.DIRECTORY_SEPARATOR.'Temp');
         defined('UPLOAD_PATH') or define('UPLOAD_PATH',dirname($_SERVER['SCRIPT_FILENAME']).DIRECTORY_SEPARATOR.'Upload');
 //定义配置文件后缀
@@ -102,6 +102,7 @@ class Tsy
         define('VENDOR_PATH',TSY_PATH.'/Vendor');
         defined('AUTH_ON') or define('AUTH_ON',false);
         defined('DEFAULT_USER_GROUP') or define('DEFAULT_USER_GROUP',1);
+        define('HOSTNAME',isset($_SERVER['HOSTNAME'])?$_SERVER['HOSTNAME']:$_SERVER['COMPUTERNAME']);
     }
     function start(){
 //        加载配置文件
@@ -110,7 +111,7 @@ class Tsy
         $this->loadFunctions();//加载框架function和项目function
         $this->loadConfig();
         $GLOBALS['Config']=C();
-        define('HOSTNAME',isset($_SERVER['HOSTNAME'])?$_SERVER['HOSTNAME']:$_SERVER['COMPUTERNAME']);
+
 //        分析配置，决定是http模式还是swoole模式
 ////        如果是http模式则实例化http类，如果是swoole模式则实例化swoole类
         if(file_exists(TSY_PATH.DIRECTORY_SEPARATOR.'Mode'.DIRECTORY_SEPARATOR.APP_MODE.'.class.php')){
