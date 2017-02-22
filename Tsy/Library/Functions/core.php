@@ -344,7 +344,7 @@ function L($msg = false,$Type=6,$trace=''){
         } elseif (APP_DEBUG && 'http' != APP_MODE_LOW) {
             echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
         }
-        fwrite($fp,date('Y-m-d H:i:s').$Type.':'.$msg."\r\n");
+        fwrite($fp,date('Y-m-d H:i:s').' '.$Type.':'.$msg."\r\n");
         return $msg;
 //        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg){
