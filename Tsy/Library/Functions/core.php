@@ -327,7 +327,7 @@ function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
     static $fp=null;
     if(!$fp){
-        $fp = fopen(RUNTIME_PATH.'/log','a+');
+        $fp = fopen(RUNTIME_PATH.'/'.date('Ymd').'log','a+');
     }
     if($msg){
         if(isset($_log[$Type])){
