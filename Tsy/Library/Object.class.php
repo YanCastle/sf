@@ -380,6 +380,7 @@ class Object
      */
     function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false,$Group=false,$Fields=false)
     {
+        $P=$P<1?1:$P;
         $Model = M($this->searchTable ? $this->searchTable : ($this->main_get_table?$this->main_get_table:$this->main));
 //        $DB_PREFIX = C('DB_PREFIX');
         $ObjectIDs = false;
