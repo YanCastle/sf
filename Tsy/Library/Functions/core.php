@@ -328,19 +328,28 @@ function L($msg = false,$Type=6,$trace=''){
     if($msg){
         $msg = date('Y-m-d H:i:s').'  '.$Type.':'.(is_string($msg)?$msg:json_encode($msg));
         if(isset($_log[$Type])){
-            $_log[$Type]=$msg;
+            $_log[$Type][]=$msg;
         }else{
-            $_log[$Type]=$msg;
+            $_log[$Type]=[];
+            $_log[$Type][]=$msg;
         }
         return $msg;
     }elseif(false===$msg){
-        return $Type===0?$_log:$_log[$Type];
+        return $Type===0?$_log:$_log[$Type][0];
     }elseif(null===$msg&&$Type===null){
-        $_log=[];
+        $str=[];
+        foreach ($_log as $Type=>$log){
+           foreach ($log as $l){
+               $str[] = $l;
+           }
+        }
         $time=microtime(true)-$_SERVER['REQUEST_TIME_FLOAT'];
+        $str[]="请求耗时:{$time} s\r\n\r\n";
+        $str = implode("\r\n",$str);
         $fp = fopen(RUNTIME_PATH.'/'.date('Ymd').'.log','a+');
-        fwrite($fp,implode("\r\n",$_log)."请求耗时:{$time} s\r\n\r\n");
+        fwrite($fp,$str);
         fclose($fp);
+        $_log=[];
     }
     return $msg;
 }
