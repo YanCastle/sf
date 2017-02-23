@@ -325,34 +325,21 @@ function E($Code){
 
 function L($msg = false,$Type=6,$trace=''){
     static $_log=[];
-    static $fp=null;
-    if(!$fp){
-        $fp = fopen(RUNTIME_PATH.'/'.date('Ymd').'.log','a+');
-    }
     if($msg){
+        $msg = date('Y-m-d H:i:s').'  '.$Type.':'.(is_string($msg)?$msg:json_encode($msg));
         if(isset($_log[$Type])){
             $_log[$Type]=$msg;
         }else{
             $_log[$Type]=$msg;
         }
-        //TODO 完善log函数
-        if(is_string($msg)&&(strpos($msg,'Unknow')||strpos($msg,'doesn\'t exist'))){
-//            echo 'stop';
-        }
-        if('swoole'==APP_MODE_LOW&&!ob_get_level()){
-            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
-        } elseif (APP_DEBUG && 'http' != APP_MODE_LOW) {
-            echo is_array($msg)?json_encode($msg,JSON_UNESCAPED_UNICODE):$msg,"\r\n";
-        }
-        fwrite($fp,date('Y-m-d H:i:s').' '.$Type.':'.$msg."\r\n");
         return $msg;
-//        echo is_string($msg)?$msg:json_encode($msg,JSON_UNESCAPED_UNICODE),"\r\n";
     }elseif(false===$msg){
         return $Type===0?$_log:$_log[$Type];
     }elseif(null===$msg&&$Type===null){
         $_log=[];
         $time=microtime(true)-$_SERVER['REQUEST_TIME_FLOAT'];
-        fwrite($fp,"请求耗时:{$time}s\r\n\r\n");
+        $fp = fopen(RUNTIME_PATH.'/'.date('Ymd').'.log','a+');
+        fwrite($fp,implode("\r\n",$_log)."请求耗时:{$time} s\r\n\r\n");
         fclose($fp);
     }
     return $msg;
