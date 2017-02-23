@@ -706,6 +706,7 @@ abstract class Driver {
                         if(is_string($val[1])) {
                              $val[1] =  explode(',',$val[1]);
                         }
+                        $val[1]=array_unique($val[1]);
                         $zone      =   implode(',',$this->parseValue($val[1]));
                         $whereStr .= $key.' '.$this->exp[$exp].' ('.$zone.')';
                     }
