@@ -337,7 +337,9 @@ function L($msg = false,$Type=6,$trace=''){
     }elseif(false===$msg){
         return $Type===0?$_log:$_log[$Type][0];
     }elseif(null===$msg&&$Type===null){
-        $str=[];
+        $str=[
+            date('Y-m-d H:i:s ',$_SERVER['REQUEST_TIME']).' 模式:'.APP_MODE,'GET:'.http_build_str($_GET),' POST:'.http_build_str($_POST)
+        ];
         foreach ($_log as $Type=>$log){
            foreach ($log as $l){
                $str[] = $l;
