@@ -1301,7 +1301,7 @@ class Object
      * @param $PropertyObjects
      */
     protected function _beforeObjectGetsForeach(&$Objects,&$ArrayProperties,&$OneProperties,&$ArrayObjectProperties,&$OneObjectProperties,&$LinkPropertyValues,&$PropertyObjects){}
-    function report($Name,$Params,$P,$N){
+    function report($Name,$Params,$P,$N,$R=false){
         $fn = 'report_'.ucfirst($Name);
         if(method_exists($this,$fn)){
             $ReflectMethod = new \ReflectionMethod($this,$fn);
@@ -1309,7 +1309,7 @@ class Object
             if($ReflectMethod->getNumberOfParameters()>0){
                 foreach ($ReflectMethod->getParameters() as $Param){
                     $ParamName=$Param->getName();
-                    if(in_array($ParamName,['P','N'])){
+                    if(in_array($ParamName,['P','N','R'])){
                         $args[]=$$ParamName;
                     }else if(isset($Params[$ParamName])){
                         $args[]=$Params[$ParamName];
@@ -1322,6 +1322,7 @@ class Object
             }
             if(is_array($rs = $ReflectMethod->invokeArgs($this,$args))){
                 if(!isset($rs['R'])){$rs['R']=[];}
+                if(!isset($rs['T'])){$rs['T']=0;}
                 $rs['P']=$P;$rs['N']=$N;
                 return $rs;
             }else{
