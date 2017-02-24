@@ -426,4 +426,8 @@ class Controller
         }
         return false;
     }
+
+    function report($Name,$Params=[],$P=1,$N=20){
+        return $this->Object->report($Name,$Params,$P,$N);
+    }
 }
