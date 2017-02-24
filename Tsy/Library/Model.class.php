@@ -262,7 +262,7 @@ class Model {
         }elseif(in_array(strtolower($method),array('count','sum','min','max','avg'),true)){
             // 统计查询的实现
             $field =  isset($args[0])?$args[0]:'*';
-            return $this->getField(strtoupper($method).'('.$field.') AS tp_'.$method);
+            return $this->getField(strtoupper($method).'('.$field.') AS t_'.$method);
         }elseif(strtolower(substr($method,0,5))=='getby') {
             // 根据某个字段获取记录
             $field   =   parse_name(substr($method,5));
@@ -797,6 +797,11 @@ class Model {
             }elseif(false !== strpos($fieldType,'datetime')){
                 if(is_numeric($data[$key]))
                     $data[$key]   =  date('Y-m-d H:i:s',$data[$key]);//转化时间戳为数据库的datetime值
+                else
+                    $data[$key] = str_replace('/','-' ,$data[$key] );
+            }elseif(false !== strpos($fieldType,'date')){
+                if(is_numeric($data[$key]))
+                    $data[$key]   =  date('Y-m-d',$data[$key]);//转化时间戳为数据库的datetime值
                 else
                     $data[$key] = str_replace('/','-' ,$data[$key] );
             }
@@ -1831,6 +1836,8 @@ class Model {
         }else{
             if(is_array($table)) {
                 $this->options['table'] =   $table;
+            }elseif(strpos($table,' ')) {
+                $this->options['table'] =   "({$table}) as s";
             }elseif(!empty($table)) {
                 //将__TABLE_NAME__替换成带前缀的表名
                 $table  = $this->parseColumnName($table);
