@@ -1322,8 +1322,8 @@ class Object
             }
             if(is_array($rs = $ReflectMethod->invokeArgs($this,$args))){
                 if(!isset($rs['R'])){$rs['R']=[];}
-                if(!isset($rs['T'])){$rs['T']=0;}
-                $rs['P']=$P;$rs['N']=$N;
+                if(!isset($rs['T'])){$rs['T']=0;}else{$rs['T']=intval($rs['T']);}
+                $rs['P']=intval($P);$rs['N']=intval($N);
                 $rs['L']=$rs['L']?$rs['L']:[];
                 return $rs;
             }else{
