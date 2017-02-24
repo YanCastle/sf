@@ -1324,6 +1324,7 @@ class Object
                 if(!isset($rs['R'])){$rs['R']=[];}
                 if(!isset($rs['T'])){$rs['T']=0;}
                 $rs['P']=$P;$rs['N']=$N;
+                $rs['L']=$rs['L']?$rs['L']:[];
                 return $rs;
             }else{
                 return $rs;
