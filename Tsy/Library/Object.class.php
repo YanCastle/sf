@@ -465,14 +465,14 @@ class Object
             $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
             return [
                 'L' => $ObjectIDs?array_values($this->gets($ObjectIDs,$Properties,$Sort)):[],
-                'P' => $P,
-                'N' => $N,
-                'T' => $Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count'],
+                'P' => intval($P),
+                'N' => intval($N),
+                'T' => intval($Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count']),
             ];
         }
         if (!is_array($ObjectIDs)) {
             return [
-                'L' => [], 'P' => $P, 'N' => $N, 'T' => 0
+                'L' => [], 'P' => intval($P), 'N' => intval($N), 'T' => 0
             ];
         }
         $T = count($ObjectIDs);
@@ -486,9 +486,9 @@ class Object
         }
         return [
             'L' => $Objects ? array_values($Objects) : [],
-            'P' => $P,
-            'N' => $N,
-            'T' => $T,
+            'P' => intval($P),
+            'N' => intval($N),
+            'T' => intval($T)
         ];
     }
 
