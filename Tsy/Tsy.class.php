@@ -322,9 +322,9 @@ class Tsy
     }
     function build(){
         foreach ([APP_PATH,CONF_PATH,RUNTIME_PATH,TEMP_PATH,] as $dir){
-            if(!is_dir($dir)&&is_string($dir)){
+            if(!is_dir($dir)&&is_string($dir)&&is_writable(dirname($dir))){
                 @mkdir($dir,0777,true);
-                file_put_contents($dir.DIRECTORY_SEPARATOR.'README.md', '#');
+                @file_put_contents($dir.DIRECTORY_SEPARATOR.'README.md', '#');
             }
         }
         $ConfigFiles=[
@@ -379,7 +379,7 @@ class Tsy
                 $dir_path = APP_PATH.DIRECTORY_SEPARATOR.$Module.DIRECTORY_SEPARATOR.$dir;
                 if(!is_dir($dir_path)){
                     @mkdir($dir_path,0777,true);
-                    file_put_contents($dir_path.DIRECTORY_SEPARATOR.'README.md', '#');
+                    @file_put_contents($dir_path.DIRECTORY_SEPARATOR.'README.md', '#');
                 }
             }
         }
