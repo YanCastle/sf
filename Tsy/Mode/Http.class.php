@@ -34,7 +34,7 @@ class Http implements Mode
     }
     function output($data){
         header('Content-Type:application/json; charset=utf-8');
-        return json_encode([
+        return str_replace(':null',':""',json_encode([
             'G'=>session('G'),
             'UN'=>session('UN'),
             'UID'=>session('UID'),
@@ -42,7 +42,7 @@ class Http implements Mode
             'd'=>is_string($data)?false:$data,
             'err'=>is_string($data)?$data:'',
             'tsy'=>session('[id]')
-        ],JSON_UNESCAPED_UNICODE);
+        ],JSON_UNESCAPED_UNICODE));
     }
     /**
      * 启动函数
