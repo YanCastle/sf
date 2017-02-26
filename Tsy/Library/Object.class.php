@@ -1313,8 +1313,8 @@ class Object
                         $args[]=$$ParamName;
                     }else if(isset($Params[$ParamName])){
                         $args[]=$Params[$ParamName];
-                    }else if($Default = ($Param->isDefaultValueAvailable()?$Param->getDefaultValue():false)){
-                        $args[]=$Default;
+                    }else if($Param->isDefaultValueAvailable()){
+                        $args[]=$Param->getDefaultValue();
                     }else{
                         return '缺少参数:'.$ParamName;
                     }
