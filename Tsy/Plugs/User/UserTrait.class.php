@@ -65,7 +65,12 @@ trait UserTrait
      * @return UserObject
      */
     function login($Account,$PWD){
-        $User = M($this->LoginView)->where([$this->_map['Account'] => $Account])->getField('UID,PWD', true);
+        $W=[$this->_map['Account'] => $Account];
+        foreach ($this->LoginAccountFields as $field){
+            $W[$field]=$Account;
+        }
+        $W['_logic']='OR';
+        $User = M($this->LoginView)->where($W)->getField('UID,PWD', true);
         if(false!==$User){
             foreach ($User as $UID=>$Hash){
                 if($this->password($PWD,$Hash)){
