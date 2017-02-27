@@ -1555,4 +1555,7 @@ class {$ObjectName}Controller extends Controller
             $Model->addAll($AuthRules);
         }
     }
+    function avalon2(){
+
+    }
 }
