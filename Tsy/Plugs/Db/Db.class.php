@@ -274,7 +274,7 @@ class Db
             ]));
         $PathInfo = pathinfo($path);
         is_dir($PathInfo['dirname']) or @mkdir($PathInfo['dirname'],0777,true);
-        if('sql'==$PathInfo['extension']){
+        if('sql'!=$PathInfo['extension']){
             return '文件错误';
         }
         if(filesize($path)>0){
