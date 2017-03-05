@@ -199,10 +199,6 @@ class Db
         return true;
     }
 
-    function backup($type, $file = false, array $tables = [])
-    {
-
-    }
 
     /**
      * 获取表的字段信息
@@ -264,5 +260,107 @@ class Db
             }
         }
         return $one ? $TableColumns[$tables[0]] : $TableColumns;
+    }
+
+    /**备份数据库
+     * @param string $path
+     * @return resource|string
+     */
+    function backUp($path=''){
+        $path=$path?$path:(implode(DIRECTORY_SEPARATOR,[
+                RUNTIME_PATH,
+                'DbBackUp',
+                date('Y-m-d_His').(defined('VERSION')?VERSION:C('VERSION')).'.sql',
+            ]));
+        $PathInfo = pathinfo($path);
+        is_dir($PathInfo['dirname']) or @mkdir($PathInfo['dirname'],0777,true);
+        if('sql'==$PathInfo['extension']){
+            return '文件错误';
+        }
+        if(filesize($path)>0){
+            rename($path,"{$PathInfo['dirname']}old_{$PathInfo['basename']}");
+        }
+        $fp = fopen($path,'w');
+        $config= [
+            'DB_NAME' => C("DB_NAME"),
+        ];
+        fwrite($fp,"SET FOREIGN_KEY_CHECKS=0;");
+        $tableName = (new Model())->query("select `TABLE_NAME` from information_schema.TABLES where `TABLE_SCHEMA` = '{$config["DB_NAME"]}' and `TABLE_TYPE` = 'BASE TABLE'");
+        $viewName = (new Model())->query("select `TABLE_NAME`,`VIEW_DEFINITION` from information_schema.VIEWS where `TABLE_SCHEMA` = '{$config["DB_NAME"]}'");
+        if($tableName){
+            foreach($tableName as $item){
+                $name = $item["TABLE_NAME"];
+                preg_match("{[A-Za-z]+_}",$name,$matches);
+                $table = str_replace($matches,"prefix_",$name);
+                $string = "drop table if exists ".$table;
+                fwrite($fp,$string.";");
+            }
+            foreach($tableName as $item){
+                $name = $item["TABLE_NAME"];
+                $tableDDL = (new Model())->query("show create table {$name}");
+                preg_match("{[A-Za-z]+_}",$tableDDL[0]['Create Table'],$matches);
+                $table = str_replace($matches,"prefix_",$tableDDL[0]['Create Table']);
+                fwrite($fp,$table.";");
+            }
+            foreach($tableName as $item){
+                $name = $item["TABLE_NAME"];
+                $location = stripos($name,"_");
+                $t = substr($name,$location);
+                $data = M("$t")->select();
+                if($data){
+                    $sql = (new Model())->table($name)->fetchSql(true)->addAll($data);
+                    fwrite($fp,$sql.";");
+                }
+            }
+        }
+        if($viewName){
+            foreach($viewName as $item){
+                $name = $item["TABLE_NAME"];
+                preg_match("{[A-Za-z]+_}",$name,$matches);
+                $view = str_replace($matches,"prefix_",$name);
+                $string = "drop view if exists ".$view;
+                fwrite($fp,$string.";");
+            }
+            foreach($viewName as $item){
+                $sql = $item["VIEW_DEFINITION"];
+                preg_match("/[a-zA-Z]+_/",$sql,$matches);
+//                preg_match("{['course'.]}",$sql,$match);
+//                $newSql = str_replace("`course`.","",$sql);
+                $viewSql = str_replace($matches,"prefix_",$sql);
+                $name = $item["TABLE_NAME"];
+                preg_match("{[A-Za-z]+_}",$name,$matches);
+                $view = str_replace($matches,"prefix_",$name);
+                $all = "create view ".$view." as ". $viewSql;
+                fwrite($fp,$all.";");
+            }
+        }
+        fclose($fp);
+        return $fp;
+    }
+
+    /**更新数据库
+     * @param $file
+     * @return bool|string
+     */
+    function upgrade($file){
+//        $path = 'ddl.sql';
+        if(file_exists($file)==false||is_file($file)==false||is_readable($file)==false){
+            return '文件不存在或者无法读取';
+        }
+        $content = file_get_contents($file);
+        $file_array = explode(';',$content);
+        startTrans();
+        foreach($file_array as $k=>$v){
+            if($v == ''){
+                continue;
+            }
+            $result = M()->execute($v);
+            if(false === $result){
+                rollback();
+                return '数据库升级失败';
+            }
+            commit();
+        }
+        return true;
     }
 }

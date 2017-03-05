@@ -389,3 +389,6 @@ cache('[+A]ke','ss');
 ```
 [2016-04-22]
 +若在启动脚本中定义APP_BUILD值为true，则会扫描项目目录下的模块并链接模块配置中的数据库生成Controller和Object以及Model文件和相关缓存文件
+
+[2017-03-05]
++在DB.class.php中添加备份数据库和更新数据库的方法。备份数据库接口地址：./SocketFramework/Tsy/Plugs/Db/Db/backUp 参数path 备份的文件路径和名称 更新数据库的接口地址：./SocketFramework/Tsy/Plugs/Db/Db/upgrade 参数file 更新的sql文件的路径及名称
