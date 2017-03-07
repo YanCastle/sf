@@ -191,7 +191,7 @@ function swoole_in_check($fd,$data){
         return '';
     }
     $_GET['_str']=$data;
-    if(false===$data||null===$data){return;}
+//    if(false===$data||null===$data){return;}
     \Tsy\Library\Aop::exec('swoole_in',\Tsy\Library\Aop::$AOP_BEFORE,$data );
     $Data=[
         'i'=>'Empty/_empty',
