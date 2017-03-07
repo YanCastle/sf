@@ -72,7 +72,7 @@ class Swoole implements Mode
                                 if(Tsy::$Out){
                                     $data = '';//TODO Fix Http Date
                                 }
-                                $response->end($data);
+//                                $response->end($data);
                             });
                             break;
                         case 'websocket':
