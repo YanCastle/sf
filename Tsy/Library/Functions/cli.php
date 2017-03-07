@@ -351,16 +351,18 @@ function swoole_send($fd,$str){
         if(method_exists('Tsy\\Mode\\'.APP_MODE,'send' )){
             call_user_func_array('Tsy\\Mode\\'.APP_MODE.'::send',[$fd,$str] );
         }else{
-            if($GLOBALS['_SWOOLE'] instanceof swoole_websocket_server){
-                $GLOBALS['_SWOOLE']->push($fd,$str);
-            }elseif($GLOBALS['_SWOOLE'] instanceof swoole_http_server){
-                $GLOBALS['_SWOOLE']->send($fd,$str);
-            }else{
-                $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
-            }
-            if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
-                $GLOBALS['_SWOOLE']->close($fd);
-                $GLOBALS['_close']=false;
+            if($GLOBALS['_SWOOLE']->exist($fd)){
+                if($GLOBALS['_SWOOLE'] instanceof swoole_websocket_server){
+                    $GLOBALS['_SWOOLE']->push($fd,$str);
+                }elseif($GLOBALS['_SWOOLE'] instanceof swoole_http_server){
+                    $GLOBALS['_SWOOLE']->send($fd,$str);
+                }else{
+                    $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
+                }
+                if(isset($GLOBALS['_close'])&&$GLOBALS['_close']===true){
+                    $GLOBALS['_SWOOLE']->close($fd);
+                    $GLOBALS['_close']=false;
+                }
             }
         }
     }
