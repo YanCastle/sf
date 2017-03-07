@@ -354,7 +354,7 @@ function swoole_send($fd,$str){
             if($GLOBALS['_SWOOLE'] instanceof swoole_websocket_server){
                 $GLOBALS['_SWOOLE']->push($fd,$str);
             }elseif($GLOBALS['_SWOOLE'] instanceof swoole_http_server){
-                $GLOBALS['_SWOOLE']->end($str);
+                $GLOBALS['_SWOOLE']->send($fd,$str);
             }else{
                 $rs = $GLOBALS['_SWOOLE']->send($fd,$str);
             }
