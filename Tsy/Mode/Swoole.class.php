@@ -62,16 +62,16 @@ class Swoole implements Mode
                             $Server=new \swoole_http_server($Listen[0],$Listen[1]);
                             $Server->on('request',function(\swoole_http_request $request,\swoole_http_response $response){
 //                                ob_start();
-//                                $_GET = $request->get;
-//                                $_POST=$request->post;
-//                                $_REQUEST=array_merge($_GET,$_POST);
-//                                $Data = swoole_in_check($response->fd,$_REQUEST);
-//                                $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
-//                                $data=swoole_out_check($response->fd,$return);
-////                                $data = ob_get_clean();
-//                                if(Tsy::$Out){
-//                                    $data = '';//TODO Fix Http Date
-//                                }
+                                $_GET = $request->get;
+                                $_POST=$request->post;
+                                $_REQUEST=array_merge($_GET,$_POST);
+                                $Data = swoole_in_check($response->fd,$_REQUEST);
+                                $return = controller($Data['i'],$Data['d'],isset($Data['m'])?$Data['m']:'');
+                                $data=swoole_out_check($response->fd,$return);
+//                                $data = ob_get_clean();
+                                if(Tsy::$Out){
+                                    $data = '';//TODO Fix Http Date
+                                }
 //                                $response->end($data);
                             });
                             break;
