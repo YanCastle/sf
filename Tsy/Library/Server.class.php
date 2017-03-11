@@ -91,6 +91,7 @@ class Server
             }
         }
         session('[id]',null);//删除session_id标识
+        L(null);
     }
      
     /**
