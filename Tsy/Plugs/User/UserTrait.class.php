@@ -170,7 +170,7 @@ trait UserTrait
     function sendVerify($UID='',$Account,$Type){
         if(isset($Account)){
             if(!preg_match('/^1[3456789][0-9]{9}$/',$Account)){
-                $UID = M('User')->field(['UID','Phone'])->where(['Account'=> $Account])->find();
+                $UID = M($this->LoginView)->field(['UID','Phone'])->where(['Account'=> $Account])->find();
                 if($UID){
                     session('UID',$UID['UID']);
                     session('VAccount',$Account);
@@ -209,7 +209,7 @@ trait UserTrait
 //        session('VAccount',$Account);
         if(session('VAccount')!=$Account)return '验证用户不匹配';
         if(!$this->checkVerifyCode($Code))return '验证码不正确';
-        $UID = M('User')->field('UID')->where(['Account'=>$Account,'Phone'=>$Account,'_logic'=>'OR'])->find();
+        $UID = M($this->LoginView)->field('UID')->where(['Account'=>$Account,'Phone'=>$Account,'_logic'=>'OR'])->find();
         if(false === $UID){
             return '用户不存在';
         }
