@@ -9,6 +9,7 @@
 namespace Tsy\Plugs\User;
 
 
+use Management\Model\UserModel;
 use Tsy\Library\Msg;
 
 trait UserTrait
@@ -159,22 +160,29 @@ trait UserTrait
         return false;
     }
 
-    /**
-     * 发送验证码
-     * @param int $UID 用户名
-     * @param int $Address 地址
-     * @param string $Type 发送方式，默认为邮件(Email)，暂时支持邮件方式
-     * @return bool true/false
-     */
-    function sendVerify($UID='', $Address, $Type = 'Email')
-    {
-//        session('UID',)
-        if($UID){
-            session('VUID',$UID);session('VAddress'.$Address,$Address);
-        }else{
 
+    /**发送验证码
+     * @param string $UID
+     * @param $Account
+     * @param $Type
+     * @return mixed
+     */
+    function sendVerify($UID='',$Account,$Type){
+        if(isset($Account)){
+            if(!preg_match('/^1[3456789][0-9]{9}$/',$Account)){
+                $UID = M('User')->field(['UID','Phone'])->where(['Account'=> $Account])->find();
+                if($UID){
+                    session('UID',$UID['UID']);
+                    session('VAccount',$Account);
+                    $Account = $UID['Phone'];
+                }else{
+                    return '手机号码不正确或者账号不存在';
+                }
+            }else{
+                session('VAccount',$Account);
+            }
         }
-        return Msg::send($Type,$Address,$this->createVerifyCode($UID));
+        return Msg::send($Type,$Account,$this->createVerifyCode($UID));
     }
 
     /**
@@ -192,18 +200,20 @@ trait UserTrait
         return $Code;
     }
 
-    /**
-     * 通过验证码登录
-     * @param $UID
+    /**通过验证码登录
      * @param $Account
      * @param $Code
      * @return mixed|string
      */
     function loginByCode($Account,$Code){
-//        if(session('VUID')!=$UID)return '验证用户不匹配';
-        if(session('VAddress')!=$Account)return '验证用户不匹配';
-        if(!$this->checkVerifyCode($Code,$UID))return '验证码不正确';
-        return $this->loginSuccess([$UID=>$Account]);
+//        session('VAccount',$Account);
+        if(session('VAccount')!=$Account)return '验证用户不匹配';
+        if(!$this->checkVerifyCode($Code))return '验证码不正确';
+        $UID = M('User')->field('UID')->where(['Account'=>$Account,'Phone'=>$Account,'_logic'=>'OR'])->find();
+        if(false === $UID){
+            return '用户不存在';
+        }
+        return $this->loginSuccess($UID);
     }
     /**
      * 验证验证码
@@ -211,7 +221,7 @@ trait UserTrait
      * @param int $UID
      * @return bool
      */
-    protected function checkVerifyCode($Code,$UID){
+    protected function checkVerifyCode($Code,$UID = ''){
         if(APP_DEBUG){
             return $Code==C('VERIFY_CODE');
         }
