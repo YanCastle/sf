@@ -14,8 +14,9 @@
  * @param bool $suffix
  * @return string
  */
-function msubstr($str, $start=0, $length, $charset="utf-8", $suffix=true)
+function msubstr($str, $start=0, $length=false, $charset="utf-8", $suffix=true)
 {
+    if(false===$length){$length=$start<0?abs($start):(mstrlen($start)-$start);}
     // 加载php_mbstring扩展时有效
     if (function_exists("mb_substr"))
         return mb_substr($str, $start, $length, $charset);
