@@ -56,4 +56,8 @@ class IndexController extends Controller
     function check(){
         return 'sds';
     }
+    function abc(){
+        $Document = new \Document('./Doc/abc.pdm');
+        $Document->generateControllers()->generateObjects()->generateModels();
+    }
 }
