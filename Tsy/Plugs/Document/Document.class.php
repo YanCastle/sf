@@ -1569,8 +1569,8 @@ class {$ObjectName}Controller extends Controller
             $path = implode('/',$p);
             if(!is_dir(dirname($path)))mkdir(dirname($path),0777,true);//创建目录
             $template=__DIR__.'/Avalon2/'.(in_array($menu['e'],['List','Add','Edit','Detail'])?$menu['e']:'page');
-            $HtmlContent = file_get_contents($template.'.html');
-            $JsContent = file_get_contents($template.'.js');
+            $HtmlContent = file_get_contents($template.'.html.tpl');
+            $JsContent = file_get_contents($template.'.js.tpl');
             file_put_contents("{$path}.js",str_replace([
                 '{$ZhName}','{$EnName}','{$Object}'
             ],[
