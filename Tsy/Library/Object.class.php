@@ -475,6 +475,7 @@ class Object
                 'L' => [], 'P' => intval($P), 'N' => intval($N), 'T' => 0
             ];
         }
+        $ObjectIDs=array_unique($ObjectIDs);
         $T = count($ObjectIDs);
         if($Sort){//之前没有任何排序
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->page($P,$N)->getField($this->pk,true);
