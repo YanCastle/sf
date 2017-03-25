@@ -664,7 +664,19 @@ class Object
             $Fields = [];
         }
         if($Sort){
-            $Model->order($Sort);
+            $SortFields=[];
+            if(is_string($Sort)){
+                $Sort = explode(',',$Sort);
+            }
+            if(is_array($Sort)){
+                foreach ($Sort as $sort){
+                    if(in_array(explode(' ',$sort)[0],$fields)){
+                        $SortFields[]=$sort;
+                    }
+                }
+            }
+            if($SortFields)
+            $Model->order(implode(',',$SortFields));
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
         $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => count($IDs)==1?end($IDs):['IN', $IDs]])->select();
