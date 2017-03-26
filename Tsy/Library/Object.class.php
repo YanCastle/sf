@@ -1314,7 +1314,17 @@ class Object
      * @param $PropertyObjects
      */
     protected function _beforeObjectGetsForeach(&$Objects,&$ArrayProperties,&$OneProperties,&$ArrayObjectProperties,&$OneObjectProperties,&$LinkPropertyValues,&$PropertyObjects){}
-    function report($Name,$Params,$P,$N,$R=false){
+
+    /**
+     * 报表接口
+     * @param $Name
+     * @param $Params
+     * @param $P
+     * @param $N
+     * @param bool $R
+     * @return int|mixed
+     */
+    function report($Name,$Params,$P=1,$N=10,$R=false){
         $fn = 'report_'.ucfirst($Name);
         if(method_exists($this,$fn)){
             $ReflectMethod = new \ReflectionMethod($this,$fn);
