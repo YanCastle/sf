@@ -44,3 +44,34 @@ function keep_time($time=false){
     if($time)$t=$time;
     return $t?$t:time();
 }
+
+/**
+ * 时间转化
+ * @param $str
+ * @param string $format
+ */
+function get_time($str,$format='Y-m-d H:i:s'){
+    $timestamp=0;
+    if(is_numeric($str)){
+        switch (strlen($str)){
+            case 8:
+                $Year = substr($str,0,4);
+                $Month = substr($str,4,2);
+                $Day = substr($str,6,2);
+                if($Month<12&&$Year>=1000&&$Year<5000&&date('d',strtotime("$Year-$Month-$Day")==$Day)){
+                    $timestamp=strtotime("$Year-$Month-$Day");
+                }else{
+                    $timestamp=$str;
+                }
+                break;
+            case 13:
+                $timestamp = substr($str,0,10);
+                break;
+        }
+    }elseif($timestamp=strtotime($str)){
+
+    }else{
+        return false;
+    }
+    return $format?date($format,$timestamp):$timestamp;
+}
