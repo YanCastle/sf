@@ -209,7 +209,7 @@ class Curl {
 
         curl_multi_close($mh); // close the curl multi handler
     }
-    static function download($filename,$showname='',$content='',$expire=180){
+    static function download($filename,$showname='',$content='',$expire=180,$unlink=false){
         if(is_file($filename)){
             $length = filesize($filename);
         }elseif($content){
@@ -244,6 +244,7 @@ class Curl {
         }else {
             echo($content);
         }
+        if($unlink&&!$content){unlink($filename);}
         return true;
     }
 
