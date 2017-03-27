@@ -209,6 +209,7 @@ class Excel {
             return false;
         }
         $pathinfo = pathinfo($file);
+        if(!is_dir($pathinfo['dirname']))mkdir($pathinfo['dirname'],0777,true);
         $path = realpath($pathinfo['dirname']);
         $file=$path.DIRECTORY_SEPARATOR.$pathinfo['basename'];
 //    $file = realpath($file);

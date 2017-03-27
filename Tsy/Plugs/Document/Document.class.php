@@ -1558,4 +1558,32 @@ class {$ObjectName}Controller extends Controller
     function avalon2(){
 
     }
+
+    /**
+     * @param $menus
+     * @param string $p
+     */
+    function avalon2menu($Root,$menus,$op=[]){
+        foreach ($menus as $menu){
+            $p=array_merge([$Root],$op,[$menu['e']]);
+            $path = implode('/',$p);
+            if(!is_dir(dirname($path)))mkdir(dirname($path),0777,true);//创建目录
+            $template=__DIR__.'/Avalon2/'.(in_array($menu['e'],['List','Add','Edit','Detail'])?$menu['e']:'page');
+            $HtmlContent = file_get_contents($template.'.html.tpl');
+            $JsContent = file_get_contents($template.'.js.tpl');
+            file_put_contents("{$path}.js",str_replace([
+                '{$ZhName}','{$EnName}','{$Object}'
+            ],[
+                $menu['n'],$menu['e'],$p[1]
+            ],$JsContent));
+            file_put_contents("{$path}.html",str_replace([
+                '{$ZhName}','{$EnName}','{$Object}'
+            ],[
+                $menu['n'],$menu['e'],$p[1]
+            ],$HtmlContent));
+            if(isset($menu['s'])&&$menu['s']){
+                $this->avalon2menu($Root,$menu['s'],[$menu['e']]);
+            }
+        }
+    }
 }

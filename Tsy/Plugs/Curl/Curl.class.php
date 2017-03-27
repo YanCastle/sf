@@ -7,6 +7,8 @@
  */
 namespace Tsy\Plugs\Curl;
 
+use Tsy\Tsy;
+
 class Curl {
     public $UserID=false;
     public $error;
@@ -207,7 +209,7 @@ class Curl {
 
         curl_multi_close($mh); // close the curl multi handler
     }
-    static function download($filename,$showname='',$content='',$expire=180){
+    static function download($filename,$showname='',$content='',$expire=180,$unlink=false){
         if(is_file($filename)){
             $length = filesize($filename);
         }elseif($content){
@@ -225,6 +227,7 @@ class Curl {
         }else{
             $type	=	"application/octet-stream";
         }
+        Tsy::$Out=false;
         //发送Http Header信息 开始下载
         header("Pragma: public");
         header("Cache-control: max-age=".$expire);
@@ -241,6 +244,7 @@ class Curl {
         }else {
             echo($content);
         }
+        if($unlink&&!$content){unlink($filename);}
         return true;
     }
 

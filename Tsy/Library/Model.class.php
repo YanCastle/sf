@@ -695,7 +695,8 @@ class Model {
     protected function _parseOptions($options=array()) {
         if(is_array($options))
             $options =  array_merge($this->options,$options);
-
+        if(!is_array($options))
+            $options=[];
         if(!isset($options['table'])){
             // 自动获取表名
             $options['table']   =   $this->getTableName();

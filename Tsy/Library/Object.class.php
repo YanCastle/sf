@@ -475,6 +475,7 @@ class Object
                 'L' => [], 'P' => intval($P), 'N' => intval($N), 'T' => 0
             ];
         }
+        $ObjectIDs=array_unique($ObjectIDs);
         $T = count($ObjectIDs);
         if($Sort){//之前没有任何排序
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->page($P,$N)->getField($this->pk,true);
@@ -663,7 +664,19 @@ class Object
             $Fields = [];
         }
         if($Sort){
-            $Model->order($Sort);
+            $SortFields=[];
+            if(is_string($Sort)){
+                $Sort = explode(',',$Sort);
+            }
+            if(is_array($Sort)){
+                foreach ($Sort as $sort){
+                    if(in_array(explode(' ',$sort)[0],$fields)){
+                        $SortFields[]=$sort;
+                    }
+                }
+            }
+            if($SortFields)
+            $Model->order(implode(',',$SortFields));
         }
 //        "SELECT A,B,C FROM A,B ON A.A=B.A WHERE"
         $Objects = $Model->group($this->_read_group)->having($this->_read_having)->where($this->_read_where)->where(["__{$UpperMainTable}__.".$this->pk => count($IDs)==1?end($IDs):['IN', $IDs]])->select();
@@ -1301,7 +1314,17 @@ class Object
      * @param $PropertyObjects
      */
     protected function _beforeObjectGetsForeach(&$Objects,&$ArrayProperties,&$OneProperties,&$ArrayObjectProperties,&$OneObjectProperties,&$LinkPropertyValues,&$PropertyObjects){}
-    function report($Name,$Params,$P,$N,$R=false){
+
+    /**
+     * 报表接口
+     * @param $Name
+     * @param $Params
+     * @param $P
+     * @param $N
+     * @param bool $R
+     * @return int|mixed
+     */
+    function report($Name,$Params,$P=1,$N=10,$R=false){
         $fn = 'report_'.ucfirst($Name);
         if(method_exists($this,$fn)){
             $ReflectMethod = new \ReflectionMethod($this,$fn);
