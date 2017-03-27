@@ -7,6 +7,8 @@
  */
 namespace Tsy\Plugs\Curl;
 
+use Tsy\Tsy;
+
 class Curl {
     public $UserID=false;
     public $error;
@@ -225,6 +227,7 @@ class Curl {
         }else{
             $type	=	"application/octet-stream";
         }
+        Tsy::$Out=false;
         //发送Http Header信息 开始下载
         header("Pragma: public");
         header("Cache-control: max-age=".$expire);
