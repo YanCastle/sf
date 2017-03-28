@@ -240,7 +240,8 @@ class Document
             }
             $PropertiesConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Property']);
             $LinksConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Link']);
-            $ExtendObject = ucfirst(strtolower($ObjectName))=='User'?'\Tsy\Plugs\User\UserObject':'Object';
+            $ExtendObject = in_array(ucfirst(strtolower($ObjectName)),['Useraccount'])?'\Tsy\Plugs\User\UserObject':'Object';
+            $Triat=in_array(ucfirst(strtolower($ObjectName)),['Useraccount'])?'use \Tsy\Plugs\User\UserTrait;':'';
             $FileContent="<?php
 namespace {$ModuleName}\\Object;
 
@@ -252,6 +253,7 @@ use Tsy\\Library\\Object;
  */
 class {$ObjectName}Object extends Object
 {
+    $Triat
     /**
 {$ColumnCommentsString}
      */
@@ -1198,7 +1200,7 @@ class {$ObjectName}Controller extends Controller
     /**
      *
      */
-    function generateObjectJS($Path='./obj'){
+    function generateObjectJS($Path='./Public/obj'){
         if(!is_dir($Path)){
             mkdir($Path,0777,true);
         }
