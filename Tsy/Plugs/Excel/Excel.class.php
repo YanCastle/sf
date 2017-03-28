@@ -204,7 +204,7 @@ class Excel {
         ]
     ]);
      */
-    function write($file,$data){
+    function write($file,$data,$properties=[]){
         if(!$data||!$file||!( file_exists($file)?unlink($file):true )){
             return false;
         }
@@ -217,13 +217,14 @@ class Excel {
         //创建excel操作对象
         $objPHPExcel = new \PHPExcel();
         //获得文件属性对象，给下文提供设置资源
-        $objPHPExcel->getProperties()->setCreator("绵阳市碳素云信息技术有限责任公司")
+        $Properties=$objPHPExcel->getProperties()->setCreator("绵阳市碳素云信息技术有限责任公司")
             ->setLastModifiedBy("绵阳市碳素云信息技术有限责任公司")
-//            ->setTitle("Input_Goods_message")
-//            ->setSubject("主题1")
-//            ->setDescription("随便一个描述了")
-//            ->setKeywords("关键字 用空格分开")
             ->setCategory("分类 ");
+        foreach ($properties as $k=>$v){
+            if(method_exists($Properties,"set{$k}")){
+                call_user_func([$Properties,"set{$k}"],$v);
+            }
+        }
         for($i=1;$i<count($data);$i++){
             $objPHPExcel->addSheet(new \PHPExcel_Worksheet($objPHPExcel,'sheet'.$i));
         }
