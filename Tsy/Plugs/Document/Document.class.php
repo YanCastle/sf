@@ -84,10 +84,10 @@ class Document
                     ];
                     switch ($ColumnName){
                         case 'CTime':
-                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='date("Y-m-d H:i:s")';
                             break;
                         case 'UTime':
-                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            $Config['FIELD_CONFIG_VALUE_FUNCTION']='date("Y-m-d H:i:s")';
                             break;
                         case 'CUID':
                             $Config['FIELD_CONFIG_VALUE_FUNCTION']='session("UID")';
@@ -114,7 +114,7 @@ class Document
                             $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
                             break;
                         case 'UTime':
-                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='time';
+                            $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='date("Y-m-d H:i:s")';
                             break;
                         case 'CUID':
                             $SaveConfig['FIELD_CONFIG_VALUE_FUNCTION']='unset';
@@ -240,6 +240,7 @@ class Document
             }
             $PropertiesConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Property']);
             $LinksConfigString = implode("\r\n        ",$PropertyAndLinkConfig['Link']);
+            $ExtendObject = ucfirst(strtolower($ObjectName))=='User'?'\Tsy\Plugs\User\UserObject':'Object';
             $FileContent="<?php
 namespace {$ModuleName}\\Object;
 
