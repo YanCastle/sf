@@ -1336,6 +1336,8 @@ class Object
                         $args[]=$$ParamName;
                     }else if(isset($Params[$ParamName])){
                         $args[]=$Params[$ParamName];
+                    }else if(isset($_POST[$ParamName])){
+                        $args[]=$_POST[$ParamName];
                     }else if($Param->isDefaultValueAvailable()){
                         $args[]=$Param->getDefaultValue();
                     }else{
