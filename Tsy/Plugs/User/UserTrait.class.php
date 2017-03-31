@@ -130,6 +130,9 @@ trait UserTrait
         if(!$this->checkVerifyCode($Code,$UID)){
             return '验证码错误';
         }
+        else{
+            return '用户信息不足，无法修改';
+        }
         if($this->findAccount($Account)['UID']==$UID){
             $data[$this->_map['PWD']]=$this->password($PWD);
             return $this->save($UID,$data);
