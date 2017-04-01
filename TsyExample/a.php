@@ -1,29 +1,44 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Castle
- * Date: 2016/4/12
- * Time: 23:31
- */
-function html($id){
-    $html = file_get_contents('http://m.23wx.com/html/2/2506/'.$id.'.html');
-    $html = iconv('GBK','UTF8',$html);
-    $next_id = preg_match('/\/html\/2\/2506\/\d+\.html">下章/',$html,$match);
-    $next_id = substr($match[0],13,strlen($match[0])-26);
-    $html = strip_tags($html);
-    $html = str_replace(['nbsp;',"\n\n",'&','  ','书架','上章','目录','下章'],'',$html);
-    $html = str_replace(['nbsp;',"\n\n",'&','  '],'',$html);
-    $html = str_replace(['nbsp;',"\n\n",'&','  '],'',$html);
-    $html = str_replace(['nbsp;',"\n\n","\n\t",'&','  '],'',$html);
-    return [$next_id,$html];
+class a{
+    private $a=1;//私有属性，只有a这个类可以变更和读取
+    protected $b=1;//受保护的属性，
+    public $c=1;
+    private static $d=1;
+    protected static $e=1;
+    public static  $f=1;
+    const H=1;
+    private function i(){}
+    protected function j(){}
+    public function k(){
+        echo 'k';
+    }
+    private static function l(){}
+    protected static function m(){}
+    public static function n(){}
 }
-//for($id=12309494;$id<123)
-$fp = fopen('txt','w+');
-$get = html(12309494);
-while(is_numeric($get[0])){
-    $get = html($get[0]);
-    fputs($fp,$get[1]);
-    fputs($fp,"\r\n");
+class b extends a{
+    function ba(){
+        echo get_class($this);
+        echo __CLASS__;
+        self::ca();
+        $this->ca();
+    }
 }
-fclose($fp);
-$c=1;
+class c extends b{
+    function ca(){
+        echo get_class($this);
+        echo __CLASS__;
+    }
+}
+//a::n();//静态调用
+//$a = new a();
+//$a->c=1;
+//$c = new c();
+//echo "\r\n";
+//$c->ba();
+//echo "\r\n";
+//$c->ca();
+echo c::$f,b::$f,a::$f;
+c::$f=2;
+echo c::$f,b::$f,a::$f;
+

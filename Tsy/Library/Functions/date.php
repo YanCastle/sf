@@ -64,6 +64,9 @@ function get_time($str,$format='Y-m-d H:i:s'){
                     $timestamp=$str;
                 }
                 break;
+            case 10:
+                $timestamp=$str;
+                break;
             case 13:
                 $timestamp = substr($str,0,10);
                 break;
