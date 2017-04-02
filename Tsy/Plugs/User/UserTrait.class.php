@@ -209,7 +209,7 @@ trait UserTrait
      * @return mixed|string
      */
     function loginByCode($Account,$Code){
-        session('VAccount',$Account);
+        //session('VAccount',$Account);
         if(session('VAccount')!=$Account)return '验证用户不匹配';
         if(!$this->checkVerifyCode($Code))return '验证码不正确';
         $UID = M($this->LoginView)->field('UID')->where(['Account'=>$Account,'Phone'=>$Account,'_logic'=>'OR'])->find();
