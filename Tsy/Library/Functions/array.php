@@ -330,3 +330,18 @@ function array_column_function($Array,$ColumnConfig){
     }
     return $Array;
 }
+
+/**
+ * 导出成Excel并下载
+ * @param $file
+ * @param $data
+ */
+function export_excel_and_down($file,$data){
+    if(strpos($file,RUNTIME_PATH)==false){
+        $file=RUNTIME_PATH.'/'.$file;
+    }
+    $Excel = new \Tsy\Plugs\Excel\Excel();
+    $Excel->write($file,$data);
+    \Tsy\Tsy::$Out=false;
+    \Tsy\Plugs\Curl\Curl::download($file);
+}

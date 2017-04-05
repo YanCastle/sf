@@ -130,6 +130,9 @@ trait UserTrait
         if(!$this->checkVerifyCode($Code,$UID)){
             return '验证码错误';
         }
+        else{
+            return '用户信息不足，无法修改';
+        }
         if($this->findAccount($Account)['UID']==$UID){
             $data[$this->_map['PWD']]=$this->password($PWD);
             return $this->save($UID,$data);
@@ -206,7 +209,7 @@ trait UserTrait
      * @return mixed|string
      */
     function loginByCode($Account,$Code){
-        session('VAccount',$Account);
+        //session('VAccount',$Account);
         if(session('VAccount')!=$Account)return '验证用户不匹配';
         if(!$this->checkVerifyCode($Code))return '验证码不正确';
         $UID = M($this->LoginView)->field('UID')->where(['Account'=>$Account,'Phone'=>$Account,'_logic'=>'OR'])->find();
