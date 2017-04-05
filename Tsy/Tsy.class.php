@@ -102,7 +102,7 @@ class Tsy
         define('VENDOR_PATH',TSY_PATH.'/Vendor');
         defined('AUTH_ON') or define('AUTH_ON',false);
         defined('DEFAULT_USER_GROUP') or define('DEFAULT_USER_GROUP',1);
-        define('HOSTNAME',isset($_SERVER['HOSTNAME'])?$_SERVER['HOSTNAME']:$_SERVER['COMPUTERNAME']);
+        define('HOSTNAME',isset($_SERVER['HOSTNAME'])?$_SERVER['HOSTNAME']:(isset($_SERVER['COMPUTERNAME'])?$_SERVER['COMPUTERNAME']:''));
     }
     function start(){
 //        加载配置文件
