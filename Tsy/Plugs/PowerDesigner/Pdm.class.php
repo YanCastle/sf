@@ -22,7 +22,14 @@ class Pdm
     function load($file){
         if(file_exists($file)) {
             $xml = file_get_contents($file);
-            $xml = str_replace(':', '', $xml);
+            $patterns = array();
+            $patterns[0] = '/(<|<\/)([a-z]{1}):(\w+)(>|\/>)/';
+            $patterns[1] = '/(<|<\/)([a-z]{1}):(\w+) (Id|Ref)="(\w+)"(>|\/>)/';
+            $replaces = array();
+            $replaces[0] = '$1${2}$3$4';
+            $replaces[1] = '$1${2}$3 $4="$5"$6';
+            $xml=preg_replace($patterns,$replaces,$xml);
+           // $xml = str_replace(':', '', $xml);
             $xml = str_replace('Column.Mandatory', 'ColumnMandatory', $xml);
             vendor('phpQuery.phpQuery');
             $this->pq=\phpQuery::newDocument($xml);
@@ -100,6 +107,10 @@ class Pdm
                     $html = pq($oColumn)->html();
                     continue;
                 }
+                //获取扩展属性
+                $ExtendProperties = explode(',',pq($oColumn)->find('aExtendedAttributesText')->html());
+                //判断是否是Unsigned属性
+                $Unsigned = in_array('Unsigned',$ExtendProperties);
                 $Code = pq($oColumn)->find('aCode')->html();
                 $Column=[
                     'Name'=>pq($oColumn)->find('aName')->html(),
@@ -108,6 +119,7 @@ class Pdm
                     'DataType'=>pq($oColumn)->find('aDataType')->html(),
                     'I'=>pq($oColumn)->find('aIdentity')->html()==1,
                     'M'=>!!pq($oColumn)->find('aColumnMandatory')->html(),
+                    'U'=>$Unsigned,
                     'ID'=>$ColumnID,
                     'P'=>$PK?$PK==$ColumnID:0,
                     'DomainID'=>pq($oColumn)->find('cDomain oPhysicalDomain')->attr('Ref'),
