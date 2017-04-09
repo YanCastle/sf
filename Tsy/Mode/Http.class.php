@@ -71,6 +71,15 @@ class Http implements Mode
             session('[id]',$session_id);
             setcookie('tsy',$session_id);
         }
+        if(isset($_SERVER['CONTENT_TYPE'])){
+            list($Type,$Charset)=explode('; ',$_SERVER['CONTENT_TYPE']);
+            switch ($Type){
+                case 'application/json':
+                    $_POST = array_merge($_POST,json_decode(file_get_contents('php://input'),true));
+                    $_REQUEST = array_merge($_GET,$_POST);
+                    break;
+            }
+        }
         $HttpDispatch = http_in_check();
         $this->out(controller($HttpDispatch['i'],$HttpDispatch['d']));
     }
