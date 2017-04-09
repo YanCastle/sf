@@ -359,8 +359,8 @@ class Db
                 rollback();
                 return '数据库升级失败';
             }
-            commit();
         }
+        commit();
         return true;
     }
 }
