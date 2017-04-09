@@ -54,7 +54,7 @@ class Http implements Mode
 //            $URL = $URI['host'];if($URI['port']!=80){$URL.=":{$URI['port']}";}
             header("Access-Control-Allow-Origin: " .$_SERVER['HTTP_ORIGIN']);
 //            header("Access-Control-Allow-Origin: *");
-            header("Access-Control-Allow-Credentials: true");
+            header("Access-Control-Allow-Credentials: include");
             header('Access-Control-Request-Method: GET,POST,PUT,DELETE');
             header('Access-Control-Allow-Headers: X-Requested-With,Cookie,Content-Type');
         }
