@@ -72,11 +72,20 @@ class Http implements Mode
             setcookie('tsy',$session_id);
         }
         if(isset($_SERVER['CONTENT_TYPE'])){
-            list($Type,$Charset)=explode('; ',$_SERVER['CONTENT_TYPE']);
+            list($Type,$Charset)=explode(';',$_SERVER['CONTENT_TYPE']);
+            $content = file_get_contents('php://input');
             switch ($Type){
                 case 'application/json':
-                    $_POST = array_merge($_POST,json_decode(file_get_contents('php://input'),true));
+                    $_POST = array_merge($_POST,json_decode($content,true));
                     $_REQUEST = array_merge($_GET,$_POST);
+                    break;
+                case 'text/plain':
+                    if(in_array(substr($content,0,1),['{','['])
+                        &&in_array(substr($content,-1,1),[']','}'])
+                    ){
+                        $_POST = array_merge($_POST,json_decode($content,true));
+                        $_REQUEST = array_merge($_GET,$_POST);
+                    }
                     break;
             }
         }
