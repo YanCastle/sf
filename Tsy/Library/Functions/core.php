@@ -201,6 +201,7 @@ function controller($i,$data,$mid='',$layer="Controller"){
             $ClassName=str_replace($C,'Empty',$ClassName);
             if(!class_exists($ClassName)){
                 L($C.'类不存在',LOG_ERR);
+                \Tsy\Tsy::$c=404;
                 return '类不存在';
             }
         }
