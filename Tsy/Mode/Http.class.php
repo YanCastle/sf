@@ -36,7 +36,7 @@ class Http implements Mode
         header('Content-Type:application/json; charset=utf-8');
         $G=session('G');
         return str_replace(':null',':""',json_encode([
-            'G'=>$G?$G:[],
+            'G'=>$G,
             'UN'=>session('UN'),
             'UID'=>session('UID'),
             'c'=>Tsy::$c,
