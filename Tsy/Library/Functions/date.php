@@ -228,3 +228,10 @@ function lastmonth_lastday($timestamp = 0, $is_return_timestamp=true){
     }
     return $cache[$id];
 }
+
+function db_date($time=false){
+    if(!$time){
+        $time=time();
+    }
+    return date('Y-m-d H:i:s',$time);
+}
