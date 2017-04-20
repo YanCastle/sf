@@ -22,6 +22,7 @@ class Pdm
     function load($file){
         if(file_exists($file)) {
             $xml = file_get_contents($file);
+            $xml = str_replace('Column.Mandatory','ColumnMandatory', $xml);
             $patterns = array();
             $patterns[0] = '/(<|<\/)([a-z]{1}):(\w+)(>|\/>)/';
             $patterns[1] = '/(<|<\/)([a-z]{1}):(\w+) (Id|Ref)="(\w+)"(>|\/>)/';
@@ -30,7 +31,6 @@ class Pdm
             $replaces[1] = '$1${2}$3 $4="$5"$6';
             $xml=preg_replace($patterns,$replaces,$xml);
            // $xml = str_replace(':', '', $xml);
-            $xml = str_replace('Column.Mandatory', 'ColumnMandatory', $xml);
             vendor('phpQuery.phpQuery');
             $this->pq=\phpQuery::newDocument($xml);
             $this->getDomains();
@@ -118,7 +118,7 @@ class Pdm
                     'Comment'=>pq($oColumn)->find('aComment')->html(),
                     'DataType'=>pq($oColumn)->find('aDataType')->html(),
                     'I'=>pq($oColumn)->find('aIdentity')->html()==1,
-                    'M'=>!!pq($oColumn)->find('aColumnMandatory')->html(),
+                    'M'=>pq($oColumn)->find('aColumnMandatory')->html(),
                     'U'=>$Unsigned,
                     'ID'=>$ColumnID,
                     'P'=>$PK?$PK==$ColumnID:0,
