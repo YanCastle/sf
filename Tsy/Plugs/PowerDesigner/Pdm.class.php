@@ -1061,9 +1061,10 @@ class Pdm
 
     /**根据数据库修改pdm设计稿文件中反日内容
      * @param $ChangeArray保存修改内容的数组通过调用checkSqlPdm方法获得
+     * @param $outFile输出文件路径及文件名
      * @return bool
      */
-    function repairSqlPdm($ChangeArray){
+    function repairSqlPdm($ChangeArray,$outFile){
         $max = $ChangeArray['maxID'];
         if(!isset($ChangeArray)){
             return false;
@@ -1527,7 +1528,7 @@ DESTINATION 0 新宋体,8,N</aFontList>
         $html=preg_replace($patterns,$replaces,$html);
         $html = str_replace('ColumnMandatory', 'Column.Mandatory', $html);
         $xml = str_replace('KeyColumns', 'Key.Columns', $html);
-        file_put_contents('1.pdm',$xml);
+        file_put_contents($outFile,$xml);
         return true;
     }
 
