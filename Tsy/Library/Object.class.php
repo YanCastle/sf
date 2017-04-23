@@ -446,21 +446,21 @@ class Object
                 }
             }
         }
-        if($WObjectIDArray){
-            if(1==count($WObjectIDArray)){
-                $ObjectIDs=$WObjectIDArray[0];
-            }else{
-                $ObjectIDs=array_unique(call_user_func_array((isset($W['_logic'])&&strtolower($W['_logic'])=='or')?'array_merge':'array_intersect',$WObjectIDArray));
-            }
-        }
+//        if($WObjectIDArray){
+//            if(1==count($WObjectIDArray)){
+//                $ObjectIDs=$WObjectIDArray[0];
+//            }else{
+        $ObjectIDs=array_unique(call_user_func_array((isset($W['_logic'])&&strtolower($W['_logic'])=='or')?'array_merge':'array_intersect',$WObjectIDArray));
+//            }
+//        }
         //取交集
-        if($ObjectIDs){
-            if(strlen($Keyword)){
-                $ObjectIDs = array_intersect($ObjectIDs,$KeywordObjectIDs);
-            }
-        }else{
-            $ObjectIDs=$KeywordObjectIDs;
-        }
+//        if($ObjectIDs){
+//            if(strlen($Keyword)){
+//                $ObjectIDs = array_intersect($ObjectIDs,$KeywordObjectIDs);
+//            }
+//        }else{
+//            $ObjectIDs=$KeywordObjectIDs;
+//        }
         if (strlen($Keyword) === 0 && count($W) === 0) {
             $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
             return [
