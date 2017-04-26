@@ -80,10 +80,10 @@ class File
                     'FileMd5'=>$info['md5'],
                     'UploadTime'=>time(),
                     'UploaderUID'=>session('UID'),
-                    'DriverType'=>$Upload->driver
-//                    'URL'=>''
+                    'DriverType'=>$Upload->driver,
+//                    'URL'=>implode('',[C('FILE_UPLOAD_TYPE_URL'),$info['savepath'],$info['savename']])
                 ];
-                $data['URL']=str_replace(array_keys($data),array_values($data),C('UPLOAD_URL'));
+                $data['URL']=str_replace(array_keys($data),array_values($data),C('FILE_UPLOAD_TYPE_URL'));
                 $UploadID = $Model->add($data);
                 if($UploadID){
                     $data['UploadID']=$UploadID;
