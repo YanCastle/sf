@@ -5,6 +5,7 @@
  * Date: 2016/4/11
  * Time: 22:20
  */
+ignore_user_abort(true);
 defined('APP_MODE') or define('APP_MODE','Http' );
 if(defined('CURL')&&defined('APP_DEBUG')&&APP_DEBUG&&CURL){
     $cmd = explode(' ',str_replace("\"",'',CURL));
