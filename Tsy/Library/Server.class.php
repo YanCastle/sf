@@ -50,6 +50,7 @@ class Server
         }
 //        标记变量，是否是第一次接受请求
         fd($fd);
+        Tsy::$fd=$fd;
         $info = swoole_connect_info($fd);
         $_GET['_Port']=$info['server_port'];
 //        接受数据次数统计
