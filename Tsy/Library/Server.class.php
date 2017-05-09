@@ -165,7 +165,8 @@ class Server
             session('[id]',$data->sid);
             if(is_callable($data->cmd)){
                 try{
-                    call_user_func($data->cmd,$data->data);
+                    session('[id]',$data->sid);
+                    controller($data->cmd,$data->data);
                 }catch (\Exception $e){
                     L($e,LOG_ERR);
                 }
