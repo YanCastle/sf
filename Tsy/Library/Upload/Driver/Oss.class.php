@@ -73,7 +73,7 @@ class Oss{
      */
     public function save(&$file,$replace=true) {
         $key = $file['savepath'] . $file['savename'];
-        $content = fopen( $file['tmp_name'],'r');
+        $content = file_get_contents( $file['tmp_name']);
         $size = $file['size'];
         $client = $this->client();
         return $client&&$client->putObject($this->config['Bucket'],$key,$content);
