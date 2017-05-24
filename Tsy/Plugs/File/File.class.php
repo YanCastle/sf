@@ -78,7 +78,7 @@ class File
                     'SaveName'=>$info['savename'],
                     'SavePath'=>$info['savepath'],
                     'FileMd5'=>$info['md5'],
-                    'UploadTime'=>time(),
+                    'UploadTime'=>date('Y-m-d H:i:s'),
                     'UploaderUID'=>session('UID'),
                     'DriverType'=>$Upload->driver,
 //                    'URL'=>implode('',[C('FILE_UPLOAD_TYPE_URL'),$info['savepath'],$info['savename']])

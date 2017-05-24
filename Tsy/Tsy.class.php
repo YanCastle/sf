@@ -42,6 +42,7 @@ class Tsy
 
     }
     function init(){
+        defined('IGNORE_UPLOAD_FILE_CHECK') or define('IGNORE_UPLOAD_FILE_CHECK',true);
         date_default_timezone_set('Asia/Shanghai');
         defined('LOG_SQL') or define('LOG_SQL','SQL');
         defined('LOG_MSG') or define('LOG_MSG','MSG');

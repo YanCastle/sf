@@ -156,7 +156,7 @@ class Upload {
             $file['ext']    =   pathinfo($file['name'], PATHINFO_EXTENSION);
 
             /* 文件上传检测 */
-            if (!$this->check($file)){
+            if (IGNORE_UPLOAD_FILE_CHECK&&false===$this->check($file)){
                 continue;
             }
 
