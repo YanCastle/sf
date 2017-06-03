@@ -1185,18 +1185,18 @@ class Object
      */
     protected function _execFieldFunctionConfig(&$Data,$Key,$Rule){
         $KeyFrom = $Key;
-//        if(strpos($Rule,':')){
-//            $Rules = explode(':',$Rule );
-//            parse_str($Rules[1],$W);
-//            $Rule=$Rules[0];
-//            foreach ($W as $t=>$w){
-//                switch ($t){
-//                    case 'K':
-//                        $KeyFrom=$w;
-//                        break;
-//                }
-//            }
-//        }
+        if(strpos($Rule,':')){
+            $Rules = explode(':',$Rule );
+            parse_str($Rules[1],$W);
+            $Rule=$Rules[0];
+            foreach ($W as $t=>$w){
+                switch ($t){
+                    case 'K':
+                        $KeyFrom=$w;
+                        break;
+                }
+            }
+        }
         if(is_array($Rule)){
             if(is_callable($Rule[0])&&is_array($Rule[1])){
                 $Data[$Key]=call_user_func_array($Rule[0],$Rule[1]);
