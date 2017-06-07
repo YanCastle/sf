@@ -46,6 +46,7 @@ class Swoole implements Mode
             $Processes=[];
             $ProcessesConf=[];
             foreach ($SwooleConfig['LISTEN'] as $Listen){
+                port_group($Listen[0],null);
                 if($Server){
 //                    $port = call_user_func_array([$Server,'addListener'],$Listen);
                     $port = $Server->listen($Listen[0],$Listen[1],$Listen[2]);
@@ -65,7 +66,7 @@ class Swoole implements Mode
             }
 //            开始创建共享table
             foreach ($SwooleConfig['TABLE'] as $table){
-                
+
             }
             swoole_get_callback(C('SWOOLE.CALLBACK'));
             if(isset($Server)&&$Server){
