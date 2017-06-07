@@ -59,6 +59,7 @@ class Swoole implements Mode
                     }
                 }else{
                     $Server=new \swoole_server($Listen[0],$Listen[1]);
+                    $Server->set($SwooleConfig['CONF']);
                 }
             }
             if(null===$Server){
