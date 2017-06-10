@@ -373,7 +373,7 @@ class Tsy
             }
         }
         each_dir(APP_PATH,function($path){
-            if(is_dir($path)&&strpos($path,DIRECTORY_SEPARATOR.'.')===false&&!file_exists($path).DIRECTORY_SEPARATOR.'README.md'){
+            if(is_dir($path)&&strpos($path,DIRECTORY_SEPARATOR.'.')===false&&!file_exists($path).DIRECTORY_SEPARATOR.'README.md'&&is_writable($path)){
                 file_put_contents($path.DIRECTORY_SEPARATOR.'README.md','#');
             }
         });
