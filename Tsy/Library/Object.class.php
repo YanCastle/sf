@@ -616,7 +616,8 @@ class Object
                         break;
                     case self::PROPERTY_FIELD:
                         //SQL字段
-                        $PropertyFields[]=$Config;
+                        if($Config[self::RELATION_TABLE_FIELDS])
+                            $PropertyFields[]=$Config[self::RELATION_TABLE_FIELDS];
                         break;
                     default:
                         L('错误的Property配置');
