@@ -15,6 +15,7 @@ class Object
     const PROPERTY_ONE = "00"; //一对一属性配置，
     const PROPERTY_ONE_PROPERTY = "04"; //一对一额外属性配置，
     const PROPERTY_ARRAY = "01"; //一对多属性配置
+    const PROPERTY_FIELD = "04"; //SQL字段
     const PROPERTY_ONE_OBJECT = "02"; //一对一属性配置
     const PROPERTY_ARRAY_OBJECT = "03"; //一对多属性配置
 
@@ -555,7 +556,7 @@ class Object
         $PropertyObjects = [];
         $UpperMainTable = strtoupper(parse_name($this->main_get_table?$this->main_get_table:$this->main));
         $Model = M($this->main_get_table?$this->main_get_table:$this->main);
-        $Fields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
+        $Fields=$PropertyFields=$OneObjectProperties=$ArrayProperties=$OneProperties=$ArrayObjectProperties=$OneObjectPropertyValues=[];
 
         foreach ($this->property as $PropertyName => $Config) {
 //            如果设定了获取的属性限定范围且该属性没有在该范围内则跳过
@@ -613,6 +614,10 @@ class Object
                         //多个对象化映射
                         $ArrayObjectProperties[$PropertyName]=$Config;
                         break;
+                    case self::PROPERTY_FIELD:
+                        //SQL字段
+                        $PropertyFields[]=$Config;
+                        break;
                     default:
                         L('错误的Property配置');
                         break;
@@ -647,6 +652,7 @@ class Object
             }
             $fields[]=$field;
         }
+
         if($this->_read_filter){
             if(end($this->_read_filter)===true){
                 $Fields=$this->_read_filter;
@@ -658,6 +664,9 @@ class Object
                         $Fields[$ColumnName]=$Config;
                 }
             }
+        }
+        if($PropertyFields){
+            $Fields=array_merge($Fields,$PropertyFields);
         }
         if ($Fields) {
             $Model->field($Fields,false,true);
