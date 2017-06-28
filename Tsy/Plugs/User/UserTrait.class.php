@@ -185,7 +185,7 @@ trait UserTrait
                 session('VAccount',$Account);
             }
         }
-        return Msg::send($Type,$Account,$this->createVerifyCode($UID));
+        return Msg::send($Type,$Account,str_replace('{Code}',$this->createVerifyCode($UID),C('USER.VERIFY.CONTENT')));
     }
 
     /**
@@ -196,8 +196,8 @@ trait UserTrait
     protected function createVerifyCode($UID,$Expire=1800){
         // 添加过期时间控制
         $Code = '';
-        for($i=0;$i<rand(5,10);$i++){
-            $Code.=chr(rand(65,90));
+        for($i=0;$i<6;$i++){
+            $Code.=rand(0,9);
         }
         cache('VerifyCode'.$Code,$Code,$Expire);
         return $Code;
