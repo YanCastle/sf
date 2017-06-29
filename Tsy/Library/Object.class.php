@@ -1340,6 +1340,11 @@ class Object
      * @return int|mixed
      */
     function report($Name,$Params,$P=1,$N=10,$R=false){
+        $Name=I('Name');
+        $Params=I('Params');
+        $P=I('P');
+        $N=I('N');
+        $R=I('R');
         $fn = 'report_'.ucfirst($Name);
         if(method_exists($this,$fn)){
             $ReflectMethod = new \ReflectionMethod($this,$fn);
