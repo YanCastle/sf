@@ -156,7 +156,7 @@ class Upload {
             $file['ext']    =   pathinfo($file['name'], PATHINFO_EXTENSION);
 
             /* 文件上传检测 */
-            if (IGNORE_UPLOAD_FILE_CHECK&&false===$this->check($file)){
+            if (false===$this->check($file)){
                 continue;
             }
 
@@ -278,7 +278,7 @@ class Upload {
         }
 
         /* 检查是否合法上传 */
-        if (!is_uploaded_file($file['tmp_name'])) {
+        if (!IGNORE_UPLOAD_FILE_CHECK&&!is_uploaded_file($file['tmp_name'])) {
             $this->error = '非法上传文件！';
             return false;
         }
