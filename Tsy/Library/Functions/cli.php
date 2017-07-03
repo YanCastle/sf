@@ -123,13 +123,12 @@ function push($name,$value,$online=true){
  * @param $Port
  * @param $value
  */
-function broadcast($Port,$value,$shipFd=false){
+function broadcast($Port,$value){
     $Group = port_group($Port);
     $Type = swoole_get_port_property($Port,'TYPE');
     $Class = swoole_get_mode_class($Type);
     foreach ($Group as $fd){
-        if($fd!=$shipFd)
-            swoole_send($fd,$Class->code($value));
+        swoole_send($fd,$Class->code($value));
     }
 }
 
