@@ -1345,6 +1345,9 @@ class Object
 //        $P=I('P');
 //        $N=I('N');
 //        $R=I('R');
+        if(!$Name){
+            $Name=$_GET['Name'];
+        }
         $fn = 'report_'.ucfirst($Name);
         if(method_exists($this,$fn)){
             $ReflectMethod = new \ReflectionMethod($this,$fn);
