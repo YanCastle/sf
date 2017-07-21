@@ -427,7 +427,11 @@ class Controller
         return false;
     }
 
-    function report($Name,$Params=[],$P=1,$N=20){
+    function report(){
+        $Name=$_REQUEST['Name'];
+        $Params=$_REQUEST['Params'];
+        $P=$_REQUEST['P']??1;
+        $N=$_REQUEST['N']??20;
         return $this->Object->report($Name,$Params,$P,$N);
     }
 }
