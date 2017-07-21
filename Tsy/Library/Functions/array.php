@@ -337,7 +337,7 @@ function array_column_function($Array,$ColumnConfig){
  * @param $data
  */
 function export_excel_and_down($file,$data){
-    if(strpos($file,RUNTIME_PATH)!=0){
+    if(strpos($file,RUNTIME_PATH)===false){
         $file=RUNTIME_PATH.'/'.$file;
     }
     $Excel = new \Tsy\Plugs\Excel\Excel();
