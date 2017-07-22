@@ -394,7 +394,7 @@ class Object
      * @param array $W
      * @param string $Sort
      */
-    function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false,$Group=false,$Fields=false)
+    function search($Keyword = '', $W = [], $Sort = '', $P = 1, $N = 20,$Properties=false,$Group=false,$Fields=false,$R=false)
     {
         $P=$P<1?1:$P;
         $Model = M($this->searchTable ? $this->searchTable : ($this->main_get_table?$this->main_get_table:$this->main));
@@ -510,7 +510,7 @@ class Object
             'P' => intval($P),
             'N' => intval($N),
             'T' => intval($T),
-            'R' => $this->search_report($this->ObjectIDs,$Model)
+            'R' => $R?$this->search_report($this->ObjectIDs,$Model):[]
         ];
     }
 
