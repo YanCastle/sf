@@ -505,15 +505,17 @@ class Object
             $PageIDs = is_array($ObjectIDs) ? array_chunk($ObjectIDs, $N) : [];
             $Objects = isset($PageIDs[$P - 1]) ? $this->gets($PageIDs[$P - 1], $Properties,$Sort) : [];
         }
-        return [
+        $return = [
             'L' => $Objects ? array_values($Objects) : [],
             'P' => intval($P),
             'N' => intval($N),
             'T' => intval($T),
             'R' => $R?$this->search_report($this->ObjectIDs,$Model):[]
         ];
+        $this->_after_search($ObjectIDs,$return);
+        return $return;
     }
-
+    protected function _after_search($ObjectIDs,&$return){}
     /**
      * 搜索报表的输出逻辑
      * @param array $OrderIDs
