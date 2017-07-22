@@ -293,12 +293,12 @@ class Controller
      * @param bool $Properties 获取属性列表
      * @return array
      */
-    function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[],$Properties=false){
+    function search($Keyword='',$W=[],$P=1,$N=20,$Sort=[],$Properties=false,$Group=false,$Fields=false,$R=false){
         if($this->Object instanceof Object){
 //            $OBVN = $this->ObjectVarName;
 //            $obj=$this->$OBVN;
 //            if((is_string($Keyword)&&strlen($Keyword)>0)||(is_array($W)&&count($W)>0))
-                return $this->Object->search($Keyword,$W,$Sort,$P,$N,$Properties);
+                return $this->Object->search($Keyword,$W,$Sort,$P,$N,$Properties,$Group,$Fields,$R);
 //            elseif($Keyword===''&&$W===[]){
 //                return
 //            }

@@ -534,7 +534,11 @@ class Object
                         switch ($c){
                             case self::SEARCH_REPORT_CONF_FIELD:
                                 //添加到字段中
-                                $Fields[]=$v;
+                                if(is_string($v)){
+                                    $Fields[$v]=$Field;
+                                }elseif(is_array($v)){
+                                    $Fields=array_merge($Fields,$v);
+                                }
                                 break;
                             case self::SEARCH_REPORT_CONF_FUNC:
                                 //TODO 实现回调函数
