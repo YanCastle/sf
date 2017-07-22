@@ -12,6 +12,8 @@ namespace Tsy\Library;
 
 class Object
 {
+    const SEARCH_OBJECT_ID_ALL='ALL';
+
     const PROPERTY_ONE = "00"; //一对一属性配置，
     const PROPERTY_ONE_PROPERTY = "04"; //一对一额外属性配置，
     const PROPERTY_ARRAY = "01"; //一对多属性配置
@@ -43,6 +45,11 @@ class Object
     const FIELD_CONFIG_CALLBACK_REPLACE_STR='###';
 
     const READER_FILTER_FIELD='F';
+
+    const SEARCH_REPORT_CONF_FIELD='SRCF';//搜索报表输出字段定义
+    const SEARCH_REPORT_CONF_SQL='SRCS';//直接用SQL形式获取数据
+    const SEARCH_REPORT_CONF_FUNC='SRCFUNC';//调用回调函数来获取数据
+
 
     protected $main = '';//主表名称，默认为类名部分
     protected $main_get_table='';//用于特殊指定的主表搜索表，通常是一个视图
@@ -88,6 +95,14 @@ class Object
     public $allow_replaceW=false;
     public $allow_saveW=true;
     public $save_add_if_not_exist=false;
+    /**
+     * 搜索时输出报表的配置
+     * @var array
+     */
+    protected $search_report_conf=[
+
+    ];
+    protected $ObjectIDs=[];//本次搜索的搜索结果的主键值列表
     function __construct($name='',$config=[])
     {
         //检测是否存在属性映射，如果存在则直接读取属性映射，没有则从数据库加载属性映射
@@ -463,20 +478,24 @@ class Object
             $ObjectIDs=$KeywordObjectIDs;
         }
         if (strlen($Keyword) === 0 && count($W) === 0) {
-            $ObjectIDs = $Model->page($P, $N)->order($Sort)->getField($this->pk, true);
-            return [
-                'L' => $ObjectIDs?array_values($this->gets($ObjectIDs,$Properties,$Sort)):[],
-                'P' => intval($P),
-                'N' => intval($N),
-                'T' => intval($Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count']),
-            ];
+            $this->ObjectIDs=self::SEARCH_OBJECT_ID_ALL;
+            $ObjectIDs = $Model->order($Sort)->getField($this->pk, true);
+//            return [
+//                'L' => $ObjectIDs?array_values($this->gets($ObjectIDs,$Properties,$Sort)):[],
+//                'P' => intval($P),
+//                'N' => intval($N),
+//                'T' => intval($Model->field('COUNT(' . $this->pk . ') AS Count')->find()['Count']),
+//                'R'=>[]
+//            ];
         }
         if (!is_array($ObjectIDs)) {
-            return [
-                'L' => [], 'P' => intval($P), 'N' => intval($N), 'T' => 0
-            ];
+            $ObjectIDs=[];
+//            return [
+//                'L' => [], 'P' => intval($P), 'N' => intval($N), 'T' => 0
+//            ];
         }
         $ObjectIDs=array_unique($ObjectIDs);
+        $this->ObjectIDs=$ObjectIDs;
         $T = count($ObjectIDs);
         if($Sort){//之前没有任何排序
             $ObjectIDs = $Model->where([$this->pk=>['IN',$ObjectIDs]])->order($Sort)->page($P,$N)->getField($this->pk,true);
@@ -490,10 +509,44 @@ class Object
             'L' => $Objects ? array_values($Objects) : [],
             'P' => intval($P),
             'N' => intval($N),
-            'T' => intval($T)
+            'T' => intval($T),
+            'R' => $this->search_report($this->ObjectIDs,$Model)
         ];
     }
 
+    /**
+     * 搜索报表的输出逻辑
+     * @param array $OrderIDs
+     * @param Model $Model
+     * @return array
+     */
+    protected function search_report($OrderIDs,$Model){
+        $R=[];
+        $Fields=[];
+        $Default=[];
+        foreach ($this->search_report_conf as $Field=>$Conf){
+            $Default[$Field]='';
+            if(is_array($Conf)&&$Conf){
+                foreach ($Conf as $c=>$v){
+                    if($v)
+                        switch ($c){
+                            case self::SEARCH_REPORT_CONF_FIELD:
+                                //添加到字段中
+                                $Fields[]=$v;
+                                break;
+                            case self::SEARCH_REPORT_CONF_FUNC:
+                                //TODO 实现回调函数
+                                break;
+                            case self::SEARCH_REPORT_CONF_SQL:
+                                //TODO 实现自定义SQL的搜索
+                                break;
+                        }
+                }
+            }
+        }
+        $R=$Model->field($Fields)->where([$this->pk=>['IN',$OrderIDs]])->limit(1)->select();
+        return $R?$R[0]:$Default;
+    }
     /**
      * 删除方法
      * @param $IDs
