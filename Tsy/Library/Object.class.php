@@ -928,7 +928,7 @@ class Object
      * @param bool|array $Properties 对象映射属性列表
      * @return array|bool|mixed
      */
-    function save($ID=false,$Params,$Properties=false)
+    function save($ID=false,$Params,$Properties=false,$OnlyPK=false)
     {
         if(!$this->allow_save)return false;
         $Where=[];
@@ -975,7 +975,7 @@ class Object
                 }
             }
             commit();
-            return $this->get($ID);
+            return $OnlyPK?$ID:$this->get($ID);
         }else{
             return false;
         }
@@ -1228,6 +1228,10 @@ class Object
                     }
                 }
             }
+        }
+        $Keys=array_keys($Data);
+        foreach (array_diff($Keys,array_intersect($Fields,$Keys)) as $f){
+            unset($Data[$f]);
         }
         if('add'==$Method&&array_diff($Fields,array_keys($Data))){
             $NotExistFields=[];
