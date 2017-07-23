@@ -46,6 +46,7 @@ trait UserTrait
             $this->_map['PWD']=>$this->password($PWD)
         ]);
         $data['data']=$data;
+        unset($data['UID']);
         startTrans();
         if($user = invokeClass($this,'add',$data)){
             if(!$this->_regSuccess($user)){
