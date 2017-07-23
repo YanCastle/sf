@@ -126,7 +126,7 @@ class Server
      * @param $fd
      * @param $from_id
      */
-    function onConnect(\swoole_server $server,$fd,$from_id){
+    function onConnect(\swoole_server $server,$fd,$from_id=''){
         $callback = swoole_get_callback('CONNECT');
         if(is_callable($callback)){
             call_user_func_array($callback,[$server,$fd,$from_id]);

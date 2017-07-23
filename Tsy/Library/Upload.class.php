@@ -278,10 +278,10 @@ class Upload {
         }
 
         /* 检查是否合法上传 */
-        if (!IGNORE_UPLOAD_FILE_CHECK&&!is_uploaded_file($file['tmp_name'])) {
-            $this->error = '非法上传文件！';
-            return false;
-        }
+//        if (!IGNORE_UPLOAD_FILE_CHECK&&!is_uploaded_file($file['tmp_name'])) {
+//            $this->error = '非法上传文件！';
+//            return false;
+//        }
 
         /* 检查文件大小 */
         if (!$this->checkSize($file['size'])) {

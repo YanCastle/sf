@@ -144,7 +144,7 @@ class Websocket implements Mode
         }
     }
     static function send($fd,$data){
-        self::$server->push($fd,$data);
+        $GLOBALS['_SWOOLE']->push($fd,$data);
     }
     function stop($Code=0)
     {

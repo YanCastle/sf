@@ -472,7 +472,7 @@ function swoole_load_config(){
             }
         }
 //        if(count())
-        return $Returns['LISTEN']?$Returns:false;
+        return $Returns['LISTEN']&&count($StartListen)<2?$Returns:false;
     }else{
         return false;
     }
