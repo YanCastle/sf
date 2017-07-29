@@ -337,7 +337,7 @@ function L($msg = false,$Type=6,$trace=''){
         return $msg;
     }elseif(false===$msg){
         return $Type===0?$_log:$_log[$Type][0];
-    }elseif(null===$msg&&$Type===null){
+    }elseif(null===$msg&&$Type===null&&WRITE_LOG){
         $str=[
             date('Y-m-d H:i:s ',$_SERVER['REQUEST_TIME']).' 模式:'.APP_MODE.' 方式:'.$_SERVER['REQUEST_METHOD'].' URI:'.$_SERVER['REQUEST_URI'],'GET:'.json_encode($_GET,JSON_UNESCAPED_UNICODE),'POST:'.json_encode($_POST,JSON_UNESCAPED_UNICODE)
         ];

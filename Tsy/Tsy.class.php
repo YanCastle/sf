@@ -83,6 +83,7 @@ class Tsy
             /** @noinspection PhpConstantReassignmentInspection */
             define('APP_MODE','Swoole');
         }
+        defined('WRITE_LOG') or define('WRITE_LOG',false);
 //结束Define检测
         if(version_compare(PHP_VERSION,'5.5.0','<')) {
             die('需要5.5.0以上的PHP版本');
