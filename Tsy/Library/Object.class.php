@@ -892,7 +892,7 @@ class Object
         foreach ($Objects as $ID => $Object) {
 //            处理一对多关系
             foreach ($ArrayProperties as $PropertyName => $PropertyConfig) {
-                $Objects[$ID][$PropertyName] = isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]]) ? $ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_TABLE_COLUMN]]] : [];
+                $Objects[$ID][$PropertyName] = isset($ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]]) ? $ArrayPropertyValues[$PropertyName][$Object[$PropertyConfig[self::RELATION_MAIN_COLUMN]]] : [];
             }
             //处理一对一的属性问题
             foreach ($OneProperties as $PropertyName=>$PropertyConfig){
