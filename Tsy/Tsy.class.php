@@ -160,6 +160,10 @@ class Tsy
         !APP_DEBUG&&!CONFIG_SUFFIX or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(APP_MODE).CONFIG_SUFFIX.'_debug.php'));
         !defined('CONFIG_MODE') or C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(CONFIG_MODE).'.php'));
         C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower(HOSTNAME).'.php'));
+        //开始识别域名并加载域名配置
+        if($_SERVER['HTTP_HOST']){
+            C(load_config(CONF_PATH.DIRECTORY_SEPARATOR.strtolower($_SERVER['HTTP_HOST']).'.php'));
+        }
         //开始加载aop配置文件
         $AopConfig = load_config(CONF_PATH.DIRECTORY_SEPARATOR.'aop.php');
         if(is_array($AopConfig)){
