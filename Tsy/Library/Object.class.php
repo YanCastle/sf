@@ -1229,10 +1229,10 @@ class Object
                 }
             }
         }
-        $Keys=array_keys($Data);
-        foreach (array_diff($Keys,array_intersect($Fields,$Keys)) as $f){
-            unset($Data[$f]);
-        }
+//        $Keys=array_keys($Data);
+//        foreach (array_diff($Keys,array_intersect($Fields,$Keys)) as $f){
+//            unset($Data[$f]);
+//        }
         if('add'==$Method&&array_diff($Fields,array_keys($Data))){
             $NotExistFields=[];
             foreach (M($this->main)->getDbFields(null,true) as $ColumnName=>$Conf){
