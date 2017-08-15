@@ -25,6 +25,6 @@ function generate_htmljs($HTMLDir,$OutputJS){
         }
     });
     $JSONStr = json_encode($HTMLMap,JSON_UNESCAPED_UNICODE);
-    file_put_contents($OutputJS,"Config.HTMLMap = ".$JSONStr.";");
+    file_put_contents($OutputJS,"if(window.location.protocol=='file:'||Config.debug==false){Config.HTMLMap = ".$JSONStr.";}");
 }
 function generate_php_controller(){}
