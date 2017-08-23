@@ -70,6 +70,8 @@ class Server
                     }
                 }elseif (is_string($Data)){
                     swoole_out_check($fd,$Data);
+                }elseif($Data===true){
+
                 }else{
                     swoole_out_check($fd,'');
                 }
@@ -87,6 +89,8 @@ class Server
                 }
             }elseif (is_string($Data)){
                 swoole_out_check($fd,$Data);
+            }elseif($Data===true){
+
             }else{
                 swoole_out_check($fd,'');
             }
