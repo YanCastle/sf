@@ -10,6 +10,7 @@ namespace Tsy\Library\Swoole;
 
 
 use Tsy\Library\Swoole;
+use Tsy\Tsy;
 
 class Websocket extends Swoole
 {
@@ -51,6 +52,15 @@ class Websocket extends Swoole
             return $str;
         }
         $opcode = ord(substr($str, 0, 1)) & 0x0F;
+        if($opcode==0x9){
+            //ping 包
+            swoole_send(Tsy::$fd,$this->code("",'pong'));
+            return null;
+        }
+        if($opcode==0xA){
+//            pong包
+            return null;
+        }
         $payloadlen = ord(substr($str, 1, 1)) & 0x7F;
         $ismask = (ord(substr($str, 1, 1)) & 0x80) >> 7;
         $maskkey = null;
@@ -87,12 +97,11 @@ class Websocket extends Swoole
         return $decodedata;
     }
 
-    function code($message) {
+    function code($message,$messageType='text') {
 //        return $message;
         if(APP_MODE_LOW=='websocket'){
             return $message;
         }
-        $messageType='text';
         switch ($messageType) {
             case 'continuous':
                 $b1 = 0;

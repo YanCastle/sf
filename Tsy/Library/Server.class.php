@@ -70,7 +70,7 @@ class Server
                     }
                 }elseif (is_string($Data)){
                     swoole_out_check($fd,$Data);
-                }elseif($Data===true){
+                }elseif($Data===true||$Data===null){
 
                 }else{
                     swoole_out_check($fd,'');
@@ -89,7 +89,7 @@ class Server
                 }
             }elseif (is_string($Data)){
                 swoole_out_check($fd,$Data);
-            }elseif($Data===true){
+            }elseif($Data===true||$Data===null){
 
             }else{
                 swoole_out_check($fd,'');
