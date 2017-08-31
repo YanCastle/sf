@@ -573,6 +573,37 @@ class Object
         }
         return is_numeric(M($this->main)->where([$this->pk => ['IN', $IDs]])->delete());
     }
+    function saveWV($WV){
+        if(is_array($WV)&&$WV){
+            $PKs = [];
+            $table = M($this->main)->getTableName();
+            $Fields=[];
+            foreach ($WV as $item){
+                if(is_numeric($item[0])){
+                    $PKs[]=$item[0];
+                }
+                if(!$Fields){
+                    foreach (array_keys($item[1]) as $key){
+                        $Fields[$key]=[];
+                    }
+                }
+                foreach ($item[1] as $k=>$p){
+                    $Fields[$k][]="WHEN '{$item[0]}' THEN '{$p}'";
+                }
+            }
+            $Rows=[];
+            foreach ($Fields as $o=>$i){
+                $Rows[]=$o.' =  CASE '.$this->pk.' '.implode(' ',$i)." END";
+                $Rows[]="`{$o}` = CASE `{$this->pk}`".implode(' ',$i)." END";
+            }
+            $Rows=implode(',',$Rows);
+            $PKs=implode(',',$PKs);
+            $SQL = "UPDATE {$table} SET {$Rows} WHERE `{$this->pk}` IN ({$PKs})";
+            $rs = M($this->main)->execute($SQL);
+            return $rs;
+        }
+        return true;
+    }
     /**
      * 获取多个对象属性
      * @param array|int $IDs 主键字段编号值

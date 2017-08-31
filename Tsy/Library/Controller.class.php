@@ -282,7 +282,9 @@ class Controller
             return false;
         }else{return FALSE;}
     }
-
+    function saveWV($WV){
+        return $this->Object->saveWV($WV);
+    }
     /**
      * 搜索对象
      * @param string $Keyword 关键字
