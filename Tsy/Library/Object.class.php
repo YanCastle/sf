@@ -430,6 +430,9 @@ class Object
                         //直接值为表名
                         if($ObjectName==$this->MC[0]){
                             $PK=$this->pk;
+                            if($W['_string']){
+                                $Params['_string']=$W['_string'];
+                            }
                         }else{
                             $ObjectClass = implode('\\',[$this->MC[0],'Object',$this->searchWFieldsConf[$ObjectName].'Object']);
 //                        if(class_exists($ObjectClass)){

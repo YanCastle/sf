@@ -430,8 +430,8 @@ class Controller
     function report(){
         $Name=$_REQUEST['Name'];
         $Params=$_REQUEST['Params'];
-        $P=$_REQUEST['P']??1;
-        $N=$_REQUEST['N']??20;
+        $P=$_REQUEST['P']?$_REQUEST['P']:1;
+        $N=$_REQUEST['N']?$_REQUEST['N']:20;
         return $this->Object->report($Name,$Params,$P,$N);
     }
 }
