@@ -428,7 +428,7 @@ class Object
                     if (is_string($this->searchWFieldsConf[$ObjectName]) && preg_match('/^[a-z_A-Z]+[a-zA-Z]$/', $this->searchWFieldsConf[$ObjectName])) {
 //                        $this->searchWFieldsConf
                         //直接值为表名
-                        if($ObjectName==$this->MC[0]){
+                        if($ObjectName==$this->MC[1]){
                             $PK=$this->pk;
                             if($W['_string']){
                                 $Params['_string']=$W['_string'];
