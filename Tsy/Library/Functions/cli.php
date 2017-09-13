@@ -143,22 +143,21 @@ function port_group($port,$fd=false){
 //    if(!$Redis){
 //        $Redis=new \Tsy\Library\Cache\Driver\Redis();
 //    }
+    $g = swoole_serialize::unpack(file_get_contents(\Tsy\Library\Server::$port_group.$port.'.bin'));
     if(false===$fd){
-        $g = cache('tmp_port_group'.$port);
         return is_array($g)?$g:[];
     }elseif(null===$fd){
-        $g = cache('tmp_port_group'.$port);
         $g = is_array($g)?$g:[];
         if($k = array_search(fd(),$g)){
             unset($g[$k]);
         }
-        cache('tmp_port_group'.$port,$fd);
+        swoole_serialize::pack($g);
     }else{
-        $g = cache('tmp_port_group'.$port);
         $g = is_array($g)?$g:[];
         $g[]=$fd;
-        cache('tmp_port_group'.$port,$g);
+        swoole_serialize::pack($g);
     }
+    return null;
 }
 
 function swoole_in_check($fd,$data){

@@ -190,6 +190,10 @@ function swoole_errno(){}
 /**
  *@since 1.8.2-beta
  */
+interface swoole_serialize{
+    static function pack($data,int $flag=0);
+    static function unpack($data,int $flag=0);
+}
 class swoole_server{
     static $taskworker=true;
     public $setting=[
@@ -584,6 +588,9 @@ class swoole_process{
  *@since 1.8.2-beta
  */
 class swoole_table{
+    const TYPE_INT=1;
+    const TYPE_FLOAT=1;
+    const TYPE_STRING=1;
     /**
      * @param $table_size[required]
      */

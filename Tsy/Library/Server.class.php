@@ -18,6 +18,7 @@ class Server
     protected $_swoole=[];
     protected $first=[];
     protected $port_mode_map=[];
+    static $port_group=RUNTIME_PATH.'swoole_port_group';
     function __construct($modes=[])
     {
         $this->port_mode_map=$modes;
@@ -28,7 +29,9 @@ class Server
      * Server启动时的初始化方法
      */
     function init(){
-
+        foreach ($this->port_mode_map as $port=>$config){
+            file_put_contents(self::$port_group.$port.'.bin','');
+        }
     }
     function onMessage(\swoole_server $server,\swoole_websocket_frame $frame){
         $this->onReceive($server,$frame->fd,0,$frame->data);

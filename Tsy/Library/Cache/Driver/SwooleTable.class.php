@@ -19,7 +19,8 @@ class SwooleTable extends Cache implements SwooleCallbackInterface
     public static $TYPE_STRING='string';
     function __construct(array $Config)
     {
-        $GLOBALS['_SWOOLE_TABLES']=[];
+        if(!isset($GLOBALS['_SWOOLE_TABLES']))
+            $GLOBALS['_SWOOLE_TABLES']=[];
         foreach ($Config as $key=>$tableConfig){
             $Key = isset($tableConfig['Name'])?$tableConfig['Name']:$key;
             if(isset($tableConfig['Column'])&&is_array($tableConfig['Column'])&&$tableConfig['Column']){
@@ -32,7 +33,9 @@ class SwooleTable extends Cache implements SwooleCallbackInterface
         }
     }
 
-    function get($name){}
+    function get($name){
+
+    }
     function set($name,$value,$expire){}
     function init(){}
     function clear(){
